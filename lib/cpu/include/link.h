@@ -20,7 +20,7 @@ class data;
 class link1 {
 	public:
 	int lattice_size[4];
-	int coordinate[4];
+	int coordinate[4];//0..lattise_size[i]-1
 	int direction;
 
 	link1(int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t);

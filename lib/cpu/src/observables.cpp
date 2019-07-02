@@ -1,16 +1,16 @@
 #define data_size 4*x_size*y_size*z_size*t_size
-#define PLACE1 (t - 1) * 3 * x_size*y_size*z_size \
-				+ (z - 1) * 3 * x_size*y_size \
-				+ (y - 1) * 3 * x_size \
-				+ (x - 1) * 3 + dir - 1
-#define PLACE_FIELD (t - 1) * x_size*y_size*z_size \
-				+ (z - 1) * x_size*y_size \
-				+ (y - 1) * x_size \
-				+ (x - 1)
-#define PLACE_FIELD1 (link.coordinate[3] - 1) * x_size*y_size*z_size \
-				+ (link.coordinate[2] - 1) * x_size*y_size \
-				+ (link.coordinate[1] - 1) * x_size \
-				+ (link.coordinate[0] - 1)
+#define PLACE1 (t) * 3 * x_size*y_size*z_size \
+				+ (z) * 3 * x_size*y_size \
+				+ (y) * 3 * x_size \
+				+ (x) * 3 + dir - 1
+#define PLACE_FIELD (t) * x_size*y_size*z_size \
+				+ (z) * x_size*y_size \
+				+ (y) * x_size \
+				+ (x)
+#define PLACE_FIELD1 (link.coordinate[3]) * x_size*y_size*z_size \
+				+ (link.coordinate[2]) * x_size*y_size \
+				+ (link.coordinate[1]) * x_size \
+				+ (link.coordinate[0])
 
 #include "observables.h"
 #include "link.h"
@@ -21,10 +21,10 @@ double plaket_time(const data& conf){
   	double aver[2];
     for (int dir = 1; dir < 4; dir++) {
         link.move_dir(dir);
-        for (int t = 1; t <= t_size; t++) {
-            for (int z = 1; z <= z_size; z++) {
-                for (int y = 1; y <= y_size; y++) {
-                    for (int x = 1; x <= x_size; x++) {
+        for (int t = 0; t < t_size; t++) {
+            for (int z = 0; z < z_size; z++) {
+                for (int y = 0; y < y_size; y++) {
+                    for (int x = 0; x < x_size; x++) {
                         link.go(x, y, z, t);
                         res.array.push_back(link.plaket(conf).tr());
                     }
@@ -40,10 +40,10 @@ double plaket_space(const data& conf){
 	link1 link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
-    for (int t = 1; t <= t_size; t++) {
-        for (int z = 1; z <= z_size; z++) {
-            for (int y = 1; y <= y_size; y++) {
-                for (int x = 1; x <= x_size; x++) {
+    for (int t = 0; t < t_size; t++) {
+        for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+                for (int x = 0; x < x_size; x++) {
                 	link.go(x, y, z, t);
                 	for(int mu = 1;mu < 4;mu++){
                 		for(int nu = mu + 1;nu < 4;nu++){
@@ -63,10 +63,10 @@ double plaket(const data& conf){
 	link1 link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
-    for (int t = 1; t <= t_size; t++) {
-        for (int z = 1; z <= z_size; z++) {
-            for (int y = 1; y <= y_size; y++) {
-                for (int x = 1; x <= x_size; x++) {
+    for (int t = 0; t < t_size; t++) {
+        for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+                for (int x = 0; x < x_size; x++) {
                 	link.go(x, y, z, t);
                 	for(int mu = 1;mu < 5;mu++){
                 		for(int nu = mu + 1;nu < 5;nu++){
@@ -87,10 +87,10 @@ double polyakov(const data& conf){
 	result res(0);
   	double aver[2];
   	link.move_dir(4);
-    for (int t = 1; t <= t_size; t++) {
-        for (int z = 1; z <= z_size; z++) {
-            for (int y = 1; y <= y_size; y++) {
-                for (int x = 1; x <= x_size; x++) {
+    for (int t = 0; t < t_size; t++) {
+        for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+                for (int x = 0; x < x_size; x++) {
                 	link.go(x, y, z, t);
                     res.array.push_back(link.polyakov_loop(conf).tr());
                 }
@@ -107,10 +107,10 @@ double wilson(const data& conf, int R, int T) {
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						vec.array[PLACE1] = link.wilson_loop(conf, R, T).tr();
 					}
@@ -130,10 +130,10 @@ double wilson_abelian(const data& conf, int R, int T/*, double wil[2]*/) {
 	//double a;
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						//a = link.wilson_loop_abelian(conf, R, T);
 						vec_cos.array[PLACE1] = link.wilson_loop_abelian(conf, R, T);
@@ -157,10 +157,10 @@ void polyakov_abelian(const data& conf, double pol[2]) {
 	double aver[2];
 	double a;
 	link.move_dir(4);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					a = link.polyakov_loop_abelian(conf);
 					vec_cos.array[PLACE_FIELD] = cos(a);
@@ -168,9 +168,6 @@ void polyakov_abelian(const data& conf, double pol[2]) {
 				}
 			}
 		}
-	}
-	for(int i = 0;i < 100;i++){
-		cout<<vec_cos.array[i]<<endl;
 	}
 	vec_cos.average(aver);
 	pol[0] = aver[0];
@@ -183,10 +180,10 @@ double wilson_dir(const data& conf, int R, int T, int dir) {
 	result vec(data_size/4);
 	double aver[2];
 	link.move_dir(dir);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					vec.array[PLACE_FIELD] = link.wilson_loop(conf, R, T).tr()/2;
 				}
@@ -201,10 +198,10 @@ void fields(const vector<vector<matrix> >& schwinger_line, const vector<matrix>&
 	link1 link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						field3[dir - 1].array[PLACE_FIELD] = link.field3(polyakov_loop, D, x_trans);
 						for (int direct = 1; direct < 4; direct++) {
@@ -225,10 +222,10 @@ void field1_average(const vector<vector<matrix> >& schwinger_line, const vector<
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						for (int direct = 1; direct < 4; direct++) {
 							if (dir != direct) {
@@ -247,10 +244,10 @@ vector<vector<matrix> > calculate_schwinger_line(const data& conf, int d, int x_
 	link1 link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						for (int nu = 1; nu < 4; nu++) {
 							if (nu != dir) vec[nu - 1][PLACE1] = link.schwinger_line(conf, d, nu, x_trans);
@@ -268,10 +265,10 @@ vector<matrix> calculate_plaket(const data& conf) {
 	link1 link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						vec[PLACE1] = link.plaket(conf);
 					}
@@ -287,10 +284,10 @@ vector<matrix> calculate_polyakov_loop(const data& conf) {
 	link1 link(x_size, y_size, z_size, t_size);
 	int dir = 4;
 	link.move_dir(4);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					vec[PLACE_FIELD] = link.polyakov_loop(conf);
 				}
@@ -305,10 +302,10 @@ vector<matrix> calculate_wilson_loop(const data& conf, int R, int T) {
 	link1 link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						vec[PLACE1] = link.wilson_loop(conf, R, T);
 					}
@@ -324,10 +321,10 @@ vector<double> calculate_wilson_loop_tr(const data& conf, int R, int T) {
 	link1 link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						link.go(x, y, z, t);
 						vec[PLACE1] = link.wilson_loop(conf, R, T).tr();
 					}
@@ -346,10 +343,10 @@ double polyakov_loop_corelator(const data& conf, int D){
 	double a;
 	//int b;
 	for(int mu = 1;mu < 4;mu++){
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					//b = PLACE_FIELD;
 					a = polyakov_loop[PLACE_FIELD1].tr();
@@ -372,10 +369,10 @@ double plaket_correlator(const vector<matrix>& plaket, int dist) {
 	double b;
 	result a(data_size);
 	double aver[2];
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					for (int mu = 1; mu < 4; mu++) {
 						link.move_dir(mu);
@@ -401,10 +398,10 @@ double plaket_correlator_space(const vector<matrix>& plaket, int dist) {
 	double b;
 	result a(6 * (data_size));
 	double aver[2];
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					link.go(x, y, z, t);
 					for (int mu = 1; mu < 4; mu++) {
 						for (int nu = 1; nu < 4; nu++) {
@@ -436,9 +433,9 @@ result wilson_plaket_correlator_electric_new(const data& conf, vector<double> wi
     double a;
     for(int d = d_min;d <= d_max;d++){
     	for (int dir = 1; dir < 4; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
                     	for (int x = 1; x <= x_size; x++) {
                     		link.go(x, y, z, t);
                     		link.move_dir(dir);
@@ -485,10 +482,10 @@ result wilson_plaket_correlator_electric_x_new(const data& conf, vector<double> 
     double a;
     for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
     	for (int dir = 1; dir < 4; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                     		//link.move_dir(dir);
                     		a = wilson_loop_tr[PLACE1];
@@ -526,10 +523,10 @@ result polyakov_plaket_correlator_electric(const data& conf, const data& smeared
     double a;
     for(int d = d_min;d <= d_max;d++){
     	for (int dir = 1; dir < 4; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                       		/*if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
                       			cout<<"polyakov1 ";
@@ -587,10 +584,10 @@ result wilson_plaket_correlator_magnetic_new(const data& conf, vector<double> wi
     for(int d = d_min;d <= d_max;d++){
     	for (int dir = 1; dir < 4; dir++) {
     	//for (int dir = 1; dir < 2; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                     		link.move_dir(dir);
                     		a = wilson_loop_tr[PLACE1];
@@ -648,10 +645,10 @@ result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared
     for(int d = d_min;d <= d_max;d++){
     	for (int dir = 1; dir < 4; dir++) {
     	//for (int dir = 1; dir < 2; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                     		a = polyakov_loop[PLACE_FIELD1].tr();
                     		link.move(dir, R);
@@ -704,10 +701,10 @@ result wilson_plaket_correlator_magnetic_x_new(const data& conf, vector<double> 
     double a;
     for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
     	for (int dir = 1; dir < 4; dir++) {
-        	for (int t = 1; t <= t_size; t++) {
-        		for (int z = 1; z <= z_size; z++) {
-                	for (int y = 1; y <= y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+        	for (int t = 0; t < t_size; t++) {
+        		for (int z = 0; z < z_size; z++) {
+                	for (int y = 0; y < y_size; y++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                     		link.move_dir(dir);
                     		a = wilson_loop_tr[PLACE1];

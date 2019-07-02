@@ -1,17 +1,17 @@
 # define Pi 3.141592653589793238462643383279502884
 #define data_size 4*lattice_size[0]*lattice_size[1]*lattice_size[2]*lattice_size[3]
-#define PLACE (coordinate[3]-1)*3*lattice_size[0]*lattice_size[1]*lattice_size[2] \
-		+ (coordinate[2]-1)*3*lattice_size[0]*lattice_size[1] \
-		+ (coordinate[1]-1)*3*lattice_size[0] \
-		+ (coordinate[0]-1)*3+abs(direction)-1
-#define PLACE1_LINK (coordinate[3]-1)*4*lattice_size[0]*lattice_size[1]*lattice_size[2] \
-		+ (coordinate[2]-1)*4*lattice_size[0]*lattice_size[1] \
-		+ (coordinate[1]-1)*4*lattice_size[0] \
-		+ (coordinate[0]-1)*4+abs(direction)-1
+#define PLACE (coordinate[3])*3*lattice_size[0]*lattice_size[1]*lattice_size[2] \
+		+ (coordinate[2])*3*lattice_size[0]*lattice_size[1] \
+		+ (coordinate[1])*3*lattice_size[0] \
+		+ (coordinate[0])*3+abs(direction)-1
+#define PLACE1_LINK (coordinate[3])*4*lattice_size[0]*lattice_size[1]*lattice_size[2] \
+		+ (coordinate[2])*4*lattice_size[0]*lattice_size[1] \
+		+ (coordinate[1])*4*lattice_size[0] \
+		+ (coordinate[0])*4+abs(direction)-1
 #define PLACE_FIELD_LINK (coordinate[3]-1)*lattice_size[0]*lattice_size[1]*lattice_size[2] \
-		+ (coordinate[2]-1)*lattice_size[0]*lattice_size[1] \
-		+ (coordinate[1]-1)*lattice_size[0] \
-		+ (coordinate[0]-1)
+		+ (coordinate[2])*lattice_size[0]*lattice_size[1] \
+		+ (coordinate[1])*lattice_size[0] \
+		+ (coordinate[0])
 		
 #include "link.h"
 #include "data.h"
@@ -23,7 +23,7 @@ link1::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z, int lat
 	lattice_size[3] = lattice_size_t;
 	direction = 1;
 	for (int i = 0; i < 4; i++) {
-		coordinate[i] = 1;
+		coordinate[i] = 0;
 	}
 }
 
@@ -34,7 +34,7 @@ link1::link1(int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z
 	lattice_size[3] = lattice_size_t;
 	direction = dir;
 	for (int i = 0; i < 4; i++) {
-		coordinate[i] = 1;
+		coordinate[i] = 0;
 	}
 }
 
@@ -91,10 +91,10 @@ link1::link1() {
 	lattice_size[2] = z_size;
 	lattice_size[3] = t_size;
 	direction = 1;
-	coordinate[0] = 1;
-	coordinate[1] = 1;
-	coordinate[2] = 1;
-	coordinate[3] = 1;
+	coordinate[0] = 0;
+	coordinate[1] = 0;
+	coordinate[2] = 0;
+	coordinate[3] = 0;
 }
 
 void link1::print_link(){
@@ -103,8 +103,8 @@ void link1::print_link(){
 
 void link1::move(int dir, int step) {
 	coordinate[abs(dir) - 1] += step * dir / abs(dir);
-	while (coordinate[abs(dir) - 1] < 1 || coordinate[abs(dir) - 1] > lattice_size[abs(dir) - 1]) {
-		if (coordinate[abs(dir) - 1] < 1) coordinate[abs(dir) - 1] += lattice_size[abs(dir) - 1];
+	while (coordinate[abs(dir) - 1] < 0 || coordinate[abs(dir) - 1] > lattice_size[abs(dir) - 1]-1) {
+		if (coordinate[abs(dir) - 1] < 0) coordinate[abs(dir) - 1] += lattice_size[abs(dir) - 1];
 		else coordinate[abs(dir) - 1] -= lattice_size[abs(dir) - 1];
 	}
 }
@@ -165,7 +165,7 @@ matrix link1::get_matrix1(matrix* vec) {
 
 double link1::border_sign(int mu){
 	if(abs(mu) == 4){
-		if(1 > (coordinate[3] + mu/abs(mu)) || (coordinate[3] + mu/abs(mu)) > lattice_size[3]) return -1.;
+		if(0 > (coordinate[3] + mu/abs(mu)) || (coordinate[3] + mu/abs(mu)) > lattice_size[3]-1) return -1.;
 		else return 1.;
 	}
 	else return 1.;
@@ -548,10 +548,10 @@ matrix link1::staples_third_refresh(const vector<matrix>& vec, int eta, double a
 vector<matrix> link1::smearing_first(const data& conf, double alpha3, int nu, int rho) {
 	vector<matrix> vec(data_size);
 	matrix A;
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					for (int i = 1; i < 5; i++) {
 						if (i != abs(nu) && i != abs(rho)) {
@@ -586,10 +586,10 @@ vector<vector<matrix> > link1::smearing_first_full(const  data& conf, double alp
 vector<matrix> link1::smearing_second(const data& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu) {
 	vector<matrix> vec(data_size);
 	matrix A;
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					for (int i = 1; i < 5; i++) {
 						if (i != abs(nu)) {
@@ -624,10 +624,10 @@ vector<matrix> link1::smearing_HYP(data& conf, vector<vector<matrix> >& smearing
 	matrix A;
 	matrix B;
 	move_dir(4);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					vec[PLACE1_LINK] = (1 - alpha1)*get_matrix(conf.array);
 					for (int d = 1; d < 4; d++) {
@@ -641,10 +641,10 @@ vector<matrix> link1::smearing_HYP(data& conf, vector<vector<matrix> >& smearing
 	}
 	for (int d = 1; d < 4; d++) {
 		move_dir(d);
-		for (int t = 1; t <= t_size; t++) {
-			for (int z = 1; z <= z_size; z++) {
-				for (int y = 1; y <= y_size; y++) {
-					for (int x = 1; x <= x_size; x++) {
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
 						go(x, y, z, t);
 						vec[PLACE1_LINK] = conf.array[PLACE1_LINK];
 					}
@@ -672,10 +672,10 @@ int link1::position_first(int a, int b) {
 
 vector<matrix> link1::smearing_APE(data& conf, double alpha_APE) {
 	vector<matrix> vec(data_size);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					for (int i = 1; i < 4; i++) {
 						move_dir(i);
@@ -692,10 +692,10 @@ vector<matrix> link1::smearing_APE(data& conf, double alpha_APE) {
 		}
 	}
 	move_dir(4);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					vec[PLACE1_LINK] = conf.array[PLACE1_LINK];
 				}
@@ -734,10 +734,10 @@ vector<matrix> link1::smearing_HYP_refresh(data& conf, double alpha1, double alp
 	vec = conf.array;
 	matrix A;
 	move_dir(4);
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					A = (1 - alpha1) * get_matrix(vec);
 					for (int d = 1; d < 4; d++) {
@@ -756,10 +756,10 @@ vector<matrix> link1::smearing_APE_refresh(data& conf, double alpha_APE) {
 	vector<matrix> vec(data_size);
 	vec = conf.array;
 	matrix A;
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
 					for (int i = 1; i < 4; i++) {
 						move_dir(i);
@@ -780,10 +780,10 @@ vector<matrix> link1::smearing_APE_refresh(data& conf, double alpha_APE) {
 vector<matrix> link1::smearing_stout(data& conf, double rho){
 	vector<matrix> vec(data_size);
 	vec = conf.array;
-	for(int t = 1; t <= t_size; t++) {
-        for (int z = 1; z <= z_size; z++) {
-            for (int y = 1; y <= y_size; y++) {
-                for (int x = 1; x <= x_size; x++) {
+	for(int t = 0; t < t_size; t++) {
+        for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+                for (int x = 0; x < x_size; x++) {
                     go(x, y, z, t);
 					for (int i = 1; i < 5; i++) {
                         move_dir(i);
@@ -834,10 +834,10 @@ void link1::gauge_transform(data& conf){
 	matrix C = A;
 	C.conj();
 	double a;
-	for (int t = 1; t <= t_size; t++) {
-		for (int z = 1; z <= z_size; z++) {
-			for (int y = 1; y <= y_size; y++) {
-				for (int x = 1; x <= x_size; x++) {
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
 					for (int i = 1; i < 5; i++) {
 						a = PLACE1_LINK;
 						conf.array[a] = C * conf.array[a] * A;
@@ -865,10 +865,6 @@ double link1::T(data& conf, int i, int j){
 	angle += get_angle_abelian(conf.array);
 	move(direction, 1);
 	move_dir(dir);
-    /*float tt=Angl(l,i);l.move(1,i);
-    tt=tt+Angl(l,j); l.move(1,j);
-    l.move(-1,i); tt=tt-Angl(l,i);
-    l.move(-1,j); tt=tt-Angl(l,j);*/
     while((angle>Pi)||(angle<-Pi))
         {
            	if(angle>Pi) angle=angle-2*Pi;
@@ -893,20 +889,13 @@ double link1::get_current(data& conf){
 int link1::current_test(double* J){
     for(int i=1; i<=4; i++){
     	move_dir(i);
-    	// if(coordinate[0] == 23 && coordinate[1] == 1 && coordinate[2] == 2 && coordinate[3] == 1) cout<<"place "<<get_place()<<" "<<J[get_place()]<<" "<<i<<endl;
 		if ( (J[get_place()]>0.3)||(J[get_place()]<-0.3) ){
-// if(coordinate[0] == 23 && coordinate[1] == 1 && coordinate[2] == 1 && coordinate[3] == 1) cout<<"place "<<get_place()<<" "<<J[get_place()]<<" "<<i<<endl;
 			return i;
 		}
 	}
 
     for(int i=1; i<=4; i++){
     	move_dir(i);
-	    /*if(coordinate[0] == 23 && coordinate[1] == 1 && coordinate[2] == 2 && coordinate[3] == 1){
-	    	move(i,-1);
-	     cout<<"place "<<get_place()<<" "<<J[get_place()]<<" "<<i<<endl;
-	    move(i, 1);
-	}*/
     	move(i,-1);
         if ( (J[get_place()]>0.3)||(J[get_place()]<-0.3) ) {
         	return -i;
