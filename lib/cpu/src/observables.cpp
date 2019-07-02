@@ -59,6 +59,48 @@ double plaket_space(const data& conf){
     return aver[0];
 }
 
+double plaket(const data& conf){
+	link1 link(x_size, y_size, z_size, t_size);
+	result res(0);
+  	double aver[2];
+    for (int t = 1; t <= t_size; t++) {
+        for (int z = 1; z <= z_size; z++) {
+            for (int y = 1; y <= y_size; y++) {
+                for (int x = 1; x <= x_size; x++) {
+                	link.go(x, y, z, t);
+                	for(int mu = 1;mu < 5;mu++){
+                		for(int nu = mu + 1;nu < 5;nu++){
+                			link.move_dir(nu);
+                        	res.array.push_back(link.plaket_mu(conf, mu).tr());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    res.average(aver);
+    return aver[0];
+}
+
+double polyakov(const data& conf){
+	link1 link(x_size, y_size, z_size, t_size);
+	result res(0);
+  	double aver[2];
+  	link.move_dir(4);
+    for (int t = 1; t <= t_size; t++) {
+        for (int z = 1; z <= z_size; z++) {
+            for (int y = 1; y <= y_size; y++) {
+                for (int x = 1; x <= x_size; x++) {
+                	link.go(x, y, z, t);
+                    res.array.push_back(link.polyakov_loop(conf).tr());
+                }
+            }
+        }
+    }
+    res.average(aver);
+    return aver[0];
+}
+
 double wilson(const data& conf, int R, int T) {
 	link1 link(x_size, y_size, z_size, t_size);
 	result vec(3 * (data_size/4));

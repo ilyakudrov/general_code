@@ -11,7 +11,9 @@ using namespace std;
 
 double plaket_time(const data& conf);
 double plaket_space(const data& conf);
+double plaket(const data& conf);
 double wilson(const data& conf, int R, int T);
+double polyakov(const data& conf);
 double wilson_abelian(const data& conf, int R, int T);
 void polyakov_abelian(const data& conf, double pol[2]);
 double wilson_dir(const data& conf, int R, int T, int dir);
