@@ -108,6 +108,36 @@ void matrix_mult_complex1(matrix A, const scomplex_t* a, scomplex_t* a1, int i, 
         a1->im = border_sign*(a[0].re * z1.im + a[0].im * z1.re + a[1].re * z2.im + a[1].im * z2.re);
 }
 
+double test_module(const scomplex_t* vec, int size){
+        double module;
+        for(int i = 0;i < size;i++){
+                module += vec[i].re * vec[i].re + vec[i].im * vec[i].im;
+        }
+        module = sqrt(module);
+        return module;
+}
+
+void test_eigenvector(const scomplex_t* eigenvector, scomplex_t eigenvalue, int size, matrix* data_conf, int x_size, int y_size, int z_size, int t_size, double mass, double mu_q, double tolerance){
+        scomplex_t* vec;
+        vec = (scomplex_t*) malloc(size * sizeof(scomplex_t));
+        scomplex_t res;
+        for(int i = 0;i < size;i++){
+                res.re = 0;
+                res.im = 0;
+                //test_mult(&res, eigenvector, i);
+                dirac_mult(&res, eigenvector, i, data_conf, x_size, y_size, z_size, t_size, mass, mu_q);
+                vec[i].re = res.re;
+                vec[i].im = res.im;
+        }
+        for(int i = 0;i < size;i++){
+                vec[i].re -= eigenvector[i].re * eigenvalue.re - eigenvector[i].im * eigenvalue.im;
+                vec[i].im -= eigenvector[i].re * eigenvalue.im + eigenvector[i].im * eigenvalue.re;
+        }
+        if(test_module(vec, size) < tolerance) printf("eigenvector is right \n");
+        else printf("eigenvector is not right \n");
+        free(vec);
+}
+
 double eta_sign(int mu, link1& link){
         int n = 0;
         for(int i = 0;i < mu - 1;i++){

@@ -6,10 +6,14 @@ test_general: $(OBJ_PATH)/test_general.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $
 	$(GCC) -I$(INCLUDE_PATH) -O3 $(OBJ_PATH)/test_general.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/monopoles.o -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/monopoles.o
 	$(GCC) -I$(INCLUDE_PATH) -O3 $(OBJ_PATH)/test_smearing.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/monopoles.o -o test_smearing
+test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/monopoles.o
+	$(GCC) -I$(INCLUDE_PATH) -O3 $(OBJ_PATH)/test_eigenvectors.o $(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/monopoles.o -o test_eigenvectors
 $(OBJ_PATH)/test_general.o: test_general.cpp
 	$(GCC) -I$(INCLUDE_PATH) -O3 -c test_general.cpp -o $(OBJ_PATH)/test_general.o
 $(OBJ_PATH)/test_smearing.o: test_smearing.cpp
 	$(GCC) -I$(INCLUDE_PATH) -O3 -c test_smearing.cpp -o $(OBJ_PATH)/test_smearing.o
+$(OBJ_PATH)/test_eigenvectors.o: test_eigenvectors.cpp
+	$(GCC) -I$(INCLUDE_PATH) -O3 -c test_eigenvectors.cpp -o $(OBJ_PATH)/test_eigenvectors.o
 $(OBJ_PATH)/link.o: $(SRC_PATH)/link.cpp
 	$(GCC) -I$(INCLUDE_PATH) -O3 -c $(SRC_PATH)/link.cpp -o $(OBJ_PATH)/link.o
 $(OBJ_PATH)/data.o: $(SRC_PATH)/data.cpp

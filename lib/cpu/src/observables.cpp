@@ -436,7 +436,7 @@ result wilson_plaket_correlator_electric_new(const data& conf, vector<double> wi
         	for (int t = 0; t < t_size; t++) {
         		for (int z = 0; z < z_size; z++) {
                 	for (int y = 0; y < y_size; y++) {
-                    	for (int x = 1; x <= x_size; x++) {
+                    	for (int x = 0; x < x_size; x++) {
                     		link.go(x, y, z, t);
                     		link.move_dir(dir);
                     		a = wilson_loop_tr[PLACE1];
