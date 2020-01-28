@@ -347,8 +347,10 @@ double plaket_correlator_space(const vector<matrix>& plaket, int dist) {
 
 result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
 	link1 link(x_size, y_size, z_size, t_size);
-	vector<result> vec(d_max - d_min + 1);
-	//result vec(0);
+	double vec[d_max - d_min + 1];
+	for(int i = 0;i < d_max - d_min + 1;i++){
+		vec[i] = 0;
+	}
     result final(0);
     double aver[2];
     double a;
@@ -363,7 +365,7 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
 			if(x_trans == 0){
 				for(int mu = 1;mu < 4;mu++){
 					link.move_dir(mu);
-					vec[d - d_min].array.push_back(a * plaket4_optimized(plaket_tr, link));
+					vec[d - d_min] += a * plaket4_optimized(plaket_tr, link);
 				}
 			}
 			link.move(dir, 1);
@@ -393,8 +395,7 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
     	SPACE_ITER_END;
     }
 	for(int d = d_min;d <= d_max;d++){
-    	vec[d - d_min].average(aver);
-    	final.array.push_back(aver[0]);
+    	final.array.push_back(vec[d - d_min]/(data_size / 4 * 9));
 	}
     return final;
 }
