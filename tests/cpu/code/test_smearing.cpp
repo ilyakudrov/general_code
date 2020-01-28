@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     link1 link(x_size, y_size, z_size, t_size);
 	data conf;
 	data smeared;
-	char path1[] = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+	char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
 	conf.read_float(path1);
 	double aver[2];
 

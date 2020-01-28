@@ -16,7 +16,7 @@ class result {
 	result(int size);
 	result();
 	void average(double a[2]);
-	void write(char const* output_file);
+	void write(char const* file_name);
 	void read(char const* file_name, int size1);
 	void read_float(char const* file_name, int size1);
 	double get_min();
