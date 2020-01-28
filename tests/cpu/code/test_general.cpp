@@ -13,16 +13,16 @@
 
 using namespace std;
 
-int x_size;
-int y_size;
-int z_size;
-int t_size;
+int x_size = 32;
+int y_size = 32;
+int z_size = 32;
+int t_size = 32;
 
 int main(int argc, char* argv[]) {
-    x_size = atof(argv[1]);
+    /*x_size = atof(argv[1]);
     y_size = atof(argv[2]);
     z_size = atof(argv[3]);
-    t_size = atof(argv[4]);
+    t_size = atof(argv[4]);*/
 
     link1 link(x_size, y_size, z_size, t_size);
 	data conf;

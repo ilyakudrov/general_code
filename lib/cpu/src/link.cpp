@@ -12,7 +12,7 @@
 		+ (coordinate[2])*lattice_size[0]*lattice_size[1] \
 		+ (coordinate[1])*lattice_size[0] \
 		+ (coordinate[0])
-		
+
 #include "link.h"
 #include "data.h"
 
@@ -264,7 +264,7 @@ matrix link1::plaket_implement4(const data& conf, int mu){
 	A = A + plaket_mu(conf, mu);
 	move(-direction, 1);
 	A = A + plaket_mu(conf, mu);
-	move(-mu, 1);
+	move(mu, -1);
 	A = A + plaket_mu(conf, mu);
 	move(direction, 1);
 	return 1./4*A;
@@ -681,7 +681,7 @@ vector<matrix> link1::smearing_APE(data& conf, double alpha_APE) {
 						move_dir(i);
 						vec[PLACE1_LINK] = (1 - alpha_APE) * conf.array[PLACE1_LINK];
 						for (int d = 1; d < 4; d++) {
-							if (d != i) vec[PLACE1_LINK]  = 
+							if (d != i) vec[PLACE1_LINK]  =
 								vec[PLACE1_LINK]
 								+ (alpha_APE / 6.)  * staples_first(conf.array, d);
 						}
@@ -768,7 +768,7 @@ vector<matrix> link1::smearing_APE_refresh(data& conf, double alpha_APE) {
 							if (d != i) A = A + (alpha_APE / 4.)  * staples_first(vec, d);
 						}
 						A.proj();
-						vec[PLACE1_LINK] = A;			
+						vec[PLACE1_LINK] = A;
 					}
 				}
 			}

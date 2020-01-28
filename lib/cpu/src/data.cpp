@@ -6,7 +6,7 @@ using namespace std;
 data::data() {
 	array.reserve(4 * x_size * y_size * z_size * t_size);
 }
-void data::read_float(char file_name[]){
+void data::read_float(char const* file_name){
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	array.clear();
 	ifstream stream(file_name);
@@ -22,7 +22,7 @@ void data::read_float(char file_name[]){
 	}
 	stream.close();
 }
-void data::read_float_abelian(char file_name[]){
+void data::read_float_abelian(char const* file_name){
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	array.clear();
 	ifstream stream(file_name);
@@ -38,7 +38,7 @@ void data::read_float_abelian(char file_name[]){
 	}
 	stream.close();
 }
-void data::read_double(char file_name[]){
+void data::read_double(char const* file_name){
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	array.clear();
 	ifstream stream(file_name);
@@ -54,7 +54,7 @@ void data::read_double(char file_name[]){
 	}
 	stream.close();
 }
-void data::read_double_abelian(char file_name[]){
+void data::read_double_abelian(char const* file_name){
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	array.clear();
 	ifstream stream(file_name);
@@ -70,7 +70,7 @@ void data::read_double_abelian(char file_name[]){
 	}
 	stream.close();
 }
-void data::write_float(char file_name[]) {
+void data::write_float(char const* file_name) {
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	ofstream stream(file_name);
 	vector<float> v(data_size * 4);
@@ -83,7 +83,7 @@ void data::write_float(char file_name[]) {
 	if(!stream.write((char*) &v[0], data_size * 4 * sizeof(float))) cout<<"write_float error: "<<file_name<<endl;
 	stream.close();
 }
-void data::write_double(char file_name[]) {
+void data::write_double(char const* file_name) {
 	int data_size = 4 * x_size * y_size * z_size * t_size;
 	ofstream stream(file_name);
 	vector<double> v(data_size * 4);
@@ -106,5 +106,6 @@ int data::eta(int mu, int x, int y, int z, int t) {
 }
 int data::sign(int x) {
 	if (x % 2 == 0) return 1;
-	if (x % 2 == 1) return -1;
+	else if (x % 2 == 1) return -1;
+	else return 0;
 }

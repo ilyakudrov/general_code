@@ -23,13 +23,13 @@ void result::average(double a[2]) {
 	a[0] = aver;
 	a[1] = err;
 }
-void result::read(char file_name[], int size1){
+void result::read(char const* file_name, int size1){
 	array.clear();
 	ifstream stream(file_name);
 	if(!stream.read((char*) &array[0], size1 * sizeof(double))) cout<<"result::read error: "<<file_name<<endl;
 	stream.close();
 }
-void result::read_float(char file_name[], int size1){
+void result::read_float(char const* file_name, int size1){
 	array.clear();
 	ifstream stream(file_name);
 	vector<float> vec(size1);
@@ -39,7 +39,7 @@ void result::read_float(char file_name[], int size1){
 	}
 	stream.close();
 }
-void result::write(char file_name[]){
+void result::write(char const* file_name){
 	ofstream stream(file_name);
 	stream.write((char*) &array[0], array.size() * sizeof(double));
 	stream.close();

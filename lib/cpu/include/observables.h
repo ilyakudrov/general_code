@@ -21,13 +21,16 @@ void fields(const vector<vector<matrix> >& schwinger_line, const vector<matrix>&
 void field1_average(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, vector<vector<result> >& field1, int d, int D, int x_trans) ;
 vector<vector<matrix> > calculate_schwinger_line(const data& conf, int d, int x_trans);
 vector<matrix> calculate_plaket(const data& conf);
+vector<double> calculate_plaket_time_tr(const data& conf);
+double plaket4_optimized(const vector<double>& plaket_tr, link1& link);
 vector<matrix> calculate_polyakov_loop(const data& conf);
 vector<matrix> calculate_wilson_loop(const data& conf, int R, int T);
 vector<double> calculate_wilson_loop_tr(const data& conf, int R, int T);
 double polyakov_loop_corelator(const data& conf, int D);
 double plaket_correlator(const vector<matrix>& plaket, int dist);
 double plaket_correlator_space(const vector<matrix>& plaket, int dist);
-result wilson_plaket_correlator_electric_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
+result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
+result wilson_plaket_correlator_electric_new(const data& conf, const vector<double>& wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_electric(const data& conf, const data& smeared, int R, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
