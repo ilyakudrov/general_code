@@ -31,6 +31,7 @@ vector<double> calculate_wilson_loop_tr(const data& conf, int R, int T);
 double polyakov_loop_corelator(const data& conf, int D);
 double plaket_correlator(const vector<matrix>& plaket, int dist);
 double plaket_correlator_space(const vector<matrix>& plaket, int dist);
+double wilson_plaket_correlator_electric_simple(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir);
 result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_new(const data& conf, const vector<double>& wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d);

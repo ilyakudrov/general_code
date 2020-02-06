@@ -381,6 +381,24 @@ double plaket_correlator_space(const vector<matrix>& plaket, int dist) {
 	return aver[0];
 }
 
+double wilson_plaket_correlator_electric_simple(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir){
+	link1 link(x_size, y_size, z_size, t_size);
+	double field = 0;
+	double a;
+	link.move_dir(dir);
+    SPACE_ITER_START;
+    link.go(x, y, z, t);
+	a = wilson_loop_tr[PLACE1];
+	link.move(dir, d);
+	link.move(4, T/2);
+	field += a * plaket_tr[PLACE3];
+    SPACE_ITER_END;
+	int count;
+	count = data_size / 4;
+    field = field/count;
+    return field;
+}
+
 result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
 	link1 link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
