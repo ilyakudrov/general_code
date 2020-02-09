@@ -117,7 +117,7 @@ void average_jack_wilson(double a[2], result& val1, result& val2, result& val3) 
 	}
 	double sigma = 0;
 	for (int i = 0; i < size; i++) {
-		sigma += powf(vec[i] - b, 2);
+		sigma += (vec[i] - b) * (vec[i] - b);
 	}
 	sigma = powf(sigma * (size - 1) / size, 0.5);
 	a[0] = b;
@@ -143,7 +143,7 @@ void average_jack_sum(double a[2], result& val11, result& val12, result& val2, r
 	}
 	double sigma = 0;
 	for (int i = 0; i < size; i++) {
-		sigma += powf(vec[i] - b, 2);
+		sigma += (vec[i] - b) * (vec[i] - b);
 	}
 	sigma = powf(sigma * (size - 1) / size, 0.5);
 	a[0] = b;
@@ -169,7 +169,7 @@ void average_jack_difference(double a[2], result& val11, result& val12, result& 
 	}
 	double sigma = 0;
 	for (int i = 0; i < size; i++) {
-		sigma += powf(vec[i] - b, 2);
+		sigma += (vec[i] - b) * (vec[i] - b);
 	}
 	sigma = powf(sigma * (size - 1) / size, 0.5);
 	a[0] = b;
@@ -187,7 +187,7 @@ void average_jackknife(double a[2], result& val1){
 		vec[i] = val1.average_n(i);
 	}
 	for (int i = 0; i < size; i++) {
-		sigma += powf(vec[i] - b, 2);
+		sigma += (vec[i] - b) * (vec[i] - b);
 	}
 	sigma = powf(sigma * (size - 1) / size, 0.5);
 	a[0] = b;
@@ -227,7 +227,7 @@ void average_bootstrap_wilson(double a[2], result& val1, result& val2, result& v
 	}
 	double sigma = 0;
 	for (int i = 0; i < k; i++) {
-		sigma += powf(vec[i] - aver, 2);
+		sigma += (vec[i] - aver) * (vec[i] - aver);
 	}
 	sigma = powf(sigma / k, 0.5);
 	a[0] = aver;
