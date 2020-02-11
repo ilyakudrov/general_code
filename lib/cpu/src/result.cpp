@@ -25,6 +25,7 @@ void result::average(double a[2]) {
 }
 void result::read(char const* file_name, int size1){
 	array.clear();
+	array.reserve(size1);
 	ifstream stream(file_name);
 	if(!stream.read((char*) &array[0], size1 * sizeof(double))) cout<<"result::read error: "<<file_name<<endl;
 	stream.close();
