@@ -411,7 +411,7 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
     for (int dir = 1; dir < 4; dir++) {
     	SPACE_ITER_START;
         link.go(x, y, z, t);
-        link.move_dir(dir);
+        // link.move_dir(dir);
         a = wilson_loop_tr[PLACE1];
         link.move(4, T/2);
 		link.move(dir, d_min);
@@ -492,6 +492,45 @@ result wilson_plaket_correlator_electric_new(const data& conf, const vector<doub
     	final.array.push_back(aver[0]);
     	vec.array.clear();
     }
+    return final;
+}
+
+result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
+	link1 link(x_size, y_size, z_size, t_size);
+	double vec[x_trans_max - x_trans_min + 1];
+	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
+		vec[i] = 0;
+	}
+    result final(0);
+    double aver[2];
+    double a;
+    for (int dir = 1; dir < 4; dir++) {
+    	SPACE_ITER_START;
+        link.go(x, y, z, t);
+        // link.move_dir(dir);
+        a = wilson_loop_tr[PLACE1];
+        link.move(4, T/2);
+		link.move(dir, d);
+		for(int nu = 1;nu < 4;nu++){
+            if(nu != dir){
+				link.move(nu, x_trans_min-1);
+				for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
+					link.move(nu, 1);
+					for(int mu = 1;mu < 4;mu++){
+						link.move_dir(mu);
+						vec[x_trans - x_trans_min] += a * plaket4_time_optimized(plaket_tr, link);
+					}
+				}
+				link.move(nu, -x_trans_max);
+			}
+		}
+    	SPACE_ITER_END;
+    }
+	int count;
+	count = data_size / 4 * 18;
+	for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
+    	final.array.push_back(vec[x_trans - x_trans_min]/count);
+	}
     return final;
 }
 
@@ -737,6 +776,53 @@ result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared
     	final.array.push_back(aver[0]);
     	vec.array.clear();
     }
+    return final;
+}
+
+result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
+	link1 link(x_size, y_size, z_size, t_size);
+	double vec[x_trans_max - x_trans_min + 1];
+	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
+		vec[i] = 0;
+	}
+    result final(0);
+    double aver[2];
+    double a;
+    for (int dir = 1; dir < 4; dir++) {
+    	SPACE_ITER_START;
+        link.go(x, y, z, t);
+        // link.move_dir(dir);
+        a = wilson_loop_tr[PLACE1];
+        link.move(4, T/2);
+		link.move(dir, d);
+		for(int nu = 1;nu < 4;nu++){
+            if(nu != dir){
+				link.move(nu, x_trans_min-1);
+				for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
+					link.move(nu, 1);
+					if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
+						link.print_link();
+					}
+					for(int mu = 1;mu < 4;mu++){
+						for(int j = mu + 1;j < 4;j++){
+							link.move_dir(mu);
+							if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1 && mu == 2 && j == 3){
+								cout<<plaket4_space_optimized(plaket_tr, link, j)<<endl;
+							}
+							vec[x_trans - x_trans_min] += a * plaket4_space_optimized(plaket_tr, link, j);
+						}
+					}
+				}
+				link.move(nu, -x_trans_max);
+			}
+		}
+    	SPACE_ITER_END;
+    }
+	int count;
+	count = data_size / 4 * 18;
+	for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
+    	final.array.push_back(vec[x_trans - x_trans_min]/count);
+	}
     return final;
 }
 
