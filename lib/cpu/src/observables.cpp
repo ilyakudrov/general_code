@@ -800,15 +800,15 @@ result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vec
 				link.move(nu, x_trans_min-1);
 				for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
 					link.move(nu, 1);
-					if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
-						link.print_link();
-					}
+					// if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
+					// 	link.print_link();
+					// }
 					for(int mu = 1;mu < 4;mu++){
 						for(int j = mu + 1;j < 4;j++){
 							link.move_dir(mu);
-							if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1 && mu == 2 && j == 3){
-								cout<<plaket4_space_optimized(plaket_tr, link, j)<<endl;
-							}
+							// if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1 && mu == 2 && j == 3){
+							// 	cout<<plaket4_space_optimized(plaket_tr, link, j)<<endl;
+							// }
 							vec[x_trans - x_trans_min] += a * plaket4_space_optimized(plaket_tr, link, j);
 						}
 					}
