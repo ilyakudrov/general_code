@@ -40,7 +40,7 @@ class link1 {
 	matrix get_matrix(const vector<matrix>& vec);//works with negative directions(takes inverse matrix)
 	matrix get_matrix1(matrix* vec);
 	double border_sign(int mu);
-	double get_angle_abelian(const vector<matrix>& vec); 
+	double get_angle_abelian(const vector<matrix>& vec);
 	matrix schwinger_line(const data& conf, int d, int dir, int x);//link is attached to "left" source and directed to the plaket
 	matrix plaket(const data& conf);//Directed to the direction of the field
 	matrix plaket_mu(const data& conf, int mu);//mu is the second direction

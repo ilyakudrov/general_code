@@ -452,49 +452,6 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
     return final;
 }
 
-result wilson_plaket_correlator_electric_new(const data& conf, const vector<double>& wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max){
-	link1 link(x_size, y_size, z_size, t_size);
-	result vec(0);
-    result final(0);
-    double aver[2];
-    double a;
-    for(int d = d_min;d <= d_max;d++){
-    	for (int dir = 1; dir < 4; dir++) {
-        	SPACE_ITER_START;
-            link.go(x, y, z, t);
-            link.move_dir(dir);
-            a = wilson_loop_tr[PLACE1];
-            link.move(4, T/2);
-            link.move(dir, d);
-            for(int nu = 1;nu < 4;nu++){
-            	if(nu != dir){
-            		link.move(nu, x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			link.move_dir(mu);
-            			if(T%2 == 0) vec.array.push_back(a * link.plaket_implement4(conf, 4).tr());
-            			if(T%2 == 1) vec.array.push_back(a * link.plaket_implement2(conf, 4).tr());
-            		}
-            		if(x_trans != 0){
-            		link.move(nu, -2*x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			link.move_dir(mu);
-            			if(T%2 == 0) vec.array.push_back(a * link.plaket_implement4(conf, 4).tr());
-            			if(T%2 == 1) vec.array.push_back(a * link.plaket_implement2(conf, 4).tr());
-            		}
-            		link.move(nu, x_trans);
-            		}
-            		else link.move(nu, -x_trans);
-            	}
-            }
-       		SPACE_ITER_END;
-    	}
-    	vec.average(aver);
-    	final.array.push_back(aver[0]);
-    	vec.array.clear();
-    }
-    return final;
-}
-
 result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
 	link1 link(x_size, y_size, z_size, t_size);
 	double vec[x_trans_max - x_trans_min + 1];
@@ -531,95 +488,6 @@ result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vec
 	for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
     	final.array.push_back(vec[x_trans - x_trans_min]/count);
 	}
-    return final;
-}
-
-result wilson_plaket_correlator_electric_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
-	link1 link(x_size, y_size, z_size, t_size);
-	result vec(0);
-    result final(0);
-    double aver[2];
-    double a;
-    for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
-    	for (int dir = 1; dir < 4; dir++) {
-        	SPACE_ITER_START;
-            link.go(x, y, z, t);
-            //link.move_dir(dir);
-            a = wilson_loop_tr[PLACE1];
-            link.move(4, T/2);
-            link.move(dir, d);
-            for(int nu = 1;nu < 4;nu++){
-            	if(nu != dir){
-            		link.move(nu, x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			link.move_dir(mu);
-            			if(T%2 == 0) vec.array.push_back(a * link.plaket_implement4(conf, 4).tr());
-            			if(T%2 == 1) vec.array.push_back(a * link.plaket_implement2(conf, 4).tr());
-            		}
-            		link.move(nu, -x_trans);
-            	}
-            }
-       		SPACE_ITER_END;
-    	}
-    	vec.average(aver);
-    	final.array.push_back(aver[0]);
-    	vec.array.clear();
-    }
-    return final;
-}
-
-result polyakov_plaket_correlator_electric(const data& conf, const data& smeared, int R, int x_trans, int d_min, int d_max){
-	vector<matrix> polyakov_loop = calculate_polyakov_loop(smeared);
-	link1 link(x_size, y_size, z_size, t_size);
-	result vec(0);
-    result final(0);
-    double aver[2];
-    double a;
-    for(int d = d_min;d <= d_max;d++){
-    	for (int dir = 1; dir < 4; dir++) {
-        	SPACE_ITER_START;
-        	link.go(x, y, z, t);
-        	/*if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
-        		cout<<"polyakov1 ";
-        	 	link.print_link();
-        	}*/
-        	a = polyakov_loop[PLACE_FIELD1].tr();
-        	link.move(dir, R);
-        	/*if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
-        		cout<<"polyakov2 ";
-        	 	link.print_link();
-        	}*/
-        	a *= polyakov_loop[PLACE_FIELD1].conj().tr();
-        	link.move(dir, d-R);
-        	for(int nu = 1;nu < 4;nu++){
-        		if(nu != dir){
-        			link.move(nu, x_trans);
-        			for(int mu = 1;mu < 4;mu++){
-        				link.move_dir(mu);
-        				/*if(x == 1 && y == 1 && z == 1 && t == 1 && dir == 1){
-        					cout<<"plaket ";
-        	 				link.print_link();
-        				}*/
-        				vec.array.push_back(a * link.plaket_implement4(conf, 4).tr());
-        				//vec.array.push_back(a * link.plaket_mu(conf, 4).tr());
-        			}
-        			if(x_trans != 0){
-        			link.move(nu, -2*x_trans);
-        			for(int mu = 1;mu < 4;mu++){
-        				link.move_dir(mu);
-        				vec.array.push_back(a * link.plaket_implement4(conf, 4).tr());
-        			}
-        			link.move(nu, x_trans);
-        			}
-        			else link.move(nu, -x_trans);
-        		}
-        	}
-       		SPACE_ITER_END;
-    	}
-    	vec.average(aver);
-    	final.array.push_back(aver[0]);
-    	vec.array.clear();
-    }
     return final;
 }
 
@@ -679,51 +547,6 @@ result wilson_plaket_correlator_magnetic_optimized(const data& conf, const vecto
 	for(int d = d_min;d <= d_max;d++){
     	final.array.push_back(vec[d - d_min]/count);
 	}
-    return final;
-}
-
-result wilson_plaket_correlator_magnetic_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max){
-	link1 link(x_size, y_size, z_size, t_size);
-	result vec(0);
-    result final(0);
-    double aver[2];
-    double a;
-    for(int d = d_min;d <= d_max;d++){
-    	for (int dir = 1; dir < 4; dir++) {
-        	SPACE_ITER_START;
-            link.go(x, y, z, t);
-            link.move_dir(dir);
-            a = wilson_loop_tr[PLACE1];
-            link.move(4, T/2);
-            link.move(dir, d);
-            for(int nu = 1;nu < 4;nu++){
-            	if(nu != dir){
-            		link.move(nu, x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			for(int j = mu + 1;j < 4;j++){
-            				link.move_dir(mu);
-            				vec.array.push_back(a * link.plaket_implement4(conf, j).tr());
-            			}
-            		}
-            		if(x_trans != 0){
-            		link.move(nu, -2*x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			for(int j = mu + 1;j < 4;j++){
-            				link.move_dir(mu);
-            				vec.array.push_back(a * link.plaket_implement4(conf, j).tr());
-            			}
-            		}
-            		link.move(nu, x_trans);
-            		}
-            		else link.move(nu, x_trans);
-            	}
-            }
-            SPACE_ITER_END;
-       	}
-       	vec.average(aver);
-    	final.array.push_back(aver[0]);
-    	vec.array.clear();
-    }
     return final;
 }
 
@@ -824,80 +647,6 @@ result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vec
     	final.array.push_back(vec[x_trans - x_trans_min]/count);
 	}
     return final;
-}
-
-result wilson_plaket_correlator_magnetic_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
-	link1 link(x_size, y_size, z_size, t_size);
-	result vec(0);
-    result final(0);
-    double aver[2];
-    double a;
-    for(int x_trans = x_trans_min;x_trans <= x_trans_max;x_trans++){
-    	for (int dir = 1; dir < 4; dir++) {
-        	SPACE_ITER_START;
-            link.go(x, y, z, t);
-            link.move_dir(dir);
-            a = wilson_loop_tr[PLACE1];
-            link.move(4, T/2);
-            link.move(dir, d);
-            for(int nu = 1;nu < 4;nu++){
-            	if(nu != dir){
-            		link.move(nu, x_trans);
-            		for(int mu = 1;mu < 4;mu++){
-            			for(int i = 1;i < 4;i++){
-            				if(i != mu){
-            					for(int j = 1;j < 4;j++){
-            						if(i != j){
-            							link.move_dir(i);
-            							vec.array.push_back(a * link.plaket_implement4(conf, j).tr());
-            						}
-            					}
-            				}
-            			}
-            		}
-            		link.move(nu, -x_trans);
-            	}
-            }
-            SPACE_ITER_END;
-       	}
-       	vec.average(aver);
-    	final.array.push_back(aver[0]);
-    	vec.array.clear();
-    }
-    return final;
-}
-
-void push_result(result& values1_out, result& values2_out, result& values3_out, vector<vector<result> >& field1_values, vector<vector<result> >& field2_values, vector<result>& field3_values){
-	double aver1[3][3][2];
-        double aver2[3][3][2];
-        double aver3[3][2];
-	for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                        if (i != j) {
-                                field1_values[i][j].average(aver1[i][j]);
-                                field2_values[i][j].average(aver2[i][j]);
-                        }
-                }
-                field3_values[i].average(aver3[i]);
-        }
-        for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                        if (i != j) {
-                                values1_out.array.push_back(aver1[i][j][0]);
-                                values2_out.array.push_back(aver2[i][j][0]);
-                        }
-                }
-                values3_out.array.push_back(aver3[i][0]);
-        }
-}
-
-void calculate_and_push(data& conf, result& values1_out, result& values2_out, result& values3_out, vector<vector<result> >& field1_values, vector<vector<result> >& field2_values, vector<result>& field3_values, vector<vector<matrix> >& schwinger_line, vector<matrix>& plaket, vector<matrix>& polyakov_loop, int d, int D, int x_trans){
-        schwinger_line = calculate_schwinger_line(conf, d, x_trans);
-        plaket = calculate_plaket(conf);
-        polyakov_loop = calculate_polyakov_loop(conf);
-
-        fields(schwinger_line, plaket, polyakov_loop, field1_values, field2_values, field3_values, d, D, x_trans);
-        push_result(values1_out, values2_out, values3_out, field1_values, field2_values, field3_values);
 }
 
 //monopoles

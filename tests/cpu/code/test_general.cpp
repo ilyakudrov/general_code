@@ -40,6 +40,6 @@ int main(int argc, char* argv[]) {
 	cout<<"test wilson_loop_R=10_T=6 "<<wilson(conf, 10, 6)<<" right: 0.001178588784"<<endl;
 
 	unsigned int end_time = clock();
-    unsigned int search_time = end_time - start_time;
-    cout<<"working time: "<<search_time*1./CLOCKS_PER_SEC<<endl;
+    	unsigned int search_time = end_time - start_time;
+    	cout<<"working time: "<<search_time*1./CLOCKS_PER_SEC<<endl;
 }

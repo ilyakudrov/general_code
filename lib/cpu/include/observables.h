@@ -33,17 +33,11 @@ double plaket_correlator(const vector<matrix>& plaket, int dist);
 double plaket_correlator_space(const vector<matrix>& plaket, int dist);
 double wilson_plaket_correlator_electric_simple(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir);
 result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_electric_new(const data& conf, const vector<double>& wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
-result wilson_plaket_correlator_electric_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_electric(const data& conf, const data& smeared, int R, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_magnetic_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
-result wilson_plaket_correlator_magnetic_x_new(const data& conf, vector<double> wilson_loop_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared, int R, int x_trans, int d_min, int d_max);
-void push_result(result& values1_out, result& values2_out, result& values3_out, vector<vector<result> >& field1_values, vector<vector<result> >& field2_values, vector<result>& field3_values);
-void calculate_and_push(data& conf, result& values1_out, result& values2_out, result& values3_out, vector<vector<result> >& field1_values, vector<vector<result> >& field2_values, vector<result>& field3_values, vector<vector<matrix> >& schwinger_line, vector<matrix>& plaket, vector<matrix>& polyakov_loop, int d, int D, int x_trans);
 //monopoles
 void length(loop* ll, int& ss1);
 result calculate_cluster_lengths(vector<loop*>& LL, int& max_number);
