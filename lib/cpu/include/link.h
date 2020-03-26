@@ -17,6 +17,7 @@ extern int t_size;
 
 class data;
 
+template<typename T>
 class link1 {
 	public:
 	int lattice_size[4];
@@ -37,21 +38,22 @@ class link1 {
 	void move_dir(int dir);//changes the direction
 	int get_place();
 	int get_place1();
-	matrix get_matrix(const vector<matrix>& vec);//works with negative directions(takes inverse matrix)
+	matrix get_matrix(const vector<matrix>& vec); //works with negative directions(takes inverse matrix)
+	double get_matrix(const vector<double>& vec);
 	matrix get_matrix1(matrix* vec);
 	double border_sign(int mu);
 	double get_angle_abelian(const vector<matrix>& vec);
-	matrix schwinger_line(const data& conf, int d, int dir, int x);//link is attached to "left" source and directed to the plaket
-	matrix plaket(const data& conf);//Directed to the direction of the field
-	matrix plaket_mu(const data& conf, int mu);//mu is the second direction
-	double plaket_abelian_mu(const data& conf, int mu);
-	matrix plaket_implement4(const data& conf, int mu);
-	double plaket_abelian_implement4(const data& conf, int mu);
-	matrix plaket_implement2(const data& conf, int mu);
-	matrix polyakov_loop(const data& conf);//attached to where it loops and directed to the temporal direction
-	double polyakov_loop_abelian(const data& conf);
-	matrix wilson_loop(const data& conf, int R, int T);
-	double wilson_loop_abelian(const data& conf, int R, int T);
+	T schwinger_line(const vector<T>& array, int d, int dir, int x);//link is attached to "left" source and directed to the plaket
+	T plaket(const vector<T>& array);//Directed to the direction of the field
+	T plaket_mu(const vector<T>& array, int mu);//mu is the second direction
+	double plaket_abelian_mu(const vector<matrix>& array, int mu);
+	T plaket_implement4(const vector<T>& array, int mu);
+	double plaket_abelian_implement4(const vector<matrix>& array, int mu);
+	T plaket_implement2(const vector<T>& array, int mu);
+	T polyakov_loop(const vector<T>& array);//attached to where it loops and directed to the temporal direction
+	double polyakov_loop_abelian(const vector<matrix>& array);
+	T wilson_loop(const vector<T>& array, int r, int t);
+	double wilson_loop_abelian(const vector<matrix>& array, int r, int t);
 	//first numeratoк
 	//d - distance between "left" source and plaket
 	//D - distance between sources
@@ -65,24 +67,24 @@ class link1 {
 	matrix staples_second_refresh(const vector<matrix>& vec, int eta, int nu, double alpha3);//staples for refreshing algorythm(refresh link every step)
 	matrix staples_third(const vector<vector<matrix> >& smearing_second, int eta);
 	matrix staples_third_refresh(const vector<matrix>& vec, int eta, double alpha2, double alpha3);
-	vector<matrix> smearing_first(const data& conf, double alpha3, int nu, int rho);
-	vector<vector<matrix> > smearing_first_full(const data& conf, double alpha3);
-	vector<matrix> smearing_second(const data& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu);
-	vector<vector<matrix> > smearing_second_full(const data& conf, vector<vector<matrix> >& smearing_first, double alpha2);
-	vector<matrix> smearing_HYP(data& conf, vector<vector<matrix> >& smearing_second, double alpha1);
+	vector<matrix> smearing_first(const data_matrix& conf, double alpha3, int nu, int rho);
+	vector<vector<matrix> > smearing_first_full(const data_matrix& conf, double alpha3);
+	vector<matrix> smearing_second(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu);
+	vector<vector<matrix> > smearing_second_full(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2);
+	vector<matrix> smearing_HYP(data_matrix& conf, vector<vector<matrix> >& smearing_second, double alpha1);
 	inline int position_first(int a, int b);
-	vector<matrix> smearing_APE(data& conf, double alpha_APE);
+	vector<matrix> smearing_APE(data_matrix& conf, double alpha_APE);
 	matrix smearing_first_refresh(const vector<matrix>& vec, int nu, int rho, double alpha3);//refresh link every step
 	matrix smearing_second_refresh(const vector<matrix>& vec, int nu,  double alpha2, double alpha3);//refresh link every step
-	vector<matrix> smearing_HYP_refresh(data& conf, double alpha1, double alpha2, double alpha3);//refresh link every step
-	vector<matrix> smearing_APE_refresh(data& conf, double alpha_APE);//refresh link every step
-	vector<matrix> smearing_stout(data& conf, double rho);
-	matrix stout_factor(data& conf, double rho);
-	matrix stout_omega(data& conf, double rho);
-	void gauge_transform(data& conf);
+	vector<matrix> smearing_HYP_refresh(data_matrix& conf, double alpha1, double alpha2, double alpha3);//refresh link every step
+	vector<matrix> smearing_APE_refresh(data_matrix& conf, double alpha_APE);//refresh link every step
+	vector<matrix> smearing_stout(data_matrix& conf, double rho);
+	matrix stout_factor(data_matrix& conf, double rho);
+	matrix stout_omega(data_matrix& conf, double rho);
+	void gauge_transform(data_matrix& conf);
 	//monopoles
-	double T(data& conf, int i, int j);//monopole_plaket
-	double get_current(data& conf);
+	double monopole_plaket(data_matrix& conf, int i, int j);//monopole_plaket
+	double get_current(data_matrix& conf);
 	int current_test(double* J);
 };
 #endif

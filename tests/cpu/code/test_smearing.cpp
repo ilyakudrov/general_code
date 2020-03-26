@@ -28,9 +28,9 @@ int main(int argc, char* argv[]) {
     vector<vector<matrix> > smearing_first(6, vector<matrix>(1));
     vector<vector<matrix> > smearing_second(4, vector<matrix>(1));
 
-    link1 link(x_size, y_size, z_size, t_size);
-	data conf;
-	data smeared;
+    link1<matrix> link(x_size, y_size, z_size, t_size);
+	data_matrix conf;
+	data_matrix smeared;
 	char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
 	conf.read_float(path1);
 	double aver[2];

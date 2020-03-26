@@ -9,8 +9,8 @@ void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_
                 + (z - 1) * 2 * x_size * y_size
                 + (y - 1) * 2 * x_size
                 + (x - 1) * 2);
-        link1 link(x_size, y_size, z_size, t_size);
-        link1 link_ferm(x_size, y_size, z_size, t_size);
+        link1<matrix> link(x_size, y_size, z_size, t_size);
+        link1<matrix> link_ferm(x_size, y_size, z_size, t_size);
         link.go(x, y, z, t);
         link_ferm.go(x, y, z, t);
         //matrix A(1, 0, 0, 0);
@@ -83,7 +83,7 @@ void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_
                 }
 }*/
 
-int complex_place(link1& link){
+int complex_place(link1<matrix>& link){
         return (link.coordinate[3]) * 2 * link.lattice_size[0]*link.lattice_size[1]*link.lattice_size[2]
                 + (link.coordinate[2]) * 2 * link.lattice_size[0]*link.lattice_size[1]
                 + (link.coordinate[1]) * 2 * link.lattice_size[0]
@@ -138,7 +138,7 @@ void test_eigenvector(const scomplex_t* eigenvector, scomplex_t eigenvalue, int 
         free(vec);
 }
 
-double eta_sign(int mu, link1& link){
+double eta_sign(int mu, link1<matrix>& link){
         int n = 0;
         for(int i = 0;i < mu - 1;i++){
                 n += (link.coordinate[i]);
@@ -147,7 +147,7 @@ double eta_sign(int mu, link1& link){
         if(n%2 == 0) return (double)1.;
 }
 
-double eta_sign_5(link1& link){
+double eta_sign_5(link1<matrix>& link){
         int n = 0;
         for(int i = 0;i < 4;i++){
                 n += (link.coordinate[i] - 1);

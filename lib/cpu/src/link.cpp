@@ -1,3 +1,6 @@
+#include "link.h"
+#include "data.h"
+
 # define Pi 3.141592653589793238462643383279502884
 #define data_size 4*lattice_size[0]*lattice_size[1]*lattice_size[2]*lattice_size[3]
 #define PLACE (coordinate[3])*3*lattice_size[0]*lattice_size[1]*lattice_size[2] \
@@ -13,10 +16,8 @@
 		+ (coordinate[1])*lattice_size[0] \
 		+ (coordinate[0])
 
-#include "link.h"
-#include "data.h"
-
-link1::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
+template<typename T>
+link1<T>::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
 	lattice_size[0] = lattice_size_x;
 	lattice_size[1] = lattice_size_y;
 	lattice_size[2] = lattice_size_z;
@@ -27,7 +28,8 @@ link1::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z, int lat
 	}
 }
 
-link1::link1(int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
+template<typename T>
+link1<T>::link1(int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
 	lattice_size[0] = lattice_size_x;
 	lattice_size[1] = lattice_size_y;
 	lattice_size[2] = lattice_size_z;
@@ -38,7 +40,8 @@ link1::link1(int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z
 	}
 }
 
-link1::link1(int coord[4], int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
+template<typename T>
+link1<T>::link1(int coord[4], int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
 	lattice_size[0] = lattice_size_x;
 	lattice_size[1] = lattice_size_y;
 	lattice_size[2] = lattice_size_z;
@@ -49,7 +52,8 @@ link1::link1(int coord[4], int dir, int lattice_size_x, int lattice_size_y, int 
 	}
 }
 
-link1::link1(int x, int y, int z, int t, int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
+template<typename T>
+link1<T>::link1(int x, int y, int z, int t, int dir, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
 	lattice_size[0] = lattice_size_x;
 	lattice_size[1] = lattice_size_y;
 	lattice_size[2] = lattice_size_z;
@@ -61,7 +65,8 @@ link1::link1(int x, int y, int z, int t, int dir, int lattice_size_x, int lattic
 	coordinate[3] = t;
 }
 
-link1::link1(int x, int y, int z, int t, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
+template<typename T>
+link1<T>::link1(int x, int y, int z, int t, int lattice_size_x, int lattice_size_y, int lattice_size_z, int lattice_size_t) {
 	lattice_size[0] = lattice_size_x;
 	lattice_size[1] = lattice_size_y;
 	lattice_size[2] = lattice_size_z;
@@ -73,7 +78,8 @@ link1::link1(int x, int y, int z, int t, int lattice_size_x, int lattice_size_y,
 	coordinate[3] = t;
 }
 
-link1::link1(const link1& link) {
+template<typename T>
+link1<T>::link1(const link1& link) {
 	lattice_size[0] = link.lattice_size[0];
 	lattice_size[1] = link.lattice_size[1];
 	lattice_size[2] = link.lattice_size[2];
@@ -85,7 +91,8 @@ link1::link1(const link1& link) {
 	coordinate[3] = link.coordinate[3];
 }
 
-link1::link1() {
+template<typename T>
+link1<T>::link1() {
 	lattice_size[0] = x_size;
 	lattice_size[1] = y_size;
 	lattice_size[2] = z_size;
@@ -97,11 +104,13 @@ link1::link1() {
 	coordinate[3] = 0;
 }
 
-void link1::print_link(){
+template<typename T>
+void link1<T>::print_link(){
 	cout<<coordinate[0]<<" "<<coordinate[1]<<" "<<coordinate[2]<<" "<<coordinate[3]<<" "<<direction<<endl;
 }
 
-void link1::move(int dir, int step) {
+template<typename T>
+void link1<T>::move(int dir, int step) {
 	coordinate[abs(dir) - 1] += step * dir / abs(dir);
 	while (coordinate[abs(dir) - 1] < 0 || coordinate[abs(dir) - 1] > lattice_size[abs(dir) - 1]-1) {
 		if (coordinate[abs(dir) - 1] < 0) coordinate[abs(dir) - 1] += lattice_size[abs(dir) - 1];
@@ -109,26 +118,31 @@ void link1::move(int dir, int step) {
 	}
 }
 
-void link1::go(int x, int y, int z, int t) {
+template<typename T>
+void link1<T>::go(int x, int y, int z, int t) {
 	coordinate[0] = x;
 	coordinate[1] = y;
 	coordinate[2] = z;
 	coordinate[3] = t;
 }
 
-void link1::move_dir(int dir) {
+template<typename T>
+void link1<T>::move_dir(int dir) {
 	direction = dir;
 }
 
-int link1::get_place(){
+template<typename T>
+int link1<T>::get_place(){
 	return PLACE1_LINK;
 }
 
-int link1::get_place1(){
+template<typename T>
+int link1<T>::get_place1(){
 	return PLACE_FIELD_LINK;
 }
 
-matrix link1::get_matrix(const vector<matrix>& vec) {
+template<typename T>
+matrix link1<T>::get_matrix(const vector<matrix>& vec) {
 	matrix A;
 	if (direction / abs(direction) == 1) {
 		A = vec[PLACE1_LINK];
@@ -146,7 +160,27 @@ matrix link1::get_matrix(const vector<matrix>& vec) {
 	}
 }
 
-matrix link1::get_matrix1(matrix* vec) {
+template<typename T>
+double link1<T>::get_matrix(const vector<double>& vec) {
+	double A;
+	if (direction / abs(direction) == 1) {
+		A = vec[PLACE1_LINK];
+		return A;
+	}
+	if (direction / abs(direction) == -1) {
+		move(direction, 1);
+		A = vec[PLACE1_LINK];
+		move(direction, -1);
+		return -A;
+	}
+	else {
+		cout << "error in get_matrix" << endl;
+		return A;
+	}
+}
+
+template<typename T>
+matrix link1<T>::get_matrix1(matrix* vec) {
         matrix A;
         if (direction / abs(direction) == 1) {
                 A = vec[PLACE1_LINK];
@@ -163,7 +197,8 @@ matrix link1::get_matrix1(matrix* vec) {
         }
 }
 
-double link1::border_sign(int mu){
+template<typename T>
+double link1<T>::border_sign(int mu){
 	if(abs(mu) == 4){
 		if(0 > (coordinate[3] + mu/abs(mu)) || (coordinate[3] + mu/abs(mu)) > lattice_size[3]-1) return -1.;
 		else return 1.;
@@ -171,7 +206,8 @@ double link1::border_sign(int mu){
 	else return 1.;
 }
 
-double link1::get_angle_abelian(const vector<matrix>& vec) {
+template<typename T>
+double link1<T>::get_angle_abelian(const vector<matrix>& vec) {
 	double angle;
 	if (direction / abs(direction) == 1) {
 		angle = atan2(vec[PLACE1_LINK].a3, vec[PLACE1_LINK].a0);
@@ -189,16 +225,17 @@ double link1::get_angle_abelian(const vector<matrix>& vec) {
 	}
 }
 
-matrix link1::schwinger_line(const data& conf, int d, int dir, int x) {
+template<typename T>
+T link1<T>::schwinger_line(const vector<T>& array, int d, int dir, int x) {
 	int dir1 = direction;
-	matrix A;
+	T A;
 	for (int i = 0; i < d; i++) {
-		A = A * get_matrix(conf.array);
+		A = A * get_matrix(array);
 		move(dir1, 1);
 	}
 	move_dir(dir);
 	for (int i = 0; i < x; i++) {
-		A = A * get_matrix(conf.array);
+		A = A * get_matrix(array);
 		move(dir, 1);
 	}
 	move_dir(dir1);
@@ -207,161 +244,217 @@ matrix link1::schwinger_line(const data& conf, int d, int dir, int x) {
 	return A;
 }
 
-matrix link1::plaket(const data& conf) {
+template<typename T>
+T link1<T>::plaket(const vector<T>& array) {
 	int dir = direction;
-	matrix A = get_matrix(conf.array);
+	T A = get_matrix(array);
 	move(dir, 1);
 	move_dir(-4);//the same temporal direction as polyakov loop, connected to schwinger line, has
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(-4, 1);
 	move_dir(-dir);
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(-dir, 1);
 	move_dir(4);
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(4, 1);
 	move_dir(dir);
 	return A;
 }
 
-matrix link1::plaket_mu(const data& conf, int mu) {
+template<typename T>
+T link1<T>::plaket_mu(const vector<T>& array, int mu) {
 	int dir = direction;
-	matrix A = get_matrix(conf.array);
+	T A = get_matrix(array);
 	move(dir, 1);
 	move_dir(-mu);//the same temporal direction as polyakov loop, connected to schwinger line, has
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(-mu, 1);
 	move_dir(-dir);
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(-dir, 1);
 	move_dir(mu);
-	A = A * get_matrix(conf.array);
+	A = A * get_matrix(array);
 	move(mu, 1);
 	move_dir(dir);
 	return A;
 }
 
-double link1::plaket_abelian_mu(const data& conf, int mu) {
+template<>
+double link1<double>::plaket_mu(const vector<double>& array, int mu) {
 	int dir = direction;
-	double angle = get_angle_abelian(conf.array);
+	double A = get_matrix(array);
 	move(dir, 1);
 	move_dir(-mu);//the same temporal direction as polyakov loop, connected to schwinger line, has
-	angle = angle + get_angle_abelian(conf.array);
+	A = A + get_matrix(array);
 	move(-mu, 1);
 	move_dir(-dir);
-	angle = angle + get_angle_abelian(conf.array);
+	A = A + get_matrix(array);
 	move(-dir, 1);
 	move_dir(mu);
-	angle = angle + get_angle_abelian(conf.array);
+	A = A + get_matrix(array);
+	move(mu, 1);
+	move_dir(dir);
+	return cos(A);
+}
+
+template<typename T>
+double link1<T>::plaket_abelian_mu(const vector<matrix>& array, int mu) {
+	int dir = direction;
+	double angle = get_angle_abelian(array);
+	move(dir, 1);
+	move_dir(-mu);//the same temporal direction as polyakov loop, connected to schwinger line, has
+	angle = angle + get_angle_abelian(array);
+	move(-mu, 1);
+	move_dir(-dir);
+	angle = angle + get_angle_abelian(array);
+	move(-dir, 1);
+	move_dir(mu);
+	angle = angle + get_angle_abelian(array);
 	move(mu, 1);
 	move_dir(dir);
 	return cos(angle);
 }
 
-matrix link1::plaket_implement4(const data& conf, int mu){
-	matrix A = plaket_mu(conf, mu);
+template<typename T>
+T link1<T>::plaket_implement4(const vector<T>& array, int mu){
+	T A = plaket_mu(array, mu);
 	move(mu, 1);
-	A = A + plaket_mu(conf, mu);
+	A = A + plaket_mu(array, mu);
 	move(-direction, 1);
-	A = A + plaket_mu(conf, mu);
+	A = A + plaket_mu(array, mu);
 	move(mu, -1);
-	A = A + plaket_mu(conf, mu);
+	A = A + plaket_mu(array, mu);
 	move(direction, 1);
 	return 1./4*A;
 }
 
-double link1::plaket_abelian_implement4(const data& conf, int mu){
-	double a = plaket_abelian_mu(conf, mu);
+template<typename T>
+double link1<T>::plaket_abelian_implement4(const vector<matrix>& array, int mu){
+	double a = plaket_abelian_mu(array, mu);
 	move(mu, 1);
-	a = a + plaket_abelian_mu(conf, mu);
+	a = a + plaket_abelian_mu(array, mu);
 	move(-direction, 1);
-	a = a + plaket_abelian_mu(conf, mu);
+	a = a + plaket_abelian_mu(array, mu);
 	move(-mu, 1);
-	a = a + plaket_abelian_mu(conf, mu);
+	a = a + plaket_abelian_mu(array, mu);
 	move(direction, 1);
 	return 1./4*a;
 }
 
-matrix link1::plaket_implement2(const data& conf, int mu){
-	matrix A = plaket_mu(conf, mu);
+template<typename T>
+T link1<T>::plaket_implement2(const vector<T>& array, int mu){
+	T A = plaket_mu(array, mu);
 	move(-direction, 1);
-	A = A + plaket_mu(conf, mu);
+	A = A + plaket_mu(array, mu);
 	move(direction, 1);
 	return 1./2*A;
 }
 
-matrix link1::polyakov_loop(const data& conf) {
-	matrix A;
+template<typename T>
+T link1<T>::polyakov_loop(const vector<T>& array) {
+	T A;
 	for (int i = 0; i < lattice_size[3]; i++) {
-		A = A * get_matrix(conf.array);
+		A = A * get_matrix(array);
 		move(direction, 1);
 	}
 	return A;
 }
 
-double link1::polyakov_loop_abelian(const data& conf) {
+template<typename T>
+double link1<T>::polyakov_loop_abelian(const vector<matrix>& array) {
 	double angle = 0;
 	for (int i = 0; i < lattice_size[3]; i++) {
 		//cout<<coordinate[0]<<" "<<coordinate[1]<<" "<<coordinate[2]<<" "<<coordinate[3]<<" "<<direction<<endl;
-		angle += get_angle_abelian(conf.array);
+		angle += get_angle_abelian(array);
 		move(direction, 1);
 	}
 	return angle;
 }
 
-matrix link1::wilson_loop(const data& conf, int R, int T) {
+template<typename T>
+T link1<T>::wilson_loop(const vector<T>& array, int r, int t) {
 	int dir = direction;
-	matrix A;
-	for (int i = 0; i < R; i++) {
-		A = A * get_matrix(conf.array);
+	T A;
+	for (int i = 0; i < r; i++) {
+		A = A * get_matrix(array);
 		move(dir, 1);
 	}
 	move_dir(4);
-	for (int i = 0; i < T; i++) {
-		A = A * get_matrix(conf.array);
+	for (int i = 0; i < t; i++) {
+		A = A * get_matrix(array);
 		move(4, 1);
 	}
 	move_dir(-dir);
-	for (int i = 0; i < R; i++) {
-		A = A * get_matrix(conf.array);
+	for (int i = 0; i < r; i++) {
+		A = A * get_matrix(array);
 		move(-dir, 1);
 	}
 	move_dir(-4);
-	for (int i = 0; i < T; i++) {
-		A = A * get_matrix(conf.array);
+	for (int i = 0; i < t; i++) {
+		A = A * get_matrix(array);
 		move(-4, 1);
 	}
 	move_dir(dir);
 	return A;
 }
 
-double link1::wilson_loop_abelian(const data& conf, int R, int T) {
+template<>
+double link1<double>::wilson_loop(const vector<double>& array, int r, int t) {
 	int dir = direction;
-	double angle = 0;
-	for (int i = 0; i < R; i++) {
-		angle += get_angle_abelian(conf.array);
+	double A;
+	for (int i = 0; i < r; i++) {
+		A = A + get_matrix(array);
 		move(dir, 1);
 	}
 	move_dir(4);
-	for (int i = 0; i < T; i++) {
-		angle += get_angle_abelian(conf.array);
+	for (int i = 0; i < t; i++) {
+		A = A + get_matrix(array);
 		move(4, 1);
 	}
 	move_dir(-dir);
-	for (int i = 0; i < R; i++) {
-		angle += get_angle_abelian(conf.array);
+	for (int i = 0; i < r; i++) {
+		A = A + get_matrix(array);
 		move(-dir, 1);
 	}
 	move_dir(-4);
-	for (int i = 0; i < T; i++) {
-		angle += get_angle_abelian(conf.array);
+	for (int i = 0; i < t; i++) {
+		A = A + get_matrix(array);
+		move(-4, 1);
+	}
+	move_dir(dir);
+	return cos(A);
+}
+
+template<typename T>
+double link1<T>::wilson_loop_abelian(const vector<matrix>& array, int r, int t) {
+	int dir = direction;
+	double angle = 0;
+	for (int i = 0; i < r; i++) {
+		angle += get_angle_abelian(array);
+		move(dir, 1);
+	}
+	move_dir(4);
+	for (int i = 0; i < t; i++) {
+		angle += get_angle_abelian(array);
+		move(4, 1);
+	}
+	move_dir(-dir);
+	for (int i = 0; i < r; i++) {
+		angle += get_angle_abelian(array);
+		move(-dir, 1);
+	}
+	move_dir(-4);
+	for (int i = 0; i < t; i++) {
+		angle += get_angle_abelian(array);
 		move(-4, 1);
 	}
 	move_dir(dir);
 	return cos(angle);
 }
 
-double link1::field1(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, int d, int D, int dir, int x) {
+template<typename T>
+double link1<T>::field1(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, int d, int D, int dir, int x) {
 	int dir1 = direction;
 	matrix C = schwinger_line[dir - 1][PLACE];
 	move(dir1, d);
@@ -381,7 +474,8 @@ double link1::field1(const vector<vector<matrix> >& schwinger_line, const vector
 	return A.tr() * B.tr();
 }
 
-double link1::field2(const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, int d, int D, int dir, int x) {
+template<typename T>
+double link1<T>::field2(const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, int d, int D, int dir, int x) {
 	int dir1 = direction;
 	move_dir(-4);
 	matrix A = polyakov_loop[PLACE_FIELD_LINK];
@@ -398,7 +492,8 @@ double link1::field2(const vector<matrix>& plaket, const vector<matrix>& polyako
 	return B.tr() * C.tr() * A.conj().tr();
 }
 
-double link1::field3(const vector<matrix>& polyakov_loop, int D, int x) {
+template<typename T>
+double link1<T>::field3(const vector<matrix>& polyakov_loop, int D, int x) {
 	int dir1 = direction;
 	move_dir(-4);
 	matrix A = polyakov_loop[PLACE_FIELD_LINK];
@@ -410,7 +505,8 @@ double link1::field3(const vector<matrix>& polyakov_loop, int D, int x) {
 	return A.conj().tr() * B.tr();
 }
 
-matrix link1::staples_first(const vector<matrix>& vec, int eta) {
+template<typename T>
+matrix link1<T>::staples_first(const vector<matrix>& vec, int eta) {
 	matrix A;
 	matrix B;
 	int dir = direction;
@@ -437,7 +533,8 @@ matrix link1::staples_first(const vector<matrix>& vec, int eta) {
 	return (A + B);
 }
 
-matrix link1::staples_second(const vector<vector<matrix> >& smearing_first, int eta, int nu) {
+template<typename T>
+matrix link1<T>::staples_second(const vector<vector<matrix> >& smearing_first, int eta, int nu) {
 	matrix A;
 	matrix B;
 	int dir = direction;
@@ -464,7 +561,8 @@ matrix link1::staples_second(const vector<vector<matrix> >& smearing_first, int 
 	return (A + B);
 }
 
-matrix link1::staples_second_refresh(const vector<matrix>& vec, int eta, int nu, double alpha3) {
+template<typename T>
+matrix link1<T>::staples_second_refresh(const vector<matrix>& vec, int eta, int nu, double alpha3) {
 	matrix A;
 	matrix B;
 	int dir = direction;
@@ -491,7 +589,8 @@ matrix link1::staples_second_refresh(const vector<matrix>& vec, int eta, int nu,
 	return (A + B);
 }
 
-matrix link1::staples_third(const vector<vector<matrix> >& smearing_second, int eta) {
+template<typename T>
+matrix link1<T>::staples_third(const vector<vector<matrix> >& smearing_second, int eta) {
 	matrix A;
 	matrix B;
 	int dir = direction;
@@ -518,7 +617,8 @@ matrix link1::staples_third(const vector<vector<matrix> >& smearing_second, int 
 	return (A + B);
 }
 
-matrix link1::staples_third_refresh(const vector<matrix>& vec, int eta, double alpha2, double alpha3) {
+template<typename T>
+matrix link1<T>::staples_third_refresh(const vector<matrix>& vec, int eta, double alpha2, double alpha3) {
 	matrix A;
 	matrix B;
 	int dir = direction;
@@ -545,7 +645,8 @@ matrix link1::staples_third_refresh(const vector<matrix>& vec, int eta, double a
 	return (A + B);
 }
 
-vector<matrix> link1::smearing_first(const data& conf, double alpha3, int nu, int rho) {
+template<typename T>
+vector<matrix> link1<T>::smearing_first(const data_matrix& conf, double alpha3, int nu, int rho) {
 	vector<matrix> vec(data_size);
 	matrix A;
 	for (int t = 0; t < t_size; t++) {
@@ -573,7 +674,8 @@ vector<matrix> link1::smearing_first(const data& conf, double alpha3, int nu, in
 	return vec;
 }
 
-vector<vector<matrix> > link1::smearing_first_full(const  data& conf, double alpha3) {
+template<typename T>
+vector<vector<matrix> > link1<T>::smearing_first_full(const data_matrix& conf, double alpha3) {
 	vector<vector<matrix> > smearing(6, vector<matrix>(data_size));
 	for (int i = 1; i < 4; i++) {
 		for (int j = i + 1; j < 5; j++) {
@@ -583,7 +685,8 @@ vector<vector<matrix> > link1::smearing_first_full(const  data& conf, double alp
 	return smearing;
 }
 
-vector<matrix> link1::smearing_second(const data& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu) {
+template<typename T>
+vector<matrix> link1<T>::smearing_second(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu) {
 	vector<matrix> vec(data_size);
 	matrix A;
 	for (int t = 0; t < t_size; t++) {
@@ -611,7 +714,8 @@ vector<matrix> link1::smearing_second(const data& conf, vector<vector<matrix> >&
 	return vec;
 }
 
-vector<vector<matrix> > link1::smearing_second_full(const data& conf, vector<vector<matrix> >& smearing_first, double alpha2) {
+template<typename T>
+vector<vector<matrix> > link1<T>::smearing_second_full(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2) {
 	vector<vector<matrix> > smearing(4, vector<matrix>(data_size));
 	for (int i = 1; i < 5; i++) {
 		smearing[i - 1] = smearing_second(conf, smearing_first, alpha2, i);
@@ -619,7 +723,8 @@ vector<vector<matrix> > link1::smearing_second_full(const data& conf, vector<vec
 	return smearing;
 }
 
-vector<matrix> link1::smearing_HYP(data& conf, vector<vector<matrix> >& smearing_second, double alpha1) {
+template<typename T>
+vector<matrix> link1<T>::smearing_HYP(data_matrix& conf, vector<vector<matrix> >& smearing_second, double alpha1) {
 	vector<matrix> vec(data_size);
 	matrix A;
 	matrix B;
@@ -655,7 +760,8 @@ vector<matrix> link1::smearing_HYP(data& conf, vector<vector<matrix> >& smearing
 	return vec;
 }
 
-int link1::position_first(int a, int b) {
+template<typename T>
+int link1<T>::position_first(int a, int b) {
 	int i;
 	int j;
 	if (a < b) {
@@ -670,7 +776,8 @@ int link1::position_first(int a, int b) {
 	return (i - 1)*(8 - i) / 2 + j - i - 1;
 }
 
-vector<matrix> link1::smearing_APE(data& conf, double alpha_APE) {
+template<typename T>
+vector<matrix> link1<T>::smearing_APE(data_matrix& conf, double alpha_APE) {
 	vector<matrix> vec(data_size);
 	for (int t = 0; t < t_size; t++) {
 		for (int z = 0; z < z_size; z++) {
@@ -705,7 +812,8 @@ vector<matrix> link1::smearing_APE(data& conf, double alpha_APE) {
 	return vec;
 }
 
-matrix link1::smearing_first_refresh(const vector<matrix>& vec, int nu, int rho, double alpha3) {
+template<typename T>
+matrix link1<T>::smearing_first_refresh(const vector<matrix>& vec, int nu, int rho, double alpha3) {
 	matrix A;
 	A = (1 - alpha3) * get_matrix(vec);
 	for (int d = 1; d < 5; d++) {
@@ -717,7 +825,8 @@ matrix link1::smearing_first_refresh(const vector<matrix>& vec, int nu, int rho,
 	return A;
 }
 
-matrix link1::smearing_second_refresh(const vector<matrix>& vec, int nu,  double alpha2, double alpha3) {
+template<typename T>
+matrix link1<T>::smearing_second_refresh(const vector<matrix>& vec, int nu,  double alpha2, double alpha3) {
 	matrix A;
 	A = (1 - alpha2) * get_matrix(vec);
 	for (int d = 1; d < 5; d++) {
@@ -729,7 +838,8 @@ matrix link1::smearing_second_refresh(const vector<matrix>& vec, int nu,  double
 	return A;
 }
 
-vector<matrix> link1::smearing_HYP_refresh(data& conf, double alpha1, double alpha2, double alpha3) {
+template<typename T>
+vector<matrix> link1<T>::smearing_HYP_refresh(data_matrix& conf, double alpha1, double alpha2, double alpha3) {
 	vector<matrix> vec(data_size);
 	vec = conf.array;
 	matrix A;
@@ -752,7 +862,8 @@ vector<matrix> link1::smearing_HYP_refresh(data& conf, double alpha1, double alp
 	return vec;
 }
 
-vector<matrix> link1::smearing_APE_refresh(data& conf, double alpha_APE) {
+template<typename T>
+vector<matrix> link1<T>::smearing_APE_refresh(data_matrix& conf, double alpha_APE) {
 	vector<matrix> vec(data_size);
 	vec = conf.array;
 	matrix A;
@@ -777,7 +888,8 @@ vector<matrix> link1::smearing_APE_refresh(data& conf, double alpha_APE) {
 	return vec;
 }
 
-vector<matrix> link1::smearing_stout(data& conf, double rho){
+template<typename T>
+vector<matrix> link1<T>::smearing_stout(data_matrix& conf, double rho){
 	vector<matrix> vec(data_size);
 	vec = conf.array;
 	for(int t = 0; t < t_size; t++) {
@@ -796,7 +908,8 @@ vector<matrix> link1::smearing_stout(data& conf, double rho){
 	return vec;
 }
 
-matrix link1::stout_factor(data& conf, double rho){
+template<typename T>
+matrix link1<T>::stout_factor(data_matrix& conf, double rho){
 	matrix A;
 	matrix B;
 	matrix C;
@@ -814,7 +927,8 @@ matrix link1::stout_factor(data& conf, double rho){
 	return B;
 }
 
-matrix link1::stout_omega(data& conf, double rho){
+template<typename T>
+matrix link1<T>::stout_omega(data_matrix& conf, double rho){
 	int dir = direction;
 	matrix A;
 	matrix B(0., 0., 0., 0.);
@@ -829,7 +943,8 @@ matrix link1::stout_omega(data& conf, double rho){
 	return A;
 }
 
-void link1::gauge_transform(data& conf){
+template<typename T>
+void link1<T>::gauge_transform(data_matrix& conf){
 	matrix A = conf.array[0];
 	matrix C = A;
 	C.conj();
@@ -850,7 +965,8 @@ void link1::gauge_transform(data& conf){
 
 //monopoles
 
-double link1::T(data& conf, int i, int j){
+template<typename T>
+double link1<T>::monopole_plaket(data_matrix& conf, int i, int j){
 	int dir = direction;
 	move_dir(i);
 	float angle = get_angle_abelian(conf.array);
@@ -873,20 +989,22 @@ double link1::T(data& conf, int i, int j){
     return angle;
 }
 
-double link1::get_current(data& conf){
+template<typename T>
+double link1<T>::get_current(data_matrix& conf){
      double jj=0.;
      link1 Lx(coordinate[0], coordinate[1], coordinate[2], coordinate[3], lattice_size[0], lattice_size[1], lattice_size[2], lattice_size[3]); Lx.move(1,1);
      link1 Ly(coordinate[0], coordinate[1], coordinate[2], coordinate[3], lattice_size[0], lattice_size[1], lattice_size[2], lattice_size[3]); Ly.move(2,1);
      link1 Lz(coordinate[0], coordinate[1], coordinate[2], coordinate[3], lattice_size[0], lattice_size[1], lattice_size[2], lattice_size[3]); Lz.move(3,1);
      link1 Lt(coordinate[0], coordinate[1], coordinate[2], coordinate[3], lattice_size[0], lattice_size[1], lattice_size[2], lattice_size[3]); Lt.move(4,1);
-     if(direction==4) jj=Lx.T(conf,2,3)-T(conf,2,3)-(Ly.T(conf,1,3)-T(conf,1,3))+Lz.T(conf,1,2)-T(conf,1,2);
-     if(direction==1) jj=-(Lt.T(conf,2,3)-T(conf,2,3))+(Ly.T(conf,4,3)-T(conf,4,3))-(Lz.T(conf,4,2)-T(conf,4,2));
-     if(direction==2) jj=Lt.T(conf,1,3)-T(conf,1,3)-(Lx.T(conf,4,3)-T(conf,4,3))+Lz.T(conf,4,1)-T(conf,4,1);
-     if(direction==3) jj=-(Lt.T(conf,1,2)-T(conf,1,2))+(Lx.T(conf,4,2)-T(conf,4,2))-(Ly.T(conf,4,1)-T(conf,4,1));
+     if(direction==4) jj=Lx.monopole_plaket(conf,2,3)-monopole_plaket(conf,2,3)-(Ly.monopole_plaket(conf,1,3)-monopole_plaket(conf,1,3))+Lz.monopole_plaket(conf,1,2)-monopole_plaket(conf,1,2);
+     if(direction==1) jj=-(Lt.monopole_plaket(conf,2,3)-monopole_plaket(conf,2,3))+(Ly.monopole_plaket(conf,4,3)-monopole_plaket(conf,4,3))-(Lz.monopole_plaket(conf,4,2)-monopole_plaket(conf,4,2));
+     if(direction==2) jj=Lt.monopole_plaket(conf,1,3)-monopole_plaket(conf,1,3)-(Lx.monopole_plaket(conf,4,3)-monopole_plaket(conf,4,3))+Lz.monopole_plaket(conf,4,1)-monopole_plaket(conf,4,1);
+     if(direction==3) jj=-(Lt.monopole_plaket(conf,1,2)-monopole_plaket(conf,1,2))+(Lx.monopole_plaket(conf,4,2)-monopole_plaket(conf,4,2))-(Ly.monopole_plaket(conf,4,1)-monopole_plaket(conf,4,1));
      return jj/2./Pi;
 }
 
-int link1::current_test(double* J){
+template<typename T>
+int link1<T>::current_test(double* J){
     for(int i=1; i<=4; i++){
     	move_dir(i);
 		if ( (J[get_place()]>0.3)||(J[get_place()]<-0.3) ){
@@ -904,3 +1022,6 @@ int link1::current_test(double* J){
     }
     return 0;
 }
+
+template class link1<matrix>;
+template class link1<double>;

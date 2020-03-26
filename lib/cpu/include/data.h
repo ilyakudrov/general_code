@@ -9,10 +9,10 @@
 #include "matrix.h"
 #include "math.h"
 
-class data {
+class data_matrix {
 	public:
 	std::vector<matrix> array;
-	data();
+	data_matrix();
 	void read_float(char const* file_name);//read conf file of floats
 	void read_float_abelian(char const* file_name);
 	void read_double(char const* file_name);//read conf file of double
@@ -21,5 +21,13 @@ class data {
 	void write_float(char const* file_name);
 	int eta(int mu, int x, int y, int z, int t);
 	int sign(int x);
+};
+
+class data_double {
+	public:
+	std::vector<double> array;
+	data_double();
+	void read_float(char const* file_name); //read conf file of floats
+	void read_float_fortran(char const* file_name);
 };
 #endif

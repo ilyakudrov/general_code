@@ -3,14 +3,14 @@
 
 #include "link.h"
 
-int test(link1 l, double* J);
+int test(link1<matrix> l, double* J);
 
 class loop {
   public:
-    link1 node;
+    link1<matrix> node;
     loop* link[7];
-  
-    loop(const link1 n1);
+
+    loop(const link1<matrix> n1);
     loop();
     loop(const loop& l);
 

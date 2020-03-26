@@ -36,23 +36,41 @@
 #include "observables.h"
 #include "link.h"
 
-double plaket_time(const data& conf){
-	link1 link(x_size, y_size, z_size, t_size);
+template<typename T>
+double plaket_time(const vector<T>& array){
+	link1<T> link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
     for (int dir = 1; dir < 4; dir++) {
         link.move_dir(dir);
 		SPACE_ITER_START;
         link.go(x, y, z, t);
-        res.array.push_back(link.plaket(conf).tr());
+        res.array.push_back(link.plaket(array).tr());
 		SPACE_ITER_END;
     }
     res.average(aver);
     return aver[0];
 }
 
-double plaket_space(const data& conf){
-	link1 link(x_size, y_size, z_size, t_size);
+template<>
+double plaket_time(const vector<double>& array){
+	link1<double> link(x_size, y_size, z_size, t_size);
+	result res(0);
+  	double aver[2];
+    for (int dir = 1; dir < 4; dir++) {
+        link.move_dir(dir);
+		SPACE_ITER_START;
+        link.go(x, y, z, t);
+        res.array.push_back(link.plaket(array));
+		SPACE_ITER_END;
+    }
+    res.average(aver);
+    return aver[0];
+}
+
+template<typename T>
+double plaket_space(const vector<T>& array){
+	link1<T> link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
     SPACE_ITER_START;
@@ -60,7 +78,7 @@ double plaket_space(const data& conf){
     for(int mu = 1;mu < 4;mu++){
         for(int nu = mu + 1;nu < 4;nu++){
             link.move_dir(nu);
-            res.array.push_back(link.plaket_mu(conf, mu).tr());
+            res.array.push_back(link.plaket_mu(array, mu).tr());
         }
     }
     SPACE_ITER_END;
@@ -68,8 +86,27 @@ double plaket_space(const data& conf){
     return aver[0];
 }
 
-double plaket(const data& conf){
-	link1 link(x_size, y_size, z_size, t_size);
+template<>
+double plaket_space(const vector<double>& array){
+	link1<double> link(x_size, y_size, z_size, t_size);
+	result res(0);
+  	double aver[2];
+    SPACE_ITER_START;
+    link.go(x, y, z, t);
+    for(int mu = 1;mu < 4;mu++){
+        for(int nu = mu + 1;nu < 4;nu++){
+            link.move_dir(nu);
+            res.array.push_back(link.plaket_mu(array, mu));
+        }
+    }
+    SPACE_ITER_END;
+    res.average(aver);
+    return aver[0];
+}
+
+template<typename T>
+double plaket(const vector<T>& array){
+	link1<T> link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
     SPACE_ITER_START;
@@ -77,7 +114,7 @@ double plaket(const data& conf){
     for(int mu = 1;mu < 5;mu++){
     	for(int nu = mu + 1;nu < 5;nu++){
     		link.move_dir(nu);
-        	res.array.push_back(link.plaket_mu(conf, mu).tr());
+        	res.array.push_back(link.plaket_mu(array, mu).tr());
         }
     }
     SPACE_ITER_END;
@@ -85,51 +122,69 @@ double plaket(const data& conf){
     return aver[0];
 }
 
-double polyakov(const data& conf){
-	link1 link(x_size, y_size, z_size, t_size);
+template<typename T>
+double polyakov(const vector<T>& array){
+	link1<T> link(x_size, y_size, z_size, t_size);
 	result res(0);
   	double aver[2];
   	link.move_dir(4);
     SPACE_ITER_START;
     link.go(x, y, z, t);
-    res.array.push_back(link.polyakov_loop(conf).tr());
+    res.array.push_back(link.polyakov_loop(array).tr());
     SPACE_ITER_END;
     res.average(aver);
     return aver[0];
 }
 
-double wilson(const data& conf, int R, int T) {
-	link1 link(x_size, y_size, z_size, t_size);
+template<typename T>
+double wilson(const vector<T>& array, int r, int time) {
+	link1<T> link(x_size, y_size, z_size, t_size);
 	result vec(3 * (data_size/4));
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec.array[PLACE1] = link.wilson_loop(conf, R, T).tr();
+		vec.array[PLACE1] = link.wilson_loop(array, r, time).tr();
 	}
 	SPACE_ITER_END;
 	vec.average(aver);
 	return aver[0];
 }
 
-double wilson_abelian(const data& conf, int R, int T/*, double wil[2]*/) {
-	link1 link(x_size, y_size, z_size, t_size);
+template<>
+double wilson<double>(const vector<double>& array, int r, int time) {
+	link1<double> link(x_size, y_size, z_size, t_size);
+	result vec(3 * (data_size/4));
+	double aver[2];
+	for (int dir = 1; dir < 4; dir++) {
+		link.move_dir(dir);
+		SPACE_ITER_START;
+		link.go(x, y, z, t);
+		vec.array[PLACE1] = link.wilson_loop(array, r, time);
+	}
+	SPACE_ITER_END;
+	vec.average(aver);
+	return aver[0];
+}
+
+double wilson_abelian(const vector<matrix>& array, int R, int T/*, double wil[2]*/) {
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	result vec_cos(3 * (data_size/4));
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec_cos.array[PLACE1] = link.wilson_loop_abelian(conf, R, T);
+		vec_cos.array[PLACE1] = link.wilson_loop_abelian(array, R, T);
 	}
 	SPACE_ITER_END;
 	vec_cos.average(aver);
 	return aver[0];
 }
 
-void polyakov_abelian(const data& conf, double pol[2]) {
-	link1 link(x_size, y_size, z_size, t_size);
+void polyakov_abelian(const vector<matrix>& array, double pol[2]) {
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	result vec_cos(data_size/4);
 	result vec_sin(data_size/4);
 	double aver[2];
@@ -137,7 +192,7 @@ void polyakov_abelian(const data& conf, double pol[2]) {
 	link.move_dir(4);
 	SPACE_ITER_START;
 	link.go(x, y, z, t);
-	a = link.polyakov_loop_abelian(conf);
+	a = link.polyakov_loop_abelian(array);
 	vec_cos.array[PLACE_FIELD] = cos(a);
 	vec_sin.array[PLACE_FIELD] = sin(a);
 	SPACE_ITER_END;
@@ -147,21 +202,21 @@ void polyakov_abelian(const data& conf, double pol[2]) {
 	pol[1] = aver[0];
 }
 
-double wilson_dir(const data& conf, int R, int T, int dir) {
-	link1 link(x_size, y_size, z_size, t_size);
+double wilson_dir(const vector<matrix>& array, int R, int T, int dir) {
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	result vec(data_size/4);
 	double aver[2];
 	link.move_dir(dir);
 	SPACE_ITER_START;
 	link.go(x, y, z, t);
-	vec.array[PLACE_FIELD] = link.wilson_loop(conf, R, T).tr()/2;
+	vec.array[PLACE_FIELD] = link.wilson_loop(array, R, T).tr()/2;
 	SPACE_ITER_END;
 	vec.average(aver);
 	return aver[0];
 }
 
 void fields(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, vector<vector<result> >& field1, vector<vector<result> >& field2, vector<result>& field3, int d, int D, int x_trans) {
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
@@ -178,7 +233,7 @@ void fields(const vector<vector<matrix> >& schwinger_line, const vector<matrix>&
 }
 
 void field1_average(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, vector<vector<result> >& field1, int d, int D, int x_trans) {
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
@@ -193,64 +248,77 @@ void field1_average(const vector<vector<matrix> >& schwinger_line, const vector<
 	}
 }
 
-vector<vector<matrix> > calculate_schwinger_line(const data& conf, int d, int x_trans) {
+vector<vector<matrix> > calculate_schwinger_line(const vector<matrix>& array, int d, int x_trans) {
 	vector<vector<matrix> > vec(3, vector<matrix>(data_size));
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
 		for (int nu = 1; nu < 4; nu++) {
-			if (nu != dir) vec[nu - 1][PLACE1] = link.schwinger_line(conf, d, nu, x_trans);
+			if (nu != dir) vec[nu - 1][PLACE1] = link.schwinger_line(array, d, nu, x_trans);
 		}
 		SPACE_ITER_END;
 	}
 	return vec;
 }
 
-vector<matrix> calculate_plaket(const data& conf) {
+vector<matrix> calculate_plaket(const vector<matrix>& array) {
 	vector<matrix> vec(data_size/4*3);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec[PLACE1] = link.plaket(conf);
+		vec[PLACE1] = link.plaket(array);
 		SPACE_ITER_END;
 	}
 	return vec;
 }
 
-vector<double> calculate_plaket_time_tr(const data& conf) {
+vector<double> calculate_plaket_time_tr(const vector<matrix>& array) {
 	vector<double> vec(data_size/4*3);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	SPACE_ITER_START;
 	link.go(x, y, z, t);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		vec[PLACE1] = link.plaket(conf).tr();
+		vec[PLACE1] = link.plaket(array).tr();
 	}
 	SPACE_ITER_END;
 	return vec;
 }
 
-vector<double> calculate_plaket_space_tr(const data& conf) {
+vector<double> calculate_plaket_time_tr(const vector<double>& array) {
 	vector<double> vec(data_size/4*3);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<double> link(x_size, y_size, z_size, t_size);
+	SPACE_ITER_START;
+	link.go(x, y, z, t);
+	for (int dir = 1; dir < 4; dir++) {
+		link.move_dir(dir);
+		vec[PLACE1] = link.plaket(array);
+	}
+	SPACE_ITER_END;
+	return vec;
+}
+
+vector<double> calculate_plaket_space_tr(const vector<matrix>& array) {
+	vector<double> vec(data_size/4*3);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	int place_dir;
 	SPACE_ITER_START;
 	link.go(x, y, z, t);
 	for (int dir = 1; dir < 4; dir++) {
 		for(int j = dir + 1;j < 4;j++){
 			link.move_dir(dir);
-			vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(conf, j).tr();
+			vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(array, j).tr();
 		}
 	}
 	SPACE_ITER_END;
 	return vec;
 }
 
-double plaket4_time_optimized(const vector<double>& plaket_tr, link1& link){
+double plaket4_time_optimized(const vector<double>& plaket_tr, link1<matrix>& link){
 	double a = plaket_tr[PLACE3];
 	link.move(link.direction, -1);
 	a += plaket_tr[PLACE3];
@@ -262,7 +330,7 @@ double plaket4_time_optimized(const vector<double>& plaket_tr, link1& link){
 	return a / 4;
 }
 
-double plaket4_space_optimized(const vector<double>& plaket_tr, link1& link, int nu){
+double plaket4_space_optimized(const vector<double>& plaket_tr, link1<matrix>& link, int nu){
 	double a = plaket_tr[PLACE3_NODIR + link.direction + nu - 2];
 	link.move(link.direction, -1);
 	a += plaket_tr[PLACE3_NODIR + link.direction + nu - 2];
@@ -274,47 +342,60 @@ double plaket4_space_optimized(const vector<double>& plaket_tr, link1& link, int
 	return a / 4;
 }
 
-vector<matrix> calculate_polyakov_loop(const data& conf) {
+vector<matrix> calculate_polyakov_loop(const vector<matrix>& array) {
 	vector<matrix> vec((data_size) / 4);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	int dir = 4;
 	link.move_dir(4);
 	SPACE_ITER_START;
 	link.go(x, y, z, t);
-	vec[PLACE_FIELD] = link.polyakov_loop(conf);
+	vec[PLACE_FIELD] = link.polyakov_loop(array);
 	SPACE_ITER_END;
 	return vec;
 }
 
-vector<matrix> calculate_wilson_loop(const data& conf, int R, int T) {
+vector<matrix> calculate_wilson_loop(const vector<matrix>& array, int R, int T) {
 	vector<matrix> vec(data_size/4*3);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec[PLACE1] = link.wilson_loop(conf, R, T);
+		vec[PLACE1] = link.wilson_loop(array, R, T);
 		SPACE_ITER_END;
 	}
 	return vec;
 }
 
-vector<double> calculate_wilson_loop_tr(const data& conf, int R, int T) {
+vector<double> calculate_wilson_loop_tr(const vector<matrix>& array, int R, int T) {
 	vector<double> vec(data_size/4*3);
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec[PLACE1] = link.wilson_loop(conf, R, T).tr();
+		vec[PLACE1] = link.wilson_loop(array, R, T).tr();
 		SPACE_ITER_END;
 	}
 	return vec;
 }
 
-double polyakov_loop_corelator(const data& conf, int D){
-	vector<matrix> polyakov_loop = calculate_polyakov_loop(conf);
-	link1 link(x_size, y_size, z_size, t_size);
+vector<double> calculate_wilson_loop_tr(const vector<double>& array, int R, int T) {
+	vector<double> vec(data_size/4*3);
+	link1<double> link(x_size, y_size, z_size, t_size);
+	for (int dir = 1; dir < 4; dir++) {
+		link.move_dir(dir);
+		SPACE_ITER_START;
+		link.go(x, y, z, t);
+		vec[PLACE1] = link.wilson_loop(array, R, T);
+		SPACE_ITER_END;
+	}
+	return vec;
+}
+
+double polyakov_loop_corelator(const vector<matrix>& array, int D){
+	vector<matrix> polyakov_loop = calculate_polyakov_loop(array);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	result vec(0);
 	double aver[2];
 	double a;
@@ -332,7 +413,7 @@ double polyakov_loop_corelator(const data& conf, int D){
 }
 
 double plaket_correlator(const vector<matrix>& plaket, int dist) {
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	matrix A;
 	double b;
 	result a(data_size);
@@ -355,7 +436,7 @@ double plaket_correlator(const vector<matrix>& plaket, int dist) {
 }
 
 double plaket_correlator_space(const vector<matrix>& plaket, int dist) {
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	matrix A;
 	double b;
 	result a(6 * (data_size));
@@ -382,7 +463,7 @@ double plaket_correlator_space(const vector<matrix>& plaket, int dist) {
 }
 
 double wilson_plaket_correlator_electric_simple(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir){
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double field = 0;
 	double a;
 	link.move_dir(dir);
@@ -399,8 +480,8 @@ double wilson_plaket_correlator_electric_simple(const data& conf, const vector<d
     return field;
 }
 
-result wilson_plaket_correlator_electric_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
-	link1 link(x_size, y_size, z_size, t_size);
+result wilson_plaket_correlator_electric_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
 	for(int i = 0;i < d_max - d_min + 1;i++){
 		vec[i] = 0;
@@ -413,7 +494,7 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
         link.go(x, y, z, t);
         // link.move_dir(dir);
         a = wilson_loop_tr[PLACE1];
-        link.move(4, T/2);
+        link.move(4, T /2);
 		link.move(dir, d_min);
 		for(int d = d_min;d <= d_max;d++){
 			if(x_trans == 0){
@@ -453,7 +534,7 @@ result wilson_plaket_correlator_electric_optimized(const data& conf, const vecto
 }
 
 result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[x_trans_max - x_trans_min + 1];
 	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
 		vec[i] = 0;
@@ -492,7 +573,7 @@ result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vec
 }
 
 result wilson_plaket_correlator_magnetic_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
 	for(int i = 0;i < d_max - d_min + 1;i++){
 		vec[i] = 0;
@@ -550,9 +631,9 @@ result wilson_plaket_correlator_magnetic_optimized(const data& conf, const vecto
     return final;
 }
 
-result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared, int R, int x_trans, int d_min, int d_max){
-	vector<matrix> polyakov_loop = calculate_polyakov_loop(smeared);
-	link1 link(x_size, y_size, z_size, t_size);
+result polyakov_plaket_correlator_magnetic(const vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max){
+	vector<matrix> polyakov_loop = calculate_polyakov_loop(array_smeared);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	result vec(0);
     result final(0);
     double aver[2];
@@ -574,7 +655,7 @@ result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared
             				for(int j = 1;j < 4;j++){
             					if(j != dir && mu < j){
             						link.move_dir(mu);
-            						vec.array.push_back(a * link.plaket_implement4(conf, j).tr());
+            						vec.array.push_back(a * link.plaket_implement4(array, j).tr());
             					}
             				}
             			}
@@ -585,7 +666,7 @@ result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared
             				for(int j = 1;j < 4;j++){
             					if(j != dir && mu < j){
             						link.move_dir(mu);
-            						vec.array.push_back(a * link.plaket_implement4(conf, j).tr());
+            						vec.array.push_back(a * link.plaket_implement4(array, j).tr());
             					}
             				}
             			}
@@ -603,7 +684,7 @@ result polyakov_plaket_correlator_magnetic(const data& conf, const data& smeared
 }
 
 result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
-	link1 link(x_size, y_size, z_size, t_size);
+	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[x_trans_max - x_trans_min + 1];
 	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
 		vec[i] = 0;
@@ -651,7 +732,7 @@ result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vec
 
 //monopoles
 
-void length(loop* ll, int& ss1){
+/*void length(loop* ll, int& ss1){
     if(ll->link[0]==NULL) return ;
     int i=0;
     int Dir=0;
@@ -844,4 +925,14 @@ double charge_difference(vector<loop*>& t_clusters_1){
 		if(t_length < 0) count2++;
 	}
 	return (double)(count1 - count2);
-}
+}*/
+
+template double plaket_time<matrix>(const vector<matrix>& array);
+template double plaket_time<double>(const vector<double>& array);
+template double plaket_space(const vector<matrix>& array);
+template double plaket(const vector<matrix>& array);
+template double wilson(const vector<matrix>& array, int r, int t);
+template double wilson(const vector<double>& array, int r, int t);
+template double polyakov(const vector<matrix>& array);
+// template vector<double> calculate_plaket_time_tr(const vector<matrix>& array);
+// template vector<double> calculate_plaket_time_tr(const vector<double>& array);
