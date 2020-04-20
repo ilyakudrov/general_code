@@ -61,7 +61,7 @@ double plaket_time(const vector<double>& array){
         link.move_dir(dir);
 		SPACE_ITER_START;
         link.go(x, y, z, t);
-        res.array.push_back(link.plaket(array));
+        res.array.push_back(link.plaket_mu(array, 4));
 		SPACE_ITER_END;
     }
     res.average(aver);
@@ -155,13 +155,13 @@ double wilson(const vector<T>& array, int r, int time) {
 template<>
 double wilson<double>(const vector<double>& array, int r, int time) {
 	link1<double> link(x_size, y_size, z_size, t_size);
-	result vec(3 * (data_size/4));
+	result vec(0);
 	double aver[2];
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
 		SPACE_ITER_START;
 		link.go(x, y, z, t);
-		vec.array[PLACE1] = link.wilson_loop(array, r, time);
+		vec.array.push_back(link.wilson_loop(array, r, time));
 	}
 	SPACE_ITER_END;
 	vec.average(aver);

@@ -402,7 +402,7 @@ T link1<T>::wilson_loop(const vector<T>& array, int r, int t) {
 template<>
 double link1<double>::wilson_loop(const vector<double>& array, int r, int t) {
 	int dir = direction;
-	double A;
+	double A = 0;
 	for (int i = 0; i < r; i++) {
 		A = A + get_matrix(array);
 		move(dir, 1);

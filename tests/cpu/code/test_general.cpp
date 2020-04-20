@@ -19,11 +19,9 @@ int z_size = 32;
 int t_size = 32;
 
 int main(int argc, char* argv[]) {
-    /*x_size = atof(argv[1]);
-    y_size = atof(argv[2]);
-    z_size = atof(argv[3]);
-    t_size = atof(argv[4]);*/
-
+	unsigned int start_time;
+	unsigned int end_time;
+    unsigned int search_time;
     link1<matrix> link(x_size, y_size, z_size, t_size);
 	data_matrix conf;
 	data_double conf_abelian;
@@ -31,7 +29,18 @@ int main(int argc, char* argv[]) {
 	char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
 	conf.read_float(path1);
 	conf_abelian.read_float_fortran(path_abelian);
-	cout<<wilson(conf_abelian.array, 10, 6)<<endl;
+	link1<double> link_abelian;
+	link_abelian.go(0, 0, 0, 0);
+	link_abelian.move_dir(1);
+	cout<<link_abelian.plaket_mu(conf_abelian.array, -4)<<endl;
+	link_abelian.go(0, 0, 0, 0);
+	link_abelian.move_dir(1);
+	cout<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
+	start_time =  clock();
+	cout<<"wilson_abelian aver "<<wilson(conf_abelian.array, 1, 1)<<endl;
+	end_time = clock();
+    search_time = end_time - start_time;
+    cout<<"wilson time: "<<search_time*1./CLOCKS_PER_SEC<<endl;
 	cout<<plaket_time(conf_abelian.array)<<endl;
 	cout<<plaket_space(conf_abelian.array)<<endl;
 	result res_plaket;
@@ -50,7 +59,7 @@ int main(int argc, char* argv[]) {
 
 
 	cout.precision(10);
-	unsigned int start_time =  clock();
+	start_time =  clock();
 
 	cout<<"test plaket "<<plaket(conf.array)/2<<" right: 0.6769540066"<<endl;
 	cout<<"test plaket_time "<<plaket_time(conf.array)/2<<" right: 0.6770628794"<<endl;
@@ -58,7 +67,7 @@ int main(int argc, char* argv[]) {
 	cout<<"test polyakov_loop "<<polyakov(conf.array)/2<<" right: -0.004586235468"<<endl;
 	cout<<"test wilson_loop_R=10_T=6 "<<wilson(conf.array, 10, 6)<<" right: 0.001178588784"<<endl;
 
-	unsigned int end_time = clock();
-    unsigned int search_time = end_time - start_time;
+	end_time = clock();
+    search_time = end_time - start_time;
     cout<<"working time: "<<search_time*1./CLOCKS_PER_SEC<<endl;
 }
