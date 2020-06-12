@@ -8,9 +8,9 @@ matrix::matrix(const matrix& M) { a0=M.a0; a1=M.a1; a2=M.a2; a3=M.a3; }
 matrix::matrix() {a0 = 1; a1 = 0; a2 = 0; a3 = 0;}
 
 double matrix::tr() {return 2*a0; }
-void matrix::inverse() { 
+void matrix::inverse() {
 	double rho=a0*a0+a1*a1+a2*a2+a3*a3;
-	a0=a0/rho; a1=-a1/rho; a2=-a2/rho; a3=-a3/rho; 
+	a0=a0/rho; a1=-a1/rho; a2=-a2/rho; a3=-a3/rho;
 }
 matrix matrix::conj() {
 	return matrix(a0, -a1, -a2, -a3);
@@ -33,3 +33,8 @@ matrix operator* (matrix A, matrix B) {
 		A.a0*B.a1+B.a0*A.a1+A.a3*B.a2-A.a2*B.a3,
 		A.a0*B.a2+B.a0*A.a2+A.a1*B.a3-A.a3*B.a1,
 		A.a0*B.a3+B.a0*A.a3+A.a2*B.a1-A.a1*B.a2); };
+
+ostream& operator<<(ostream& os, const matrix& A){
+	os<<"a0 = "<<A.a0<<" "<<"a0 = "<<A.a1<<" "<<"a0 = "<<A.a2<<" "<<"a0 = "<<A.a3<<" "<<endl;
+	return os;
+}

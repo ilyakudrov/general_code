@@ -262,6 +262,24 @@ T link1<T>::plaket(const vector<T>& array) {
 	return A;
 }
 
+template<>
+double link1<double>::plaket(const vector<double>& array) {
+	int dir = direction;
+	double A = get_matrix(array);
+	move(dir, 1);
+	move_dir(-4);//the same temporal direction as polyakov loop, connected to schwinger line, has
+	A = A + get_matrix(array);
+	move(-4, 1);
+	move_dir(-dir);
+	A = A + get_matrix(array);
+	move(-dir, 1);
+	move_dir(4);
+	A = A + get_matrix(array);
+	move(4, 1);
+	move_dir(dir);
+	return cos(A);
+}
+
 template<typename T>
 T link1<T>::plaket_mu(const vector<T>& array, int mu) {
 	int dir = direction;

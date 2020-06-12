@@ -32,10 +32,13 @@ int main(int argc, char* argv[]) {
 	link1<double> link_abelian;
 	link_abelian.go(0, 0, 0, 0);
 	link_abelian.move_dir(1);
-	cout<<link_abelian.plaket_mu(conf_abelian.array, -4)<<endl;
+	cout<<"first plaket "<<link_abelian.plaket_mu(conf_abelian.array, -4)<<endl;
 	link_abelian.go(0, 0, 0, 0);
 	link_abelian.move_dir(1);
-	cout<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
+	cout<<"first plaket "<<link_abelian.plaket(conf_abelian.array)<<endl;
+	link_abelian.go(0, 0, 0, 0);
+	link_abelian.move_dir(1);
+	cout<<"first wilson "<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
 	start_time =  clock();
 	cout<<"wilson_abelian aver "<<wilson(conf_abelian.array, 1, 1)<<endl;
 	end_time = clock();
@@ -43,18 +46,29 @@ int main(int argc, char* argv[]) {
     cout<<"wilson time: "<<search_time*1./CLOCKS_PER_SEC<<endl;
 	cout<<plaket_time(conf_abelian.array)<<endl;
 	cout<<plaket_space(conf_abelian.array)<<endl;
+
+	int R = 1;
+	int T = 1;
 	result res_plaket;
 	result res_wilson;
 	result res_correlator;
 	res_plaket.array = calculate_plaket_time_tr(conf_abelian.array);
-	res_wilson.array = calculate_plaket_time_tr(conf_abelian.array);
-	int d_min = 0;
-	int d_max = 0;
+	res_wilson.array = calculate_wilson_loop_tr(conf_abelian.array, R, T);
+	double aver[2];
+	res_plaket.average(aver);
+	cout<<"plaket time first "<<res_plaket.array[0]<<endl;
+	cout<<"plaket_time aver "<<aver[0]<<endl;
+	res_wilson.average(aver);
+	cout<<"wilson first "<<res_wilson.array[0]<<endl;
+	cout<<"wilson aver "<<aver[0]<<endl;
+
+	int d_min = -10;
+	int d_max = 10;
 	int x_trans = 0;
-	int R = 10;
-	int T = 6;
 	res_correlator = wilson_plaket_correlator_electric_optimized(res_wilson.array, res_plaket.array, R, T, x_trans, d_min, d_max);
-	cout<<res_correlator.array[0]<<endl;
+	// for(int i = 0;i < res_correlator.array.size();i++){
+	// 	cout<<res_correlator.array[i]<<endl;
+	// }
 
 
 

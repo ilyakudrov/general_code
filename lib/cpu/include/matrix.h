@@ -3,6 +3,9 @@
 #define __MATRIX_H__
 
 //#include <math>
+#include <iostream>
+
+using namespace std;
 
 class matrix {
 	public:
@@ -25,4 +28,6 @@ matrix operator- (matrix A, matrix B);
 matrix operator* (double x, matrix A);
 matrix operator* (matrix A, double x);
 matrix operator* (matrix A, matrix B);
+
+ostream& operator<<(ostream& os, const matrix& A);
 #endif

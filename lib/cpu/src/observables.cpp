@@ -283,7 +283,7 @@ vector<double> calculate_plaket_time_tr(const vector<matrix>& array) {
 	link.go(x, y, z, t);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		vec[PLACE1] = link.plaket(array).tr();
+		vec[PLACE1] = link.plaket_mu(array, -4).tr();
 	}
 	SPACE_ITER_END;
 	return vec;
@@ -296,7 +296,7 @@ vector<double> calculate_plaket_time_tr(const vector<double>& array) {
 	link.go(x, y, z, t);
 	for (int dir = 1; dir < 4; dir++) {
 		link.move_dir(dir);
-		vec[PLACE1] = link.plaket(array);
+		vec[PLACE1] = link.plaket_mu(array, -4);
 	}
 	SPACE_ITER_END;
 	return vec;
