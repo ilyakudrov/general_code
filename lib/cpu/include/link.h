@@ -63,17 +63,20 @@ class link1 {
 	//denominator
 	double field3(const vector<matrix>& polyakov_loop, int D, int x);//attached to the "left" source and points to another
 	matrix staples_first(const vector<matrix>& vec, int eta);
+	void staples_first(const vector<double>& array, int eta, double& beta, double& r);
 	matrix staples_second(const vector<vector<matrix> >& smearing_first, int eta, int nu);
+	void staples_second(const vector<vector<double> >& smearing_first, int eta, int nu, double& beta, double& r);
 	matrix staples_second_refresh(const vector<matrix>& vec, int eta, int nu, double alpha3);//staples for refreshing algorythm(refresh link every step)
 	matrix staples_third(const vector<vector<matrix> >& smearing_second, int eta);
+	void staples_third(const vector<vector<double> >& smearing_second, int eta, double& beta, double& r);
 	matrix staples_third_refresh(const vector<matrix>& vec, int eta, double alpha2, double alpha3);
-	vector<matrix> smearing_first(const data_matrix& conf, double alpha3, int nu, int rho);
-	vector<vector<matrix> > smearing_first_full(const data_matrix& conf, double alpha3);
-	vector<matrix> smearing_second(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu);
-	vector<vector<matrix> > smearing_second_full(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2);
-	vector<matrix> smearing_HYP(data_matrix& conf, vector<vector<matrix> >& smearing_second, double alpha1);
+	vector<T> smearing_first(const vector<T>& array, double alpha3, int nu, int rho);
+	vector<vector<T> > smearing_first_full(const vector<T>& array, double alpha3);
+	vector<T> smearing_second(const vector<T>& array, vector<vector<T> >& smearing_first, double alpha2, int nu);
+	vector<vector<T> > smearing_second_full(const vector<T>& array, vector<vector<T> >& smearing_first, double alpha2);
+	vector<T> smearing_HYP(const vector<T>& array, vector<vector<T> >& smearing_second, double alpha1);
 	inline int position_first(int a, int b);
-	vector<matrix> smearing_APE(data_matrix& conf, double alpha_APE);
+	vector<T> smearing_APE(const vector<T>& array, double alpha_APE);
 	matrix smearing_first_refresh(const vector<matrix>& vec, int nu, int rho, double alpha3);//refresh link every step
 	matrix smearing_second_refresh(const vector<matrix>& vec, int nu,  double alpha2, double alpha3);//refresh link every step
 	vector<matrix> smearing_HYP_refresh(data_matrix& conf, double alpha1, double alpha2, double alpha3);//refresh link every step

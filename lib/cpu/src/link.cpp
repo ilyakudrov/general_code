@@ -1,5 +1,6 @@
 #include "link.h"
 #include "data.h"
+#include <cmath>
 
 # define Pi 3.141592653589793238462643383279502884
 #define data_size 4*lattice_size[0]*lattice_size[1]*lattice_size[2]*lattice_size[3]
@@ -552,6 +553,35 @@ matrix link1<T>::staples_first(const vector<matrix>& vec, int eta) {
 }
 
 template<typename T>
+void link1<T>::staples_first(const vector<double>& array, int eta, double& beta, double& r){
+	double phi1, phi2;
+	int dir = direction;
+	move_dir(eta);
+	phi1 = get_matrix(array);
+	move(eta, 1);
+	move_dir(dir);
+	phi1 = phi1 + get_matrix(array);
+	move(dir, 1);
+	move_dir(-eta);
+	phi1 = phi1 + get_matrix(array);
+	move(-eta, 1);
+	move(-dir, 1);
+	phi2 = get_matrix(array);
+	move(-eta, 1);
+	move_dir(dir);
+	phi2 = phi2 + get_matrix(array);
+	move(dir, 1);
+	move_dir(eta);
+	phi2 = phi2 + get_matrix(array);
+	move(eta, 1);
+	move(-dir, 1);
+	move_dir(dir);
+	beta = atan2(sin(phi1) + sin(phi2), cos(phi1) + cos(phi2));
+	r = sqrt((sin(phi1) + sin(phi2)) * (sin(phi1) + sin(phi2)) +
+		(cos(phi1) + cos(phi2)) * (cos(phi1) + cos(phi2)));
+}
+
+template<typename T>
 matrix link1<T>::staples_second(const vector<vector<matrix> >& smearing_first, int eta, int nu) {
 	matrix A;
 	matrix B;
@@ -577,6 +607,35 @@ matrix link1<T>::staples_second(const vector<vector<matrix> >& smearing_first, i
 	move(-dir, 1);
 	move_dir(dir);
 	return (A + B);
+}
+
+template<typename T>
+void link1<T>::staples_second(const vector<vector<double> >& smearing_first, int eta, int nu, double& beta, double& r) {
+	double phi1, phi2;
+	int dir = direction;
+	move_dir(eta);
+	phi1 = get_matrix(smearing_first[position_first(nu, dir)]);
+	move(eta, 1);
+	move_dir(dir);
+	phi1 = phi1 + get_matrix(smearing_first[position_first(nu, eta)]);
+	move(dir, 1);
+	move_dir(-eta);
+	phi1 = phi1 + get_matrix(smearing_first[position_first(nu, dir)]);
+	move(-eta, 1);
+	move(-dir, 1);
+	phi2 = get_matrix(smearing_first[position_first(nu, dir)]);
+	move(-eta, 1);
+	move_dir(dir);
+	phi2 = phi2 + get_matrix(smearing_first[position_first(nu, eta)]);
+	move(dir, 1);
+	move_dir(eta);
+	phi2 = phi2 + get_matrix(smearing_first[position_first(nu, dir)]);
+	move(eta, 1);
+	move(-dir, 1);
+	move_dir(dir);
+	beta = atan2(sin(phi1) + sin(phi2), cos(phi1) + cos(phi2));
+	r = sqrt((sin(phi1) + sin(phi2)) * (sin(phi1) + sin(phi2)) +
+		(cos(phi1) + cos(phi2)) * (cos(phi1) + cos(phi2)));
 }
 
 template<typename T>
@@ -636,6 +695,35 @@ matrix link1<T>::staples_third(const vector<vector<matrix> >& smearing_second, i
 }
 
 template<typename T>
+void link1<T>::staples_third(const vector<vector<double> >& smearing_second, int eta, double& beta, double& r) {
+	double phi1, phi2;
+	int dir = direction;
+	move_dir(eta);
+	phi1 = get_matrix(smearing_second[dir - 1]);
+	move(eta, 1);
+	move_dir(dir);
+	phi1 = phi1 + get_matrix(smearing_second[eta - 1]);
+	move(dir, 1);
+	move_dir(-eta);
+	phi1 = phi1 + get_matrix(smearing_second[dir - 1]);
+	move(-eta, 1);
+	move(-dir, 1);
+	phi2 = get_matrix(smearing_second[dir - 1]);
+	move(-eta, 1);
+	move_dir(dir);
+	phi2 = phi2 + get_matrix(smearing_second[eta - 1]);
+	move(dir, 1);
+	move_dir(eta);
+	phi2 = phi2 + get_matrix(smearing_second[dir - 1]);
+	move(eta, 1);
+	move(-dir, 1);
+	move_dir(dir);
+	beta = atan2(sin(phi1) + sin(phi2), cos(phi1) + cos(phi2));
+	r = sqrt((sin(phi1) + sin(phi2)) * (sin(phi1) + sin(phi2)) +
+		(cos(phi1) + cos(phi2)) * (cos(phi1) + cos(phi2)));
+}
+
+template<typename T>
 matrix link1<T>::staples_third_refresh(const vector<matrix>& vec, int eta, double alpha2, double alpha3) {
 	matrix A;
 	matrix B;
@@ -664,9 +752,8 @@ matrix link1<T>::staples_third_refresh(const vector<matrix>& vec, int eta, doubl
 }
 
 template<typename T>
-vector<matrix> link1<T>::smearing_first(const data_matrix& conf, double alpha3, int nu, int rho) {
+vector<T> link1<T>::smearing_first(const vector<T>& array, double alpha3, int nu, int rho) {
 	vector<matrix> vec(data_size);
-	matrix A;
 	for (int t = 0; t < t_size; t++) {
 		for (int z = 0; z < z_size; z++) {
 			for (int y = 0; y < y_size; y++) {
@@ -675,11 +762,11 @@ vector<matrix> link1<T>::smearing_first(const data_matrix& conf, double alpha3, 
 					for (int i = 1; i < 5; i++) {
 						if (i != abs(nu) && i != abs(rho)) {
 							move_dir(i);
-							vec[PLACE1_LINK] = (1 - alpha3)*get_matrix(conf.array);
+							vec[PLACE1_LINK] = (1 - alpha3)*get_matrix(array);
 							for (int d = 1; d < 5; d++) {
 								if (d != abs(nu) && d != abs(rho) && d != i) {
 									vec[PLACE1_LINK] = vec[PLACE1_LINK]
-									+ alpha3 / 2. * staples_first(conf.array, d);
+									+ alpha3 / 2. * staples_first(array, d);
 								}
 							}
 							vec[PLACE1_LINK].proj();
@@ -692,21 +779,75 @@ vector<matrix> link1<T>::smearing_first(const data_matrix& conf, double alpha3, 
 	return vec;
 }
 
+template<>
+vector<double> link1<double>::smearing_first(const vector<double>& array, double alpha3, int nu, int rho) {
+	vector<double> vec(data_size);
+	double r, r1, beta, phi;
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
+					go(x, y, z, t);
+					for (int i = 1; i < 5; i++) {
+						if (i != abs(nu) && i != abs(rho)) {
+							move_dir(i);
+							r = 1 - alpha3;
+							beta = get_matrix(array);
+							for (int d = 1; d < 5; d++) {
+									if (d != abs(nu) && d != abs(rho) && d != i) {
+									staples_first(array, d, phi, r1);
+									beta = atan2(r * sin(beta) + (alpha3 / 2.) * r1 * sin(phi),
+										r * cos(beta) + (alpha3 / 2.) * r1 * cos(phi));
+									r = sqrt((r * sin(beta) + (alpha3 / 2.) * r1 * sin(phi)) *
+										(r * sin(beta) + (alpha3 / 2.) * r1 * sin(phi)) +
+										(r * cos(beta) + (alpha3 / 2.) * r1 * cos(phi)) *
+										(r * cos(beta) + (alpha3 / 2.) * r1 * cos(phi)));
+								}
+							}
+							vec[PLACE1_LINK] = beta;
+
+							/*vec[PLACE1_LINK] = (1 - alpha3)*get_matrix(array);
+							for (int d = 1; d < 5; d++) {
+								if (d != abs(nu) && d != abs(rho) && d != i) {
+									vec[PLACE1_LINK] = vec[PLACE1_LINK]
+									+ alpha3 / 2. * staples_first(conf.array, d);
+								}
+							}
+							vec[PLACE1_LINK].proj();*/
+						}
+					}
+				}
+			}
+		}
+	}
+	return vec;
+}
+
 template<typename T>
-vector<vector<matrix> > link1<T>::smearing_first_full(const data_matrix& conf, double alpha3) {
+vector<vector<T> > link1<T>::smearing_first_full(const vector<T>& array, double alpha3) {
 	vector<vector<matrix> > smearing(6, vector<matrix>(data_size));
 	for (int i = 1; i < 4; i++) {
 		for (int j = i + 1; j < 5; j++) {
-			smearing[position_first(i, j)] = smearing_first(conf, alpha3, i, j);
+			smearing[position_first(i, j)] = smearing_first(array, alpha3, i, j);
+		}
+	}
+	return smearing;
+}
+
+template<>
+vector<vector<double> > link1<double>::smearing_first_full(const vector<double>& array, double alpha3) {
+	vector<vector<double> > smearing(6, vector<double>(data_size));
+	for (int i = 1; i < 4; i++) {
+		for (int j = i + 1; j < 5; j++) {
+			smearing[position_first(i, j)] = smearing_first(array, alpha3, i, j);
 		}
 	}
 	return smearing;
 }
 
 template<typename T>
-vector<matrix> link1<T>::smearing_second(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2, int nu) {
+vector<T> link1<T>::smearing_second(const vector<T>& array, vector<vector<T> >& smearing_first, double alpha2, int nu) {
 	vector<matrix> vec(data_size);
-	matrix A;
 	for (int t = 0; t < t_size; t++) {
 		for (int z = 0; z < z_size; z++) {
 			for (int y = 0; y < y_size; y++) {
@@ -715,7 +856,7 @@ vector<matrix> link1<T>::smearing_second(const data_matrix& conf, vector<vector<
 					for (int i = 1; i < 5; i++) {
 						if (i != abs(nu)) {
 							move_dir(i);
-							vec[PLACE1_LINK] = (1 - alpha2)*get_matrix(conf.array);
+							vec[PLACE1_LINK] = (1 - alpha2)*get_matrix(array);
 							for (int d = 1; d < 5; d++) {
 								if (d != abs(nu) && d != i) {
 									vec[PLACE1_LINK] = vec[PLACE1_LINK]
@@ -732,27 +873,69 @@ vector<matrix> link1<T>::smearing_second(const data_matrix& conf, vector<vector<
 	return vec;
 }
 
+template<>
+vector<double> link1<double>::smearing_second(const vector<double>& array, vector<vector<double> >& smearing_first, double alpha2, int nu) {
+	vector<double> vec(data_size);
+	double r, r1, beta, phi;
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
+					go(x, y, z, t);
+					for (int i = 1; i < 5; i++) {
+						if (i != abs(nu)) {
+							move_dir(i);
+							r = 1 - alpha2;
+							beta = get_matrix(array);
+							for (int d = 1; d < 5; d++) {
+								if (d != abs(nu) && d != i) {
+									staples_second(smearing_first, d, nu, phi, r1);
+									beta = atan2(r * sin(beta) + (alpha2 / 4.) * r1 * sin(phi),
+										r * cos(beta) + (alpha2 / 4.) * r1 * cos(phi));
+									r = sqrt((r * sin(beta) + (alpha2 / 4.) * r1 * sin(phi)) *
+										(r * sin(beta) + (alpha2 / 4.) * r1 * sin(phi)) +
+										(r * cos(beta) + (alpha2 / 4.) * r1 * cos(phi)) *
+										(r * cos(beta) + (alpha2 / 4.) * r1 * cos(phi)));
+								}
+							}
+							vec[PLACE1_LINK] = beta;
+						}
+					}
+				}
+			}
+		}
+	}
+	return vec;
+}
+
 template<typename T>
-vector<vector<matrix> > link1<T>::smearing_second_full(const data_matrix& conf, vector<vector<matrix> >& smearing_first, double alpha2) {
+vector<vector<T> > link1<T>::smearing_second_full(const vector<T>& array, vector<vector<T> >& smearing_first, double alpha2) {
 	vector<vector<matrix> > smearing(4, vector<matrix>(data_size));
 	for (int i = 1; i < 5; i++) {
-		smearing[i - 1] = smearing_second(conf, smearing_first, alpha2, i);
+		smearing[i - 1] = smearing_second(array, smearing_first, alpha2, i);
+	}
+	return smearing;
+}
+
+template<>
+vector<vector<double> > link1<double>::smearing_second_full(const vector<double>& array, vector<vector<double> >& smearing_first, double alpha2) {
+	vector<vector<double> > smearing(4, vector<double>(data_size));
+	for (int i = 1; i < 5; i++) {
+		smearing[i - 1] = smearing_second(array, smearing_first, alpha2, i);
 	}
 	return smearing;
 }
 
 template<typename T>
-vector<matrix> link1<T>::smearing_HYP(data_matrix& conf, vector<vector<matrix> >& smearing_second, double alpha1) {
-	vector<matrix> vec(data_size);
-	matrix A;
-	matrix B;
+vector<T> link1<T>::smearing_HYP(const vector<T>& array, vector<vector<T> >& smearing_second, double alpha1) {
+	vector<T> vec(data_size);
 	move_dir(4);
 	for (int t = 0; t < t_size; t++) {
 		for (int z = 0; z < z_size; z++) {
 			for (int y = 0; y < y_size; y++) {
 				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
-					vec[PLACE1_LINK] = (1 - alpha1)*get_matrix(conf.array);
+					vec[PLACE1_LINK] = (1 - alpha1)*get_matrix(array);
 					for (int d = 1; d < 4; d++) {
 						vec[PLACE1_LINK] = vec[PLACE1_LINK]
 						+ alpha1 / 6. * staples_third(smearing_second, d);
@@ -769,7 +952,56 @@ vector<matrix> link1<T>::smearing_HYP(data_matrix& conf, vector<vector<matrix> >
 				for (int y = 0; y < y_size; y++) {
 					for (int x = 0; x < x_size; x++) {
 						go(x, y, z, t);
-						vec[PLACE1_LINK] = conf.array[PLACE1_LINK];
+						vec[PLACE1_LINK] = array[PLACE1_LINK];
+					}
+				}
+			}
+		}
+	}
+	return vec;
+}
+
+template<>
+vector<double> link1<double>::smearing_HYP(const vector<double>& array, vector<vector<double> >& smearing_second, double alpha1) {
+	vector<double> vec(data_size);
+	double r, r1, beta, phi;
+	move_dir(4);
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
+					go(x, y, z, t);
+					r = 1 - alpha1;
+					beta = get_matrix(array);
+					for (int d = 1; d < 4; d++) {
+						staples_third(smearing_second, d, phi, r1);
+						beta = atan2(r * sin(beta) + (alpha1 / 6.) * r1 * sin(phi),
+							r * cos(beta) + (alpha1 / 6.) * r1 * cos(phi));
+						r = sqrt((r * sin(beta) + (alpha1 / 6.) * r1 * sin(phi)) *
+							(r * sin(beta) + (alpha1 / 6.) * r1 * sin(phi)) +
+							(r * cos(beta) + (alpha1 / 6.) * r1 * cos(phi)) *
+							(r * cos(beta) + (alpha1 / 6.) * r1 * cos(phi)));
+					}
+					vec[PLACE1_LINK] = beta;
+
+					/*vec[PLACE1_LINK] = (1 - alpha1)*get_matrix(array);
+					for (int d = 1; d < 4; d++) {
+						vec[PLACE1_LINK] = vec[PLACE1_LINK]
+						+ alpha1 / 6. * staples_third(smearing_second, d);
+					}
+					vec[PLACE1_LINK].proj();*/
+				}
+			}
+		}
+	}
+	for (int d = 1; d < 4; d++) {
+		move_dir(d);
+		for (int t = 0; t < t_size; t++) {
+			for (int z = 0; z < z_size; z++) {
+				for (int y = 0; y < y_size; y++) {
+					for (int x = 0; x < x_size; x++) {
+						go(x, y, z, t);
+						vec[PLACE1_LINK] = array[PLACE1_LINK];
 					}
 				}
 			}
@@ -795,8 +1027,8 @@ int link1<T>::position_first(int a, int b) {
 }
 
 template<typename T>
-vector<matrix> link1<T>::smearing_APE(data_matrix& conf, double alpha_APE) {
-	vector<matrix> vec(data_size);
+vector<T> link1<T>::smearing_APE(const vector<T>& array, double alpha_APE) {
+	vector<T> vec(data_size);
 	for (int t = 0; t < t_size; t++) {
 		for (int z = 0; z < z_size; z++) {
 			for (int y = 0; y < y_size; y++) {
@@ -804,11 +1036,11 @@ vector<matrix> link1<T>::smearing_APE(data_matrix& conf, double alpha_APE) {
 					go(x, y, z, t);
 					for (int i = 1; i < 4; i++) {
 						move_dir(i);
-						vec[PLACE1_LINK] = (1 - alpha_APE) * conf.array[PLACE1_LINK];
+						vec[PLACE1_LINK] = (1 - alpha_APE) * array[PLACE1_LINK];
 						for (int d = 1; d < 4; d++) {
 							if (d != i) vec[PLACE1_LINK]  =
 								vec[PLACE1_LINK]
-								+ (alpha_APE / 6.)  * staples_first(conf.array, d);
+								+ (alpha_APE / 6.)  * staples_first(array, d);
 						}
 						vec[PLACE1_LINK].proj();
 					}
@@ -822,7 +1054,51 @@ vector<matrix> link1<T>::smearing_APE(data_matrix& conf, double alpha_APE) {
 			for (int y = 0; y < y_size; y++) {
 				for (int x = 0; x < x_size; x++) {
 					go(x, y, z, t);
-					vec[PLACE1_LINK] = conf.array[PLACE1_LINK];
+					vec[PLACE1_LINK] = array[PLACE1_LINK];
+				}
+			}
+		}
+	}
+	return vec;
+}
+
+template<>
+vector<double> link1<double>::smearing_APE(const vector<double>& array, double alpha_APE) {
+	vector<double> vec(data_size);
+	double r, r1, beta, phi;
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
+					go(x, y, z, t);
+					for (int i = 1; i < 4; i++) {
+						move_dir(i);
+						r = 1 - alpha_APE;
+						beta = array[PLACE1_LINK];
+						for (int d = 1; d < 4; d++) {
+							if (d != i){
+								staples_first(array, d, phi, r1);
+								beta = atan2(r * sin(beta) + (alpha_APE / 6.) * r1 * sin(phi),
+									r * cos(beta) + (alpha_APE / 6.) * r1 * cos(phi));
+								r = sqrt((r * sin(beta) + (alpha_APE / 6.) * r1 * sin(phi)) *
+									(r * sin(beta) + (alpha_APE / 6.) * r1 * sin(phi)) +
+									(r * cos(beta) + (alpha_APE / 6.) * r1 * cos(phi)) *
+									(r * cos(beta) + (alpha_APE / 6.) * r1 * cos(phi)));
+							}
+						}
+						vec[PLACE1_LINK] = beta;
+					}
+				}
+			}
+		}
+	}
+	move_dir(4);
+	for (int t = 0; t < t_size; t++) {
+		for (int z = 0; z < z_size; z++) {
+			for (int y = 0; y < y_size; y++) {
+				for (int x = 0; x < x_size; x++) {
+					go(x, y, z, t);
+					vec[PLACE1_LINK] = array[PLACE1_LINK];
 				}
 			}
 		}

@@ -29,15 +29,6 @@ int main(int argc, char* argv[]) {
 	char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
 	conf.read_float(path1);
 	conf_abelian.read_float_fortran(path_abelian);
-	link1<double> link_abelian;
-	link_abelian.go(0, 0, 0, 0);
-	link_abelian.move_dir(1);
-	cout<<"first plaket "<<link_abelian.plaket_mu(conf_abelian.array, -4)<<endl;
-	link_abelian.go(0, 0, 0, 0);
-	link_abelian.move_dir(1);
-	cout<<"first plaket "<<link_abelian.plaket(conf_abelian.array)<<endl;
-	link_abelian.go(0, 0, 0, 0);
-	link_abelian.move_dir(1);
 	cout<<"first wilson "<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
 	start_time =  clock();
 	cout<<"wilson_abelian aver "<<wilson(conf_abelian.array, 1, 1)<<endl;

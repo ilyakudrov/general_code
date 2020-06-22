@@ -29,19 +29,44 @@ int main(int argc, char* argv[]) {
     vector<vector<matrix> > smearing_second(4, vector<matrix>(1));
 
     link1<matrix> link(x_size, y_size, z_size, t_size);
+	link1<double> link_double(x_size, y_size, z_size, t_size);
 	data_matrix conf;
 	data_matrix smeared;
+	data_double conf_abelian;
+	data_double conf_abelian_smeared;
 	char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+	char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
 	conf.read_float(path1);
+	conf_abelian.read_float_fortran(path_abelian);
 	double aver[2];
 
 	cout.precision(10);
 	matrix A;
 	unsigned int start_time =  clock();
 
-	smearing_first = link.smearing_first_full(conf, alpha3);
-	smearing_second = link.smearing_second_full(conf, smearing_first, alpha2);
-	smeared.array = link.smearing_HYP(conf, smearing_second, alpha1);
+	conf_abelian_smeared.array = link_double.smearing_APE(conf_abelian.array, alpha_APE);
+
+	for(int i = 0;i < 10;i++){
+		cout<<"smearing_APE_abelian test "<<conf_abelian_smeared.array[i]<<endl;
+	}
+
+	cout<<"wilson_abelian_smeared aver "<<wilson(conf_abelian_smeared.array, 1, 1)<<endl;
+
+	vector<vector<double> > smearing_first_abelian(6, vector<double>(1));
+    vector<vector<double> > smearing_second_abelian(4, vector<double>(1));
+    smearing_first_abelian = link_double.smearing_first_full(conf_abelian.array, alpha3);
+    smearing_second_abelian = link_double.smearing_second_full(conf_abelian.array, smearing_first_abelian, alpha2);
+    conf_abelian_smeared.array = link_double.smearing_HYP(conf_abelian.array, smearing_second_abelian, alpha1);
+
+	for(int i = 0;i < 10;i++){
+		cout<<"smearing_HYP_abelian test "<<conf_abelian_smeared.array[i]<<endl;
+	}
+
+	cout<<"wilson_abelian_smeared aver "<<wilson(conf_abelian_smeared.array, 1, 1)<<endl;
+
+	smearing_first = link.smearing_first_full(conf.array, alpha3);
+	smearing_second = link.smearing_second_full(conf.array, smearing_first, alpha2);
+	smeared.array = link.smearing_HYP(conf.array, smearing_second, alpha1);
 
 	for(int i = 0;i < 4;i++){
 		A = smeared.array[i];
@@ -65,7 +90,7 @@ int main(int argc, char* argv[]) {
 	cout<<"0.174894 0.667862 0.674797 0.260808"<<endl;
 	cout<<"-0.704066 -0.13241 0.453476 -0.530206"<<endl;
 
-	smeared.array = link.smearing_APE(conf, alpha_APE);
+	smeared.array = link.smearing_APE(conf.array, alpha_APE);
 
 	for(int i = 0;i < 4;i++){
 		A = smeared.array[i];
