@@ -31,6 +31,7 @@ vector<matrix> calculate_plaket(vector<matrix>& array);
 vector<double> calculate_plaket_time_tr(const vector<matrix>& array);
 vector<double> calculate_plaket_time_tr(const vector<double>& array);
 vector<double> calculate_plaket_space_tr(const vector<matrix>& array);
+vector<double> calculate_plaket_space_tr(const vector<double>& array);
 double plaket4_time_optimized(const vector<double>& plaket_tr, link1<matrix>& link);
 double plaket4_space_optimized(const vector<double>& plaket_tr, link1<matrix>& link, int nu);
 vector<matrix> calculate_polyakov_loop(const vector<matrix>& array);
