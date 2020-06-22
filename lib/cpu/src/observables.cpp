@@ -588,7 +588,7 @@ result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vec
     return final;
 }
 
-result wilson_plaket_correlator_magnetic_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
+result wilson_plaket_correlator_magnetic_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
 	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
 	for(int i = 0;i < d_max - d_min + 1;i++){

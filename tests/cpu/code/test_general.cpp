@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
 	char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
 	conf.read_float(path1);
 	conf_abelian.read_float_fortran(path_abelian);
+	link1<double> link_abelian(x_size, y_size, z_size, t_size);
 	cout<<"first wilson "<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
 	start_time =  clock();
 	cout<<"wilson_abelian aver "<<wilson(conf_abelian.array, 1, 1)<<endl;
@@ -40,14 +41,17 @@ int main(int argc, char* argv[]) {
 
 	int R = 1;
 	int T = 1;
-	result res_plaket;
+	result res_plaket_time;
+	result res_plaket_space;
 	result res_wilson;
-	result res_correlator;
-	res_plaket.array = calculate_plaket_time_tr(conf_abelian.array);
+	result res_correlator_electric;
+	result res_correlator_magnetic;
+	res_plaket_time.array = calculate_plaket_time_tr(conf_abelian.array);
+	res_plaket_space.array = calculate_plaket_space_tr(conf_abelian.array);
 	res_wilson.array = calculate_wilson_loop_tr(conf_abelian.array, R, T);
 	double aver[2];
-	res_plaket.average(aver);
-	cout<<"plaket time first "<<res_plaket.array[0]<<endl;
+	res_plaket_time.average(aver);
+	cout<<"plaket time first "<<res_plaket_time.array[0]<<endl;
 	cout<<"plaket_time aver "<<aver[0]<<endl;
 	res_wilson.average(aver);
 	cout<<"wilson first "<<res_wilson.array[0]<<endl;
@@ -56,7 +60,8 @@ int main(int argc, char* argv[]) {
 	int d_min = -10;
 	int d_max = 10;
 	int x_trans = 0;
-	res_correlator = wilson_plaket_correlator_electric_optimized(res_wilson.array, res_plaket.array, R, T, x_trans, d_min, d_max);
+	res_correlator_electric = wilson_plaket_correlator_electric_optimized(res_wilson.array, res_plaket_time.array, R, T, x_trans, d_min, d_max);
+	res_correlator_magnetic = wilson_plaket_correlator_magnetic_optimized(res_wilson.array, res_plaket_space.array, R, T, x_trans, d_min, d_max);
 	// for(int i = 0;i < res_correlator.array.size();i++){
 	// 	cout<<res_correlator.array[i]<<endl;
 	// }

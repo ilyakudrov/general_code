@@ -45,7 +45,7 @@ double wilson_plaket_correlator_electric_simple(const vector<matrix>& array, con
 result wilson_plaket_correlator_electric_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_x_optimized(const vector<matrix>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_electric(const vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_magnetic_optimized(vector<matrix>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
+result wilson_plaket_correlator_magnetic_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic_x_optimized(vector<matrix>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_magnetic(vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
 //monopoles
