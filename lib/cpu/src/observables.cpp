@@ -318,6 +318,22 @@ vector<double> calculate_plaket_space_tr(const vector<matrix>& array) {
 	return vec;
 }
 
+vector<double> calculate_plaket_space_tr(const vector<double>& array) {
+	vector<double> vec(data_size/4*3);
+	link1<double> link(x_size, y_size, z_size, t_size);
+	int place_dir;
+	SPACE_ITER_START;
+	link.go(x, y, z, t);
+	for (int dir = 1; dir < 4; dir++) {
+		for(int j = dir + 1;j < 4;j++){
+			link.move_dir(dir);
+			vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(array, j);
+		}
+	}
+	SPACE_ITER_END;
+	return vec;
+}
+
 double plaket4_time_optimized(const vector<double>& plaket_tr, link1<matrix>& link){
 	double a = plaket_tr[PLACE3];
 	link.move(link.direction, -1);
