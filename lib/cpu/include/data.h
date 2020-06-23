@@ -29,5 +29,6 @@ class data_double {
 	data_double();
 	void read_float(char const* file_name); //read conf file of floats
 	void read_float_fortran(char const* file_name);
+	void write_float_fortran(char const* file_name);
 };
 #endif
