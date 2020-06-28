@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
 	int d_min = -10;
 	int d_max = 10;
 	int x_trans = 0;
-	res_correlator_electric = wilson_plaket_correlator_electric_optimized(res_wilson.array, res_plaket_time.array, R, T, x_trans, d_min, d_max);
-	res_correlator_magnetic = wilson_plaket_correlator_magnetic_optimized(res_wilson.array, res_plaket_space.array, R, T, x_trans, d_min, d_max);
+	res_correlator_electric = wilson_plaket_correlator_electric(res_wilson.array, res_plaket_time.array, R, T, x_trans, d_min, d_max);
+	res_correlator_magnetic = wilson_plaket_correlator_magnetic(res_wilson.array, res_plaket_space.array, R, T, x_trans, d_min, d_max);
 	// for(int i = 0;i < res_correlator.array.size();i++){
 	// 	cout<<res_correlator.array[i]<<endl;
 	// }

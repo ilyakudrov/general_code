@@ -496,7 +496,7 @@ double wilson_plaket_correlator_electric_simple(const data& conf, const vector<d
     return field;
 }
 
-result wilson_plaket_correlator_electric_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
+result wilson_plaket_correlator_electric(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
 	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
 	for(int i = 0;i < d_max - d_min + 1;i++){
@@ -549,7 +549,7 @@ result wilson_plaket_correlator_electric_optimized(const vector<double>& wilson_
     return final;
 }
 
-result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
+result wilson_plaket_correlator_electric_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
 	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[x_trans_max - x_trans_min + 1];
 	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
@@ -588,7 +588,7 @@ result wilson_plaket_correlator_electric_x_optimized(const data& conf, const vec
     return final;
 }
 
-result wilson_plaket_correlator_magnetic_optimized(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
+result wilson_plaket_correlator_magnetic(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max){
 	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[d_max - d_min + 1];
 	for(int i = 0;i < d_max - d_min + 1;i++){
@@ -699,7 +699,7 @@ result polyakov_plaket_correlator_magnetic(const vector<matrix>& array, const ve
     return final;
 }
 
-result wilson_plaket_correlator_magnetic_x_optimized(const data& conf, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
+result wilson_plaket_correlator_magnetic_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d){
 	link1<matrix> link(x_size, y_size, z_size, t_size);
 	double vec[x_trans_max - x_trans_min + 1];
 	for(int i = 0;i < x_trans_max - x_trans_min + 1;i++){
