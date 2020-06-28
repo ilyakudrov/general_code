@@ -43,10 +43,10 @@ double plaket_correlator(const vector<matrix>& plaket, int dist);
 double plaket_correlator_space(const vector<matrix>& plaket, int dist);
 double wilson_plaket_correlator_electric_simple(const vector<matrix>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir);
 result wilson_plaket_correlator_electric(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_electric_x(const vector<double>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
+result wilson_plaket_correlator_electric_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_electric(const vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_magnetic_x(vector<double>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
+result wilson_plaket_correlator_magnetic_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
 result polyakov_plaket_correlator_magnetic(vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
 //monopoles
 void length(loop* ll, int& ss1);
