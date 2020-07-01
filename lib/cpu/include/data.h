@@ -16,7 +16,7 @@ class data_matrix {
 	void read_float(char const* file_name);//read conf file of floats
 	void read_float_abelian(char const* file_name);
 	void read_double(char const* file_name);//read conf file of double
-	void read_double_abelian(char const* file_name);
+	void read_double_fortran(char const* file_name);
 	void write_double(char const* file_name);//writes in file
 	void write_float(char const* file_name);
 	int eta(int mu, int x, int y, int z, int t);

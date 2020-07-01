@@ -59,18 +59,19 @@ void data_matrix::read_double(char const* file_name){
 	}
 	stream.close();
 }
-void data_matrix::read_double_abelian(char const* file_name){
+void data_matrix::read_double_fortran(char const* file_name){
 	int data_size1 = 4 * x_size * y_size * z_size * t_size;
 	array.clear();
 	ifstream stream(file_name);
-	vector<double> v(data_size1 * 4 + 2);
-	if(!stream.read((char*) &v[0], (data_size1 * 4 + 2) * sizeof(double))) cout<<"read_float error: "<<file_name<<endl;
+	vector<double> v(data_size1 * 4);
+	stream.ignore(4);
+	if(!stream.read((char*) &v[0], (data_size1 * 4) * sizeof(double))) cout<<"read_float error: "<<file_name<<endl;
 	matrix A;
 	for (int i = 0; i < data_size1; i++) {
-		A.a0 = v[i * 4 + 1];
-		A.a1 = v[i * 4 + 2];
-		A.a2 = v[i * 4 + 3];
-		A.a3 = v[i * 4 + 4];
+		A.a0 = v[i * 4];
+		A.a1 = v[i * 4 + 1];
+		A.a2 = v[i * 4 + 2];
+		A.a3 = v[i * 4 + 3];
 		array.push_back(A);
 	}
 	stream.close();

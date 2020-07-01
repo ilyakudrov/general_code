@@ -25,10 +25,20 @@ int main(int argc, char* argv[]) {
     link1<matrix> link(x_size, y_size, z_size, t_size);
 	data_matrix conf;
 	data_double conf_abelian;
+	data_matrix conf_offd;
 	char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
 	char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
+	char const *path_offd = "/home/ilya/lattice/conf/offd/CON_OFF_MAG_033.LAT";
 	conf.read_float(path1);
 	conf_abelian.read_float_fortran(path_abelian);
+	conf_offd.read_double_fortran(path_offd);
+
+	for(int i = 0;i < 5;i++){
+		cout<<conf_offd.array[i]<<endl;
+		cout<<conf_offd.array[i].module()<<endl;
+	}
+
+
 	link1<double> link_abelian(x_size, y_size, z_size, t_size);
 	cout<<"first wilson "<<link_abelian.wilson_loop(conf_abelian.array, 1, 1)<<endl;
 	start_time =  clock();

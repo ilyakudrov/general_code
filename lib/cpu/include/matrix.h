@@ -19,6 +19,7 @@ class matrix {
 	void inverse();
 	matrix conj();
 	//Projection to SU(2)
+	double module();
 	void proj();
 };
 

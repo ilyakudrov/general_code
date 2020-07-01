@@ -12,6 +12,9 @@ void matrix::inverse() {
 	double rho=a0*a0+a1*a1+a2*a2+a3*a3;
 	a0=a0/rho; a1=-a1/rho; a2=-a2/rho; a3=-a3/rho;
 }
+double matrix::module(){
+	return a0*a0+a1*a1+a2*a2+a3*a3;
+}
 matrix matrix::conj() {
 	return matrix(a0, -a1, -a2, -a3);
 }
@@ -35,6 +38,6 @@ matrix operator* (matrix A, matrix B) {
 		A.a0*B.a3+B.a0*A.a3+A.a2*B.a1-A.a1*B.a2); };
 
 ostream& operator<<(ostream& os, const matrix& A){
-	os<<"a0 = "<<A.a0<<" "<<"a0 = "<<A.a1<<" "<<"a0 = "<<A.a2<<" "<<"a0 = "<<A.a3<<" "<<endl;
+	os<<"a0 = "<<A.a0<<" "<<"a1 = "<<A.a1<<" "<<"a2 = "<<A.a2<<" "<<"a3 = "<<A.a3<<" "<<endl;
 	return os;
 }
