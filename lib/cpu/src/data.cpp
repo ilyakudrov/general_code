@@ -154,3 +154,15 @@ void data_double::write_float_fortran(char const* file_name) {
 	if(!stream.write((char*) &v[0], (data_size1 + 2) * sizeof(float))) cout<<"write_double error: "<<file_name<<endl;
 	stream.close();
 }
+
+void data_double::read_float_fortran_convert_abelian(char const* file_name){
+	int data_size1 = 4 * x_size * y_size * z_size * t_size;
+	array.clear();
+	ifstream stream(file_name);
+	vector<float> v(data_size1 * 4 + 2);
+	if(!stream.read((char*) &v[0], (data_size1 * 4 + 2) * sizeof(float))) cout<<"read_float error: "<<file_name<<endl;
+	for (int i = 0; i < data_size1; i++) {
+		array.push_back((double)atan2(v[i * 4 + 4], v[i * 4 + 1]));
+	}
+	stream.close();
+}
