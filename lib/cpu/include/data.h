@@ -31,5 +31,6 @@ class data_double {
 	void read_float_fortran(char const* file_name);
 	void write_float_fortran(char const* file_name);
 	void read_float_fortran_convert_abelian(char const* file_name);
+	void read_float_convert_abelian(char const* file_name);
 };
 #endif
