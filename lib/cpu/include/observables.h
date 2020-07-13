@@ -1,68 +1,94 @@
-#ifndef __OBSERVABLES_H__
-#define __OBSERVABLES_H__
+#pragma once
 
 #include "data.h"
-#include "matrix.h"
 #include "link.h"
+#include "matrix.h"
 #include "result.h"
-#include "monopoles.h"
 
 using namespace std;
 
-template<typename T>
-double plaket_time(const vector<T>& array);
-template<typename T>
-double plaket_space(const vector<T>& array);
-template<typename T>
-double plaket(const vector<T>& array);
-template<typename T>
-double wilson(const vector<T>& array, int r, int time);
-// double wilson(const vector<matrix>& array, int r, int t);
-// double wilson(const vector<double>& array, int r, int t);
-template<typename T>
-double polyakov(const vector<T>& array);
-double wilson_abelian(const vector<matrix>& array, int R, int T);
-void polyakov_abelian(const vector<matrix>& array, double pol[2]);
-double wilson_dir(const vector<matrix>& array, int R, int T, int dir);
-void fields(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, vector<vector<result> >& field1, vector<vector<result> >& field2, vector<result>& field3, int d, int D, int x_trans);
-void field1_average(const vector<vector<matrix> >& schwinger_line, const vector<matrix>& plaket, const vector<matrix>& polyakov_loop, vector<vector<result> >& field1, int d, int D, int x_trans) ;
-vector<vector<matrix> > calculate_schwinger_line(vector<matrix>& array, int d, int x_trans);
-vector<matrix> calculate_plaket(vector<matrix>& array);
-vector<double> calculate_plaket_time_tr(const vector<matrix>& array);
-vector<double> calculate_plaket_time_tr(const vector<double>& array);
-vector<double> calculate_plaket_space_tr(const vector<matrix>& array);
-vector<double> calculate_plaket_space_tr(const vector<double>& array);
-double plaket4_time_optimized(const vector<double>& plaket_tr, link1<matrix>& link);
-double plaket4_space_optimized(const vector<double>& plaket_tr, link1<matrix>& link, int nu);
-vector<matrix> calculate_polyakov_loop(const vector<matrix>& array);
-vector<matrix> calculate_wilson_loop(const vector<matrix>& array, int R, int T);
-vector<double> calculate_wilson_loop_tr(const vector<matrix>& array, int R, int T);
-vector<double> calculate_wilson_loop_tr(const vector<double>& array, int R, int T);
-double polyakov_loop_corelator(const vector<matrix>& array, int D);
-double plaket_correlator(const vector<matrix>& plaket, int dist);
-double plaket_correlator_space(const vector<matrix>& plaket, int dist);
-double wilson_plaket_correlator_electric_simple(const vector<matrix>& array, const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int d, int dir);
-result wilson_plaket_correlator_electric(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_electric_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
-result polyakov_plaket_correlator_electric(const vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_magnetic(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans, int d_min, int d_max);
-result wilson_plaket_correlator_magnetic_x(const vector<double>& wilson_loop_tr, const vector<double>& plaket_tr, int R, int T, int x_trans_min, int x_trans_max, int d);
-result polyakov_plaket_correlator_magnetic(vector<matrix>& array, const vector<matrix>& array_smeared, int R, int x_trans, int d_min, int d_max);
-//monopoles
-void length(loop* ll, int& ss1);
-result calculate_cluster_lengths(vector<loop*>& LL, int& max_number);
-void length_mu(loop* ll, int mu, int& s);
-void calculate_t_clusters(vector<loop*>& LL, vector<loop*>& t_clusters, int max_number);
-void calculate_t_clusters_n(vector<loop*>& LL, vector<loop*>& t_clusters_n, int max_number, int n);
-void calculate_s_clusters(vector<loop*>& LL, vector<loop*>&	s_clusters, int max_number);
-double t_density_n(vector<loop*>& t_clusters, int n);
-double time_length_portion(vector<loop*>& t_clusters);
-void sites_unique(loop* ll, vector<loop*>& sites);
-double* aver_r(vector<loop*> sites);
-double distance_shortest(double a, double b);
-double disp_r(vector<loop*>& sites, double* aver_coord);
-double calculate_disp_r(vector<loop*>& t_clusters);
-bool sites_close(loop* l, loop* ll);
-double dimension(vector<loop*> sites);
-double charge_difference(vector<loop*>& t_clusters_1);
-#endif
+template <class T> FLOAT plaket_time(const vector<T> &array);
+template <class T> FLOAT plaket_space(const vector<T> &array);
+template <class T> FLOAT plaket(const vector<T> &array);
+template <class T> FLOAT wilson(const vector<T> &array, int r, int time);
+template <class T> FLOAT polyakov(const vector<T> &array);
+template <class T>
+void fields(const vector<vector<T>> &schwinger_line, const vector<T> &plaket,
+            const vector<T> &polyakov_loop, vector<vector<result>> &field1,
+            vector<vector<result>> &field2, vector<result> &field3, int d,
+            int D, int x_trans);
+template <class T>
+void field1_average(const vector<vector<T>> &schwinger_line,
+                    const vector<T> &plaket, const vector<T> &polyakov_loop,
+                    vector<vector<result>> &field1, int d, int D, int x_trans);
+template <class T>
+vector<vector<T>> calculate_schwinger_line(const vector<T> &array, int d,
+                                           int x_trans);
+template <class T> vector<T> calculate_plaket(const vector<T> &array);
+template <class T>
+vector<FLOAT> calculate_plaket_time_tr(const vector<T> &array);
+template <class T>
+vector<FLOAT> calculate_plaket_space_tr(const vector<T> &array);
+template <class T>
+FLOAT plaket4_time_optimized(const vector<FLOAT> &plaket_tr, link1<T> &link);
+template <class T>
+FLOAT plaket4_space_optimized(const vector<FLOAT> &plaket_tr, link1<T> &link,
+                              int nu);
+template <class T> vector<T> calculate_polyakov_loop(const vector<T> &array);
+template <class T>
+vector<T> calculate_wilson_loop(const vector<T> &array, int r, int time);
+template <class T>
+vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r, int time);
+template <class T> FLOAT polyakov_loop_corelator(const vector<T> &array, int D);
+template <class T> FLOAT plaket_correlator(const vector<T> &plaket, int dist);
+template <class T>
+FLOAT plaket_correlator_space(const vector<T> &plaket, int dist);
+result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
+                                         const vector<FLOAT> &plaket_tr, int r,
+                                         int time, int x_trans, int d_min,
+                                         int d_max);
+result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
+                                           const vector<FLOAT> &plaket_tr,
+                                           int r, int time, int x_trans_min,
+                                           int x_trans_max, int d);
+/*template <class T>
+result polyakov_plaket_correlator_electric(const vector<T> &array,
+                                           const vector<T> &array_smeared,
+                                           int r, int x_trans, int d_min,
+                                           int d_max);*/
+result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
+                                         const vector<FLOAT> &plaket_tr, int r,
+                                         int time, int x_trans, int d_min,
+                                         int d_max);
+result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
+                                           const vector<FLOAT> &plaket_tr,
+                                           int r, int time, int x_trans_min,
+                                           int x_trans_max, int d);
+/*result polyakov_plaket_correlator_magnetic(const vector<T> &array,
+                                           const vector<T> &array_smeared,
+                                           int R, int x_trans, int d_min,
+                                           int d_max);*/
+// monopoles
+/*template <class T> void length(loop *ll, int &ss1);
+template <class T>
+result calculate_cluster_lengths(vector<loop *> &LL, int &max_number);
+template <class T> void length_mu(loop *ll, int mu, int &s);
+template <class T>
+void calculate_t_clusters(vector<loop *> &LL, vector<loop *> &t_clusters,
+                          int max_number);
+template <class T>
+void calculate_t_clusters_n(vector<loop *> &LL, vector<loop *> &t_clusters_n,
+                            int max_number, int n);
+template <class T>
+void calculate_s_clusters(vector<loop *> &LL, vector<loop *> &s_clusters,
+                          int max_number);
+template <class T> FLOAT t_density_n(vector<loop *> &t_clusters, int n);
+template <class T> FLOAT time_length_portion(vector<loop *> &t_clusters);
+template <class T> void sites_unique(loop *ll, vector<loop *> &sites);
+template <class T> FLOAT *aver_r(vector<loop *> sites);
+template <class T> FLOAT distance_shortest(FLOAT a, FLOAT b);
+template <class T> FLOAT disp_r(vector<loop *> &sites, FLOAT *aver_coord);
+template <class T> FLOAT calculate_disp_r(vector<loop *> &t_clusters);
+template <class T> bool sites_close(loop *l, loop *ll);
+template <class T> FLOAT dimension(vector<loop *> sites);
+template <class T> FLOAT charge_difference(vector<loop *> &t_clusters_1);*/

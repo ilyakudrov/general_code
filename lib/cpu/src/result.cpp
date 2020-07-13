@@ -1,18 +1,18 @@
 #include "result.h"
 
 result::result(int size) {
-	array = vector<double>(size);
+	array = vector<FLOAT>(size);
 }
 result::result(){
-	array = vector<double>(0);
+	array = vector<FLOAT>(0);
 }
-void result::average(double a[2]) {
+void result::average(FLOAT a[2]) {
 	if(array.size() == 0){
 		a[0] = 0; a[1] = 1;
 		return ;
 	}
-	double aver = 0;
-	double err = 0;
+	FLOAT aver = 0;
+	FLOAT err = 0;
 	for (int i = 0; i < array.size(); i++) {
 		aver += array[i] / array.size();
 	}
@@ -27,7 +27,7 @@ void result::read(char const* file_name, int size1){
 	array.clear();
 	array.reserve(size1);
 	ifstream stream(file_name);
-	if(!stream.read((char*) &array[0], size1 * sizeof(double))) cout<<"result::read error: "<<file_name<<endl;
+	if(!stream.read((char*) &array[0], size1 * sizeof(FLOAT))) cout<<"result::read error: "<<file_name<<endl;
 	stream.close();
 }
 void result::read_float(char const* file_name, int size1){
@@ -36,34 +36,34 @@ void result::read_float(char const* file_name, int size1){
 	vector<float> vec(size1);
 	stream.read((char*) &vec[0], size1 * sizeof(float));
 	for(int i = 0;i < size1;i++){
-		array.push_back((double)vec[i]);
+		array.push_back((FLOAT)vec[i]);
 	}
 	stream.close();
 }
 void result::write(char const* file_name){
 	ofstream stream(file_name);
-	stream.write((char*) &array[0], array.size() * sizeof(double));
+	stream.write((char*) &array[0], array.size() * sizeof(FLOAT));
 	stream.close();
 }
-double result::get_min() {
-	double a = array[0];
+FLOAT result::get_min() {
+	FLOAT a = array[0];
 	for (int i = 0; i < array.size(); i++) {
 		if (a > array[i]) a = array[i];
 	}
 	return a;
 }
-double result::get_max() {
-	double a = array[0];
+FLOAT result::get_max() {
+	FLOAT a = array[0];
 	for (int i = 0; i < array.size(); i++) {
 		if (a < array[i]) a = array[i];
 	}
 	return a;
 }
 void result::get_hist(int n, result& plaket, result& number) {
-	double min = get_min();
-	double max = get_max();
+	FLOAT min = get_min();
+	FLOAT max = get_max();
 	int count = 0;
-	double step = (max - min) / n;
+	FLOAT step = (max - min) / n;
 	for (int i = 0; i < n; i++) {
 		plaket.array.push_back(min + i * step);
 		count = 0;
@@ -73,25 +73,25 @@ void result::get_hist(int n, result& plaket, result& number) {
 		number.array.push_back(count);
 	}
 }
-double result::average_n(int n){
+FLOAT result::average_n(int n){
 	int size = array.size();
-	double a = 0;
+	FLOAT a = 0;
 	for(int i = 0;i < size;i++){
 		if(i != n) a += array[i] / (size - 1);
 	}
 	return a;
 }
-void average_jack(double a[2], result& val1, result& val2, result& val3) {
+void average_jack(FLOAT a[2], result& val1, result& val2, result& val3) {
 	int size = val1.array.size();
-	vector< double > vec(size);
-	double aver1[2];
-	double aver2[2];
-	double aver3[2];
+	vector< FLOAT > vec(size);
+	FLOAT aver1[2];
+	FLOAT aver2[2];
+	FLOAT aver3[2];
 	val1.average(aver1);
 	val2.average(aver2);
 	val3.average(aver3);
-	double b = (aver1[0] - aver2[0] / 2) / aver3[0];
-	double sigma = 0;
+	FLOAT b = (aver1[0] - aver2[0] / 2) / aver3[0];
+	FLOAT sigma = 0;
 	for (int i = 0; i < size; i++) {
 		vec[i] = (val1.average_n(i) - val2.average_n(i)/ 2) / val3.average_n(i);
 	}
@@ -103,20 +103,20 @@ void average_jack(double a[2], result& val1, result& val2, result& val3) {
 	a[1] = sigma;
 }
 
-void average_jack_wilson(double a[2], result& val1, result& val2, result& val3) {
+void average_jack_wilson(FLOAT a[2], result& val1, result& val2, result& val3) {
 	int size = val1.array.size();
-	vector<double> vec(size);
-	double aver1[2];
-	double aver2[2];
-	double aver3[2];
+	vector<FLOAT> vec(size);
+	FLOAT aver1[2];
+	FLOAT aver2[2];
+	FLOAT aver3[2];
 	val1.average(aver1);
 	val2.average(aver2);
 	val3.average(aver3);
-	double b = aver1[0]/aver2[0] - aver3[0];
+	FLOAT b = aver1[0]/aver2[0] - aver3[0];
 	for (int i = 0; i < size; i++) {
 		vec[i] = val1.average_n(i)/val2.average_n(i) - val3.average_n(i);
 	}
-	double sigma = 0;
+	FLOAT sigma = 0;
 	for (int i = 0; i < size; i++) {
 		sigma += (vec[i] - b) * (vec[i] - b);
 	}
@@ -125,24 +125,24 @@ void average_jack_wilson(double a[2], result& val1, result& val2, result& val3) 
 	a[1] = sigma;
 }
 
-void average_jack_sum(double a[2], result& val11, result& val12, result& val2, result& val3, result& val4) {
+void average_jack_sum(FLOAT a[2], result& val11, result& val12, result& val2, result& val3, result& val4) {
 	int size = val11.array.size();
-	vector<double> vec(size);
-	double aver11[2];
-	double aver12[2];
-	double aver2[2];
-	double aver3[2];
-	double aver4[2];
+	vector<FLOAT> vec(size);
+	FLOAT aver11[2];
+	FLOAT aver12[2];
+	FLOAT aver2[2];
+	FLOAT aver3[2];
+	FLOAT aver4[2];
 	val11.average(aver11);
 	val12.average(aver12);
 	val2.average(aver2);
 	val3.average(aver3);
 	val4.average(aver4);
-	double b = (aver11[0] + aver12[0])/aver2[0] - aver3[0] - aver4[0];
+	FLOAT b = (aver11[0] + aver12[0])/aver2[0] - aver3[0] - aver4[0];
 	for (int i = 0; i < size; i++) {
 		vec[i] = (val11.average_n(i) + val12.average_n(i))/val2.average_n(i) - val3.average_n(i) - val4.average_n(i);
 	}
-	double sigma = 0;
+	FLOAT sigma = 0;
 	for (int i = 0; i < size; i++) {
 		sigma += (vec[i] - b) * (vec[i] - b);
 	}
@@ -151,24 +151,24 @@ void average_jack_sum(double a[2], result& val11, result& val12, result& val2, r
 	a[1] = sigma;
 }
 
-void average_jack_difference(double a[2], result& val11, result& val12, result& val2, result& val3, result& val4) {
+void average_jack_difference(FLOAT a[2], result& val11, result& val12, result& val2, result& val3, result& val4) {
 	int size = val11.array.size();
-	vector<double> vec(size);
-	double aver11[2];
-	double aver12[2];
-	double aver2[2];
-	double aver3[2];
-	double aver4[2];
+	vector<FLOAT> vec(size);
+	FLOAT aver11[2];
+	FLOAT aver12[2];
+	FLOAT aver2[2];
+	FLOAT aver3[2];
+	FLOAT aver4[2];
 	val11.average(aver11);
 	val12.average(aver12);
 	val2.average(aver2);
 	val3.average(aver3);
 	val4.average(aver4);
-	double b = (aver11[0] - aver12[0])/aver2[0] - aver3[0] + aver4[0];
+	FLOAT b = (aver11[0] - aver12[0])/aver2[0] - aver3[0] + aver4[0];
 	for (int i = 0; i < size; i++) {
 		vec[i] = (val11.average_n(i) - val12.average_n(i))/val2.average_n(i) - val3.average_n(i) + val4.average_n(i);
 	}
-	double sigma = 0;
+	FLOAT sigma = 0;
 	for (int i = 0; i < size; i++) {
 		sigma += (vec[i] - b) * (vec[i] - b);
 	}
@@ -177,13 +177,13 @@ void average_jack_difference(double a[2], result& val11, result& val12, result& 
 	a[1] = sigma;
 }
 
-void average_jackknife(double a[2], result& val1){
+void average_jackknife(FLOAT a[2], result& val1){
 	int size = val1.array.size();
-	vector< double > vec(size);
-	double aver[2];
+	vector< FLOAT > vec(size);
+	FLOAT aver[2];
 	val1.average(aver);
-	double b = aver[0];
-	double sigma = 0;
+	FLOAT b = aver[0];
+	FLOAT sigma = 0;
 	for (int i = 0; i < size; i++) {
 		vec[i] = val1.average_n(i);
 	}
@@ -195,15 +195,15 @@ void average_jackknife(double a[2], result& val1){
 	a[1] = sigma;
 }
 
-double bootstrap_wilson(double aver[2], result& val1, result& val2, result& val3){
+FLOAT bootstrap_wilson(FLOAT aver[2], result& val1, result& val2, result& val3){
 	int size = val1.array.size();
 	int rand1 = 0;
 	result res1(0);
 	result res2(0);
 	result res3(0);
-	double aver1[2];
-	double aver2[2];
-	double aver3[2];
+	FLOAT aver1[2];
+	FLOAT aver2[2];
+	FLOAT aver3[2];
 	for(int i = 0;i < size;i++){
 		rand1 = rand()%size;
 		res1.array.push_back(val1.array[rand1]);
@@ -216,17 +216,17 @@ double bootstrap_wilson(double aver[2], result& val1, result& val2, result& val3
 	return aver1[0]/aver2[0]-aver3[0];
 }
 
-void average_bootstrap_wilson(double a[2], result& val1, result& val2, result& val3, int k) {
-	vector<double> vec(k);
-	double aver1[2];
+void average_bootstrap_wilson(FLOAT a[2], result& val1, result& val2, result& val3, int k) {
+	vector<FLOAT> vec(k);
+	FLOAT aver1[2];
 	for (int i = 0; i < k; i++){
 		vec[i] = bootstrap_wilson(aver1, val1, val2, val3);
 	}
-	double aver = 0;
+	FLOAT aver = 0;
 	for(int i = 0;i < k;i++){
 		aver += vec[i]/k;
 	}
-	double sigma = 0;
+	FLOAT sigma = 0;
 	for (int i = 0; i < k; i++) {
 		sigma += (vec[i] - aver) * (vec[i] - aver);
 	}

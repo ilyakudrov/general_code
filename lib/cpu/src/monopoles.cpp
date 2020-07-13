@@ -27,7 +27,7 @@ int loop::get_dir(int i) {
       return 0;
 }
 
-void calculate_current(data_matrix& conf, double* J){
+void calculate_current(data_matrix& conf, FLOAT* J){
   link1<matrix> link(x_size, y_size, z_size, t_size);
 	int a;
 	for(int t=1;t<=t_size;t++) {
@@ -48,7 +48,7 @@ void calculate_current(data_matrix& conf, double* J){
 	}
 }
 
-int test(link1<matrix> l, double* J){
+int test(link1<matrix> l, FLOAT* J){
   for(int i=1; i<=4; i++){
     if( (J[l.get_place1()*4+i-1]>0.3)||(J[l.get_place1()*4+i-1]<-0.3) ) return i;
   }
@@ -60,7 +60,7 @@ int test(link1<matrix> l, double* J){
   return 0;
 }
 
-void find_cluster(loop* ll, double* J) {
+void find_cluster(loop* ll, FLOAT* J) {
   int i=0;
   link1<matrix> tmp;
   int dir;
@@ -81,7 +81,7 @@ void find_cluster(loop* ll, double* J) {
   return ;
 };
 
-void calculate_clusters(vector<loop*>& LL, double* J){
+void calculate_clusters(vector<loop*>& LL, FLOAT* J){
   int dir1;
   for(int it=1;it<=t_size; it++ ) {
     for(int iz=1;iz<=z_size; iz++ ) {

@@ -1,6 +1,6 @@
 #include "eigen.h"
 
-void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_conf, int x_size, int y_size, int z_size, int t_size, double mass, double mu_q){
+void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_conf, int x_size, int y_size, int z_size, int t_size, FLOAT mass, FLOAT mu_q){
         int t = place/(x_size * y_size * z_size*2);
         int z = (place - (x_size * y_size * z_size*2)*t)/(x_size * y_size*2);
         int y = (place - (x_size * y_size * z_size*2)*t - (2*x_size * y_size)*z)/(x_size*2);
@@ -14,9 +14,9 @@ void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_
         link.go(x, y, z, t);
         link_ferm.go(x, y, z, t);
         //matrix A(1, 0, 0, 0);
-        double delta_4 = 0;
-                double sign;
-                double border_sign;
+        FLOAT delta_4 = 0;
+                FLOAT sign;
+                FLOAT border_sign;
                 scomplex_t vec;
                 for(int mu = 1;mu <= 4;mu++){
                         if(mu == 4) delta_4 = 1;
@@ -54,9 +54,9 @@ void dirac_mult(scomplex_t* res, const scomplex_t* src, int place, matrix* data_
         link1 link_ferm(x_size, y_size, z_size, t_size);
         link.go(x, y, z, t);
         link_ferm.go(x, y, z, t);
-                double sign;
-                double sign1;
-                double sign2;
+                FLOAT sign;
+                FLOAT sign1;
+                FLOAT sign2;
 
                 scomplex_t vec;
                 for(int mu = 1;mu <= 4;mu++){
@@ -90,7 +90,7 @@ int complex_place(link1<matrix>& link){
                 + (link.coordinate[0]) * 2;
 }
 
-void matrix_mult_complex1(matrix A, const scomplex_t* a, scomplex_t* a1, int i, double border_sign){
+void matrix_mult_complex1(matrix A, const scomplex_t* a, scomplex_t* a1, int i, FLOAT border_sign){
         scomplex_t z1, z2;
         //z1[0].re = A.a0; z1[0].im = A.a3;
         //z2[0].re = A.a2; z2[0].im = A.a1;
@@ -108,8 +108,8 @@ void matrix_mult_complex1(matrix A, const scomplex_t* a, scomplex_t* a1, int i, 
         a1->im = border_sign*(a[0].re * z1.im + a[0].im * z1.re + a[1].re * z2.im + a[1].im * z2.re);
 }
 
-double test_module(const scomplex_t* vec, int size){
-        double module;
+FLOAT test_module(const scomplex_t* vec, int size){
+        FLOAT module;
         for(int i = 0;i < size;i++){
                 module += vec[i].re * vec[i].re + vec[i].im * vec[i].im;
         }
@@ -117,7 +117,7 @@ double test_module(const scomplex_t* vec, int size){
         return module;
 }
 
-void test_eigenvector(const scomplex_t* eigenvector, scomplex_t eigenvalue, int size, matrix* data_conf, int x_size, int y_size, int z_size, int t_size, double mass, double mu_q, double tolerance){
+void test_eigenvector(const scomplex_t* eigenvector, scomplex_t eigenvalue, int size, matrix* data_conf, int x_size, int y_size, int z_size, int t_size, FLOAT mass, FLOAT mu_q, FLOAT tolerance){
         scomplex_t* vec;
         vec = (scomplex_t*) malloc(size * sizeof(scomplex_t));
         scomplex_t res;
@@ -138,20 +138,20 @@ void test_eigenvector(const scomplex_t* eigenvector, scomplex_t eigenvalue, int 
         free(vec);
 }
 
-double eta_sign(int mu, link1<matrix>& link){
+FLOAT eta_sign(int mu, link1<matrix>& link){
         int n = 0;
         for(int i = 0;i < mu - 1;i++){
                 n += (link.coordinate[i]);
         }
-        if(n%2 == 1) return (double)(-1.);
-        if(n%2 == 0) return (double)1.;
+        if(n%2 == 1) return (FLOAT)(-1.);
+        if(n%2 == 0) return (FLOAT)1.;
 }
 
-double eta_sign_5(link1<matrix>& link){
+FLOAT eta_sign_5(link1<matrix>& link){
         int n = 0;
         for(int i = 0;i < 4;i++){
                 n += (link.coordinate[i] - 1);
         }
-        if(n%2 == 1) return (double)(-1.);
-        if(n%2 == 0) return (double)1.;
+        if(n%2 == 1) return (FLOAT)(-1.);
+        if(n%2 == 0) return (FLOAT)1.;
 }

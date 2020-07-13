@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
     t_size = atof(argv[4]);
     int mass = 0.0075;
     int mu_q = 0;
-    double tolerance = 1e-2;
+    FLOAT tolerance = 1e-2;
     char const *path_vec = "../../eigenvectors/time_32/mu0.00/eigenvectors_neig=60_0001";
     char const *path_val = "../../eigenvectors/time_32/mu0.00/eigenvalues_neig=60_0001";
     char const *path_conf = "../../confs/su2/time_32/mu0.00/conf_0001.fl";

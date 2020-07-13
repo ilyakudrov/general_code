@@ -1,34 +1,63 @@
-//Matrix class
-#ifndef __MATRIX_H__
-#define __MATRIX_H__
+#pragma once
 
-//#include <math>
 #include <iostream>
 
 using namespace std;
 
-class matrix {
-	public:
-	double a0,a1,a2,a3;
-	matrix(double b0, double b1, double b2, double b3);
-	matrix(const matrix& M);
-	matrix();
-	// Trace
-	double tr();
-	// inverse matrix
-	void inverse();
-	matrix conj();
-	//Projection to SU(2)
-	double module();
-	void proj();
+// template <class T> class matrix {
+//   FLOAT tr();
+//   T inverse();
+//   T conj();
+//   T proj();
+//   FLOAT module();
+
+//   T operator+(matrix A, matrix B);
+//   T operator-(matrix A, matrix B);
+//   T operator*(FLOAT x, matrix A);
+//   T operator*(matrix A, FLOAT x);
+//   T operator*(matrix A, matrix B);
+
+//   ostream &operator<<(ostream &os, const matrix &A);
+// };
+
+class su2 /*: public matrix<su2>*/ {
+public:
+  FLOAT a0, a1, a2, a3;
+  su2(FLOAT b0, FLOAT b1, FLOAT b2, FLOAT b3);
+  su2();
+
+  FLOAT tr();
+  su2 inverse();
+  su2 conj();
+  su2 proj();
+  FLOAT module();
 };
 
-//overloaded matrix operations
-matrix operator+ (matrix A, matrix B);
-matrix operator- (matrix A, matrix B);
-matrix operator* (double x, matrix A);
-matrix operator* (matrix A, double x);
-matrix operator* (matrix A, matrix B);
+su2 operator+(const su2 &A, const su2 &B);
+su2 operator-(const su2 &A, const su2 &B);
+su2 operator*(const FLOAT &x, const su2 &A);
+su2 operator*(const su2 &A, const FLOAT &x);
+su2 operator*(const su2 &A, const su2 &B);
 
-ostream& operator<<(ostream& os, const matrix& A);
-#endif
+ostream &operator<<(ostream &os, const su2 &A);
+
+class abelian /*: public matrix<abelian>*/ {
+public:
+  FLOAT r, phi;
+  abelian();
+  abelian(FLOAT r1, FLOAT phi1);
+
+  FLOAT tr();
+  abelian inverse();
+  abelian conj();
+  abelian proj();
+  FLOAT module();
+};
+
+abelian operator+(const abelian &A, const abelian &B);
+abelian operator-(const abelian &A, const abelian &B);
+abelian operator*(const FLOAT &x, const abelian &A);
+abelian operator*(const abelian &A, const FLOAT &x);
+abelian operator*(const abelian &A, const abelian &B);
+
+ostream &operator<<(ostream &os, const abelian &A);

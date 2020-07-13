@@ -3,7 +3,7 @@
 
 #include "link.h"
 
-int test(link1<matrix> l, double* J);
+int test(link1<matrix> l, FLOAT* J);
 
 class loop {
   public:
@@ -18,8 +18,8 @@ class loop {
     int get_dir(int i);
 };
 
-void find_cluster(loop* ll, double* J);
-void calculate_clusters(vector<loop*>& LL, double* J);
+void find_cluster(loop* ll, FLOAT* J);
+void calculate_clusters(vector<loop*>& LL, FLOAT* J);
 
-void calculate_current(data& conf, double* J);
+void calculate_current(data& conf, FLOAT* J);
 #endif
