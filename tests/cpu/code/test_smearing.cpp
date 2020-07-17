@@ -63,14 +63,6 @@ int main(int argc, char *argv[]) {
   conf_abelian_smeared.array = link_double.smearing_HYP(
       conf_abelian.array, smearing_second_abelian, alpha1);
 
-  for (int i = 0; i < 10; i++) {
-    cout << "smearing_HYP_abelian test " << conf_abelian_smeared.array[i]
-         << endl;
-  }
-
-  cout << "wilson_abelian_smeared aver "
-       << wilson(conf_abelian_smeared.array, 1, 1) << endl;
-
   smearing_first = link.smearing_first_full(conf.array, alpha3);
   smearing_second =
       link.smearing_second_full(conf.array, smearing_first, alpha2);

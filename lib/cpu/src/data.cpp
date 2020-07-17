@@ -119,6 +119,19 @@ template <> void data<su2>::read_double(char const *file_name) {
   stream.close();
 }
 
+template <> void data<abelian>::read_double(char const *file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  ifstream stream(file_name);
+  vector<double> v(data_size1 * 4);
+  if (!stream.read((char *)&v[0], data_size1 * sizeof(double)))
+    cout << "read_float error: " << file_name << endl;
+  for (int i = 0; i < data_size1; i++) {
+    array.push_back(abelian(1, (FLOAT)v[i]));
+  }
+  stream.close();
+}
+
 template <> void data<su2>::read_double_fortran(char const *file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
@@ -138,6 +151,20 @@ template <> void data<su2>::read_double_fortran(char const *file_name) {
   stream.close();
 }
 
+template <> void data<abelian>::read_double_fortran(char const *file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  ifstream stream(file_name);
+  vector<double> v(data_size1);
+  stream.ignore(4);
+  if (!stream.read((char *)&v[0], (data_size1) * sizeof(double)))
+    cout << "read_float error: " << file_name << endl;
+  for (int i = 0; i < data_size1; i++) {
+    array.push_back(abelian(1, (FLOAT)v[i]));
+  }
+  stream.close();
+}
+
 template <> void data<su2>::write_float(char const *file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ofstream stream(file_name);
@@ -150,6 +177,18 @@ template <> void data<su2>::write_float(char const *file_name) {
   }
   if (!stream.write((char *)&v[0], data_size1 * 4 * sizeof(float)))
     cout << "write_float error: " << file_name << endl;
+  stream.close();
+}
+
+template <> void data<abelian>::write_float(char const *file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  ofstream stream(file_name);
+  vector<float> v(data_size1);
+  for (int i = 0; i < data_size1; i++) {
+    v[i] = (float)array[i].phi;
+  }
+  if (!stream.write((char *)&v[0], (data_size1) * sizeof(float)))
+    cout << "write_double error: " << file_name << endl;
   stream.close();
 }
 

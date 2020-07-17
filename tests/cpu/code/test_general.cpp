@@ -33,23 +33,11 @@ int main(int argc, char *argv[]) {
   conf_abelian.read_float_fortran(path_abelian);
   conf_offd.read_double_fortran(path_offd);
 
-  for (int i = 0; i < 5; i++) {
-    cout << conf_offd.array[i] << endl;
-    cout << conf_offd.array[i].module() << endl;
-  }
-
   link1<abelian> link_abelian(x_size, y_size, z_size, t_size);
-  abelian G;
-  cout << G << endl;
-  cout << "first wilson " << link_abelian.wilson_loop(conf_abelian.array, 1, 1)
-       << endl;
   start_time = clock();
-  cout << "wilson_abelian aver " << wilson(conf_abelian.array, 1, 1) << endl;
+
   end_time = clock();
   search_time = end_time - start_time;
-  cout << "wilson time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-  cout << plaket_time(conf_abelian.array) << endl;
-  cout << plaket_space(conf_abelian.array) << endl;
 
   int r = 1;
   int t = 1;
@@ -63,11 +51,6 @@ int main(int argc, char *argv[]) {
   res_wilson.array = calculate_wilson_loop_tr(conf_abelian.array, r, t);
   FLOAT aver[2];
   res_plaket_time.average(aver);
-  cout << "plaket time first " << res_plaket_time.array[0] << endl;
-  cout << "plaket_time aver " << aver[0] << endl;
-  res_wilson.average(aver);
-  cout << "wilson first " << res_wilson.array[0] << endl;
-  cout << "wilson aver " << aver[0] << endl;
 
   int d_min = -10;
   int d_max = 10;
@@ -76,13 +59,46 @@ int main(int argc, char *argv[]) {
       res_wilson.array, res_plaket_time.array, r, t, x_trans, d_min, d_max);
   res_correlator_magnetic = wilson_plaket_correlator_magnetic(
       res_wilson.array, res_plaket_space.array, r, t, x_trans, d_min, d_max);
-  // for(int i = 0;i < res_correlator.array.size();i++){
-  // 	cout<<res_correlator.array[i]<<endl;
-  // }
+
+  link1<su2> link_test(32, 32, 32, 32);
+  link_test.move(2, 31);
+  cout << link_test.coordinate[1] << endl;
+  link_test.move(2, 10);
+  cout << link_test.coordinate[1] << endl;
 
   cout.precision(10);
+
   start_time = clock();
 
+  cout << "abelian" << endl;
+  cout << "test plaket " << plaket(conf_abelian.array) / 2 << endl;
+  cout << "test plaket_time " << plaket_time(conf_abelian.array) / 2 << endl;
+  cout << "test plaket_space " << plaket_space(conf_abelian.array) / 2 << endl;
+  cout << "test polyakov_loop " << polyakov(conf_abelian.array) / 2 << endl;
+  cout << "test wilson_loop_R=10_T=6 " << wilson(conf_abelian.array, 10, 6)
+       << endl;
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "abelian working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
+  start_time = clock();
+
+  cout << "offd" << endl;
+  cout << "test plaket " << plaket(conf_offd.array) / 2 << endl;
+  cout << "test plaket_time " << plaket_time(conf_offd.array) / 2 << endl;
+  cout << "test plaket_space " << plaket_space(conf_offd.array) / 2 << endl;
+  cout << "test polyakov_loop " << polyakov(conf_offd.array) / 2 << endl;
+  cout << "test wilson_loop_R=10_T=6 " << wilson(conf_offd.array, 10, 6)
+       << endl;
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "offd working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
+  start_time = clock();
+
+  cout << "su2" << endl;
   cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066"
        << endl;
   cout << "test plaket_time " << plaket_time(conf.array) / 2

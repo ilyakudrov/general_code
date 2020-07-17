@@ -34,14 +34,10 @@ link1<T>::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
 }
 
 template <class T> void link1<T>::move(int dir, int step) {
-  coordinate[abs(dir) - 1] += step * dir / abs(dir);
-  while (coordinate[abs(dir) - 1] < 0 ||
-         coordinate[abs(dir) - 1] > lattice_size[abs(dir) - 1] - 1) {
-    if (coordinate[abs(dir) - 1] < 0)
-      coordinate[abs(dir) - 1] += lattice_size[abs(dir) - 1];
-    else
-      coordinate[abs(dir) - 1] -= lattice_size[abs(dir) - 1];
-  }
+  coordinate[abs(dir) - 1] +=
+      (step * (dir / abs(dir)) + lattice_size[abs(dir) - 1]);
+  coordinate[abs(dir) - 1] =
+      coordinate[abs(dir) - 1] % lattice_size[abs(dir) - 1];
 }
 template <class T> void link1<T>::go(int x, int y, int z, int t) {
   coordinate[0] = x;
@@ -398,7 +394,7 @@ vector<T> link1<T>::smearing_first(const vector<T> &array, FLOAT alpha3, int nu,
                       vec[PLACE1_LINK] + alpha3 / 2. * staples_first(array, d);
                 }
               }
-              vec[PLACE1_LINK].proj();
+              vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
             }
           }
         }
@@ -441,7 +437,7 @@ vector<T> link1<T>::smearing_second(const vector<T> &array,
                       alpha2 / 4. * staples_second(smearing_first, d, nu);
                 }
               }
-              vec[PLACE1_LINK].proj();
+              vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
             }
           }
         }
@@ -477,7 +473,7 @@ vector<T> link1<T>::smearing_HYP(const vector<T> &array,
             vec[PLACE1_LINK] = vec[PLACE1_LINK] +
                                alpha1 / 6. * staples_third(smearing_second, d);
           }
-          vec[PLACE1_LINK].proj();
+          vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
         }
       }
     }
@@ -530,7 +526,7 @@ vector<T> link1<T>::smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
                 vec[PLACE1_LINK] = vec[PLACE1_LINK] +
                                    (alpha_APE / 6.) * staples_first(array, d);
             }
-            vec[PLACE1_LINK].proj();
+            vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
           }
         }
       }
@@ -594,8 +590,7 @@ vector<T> link1<T>::smearing_HYP_refresh(data<T> &conf, FLOAT alpha1,
           for (int d = 1; d < 4; d++) {
             A = A + alpha1 / 6. * staples_third_refresh(vec, d, alpha2, alpha3);
           }
-          A.proj();
-          vec[PLACE1_LINK] = A;
+          vec[PLACE1_LINK] = A.proj();
         }
       }
     }
@@ -620,8 +615,7 @@ vector<T> link1<T>::smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
               if (d != i)
                 A = A + (alpha_APE / 4.) * staples_first(vec, d);
             }
-            A.proj();
-            vec[PLACE1_LINK] = A;
+            vec[PLACE1_LINK] = A.proj();
           }
         }
       }
@@ -681,8 +675,7 @@ template <> su2 link1<su2>::stout_omega(data<su2> &conf, FLOAT rho) {
   int dir = direction;
   su2 A;
   su2 B(0., 0., 0., 0.);
-  A = conf.array[PLACE1_LINK];
-  A.inverse();
+  A = conf.array[PLACE1_LINK].inverse();
   for (int i = 1; i < 5; i++) {
     if (i != dir) {
       B = B + staples_first(conf.array, i);
@@ -694,8 +687,7 @@ template <> su2 link1<su2>::stout_omega(data<su2> &conf, FLOAT rho) {
 
 template <class T> void link1<T>::gauge_transform(data<T> &conf) {
   T A = conf.array[0];
-  T C = A;
-  C.conj();
+  T C = A.conj();
   FLOAT a;
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
