@@ -13,12 +13,16 @@
 
 using namespace std;
 
-int x_size = 32;
-int y_size = 32;
-int z_size = 32;
-int t_size = 32;
+int x_size;
+int y_size;
+int z_size;
+int t_size;
 
 int main(int argc, char *argv[]) {
+  x_size = 32;
+  y_size = 32;
+  z_size = 32;
+  t_size = 32;
   unsigned int start_time;
   unsigned int end_time;
   unsigned int search_time;
@@ -26,46 +30,41 @@ int main(int argc, char *argv[]) {
   data<su2> conf;
   data<abelian> conf_abelian;
   data<su2> conf_offd;
+  data<su2> conf_qc2dstag;
   char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
   char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
   char const *path_offd = "/home/ilya/lattice/conf/offd/CON_OFF_MAG_033.LAT";
+  char const *path_qc2dstag =
+      "/home/ilya/lattice/general_code/tests/confs/qc2dstag/mu0.05/CONF0001";
   conf.read_float(path1);
   conf_abelian.read_float_fortran(path_abelian);
   conf_offd.read_double_fortran(path_offd);
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
+  conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
 
+  cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) / 2 << endl;
+  cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array) / 2
+       << endl;
+  cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array) / 2
+       << endl;
+  cout << "qc2dstag wilson " << wilson(conf_qc2dstag.array, 1, 1) / 2 << endl;
+  cout << "qc2dstag wilson " << wilson(conf_qc2dstag.array, 10, 10) / 2 << endl;
+  cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array) / 2 << endl;
+  cout << "module " << conf_qc2dstag.array[0].module() << endl;
+
+  link1<su2> link_qc2dstag(x_size, y_size, z_size, t_size);
+  link_qc2dstag.move(1, 2);
+  cout << "qc2dstag plaket_mu "
+       << link_qc2dstag.plaket_mu(conf_qc2dstag.array, 2) << endl;
+
+  x_size = 32;
+  y_size = 32;
+  z_size = 32;
+  t_size = 32;
   link1<abelian> link_abelian(x_size, y_size, z_size, t_size);
-  start_time = clock();
-
-  end_time = clock();
-  search_time = end_time - start_time;
-
-  int r = 1;
-  int t = 1;
-  result res_plaket_time;
-  result res_plaket_space;
-  result res_wilson;
-  result res_correlator_electric;
-  result res_correlator_magnetic;
-  res_plaket_time.array = calculate_plaket_time_tr(conf_abelian.array);
-  res_plaket_space.array = calculate_plaket_space_tr(conf_abelian.array);
-  res_wilson.array = calculate_wilson_loop_tr(conf_abelian.array, r, t);
-  FLOAT aver[2];
-  res_plaket_time.average(aver);
-
-  int d_min = -10;
-  int d_max = 10;
-  int x_trans = 0;
-  res_correlator_electric = wilson_plaket_correlator_electric(
-      res_wilson.array, res_plaket_time.array, r, t, x_trans, d_min, d_max);
-  res_correlator_magnetic = wilson_plaket_correlator_magnetic(
-      res_wilson.array, res_plaket_space.array, r, t, x_trans, d_min, d_max);
-
-  link1<su2> link_test(32, 32, 32, 32);
-  link_test.move(2, 31);
-  cout << link_test.coordinate[1] << endl;
-  link_test.move(2, 10);
-  cout << link_test.coordinate[1] << endl;
-
   cout.precision(10);
 
   start_time = clock();

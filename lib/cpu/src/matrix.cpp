@@ -53,7 +53,7 @@ ostream &operator<<(ostream &os, const su2 &A) {
   os << "a0 = " << A.a0 << " "
      << "a1 = " << A.a1 << " "
      << "a2 = " << A.a2 << " "
-     << "a3 = " << A.a3 << " " << endl;
+     << "a3 = " << A.a3;
   return os;
 }
 
