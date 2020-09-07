@@ -1,22 +1,22 @@
-#include "link.h"
-#include "data.h"
+#include "../include/link.h"
+#include "../include/data.h"
 #include <cmath>
 
 #define Pi 3.141592653589793238462643383279502884
 #define data_size                                                              \
   4 * lattice_size[0] * lattice_size[1] * lattice_size[2] * lattice_size[3]
-#define PLACE                                                                  \
+#define PLACE3_LINK_DIR                                                        \
   (coordinate[3]) * 3 * lattice_size[0] * lattice_size[1] * lattice_size[2] +  \
       (coordinate[2]) * 3 * lattice_size[0] * lattice_size[1] +                \
       (coordinate[1]) * 3 * lattice_size[0] + (coordinate[0]) * 3 +            \
       abs(direction) - 1
-#define PLACE1_LINK                                                            \
+#define PLACE4_LINK_DIR                                                        \
   (coordinate[3]) * 4 * lattice_size[0] * lattice_size[1] * lattice_size[2] +  \
       (coordinate[2]) * 4 * lattice_size[0] * lattice_size[1] +                \
       (coordinate[1]) * 4 * lattice_size[0] + (coordinate[0]) * 4 +            \
       abs(direction) - 1
-#define PLACE_FIELD_LINK                                                       \
-  (coordinate[3] - 1) * lattice_size[0] * lattice_size[1] * lattice_size[2] +  \
+#define PLACE1_LINK_NODIR                                                      \
+  (coordinate[3]) * lattice_size[0] * lattice_size[1] * lattice_size[2] +      \
       (coordinate[2]) * lattice_size[0] * lattice_size[1] +                    \
       (coordinate[1]) * lattice_size[0] + (coordinate[0])
 
@@ -33,6 +33,13 @@ link1<T>::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
   }
 }
 
+template <class T> ostream &operator<<(ostream &os, const link1<T> &link) {
+  os << "x: " << link.coordinate[0] << " y: " << link.coordinate[1]
+     << " z: " << link.coordinate[2] << " t: " << link.coordinate[3]
+     << " dir: " << link.direction << endl;
+  return os;
+}
+
 template <class T> void link1<T>::move(int dir, int step) {
   coordinate[abs(dir) - 1] +=
       (step * (dir / abs(dir)) + lattice_size[abs(dir) - 1]);
@@ -46,17 +53,17 @@ template <class T> void link1<T>::go(int x, int y, int z, int t) {
   coordinate[3] = t;
 }
 template <class T> void link1<T>::move_dir(int dir) { direction = dir; }
-template <class T> int link1<T>::get_place() { return PLACE1_LINK; }
-template <class T> int link1<T>::get_place1() { return PLACE_FIELD_LINK; }
+template <class T> int link1<T>::get_place() { return PLACE4_LINK_DIR; }
+template <class T> int link1<T>::get_place1() { return PLACE1_LINK_NODIR; }
 
 template <class T> T link1<T>::get_matrix(const vector<T> &vec) {
   T A;
   if (direction / abs(direction) == 1) {
-    return vec[PLACE1_LINK];
+    return vec[PLACE4_LINK_DIR];
   }
   if (direction / abs(direction) == -1) {
     move(direction, 1);
-    A = vec[PLACE1_LINK];
+    A = vec[PLACE4_LINK_DIR];
     move(direction, -1);
     return A.conj();
   } else {
@@ -79,12 +86,12 @@ template <class T> FLOAT link1<T>::border_sign(int mu) {
 template <> FLOAT link1<su2>::get_angle_abelian(const vector<su2> &vec) {
   FLOAT angle;
   if (direction / abs(direction) == 1) {
-    angle = atan2(vec[PLACE1_LINK].a3, vec[PLACE1_LINK].a0);
+    angle = atan2(vec[PLACE4_LINK_DIR].a3, vec[PLACE4_LINK_DIR].a0);
     return angle;
   }
   if (direction / abs(direction) == -1) {
     move(direction, 1);
-    angle = atan2(vec[PLACE1_LINK].a3, vec[PLACE1_LINK].a0);
+    angle = atan2(vec[PLACE4_LINK_DIR].a3, vec[PLACE4_LINK_DIR].a0);
     move(direction, -1);
     return -angle;
   } else {
@@ -178,24 +185,34 @@ T link1<T>::wilson_loop(const vector<T> &array, int r, int t) {
   return A;
 }
 
+template <class T> T link1<T>::wilson_line(const vector<T> &array, int length) {
+  int dir = direction;
+  T A;
+  for (int i = 0; i < length; i++) {
+    A = A * get_matrix(array);
+    move(dir, 1);
+  }
+  return A;
+}
+
 template <class T>
 FLOAT link1<T>::field1(const vector<vector<T>> &schwinger_line,
                        const vector<T> &plaket, const vector<T> &polyakov_loop,
                        int d, int D, int dir, int x) {
   int dir1 = direction;
-  T C = schwinger_line[dir - 1][PLACE];
+  T C = schwinger_line[dir - 1][PLACE3_LINK_DIR];
   move(dir1, d);
   move(dir, x);
-  T B = plaket[PLACE];
+  T B = plaket[PLACE3_LINK_DIR];
   move(-dir, x);
   move(-dir1, d);
   move_dir(-4);
-  T A = polyakov_loop[PLACE_FIELD_LINK];
+  T A = polyakov_loop[PLACE1_LINK_NODIR];
   A = A.conj() * C * B;
   A = A * C.conj();
   move(dir1, D);
   move_dir(4);
-  B = polyakov_loop[PLACE_FIELD_LINK];
+  B = polyakov_loop[PLACE1_LINK_NODIR];
   move(-dir1, D);
   move_dir(dir1);
   return A.tr() * B.tr();
@@ -206,15 +223,15 @@ FLOAT link1<T>::field2(const vector<T> &plaket, const vector<T> &polyakov_loop,
                        int d, int D, int dir, int x) {
   int dir1 = direction;
   move_dir(-4);
-  T A = polyakov_loop[PLACE_FIELD_LINK];
+  T A = polyakov_loop[PLACE1_LINK_NODIR];
   move(dir1, d);
   move(dir, x);
   move_dir(dir1);
-  T B = plaket[PLACE];
+  T B = plaket[PLACE3_LINK_DIR];
   move(-dir, x);
   move(dir1, D - d);
   move_dir(4);
-  T C = polyakov_loop[PLACE_FIELD_LINK];
+  T C = polyakov_loop[PLACE1_LINK_NODIR];
   move(-dir1, D);
   move_dir(dir1);
   return B.tr() * C.tr() * A.conj().tr();
@@ -224,10 +241,10 @@ template <class T>
 FLOAT link1<T>::field3(const vector<T> &polyakov_loop, int D, int x) {
   int dir1 = direction;
   move_dir(-4);
-  T A = polyakov_loop[PLACE_FIELD_LINK];
+  T A = polyakov_loop[PLACE1_LINK_NODIR];
   move(dir1, D);
   move_dir(4);
-  T B = polyakov_loop[PLACE_FIELD_LINK];
+  T B = polyakov_loop[PLACE1_LINK_NODIR];
   move(-dir1, D);
   move_dir(dir1);
   return A.conj().tr() * B.tr();
@@ -387,14 +404,14 @@ vector<T> link1<T>::smearing_first(const vector<T> &array, FLOAT alpha3, int nu,
           for (int i = 1; i < 5; i++) {
             if (i != abs(nu) && i != abs(rho)) {
               move_dir(i);
-              vec[PLACE1_LINK] = (1 - alpha3) * get_matrix(array);
+              vec[PLACE4_LINK_DIR] = (1 - alpha3) * get_matrix(array);
               for (int d = 1; d < 5; d++) {
                 if (d != abs(nu) && d != abs(rho) && d != i) {
-                  vec[PLACE1_LINK] =
-                      vec[PLACE1_LINK] + alpha3 / 2. * staples_first(array, d);
+                  vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR] +
+                                         alpha3 / 2. * staples_first(array, d);
                 }
               }
-              vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
+              vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
             }
           }
         }
@@ -429,15 +446,15 @@ vector<T> link1<T>::smearing_second(const vector<T> &array,
           for (int i = 1; i < 5; i++) {
             if (i != abs(nu)) {
               move_dir(i);
-              vec[PLACE1_LINK] = (1 - alpha2) * get_matrix(array);
+              vec[PLACE4_LINK_DIR] = (1 - alpha2) * get_matrix(array);
               for (int d = 1; d < 5; d++) {
                 if (d != abs(nu) && d != i) {
-                  vec[PLACE1_LINK] =
-                      vec[PLACE1_LINK] +
+                  vec[PLACE4_LINK_DIR] =
+                      vec[PLACE4_LINK_DIR] +
                       alpha2 / 4. * staples_second(smearing_first, d, nu);
                 }
               }
-              vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
+              vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
             }
           }
         }
@@ -468,12 +485,13 @@ vector<T> link1<T>::smearing_HYP(const vector<T> &array,
       for (int y = 0; y < y_size; y++) {
         for (int x = 0; x < x_size; x++) {
           go(x, y, z, t);
-          vec[PLACE1_LINK] = (1 - alpha1) * get_matrix(array);
+          vec[PLACE4_LINK_DIR] = (1 - alpha1) * get_matrix(array);
           for (int d = 1; d < 4; d++) {
-            vec[PLACE1_LINK] = vec[PLACE1_LINK] +
-                               alpha1 / 6. * staples_third(smearing_second, d);
+            vec[PLACE4_LINK_DIR] =
+                vec[PLACE4_LINK_DIR] +
+                alpha1 / 6. * staples_third(smearing_second, d);
           }
-          vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
+          vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
         }
       }
     }
@@ -485,7 +503,7 @@ vector<T> link1<T>::smearing_HYP(const vector<T> &array,
         for (int y = 0; y < y_size; y++) {
           for (int x = 0; x < x_size; x++) {
             go(x, y, z, t);
-            vec[PLACE1_LINK] = array[PLACE1_LINK];
+            vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
           }
         }
       }
@@ -520,13 +538,14 @@ vector<T> link1<T>::smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
           go(x, y, z, t);
           for (int i = 1; i < 4; i++) {
             move_dir(i);
-            vec[PLACE1_LINK] = (1 - alpha_APE) * array[PLACE1_LINK];
+            vec[PLACE4_LINK_DIR] = (1 - alpha_APE) * array[PLACE4_LINK_DIR];
             for (int d = 1; d < 4; d++) {
               if (d != i)
-                vec[PLACE1_LINK] = vec[PLACE1_LINK] +
-                                   (alpha_APE / 6.) * staples_first(array, d);
+                vec[PLACE4_LINK_DIR] =
+                    vec[PLACE4_LINK_DIR] +
+                    (alpha_APE / 6.) * staples_first(array, d);
             }
-            vec[PLACE1_LINK] = vec[PLACE1_LINK].proj();
+            vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
           }
         }
       }
@@ -538,7 +557,7 @@ vector<T> link1<T>::smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
       for (int y = 0; y < y_size; y++) {
         for (int x = 0; x < x_size; x++) {
           go(x, y, z, t);
-          vec[PLACE1_LINK] = array[PLACE1_LINK];
+          vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
         }
       }
     }
@@ -590,7 +609,7 @@ vector<T> link1<T>::smearing_HYP_refresh(data<T> &conf, FLOAT alpha1,
           for (int d = 1; d < 4; d++) {
             A = A + alpha1 / 6. * staples_third_refresh(vec, d, alpha2, alpha3);
           }
-          vec[PLACE1_LINK] = A.proj();
+          vec[PLACE4_LINK_DIR] = A.proj();
         }
       }
     }
@@ -610,12 +629,12 @@ vector<T> link1<T>::smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
           go(x, y, z, t);
           for (int i = 1; i < 4; i++) {
             move_dir(i);
-            A = (1 - alpha_APE) * conf.array[PLACE1_LINK];
+            A = (1 - alpha_APE) * conf.array[PLACE4_LINK_DIR];
             for (int d = 1; d < 4; d++) {
               if (d != i)
                 A = A + (alpha_APE / 4.) * staples_first(vec, d);
             }
-            vec[PLACE1_LINK] = A.proj();
+            vec[PLACE4_LINK_DIR] = A.proj();
           }
         }
       }
@@ -637,8 +656,8 @@ template <> vector<su2> link1<su2>::smearing_stout(data<su2> &conf, FLOAT rho) {
           go(x, y, z, t);
           for (int i = 1; i < 5; i++) {
             move_dir(i);
-            vec[PLACE1_LINK] =
-                stout_factor(conf, rho) * conf.array[PLACE1_LINK];
+            vec[PLACE4_LINK_DIR] =
+                stout_factor(conf, rho) * conf.array[PLACE4_LINK_DIR];
           }
         }
       }
@@ -675,7 +694,7 @@ template <> su2 link1<su2>::stout_omega(data<su2> &conf, FLOAT rho) {
   int dir = direction;
   su2 A;
   su2 B(0., 0., 0., 0.);
-  A = conf.array[PLACE1_LINK].inverse();
+  A = conf.array[PLACE4_LINK_DIR].inverse();
   for (int i = 1; i < 5; i++) {
     if (i != dir) {
       B = B + staples_first(conf.array, i);
@@ -694,7 +713,7 @@ template <class T> void link1<T>::gauge_transform(data<T> &conf) {
       for (int y = 0; y < y_size; y++) {
         for (int x = 0; x < x_size; x++) {
           for (int i = 1; i < 5; i++) {
-            a = PLACE1_LINK;
+            a = PLACE4_LINK_DIR;
             conf.array[a] = C * conf.array[a] * A;
           }
         }
@@ -784,3 +803,6 @@ template <class T> int link1<T>::current_test(FLOAT *J) {
 
 template class link1<su2>;
 template class link1<abelian>;
+
+template ostream &operator<<(ostream &os, const link1<su2> &link);
+template ostream &operator<<(ostream &os, const link1<abelian> &link);

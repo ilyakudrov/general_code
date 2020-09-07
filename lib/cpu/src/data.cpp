@@ -1,4 +1,4 @@
-#include "data.h"
+#include "../include/data.h"
 
 #define PLACE_DATA                                                             \
   (t) * 4 * x_size *y_size *z_size + (z)*4 * x_size *y_size + (y)*4 * x_size + \
@@ -176,6 +176,10 @@ template <> void data<su2>::read_double_qc2dstag(char const *file_name) {
   }
   SPACE_ITER_END
   stream.close();
+}
+
+template <> void data<abelian>::read_double_qc2dstag(char const *file_name) {
+  cout << "there's no reason for implementation" << endl;
 }
 
 template <> void data<su2>::read_double_fortran(char const *file_name) {

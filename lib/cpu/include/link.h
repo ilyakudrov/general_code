@@ -7,6 +7,12 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
+#ifdef DOUBLE
+#define FLOAT double
+#else
+#define FLOAT float
+#endif
+
 #include "data.h"
 #include "math.h"
 #include "matrix.h"
@@ -22,13 +28,6 @@ public:
 
   link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
         int lattice_size_t);
-
-  ostream &operator<<(ostream &os) {
-    os << "x: " << coordinate[0] << " y: " << coordinate[1]
-       << " z: " << coordinate[2] << " t: " << coordinate[3]
-       << " dir: " << direction << endl;
-    return os;
-  }
 
   void print_link();
   void move(int dir, int step);
@@ -49,6 +48,7 @@ public:
   T polyakov_loop(const vector<T> &array); // attached to where it loops and
                                            // directed to the temporal direction
   T wilson_loop(const vector<T> &array, int r, int t);
+  T wilson_line(const vector<T> &array, int length);
   // first numeratoк
   // d - distance between "left" source and plaket
   // D - distance between sources
@@ -102,3 +102,5 @@ public:
   FLOAT get_current(data<T> &conf);
   int current_test(FLOAT *J);*/
 };
+
+template <class T> ostream &operator<<(ostream &os, const link1<T> &link);

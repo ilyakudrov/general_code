@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef DOUBLE
+#define FLOAT double
+#else
+#define FLOAT float
+#endif
+
 #include "data.h"
 #include "link.h"
 #include "matrix.h"
@@ -7,24 +13,43 @@
 
 using namespace std;
 
+// Plaket
 template <class T> FLOAT plaket_time(const vector<T> &array);
 template <class T> FLOAT plaket_space(const vector<T> &array);
 template <class T> FLOAT plaket(const vector<T> &array);
-template <class T> FLOAT wilson(const vector<T> &array, int r, int time);
+
+// Wilson loop
+template <class T>
+vector<FLOAT> wilson(const vector<T> &array, int r_min, int r_max, int time_min,
+                     int time_max);
+template <class T>
+vector<T> wilson_lines(const vector<T> &array, int mu, int length);
+template <class T>
+vector<T> wilson_line_increase(const vector<T> &array, const vector<T> &lines,
+                               int mu, int length);
+
+// Polyakov loop
 template <class T> FLOAT polyakov(const vector<T> &array);
+
+// Wilson_plaket_schwinger_correlator
+template <class T> vector<T> calculate_plaket_time(const vector<T> array);
+template <class T> vector<T> calculate_plaket_space(const vector<T> &array);
+template <class T> vector<T> calculate_polyakov_loop(const vector<T> &array);
 template <class T>
-void fields(const vector<vector<T>> &schwinger_line, const vector<T> &plaket,
-            const vector<T> &polyakov_loop, vector<vector<result>> &field1,
-            vector<vector<result>> &field2, vector<result> &field3, int d,
-            int D, int x_trans);
-template <class T>
-void field1_average(const vector<vector<T>> &schwinger_line,
-                    const vector<T> &plaket, const vector<T> &polyakov_loop,
-                    vector<vector<result>> &field1, int d, int D, int x_trans);
+vector<T> calculate_wilson_loop(const vector<T> &array, int r, int time);
 template <class T>
 vector<vector<T>> calculate_schwinger_line(const vector<T> &array, int d,
                                            int x_trans);
-template <class T> vector<T> calculate_plaket(const vector<T> &array);
+template <class T>
+void wilson_plaket_schwinger_electric(const vector<vector<T>> &schwinger_line,
+                                      const vector<T> &plaket,
+                                      const vector<T> &polyakov_loop,
+                                      vector<vector<result>> &field1,
+                                      vector<vector<result>> &field2,
+                                      vector<result> &field3, int d, int D,
+                                      int x_trans);
+
+// Wilson_plaket_correlator
 template <class T>
 vector<FLOAT> calculate_plaket_time_tr(const vector<T> &array);
 template <class T>
@@ -34,15 +59,9 @@ FLOAT plaket4_time_optimized(const vector<FLOAT> &plaket_tr, link1<T> &link);
 template <class T>
 FLOAT plaket4_space_optimized(const vector<FLOAT> &plaket_tr, link1<T> &link,
                               int nu);
-template <class T> vector<T> calculate_polyakov_loop(const vector<T> &array);
-template <class T>
-vector<T> calculate_wilson_loop(const vector<T> &array, int r, int time);
 template <class T>
 vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r, int time);
-template <class T> FLOAT polyakov_loop_corelator(const vector<T> &array, int D);
-template <class T> FLOAT plaket_correlator(const vector<T> &plaket, int dist);
-template <class T>
-FLOAT plaket_correlator_space(const vector<T> &plaket, int dist);
+
 result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
                                          const vector<FLOAT> &plaket_tr, int r,
                                          int time, int x_trans, int d_min,
@@ -51,11 +70,6 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
                                            const vector<FLOAT> &plaket_tr,
                                            int r, int time, int x_trans_min,
                                            int x_trans_max, int d);
-/*template <class T>
-result polyakov_plaket_correlator_electric(const vector<T> &array,
-                                           const vector<T> &array_smeared,
-                                           int r, int x_trans, int d_min,
-                                           int d_max);*/
 result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
                                          const vector<FLOAT> &plaket_tr, int r,
                                          int time, int x_trans, int d_min,
@@ -64,10 +78,10 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
                                            const vector<FLOAT> &plaket_tr,
                                            int r, int time, int x_trans_min,
                                            int x_trans_max, int d);
-/*result polyakov_plaket_correlator_magnetic(const vector<T> &array,
-                                           const vector<T> &array_smeared,
-                                           int R, int x_trans, int d_min,
-                                           int d_max);*/
+
+// Polyakov_correlator
+template <class T> FLOAT polyakov_loop_corelator(const vector<T> &array, int D);
+
 // monopoles
 /*template <class T> void length(loop *ll, int &ss1);
 template <class T>

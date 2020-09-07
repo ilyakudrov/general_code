@@ -1,8 +1,8 @@
-#include "data.h"
-#include "link.h"
-#include "matrix.h"
-#include "observables.h"
-#include "result.h"
+#include "../include/data.h"
+#include "../include/link.h"
+#include "../include/matrix.h"
+#include "../include/observables.h"
+#include "../include/result.h"
 
 #include <cstdlib>
 #include <cstring>

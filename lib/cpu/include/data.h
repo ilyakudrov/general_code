@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef DOUBLE
+#define FLOAT double
+#else
+#define FLOAT float
+#endif
+
 #include "math.h"
 #include "matrix.h"
 #include <fstream>

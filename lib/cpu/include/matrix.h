@@ -1,26 +1,16 @@
 #pragma once
 
+#ifdef DOUBLE
+#define FLOAT double
+#else
+#define FLOAT float
+#endif
+
 #include <iostream>
 
 using namespace std;
 
-// template <class T> class matrix {
-//   FLOAT tr();
-//   T inverse();
-//   T conj();
-//   T proj();
-//   FLOAT module();
-
-//   T operator+(matrix A, matrix B);
-//   T operator-(matrix A, matrix B);
-//   T operator*(FLOAT x, matrix A);
-//   T operator*(matrix A, FLOAT x);
-//   T operator*(matrix A, matrix B);
-
-//   ostream &operator<<(ostream &os, const matrix &A);
-// };
-
-class su2 /*: public matrix<su2>*/ {
+class su2 {
 public:
   FLOAT a0, a1, a2, a3;
   su2(FLOAT b0, FLOAT b1, FLOAT b2, FLOAT b3);
@@ -41,7 +31,7 @@ su2 operator*(const su2 &A, const su2 &B);
 
 ostream &operator<<(ostream &os, const su2 &A);
 
-class abelian /*: public matrix<abelian>*/ {
+class abelian {
 public:
   FLOAT r, phi;
   abelian();
