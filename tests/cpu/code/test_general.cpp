@@ -85,17 +85,20 @@ int main(int argc, char *argv[]) {
   end_time = clock();
   search_time = end_time - start_time;
   cout << "prepare time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
   start_time = clock();
   result electric = wilson_plaket_correlator_electric(
       wilson_vec, plaket_time_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
   cout << "electric time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
   start_time = clock();
   result magnetic = wilson_plaket_correlator_magnetic(
       wilson_vec, plaket_space_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
+
   cout << "magnetic time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
   for (int i = 0; i < electric.array.size(); i++) {
     cout << "electric R = " << R << " T= " << T << " " << electric.array[i]
@@ -107,7 +110,28 @@ int main(int argc, char *argv[]) {
   int x_trans_min = -12;
   int x_trans_max = 12;
 
-  x_size = 32;
+     start_time = clock();
+  result electric_x = wilson_plaket_correlator_electric_x(
+      wilson_vec, plaket_time_vec, R, T, x_trans_min, x_trans_max, R/2);
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "electric_x time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
+  start_time = clock();
+  result magnetic_x = wilson_plaket_correlator_magnetic_x(
+      wilson_vec, plaket_space_vec, R, T, x_trans_min, x_trans_max, R/2);
+  end_time = clock();
+  search_time = end_time - start_time;
+
+  cout << "magnetic_x time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+  for (int i = 0; i < electric_x.array.size(); i++) {
+    cout << "electric_x R = " << R << " T= " << T << " " << electric_x.array[i]
+         << endl;
+    cout << "magnetic_x R = " << R << " T= " << T << " " << magnetic_x.array[i]
+         << endl;
+  }
+
+  /*x_size = 32;
   y_size = 32;
   z_size = 32;
   t_size = 32;
@@ -164,5 +188,5 @@ int main(int argc, char *argv[]) {
 
   end_time = clock();
   search_time = end_time - start_time;
-  cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+  cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;*/
 }
