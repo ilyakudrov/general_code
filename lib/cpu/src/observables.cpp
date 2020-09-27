@@ -35,6 +35,16 @@
   }                                                                            \
   }
 
+#define ITER_START_ZYX                                                         \
+  for (int z = 0; z < z_size; z++) {                                           \
+    for (int y = 0; y < y_size; y++) {                                         \
+      for (int x = 0; x < x_size; x++) {
+
+#define ITER_END_3                                                             \
+  }                                                                            \
+  }                                                                            \
+  }
+
 #include "../include/observables.h"
 #include "../include/link.h"
 
@@ -106,18 +116,21 @@ vector<FLOAT> wilson(const vector<T> &array, int r_min, int r_max, int time_min,
       else
         space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
       for (int time = time_min; time <= time_max; time++) {
-        SPACE_ITER_START;
-        link.go(x, y, z, t);
-        A = time_lines[time - time_min][PLACE1_LINK_NODIR];
-        link.move(4, time);
-        A = A * space_lines[PLACE1_LINK_NODIR];
-        link.move(-4, time);
-        link.move(dir, r);
-        A = A * time_lines[time - time_min][PLACE1_LINK_NODIR].conj();
-        link.move(-dir, r);
-        A = A * space_lines[PLACE1_LINK_NODIR].conj();
-        wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] += A.tr();
-        SPACE_ITER_END;
+        for (int t = 0; t < t_size; t++) {
+          ITER_START_ZYX
+          link.go(x, y, z, t);
+          A = time_lines[time - time_min][PLACE1_LINK_NODIR];
+          link.move(4, time);
+          A = A * space_lines[PLACE1_LINK_NODIR];
+          link.move(-4, time);
+          link.move(dir, r);
+          A = A * time_lines[time - time_min][PLACE1_LINK_NODIR].conj();
+          link.move(-dir, r);
+          A = A * space_lines[PLACE1_LINK_NODIR].conj();
+          wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] +=
+              A.tr();
+          ITER_END_3
+        }
       }
     }
   }
@@ -613,28 +626,25 @@ void length_mu(loop* ll, int mu, int& s){
         } while((ll->link[i]!=NULL)&&(i<=6));
 }
 
-void calculate_t_clusters(vector<loop*>& LL, vector<loop*>& t_clusters, int
-max_number){ int s = 0; for(int i = 0;i < LL.size();i++){ if(i != max_number){
-                        s = 0;
-                        length_mu(LL[i], 4, s);
-                        if(s != 0) t_clusters.push_back(LL[i]);
+void calculate_t_clusters(vector<loop*>& LL, vector<loop*>& t_clusters,
+int max_number){ int s = 0; for(int i = 0;i < LL.size();i++){ if(i !=
+max_number){ s = 0; length_mu(LL[i], 4, s); if(s != 0)
+t_clusters.push_back(LL[i]);
                 }
         }
 }
 
-void calculate_t_clusters_n(vector<loop*>& LL, vector<loop*>& t_clusters_n,
-int max_number, int n){ int s = 0; for(int i = 0;i < LL.size();i++){ if(i !=
-max_number){ s = 0; length_mu(LL[i], 4, s); if(abs(s/t_size) == n)
-t_clusters_n.push_back(LL[i]);
+void calculate_t_clusters_n(vector<loop*>& LL, vector<loop*>&
+t_clusters_n, int max_number, int n){ int s = 0; for(int i = 0;i <
+LL.size();i++){ if(i != max_number){ s = 0; length_mu(LL[i], 4, s);
+if(abs(s/t_size) == n) t_clusters_n.push_back(LL[i]);
                 }
         }
 }
 
-void calculate_s_clusters(vector<loop*>& LL, vector<loop*>& s_clusters, int
-max_number){ int s = 0; for(int i = 0;i < LL.size();i++){ if(i != max_number){
-                        for(int j = 1;j < 4;j++){
-                                s = 0;
-                                length_mu(LL[i], j, s);
+void calculate_s_clusters(vector<loop*>& LL, vector<loop*>& s_clusters,
+int max_number){ int s = 0; for(int i = 0;i < LL.size();i++){ if(i !=
+max_number){ for(int j = 1;j < 4;j++){ s = 0; length_mu(LL[i], j, s);
                                 if(s != 0) s_clusters.push_back(LL[i]);
                         }
                 }
@@ -671,7 +681,8 @@ FLOAT time_length_portion(vector<loop*>& t_clusters){
 void sites_unique(loop* ll, vector<loop*>& sites){
         int a = 0;
         for(int r=0;r < sites.size();r++){
-                if(sites[r]->node.coordinate[0] == ll->node.coordinate[0]
+                if(sites[r]->node.coordinate[0] ==
+ll->node.coordinate[0]
                         && sites[r]->node.coordinate[1] ==
 ll->node.coordinate[1]
                         && sites[r]->node.coordinate[2] ==
@@ -732,10 +743,11 @@ FLOAT calculate_disp_r(vector<loop*>& t_clusters){
 
 bool sites_close(loop* l, loop* ll){
         int x = distance_shortest(ll->node.coordinate[0],
-l->node.coordinate[0]); int y = distance_shortest(ll->node.coordinate[1],
-l->node.coordinate[1]); int z = distance_shortest(ll->node.coordinate[2],
-l->node.coordinate[2]); int t = distance_shortest(ll->node.coordinate[3],
-l->node.coordinate[3]); return ((x*x + y*y + z*z + t*t) == 1);
+l->node.coordinate[0]); int y =
+distance_shortest(ll->node.coordinate[1], l->node.coordinate[1]); int z
+= distance_shortest(ll->node.coordinate[2], l->node.coordinate[2]); int
+t = distance_shortest(ll->node.coordinate[3], l->node.coordinate[3]);
+return ((x*x + y*y + z*z + t*t) == 1);
 }
 
 FLOAT dimension(vector<loop*> sites) {

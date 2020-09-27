@@ -1,13 +1,14 @@
-#include "../include/data.h"
-#include "../include/link.h"
-#include "../include/matrix.h"
-#include "../include/observables.h"
-#include "../include/result.h"
+#include "../../../lib/cpu/include/data.h"
+#include "../../../lib/cpu/include/link.h"
+#include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/observables.h"
+#include "../../../lib/cpu/include/result.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <omp.h>
 #include <stdio.h>
 
 using namespace std;
@@ -24,8 +25,8 @@ int main(int argc, char *argv[]) {
   FLOAT alpha_APE = 0.3;
   FLOAT stout_rho = 0.15;
 
-  vector<vector<su2>> smearing_first(6, vector<su2>(1));
-  vector<vector<su2>> smearing_second(4, vector<su2>(1));
+  vector<vector<su2>> smearing_first(9, vector<su2>(1));
+  vector<vector<su2>> smearing_second(6, vector<su2>(1));
 
   link1<su2> link(x_size, y_size, z_size, t_size);
   link1<abelian> link_double(x_size, y_size, z_size, t_size);
@@ -43,25 +44,8 @@ int main(int argc, char *argv[]) {
   su2 A;
   unsigned int start_time = clock();
 
-  conf_abelian_smeared.array =
-      link_double.smearing_APE(conf_abelian.array, alpha_APE);
-
-  for (int i = 0; i < 10; i++) {
-    cout << "smearing_APE_abelian test " << conf_abelian_smeared.array[i]
-         << endl;
-  }
-
-  cout << "wilson_abelian_smeared aver "
-       << wilson(conf_abelian_smeared.array, 1, 1) << endl;
-
-  vector<vector<abelian>> smearing_first_abelian(6, vector<abelian>(1));
-  vector<vector<abelian>> smearing_second_abelian(4, vector<abelian>(1));
-  smearing_first_abelian =
-      link_double.smearing_first_full(conf_abelian.array, alpha3);
-  smearing_second_abelian = link_double.smearing_second_full(
-      conf_abelian.array, smearing_first_abelian, alpha2);
-  conf_abelian_smeared.array = link_double.smearing_HYP(
-      conf_abelian.array, smearing_second_abelian, alpha1);
+  double start;
+  double end;
 
   smearing_first = link.smearing_first_full(conf.array, alpha3);
   smearing_second =
@@ -69,9 +53,7 @@ int main(int argc, char *argv[]) {
   smeared.array = link.smearing_HYP(conf.array, smearing_second, alpha1);
 
   for (int i = 0; i < 4; i++) {
-    A = smeared.array[i];
-    cout << "smearing_HYP test " << A.a0 << " " << A.a1 << " " << A.a2 << " "
-         << A.a3 << endl;
+    cout << "smearing_HYP test " << smeared.array[i] << endl;
   }
   cout << "right:" << endl;
   cout << "-0.110943 0.629543 -0.583767 0.500582" << endl;

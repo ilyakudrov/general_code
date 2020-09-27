@@ -23,7 +23,7 @@ su2 su2::inverse() {
   return su2(a0 / rho, -a1 / rho, -a2 / rho, -a3 / rho);
 }
 FLOAT su2::module() { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
-su2 su2::conj() { return su2(a0, -a1, -a2, -a3); }
+su2 su2::conj() const { return su2(a0, -a1, -a2, -a3); }
 su2 su2::proj() {
   FLOAT rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   return su2(a0 / powf(rho, 0.5), a1 / powf(rho, 0.5), a2 / powf(rho, 0.5),
@@ -72,7 +72,7 @@ FLOAT abelian::tr() { return cos(phi); }
 
 abelian abelian::inverse() { return abelian(1 / r, -phi); }
 FLOAT abelian::module() { return r; }
-abelian abelian::conj() { return abelian(r, -phi); }
+abelian abelian::conj() const { return abelian(r, -phi); }
 abelian abelian::proj() { return abelian(1, phi); }
 
 abelian operator+(const abelian &A, const abelian &B) {

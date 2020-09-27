@@ -278,31 +278,28 @@ template <class T> T link1<T>::staples_first(const vector<T> &vec, int eta) {
 }
 
 template <class T>
-T link1<T>::staples_second(const vector<vector<T>> &smearing_first, int eta,
+T link1<T>::staples_second(const vector<vector<T>> &smearing_first,
+                           unordered_map<int, int> &indexes, int rho, int mu,
                            int nu) {
   T A;
   T B;
-  int dir = direction;
-  move_dir(eta);
-  A = get_matrix(smearing_first[position_first(nu, dir)]);
-  move(eta, 1);
-  move_dir(dir);
-  A = A * get_matrix(smearing_first[position_first(nu, eta)]);
-  move(dir, 1);
-  move_dir(-eta);
-  A = A * get_matrix(smearing_first[position_first(nu, dir)]);
-  move(-eta, 1);
-  move(-dir, 1);
-  B = get_matrix(smearing_first[position_first(nu, dir)]);
-  move(-eta, 1);
-  move_dir(dir);
-  B = B * get_matrix(smearing_first[position_first(nu, eta)]);
-  move(dir, 1);
-  move_dir(eta);
-  B = B * get_matrix(smearing_first[position_first(nu, dir)]);
-  move(eta, 1);
-  move(-dir, 1);
-  move_dir(dir);
+  int a = 0;
+  A = smearing_first[indexes[rho * 100 + nu * 10 + mu]][PLACE1_LINK_NODIR];
+  move(rho, 1);
+  A = A * smearing_first[indexes[mu * 100 + rho * 10 + nu]][PLACE1_LINK_NODIR];
+  move(direction, 1);
+  move(-rho, 1);
+  A = A * smearing_first[indexes[rho * 100 + nu * 10 + mu]][PLACE1_LINK_NODIR]
+              .conj();
+  move(-direction, 1);
+  move(-rho, 1);
+  B = smearing_first[indexes[rho * 100 + nu * 10 + mu]][PLACE1_LINK_NODIR]
+          .conj();
+  B = B * smearing_first[indexes[mu * 100 + rho * 10 + nu]][PLACE1_LINK_NODIR];
+  move(direction, 1);
+  B = B * smearing_first[indexes[rho * 100 + nu * 10 + mu]][PLACE1_LINK_NODIR];
+  move(rho, 1);
+  move(-direction, 1);
   return (A + B);
 }
 
@@ -336,30 +333,24 @@ T link1<T>::staples_second_refresh(const vector<T> &vec, int eta, int nu,
 }
 
 template <class T>
-T link1<T>::staples_third(const vector<vector<T>> &smearing_second, int eta) {
+T link1<T>::staples_third(const vector<vector<T>> &smearing_second,
+                          unordered_map<int, int> indexes, int nu, int mu) {
   T A;
   T B;
-  int dir = direction;
-  move_dir(eta);
-  A = get_matrix(smearing_second[dir - 1]);
-  move(eta, 1);
-  move_dir(dir);
-  A = A * get_matrix(smearing_second[eta - 1]);
-  move(dir, 1);
-  move_dir(-eta);
-  A = A * get_matrix(smearing_second[dir - 1]);
-  move(-eta, 1);
-  move(-dir, 1);
-  B = get_matrix(smearing_second[dir - 1]);
-  move(-eta, 1);
-  move_dir(dir);
-  B = B * get_matrix(smearing_second[eta - 1]);
-  move(dir, 1);
-  move_dir(eta);
-  B = B * get_matrix(smearing_second[dir - 1]);
-  move(eta, 1);
-  move(-dir, 1);
-  move_dir(dir);
+  A = smearing_second[indexes[nu * 10 + mu]][PLACE1_LINK_NODIR];
+  move(nu, 1);
+  A = A * smearing_second[indexes[mu * 10 + nu]][PLACE1_LINK_NODIR];
+  move(direction, 1);
+  move(-nu, 1);
+  A = A * smearing_second[indexes[nu * 10 + mu]][PLACE1_LINK_NODIR].conj();
+  move(-direction, 1);
+  move(-nu, 1);
+  B = smearing_second[indexes[nu * 10 + mu]][PLACE1_LINK_NODIR].conj();
+  B = B * smearing_second[indexes[mu * 10 + nu]][PLACE1_LINK_NODIR];
+  move(direction, 1);
+  B = B * smearing_second[indexes[nu * 10 + mu]][PLACE1_LINK_NODIR];
+  move(nu, 1);
+  move(-direction, 1);
   return (A + B);
 }
 
@@ -393,27 +384,23 @@ T link1<T>::staples_third_refresh(const vector<T> &vec, int eta, FLOAT alpha2,
 }
 
 template <class T>
-vector<T> link1<T>::smearing_first(const vector<T> &array, FLOAT alpha3, int nu,
-                                   int rho) {
-  vector<T> vec(data_size);
+vector<T> link1<T>::smearing_first(const vector<T> &array, FLOAT alpha3, int mu,
+                                   int nu, int rho) {
+  vector<T> vec(data_size / 4);
+  move_dir(mu);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
       for (int y = 0; y < y_size; y++) {
         for (int x = 0; x < x_size; x++) {
           go(x, y, z, t);
+          vec[PLACE1_LINK_NODIR] = (1 - alpha3) * get_matrix(array);
           for (int i = 1; i < 5; i++) {
-            if (i != abs(nu) && i != abs(rho)) {
-              move_dir(i);
-              vec[PLACE4_LINK_DIR] = (1 - alpha3) * get_matrix(array);
-              for (int d = 1; d < 5; d++) {
-                if (d != abs(nu) && d != abs(rho) && d != i) {
-                  vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR] +
-                                         alpha3 / 2. * staples_first(array, d);
-                }
-              }
-              vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+            if (i != mu && i != nu && i != rho) {
+              vec[PLACE1_LINK_NODIR] = vec[PLACE1_LINK_NODIR] +
+                                       alpha3 / 2. * staples_first(array, i);
             }
           }
+          vec[PLACE1_LINK_NODIR] = vec[PLACE1_LINK_NODIR].proj();
         }
       }
     }
@@ -421,13 +408,54 @@ vector<T> link1<T>::smearing_first(const vector<T> &array, FLOAT alpha3, int nu,
   return vec;
 }
 
+void make_map_first(unordered_map<int, int> &indexes) {
+  int key;
+  int count = 0;
+  for (int i = 1; i <= 3; i++) {
+    for (int j = 1; j <= 3; j++) {
+      int k = 4;
+      if (i != j) {
+        key = i * 100 + j * 10 + k;
+        indexes[key] = count;
+        key = i * 100 + k * 10 + j;
+        indexes[key] = count;
+        count++;
+      }
+    }
+  }
+  int i = 4;
+  for (int j = 1; j <= 2; j++) {
+    for (int k = j + 1; k <= 3; k++) {
+      key = i * 100 + j * 10 + k;
+      indexes[key] = count;
+      key = i * 100 + k * 10 + j;
+      indexes[key] = count;
+      count++;
+    }
+  }
+}
+
 template <class T>
 vector<vector<T>> link1<T>::smearing_first_full(const vector<T> &array,
                                                 FLOAT alpha3) {
-  vector<vector<T>> smearing(6, vector<T>(data_size));
-  for (int i = 1; i < 4; i++) {
-    for (int j = i + 1; j < 5; j++) {
-      smearing[position_first(i, j)] = smearing_first(array, alpha3, i, j);
+  unordered_map<int, int> indexes;
+  make_map_first(indexes);
+  vector<vector<T>> smearing(9, vector<T>(data_size / 4));
+  int key;
+  for (int i = 1; i <= 3; i++) {
+    for (int j = 1; j <= 3; j++) {
+      int k = 4;
+      if (i != j) {
+        key = i * 100 + j * 10 + k;
+        smearing[indexes[key]] = smearing_first(array, alpha3, i, j, k);
+      }
+    }
+  }
+  int i = 4;
+  for (int j = 1; j <= 2; j++) {
+    for (int k = j + 1; k <= 3; k++) {
+      key = i * 100 + j * 10 + k;
+      smearing[indexes[key]] = smearing_first(array, alpha3, i, j, k);
     }
   }
   return smearing;
@@ -436,27 +464,26 @@ vector<vector<T>> link1<T>::smearing_first_full(const vector<T> &array,
 template <class T>
 vector<T> link1<T>::smearing_second(const vector<T> &array,
                                     vector<vector<T>> &smearing_first,
-                                    FLOAT alpha2, int nu) {
-  vector<T> vec(data_size);
+                                    FLOAT alpha2, int mu, int nu) {
+  unordered_map<int, int> indexes;
+  make_map_first(indexes);
+  vector<T> vec(data_size / 4);
+  move_dir(mu);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
       for (int y = 0; y < y_size; y++) {
         for (int x = 0; x < x_size; x++) {
           go(x, y, z, t);
+          vec[PLACE1_LINK_NODIR] = (1 - alpha2) * get_matrix(array);
           for (int i = 1; i < 5; i++) {
-            if (i != abs(nu)) {
-              move_dir(i);
-              vec[PLACE4_LINK_DIR] = (1 - alpha2) * get_matrix(array);
-              for (int d = 1; d < 5; d++) {
-                if (d != abs(nu) && d != i) {
-                  vec[PLACE4_LINK_DIR] =
-                      vec[PLACE4_LINK_DIR] +
-                      alpha2 / 4. * staples_second(smearing_first, d, nu);
-                }
-              }
-              vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+            if (i != mu && i != nu) {
+              vec[PLACE1_LINK_NODIR] =
+                  vec[PLACE1_LINK_NODIR] +
+                  alpha2 / 4. *
+                      staples_second(smearing_first, indexes, i, mu, nu);
             }
           }
+          vec[PLACE1_LINK_NODIR] = vec[PLACE1_LINK_NODIR].proj();
         }
       }
     }
@@ -464,12 +491,37 @@ vector<T> link1<T>::smearing_second(const vector<T> &array,
   return vec;
 }
 
+void make_map_second(unordered_map<int, int> &indexes) {
+  int key;
+  int count = 0;
+  for (int i = 1; i <= 3; i++) {
+    key = i * 10 + 4;
+    indexes[key] = count;
+    count++;
+  }
+  for (int i = 1; i <= 3; i++) {
+    key = 40 + i;
+    indexes[key] = count;
+    count++;
+  }
+}
+
 template <class T>
 vector<vector<T>> link1<T>::smearing_second_full(
     const vector<T> &array, vector<vector<T>> &smearing_first, FLOAT alpha2) {
-  vector<vector<T>> smearing(4, vector<T>(data_size));
-  for (int i = 1; i < 5; i++) {
-    smearing[i - 1] = smearing_second(array, smearing_first, alpha2, i);
+  unordered_map<int, int> indexes;
+  make_map_second(indexes);
+  vector<vector<T>> smearing(6, vector<T>(data_size / 4));
+  int key;
+  for (int i = 1; i <= 3; i++) {
+    key = i * 10 + 4;
+    smearing[indexes[key]] =
+        smearing_second(array, smearing_first, alpha2, i, 4);
+  }
+  for (int i = 1; i <= 3; i++) {
+    key = 40 + i;
+    smearing[indexes[key]] =
+        smearing_second(array, smearing_first, alpha2, 4, i);
   }
   return smearing;
 }
@@ -478,6 +530,8 @@ template <class T>
 vector<T> link1<T>::smearing_HYP(const vector<T> &array,
                                  vector<vector<T>> &smearing_second,
                                  FLOAT alpha1) {
+  unordered_map<int, int> indexes;
+  make_map_second(indexes);
   vector<T> vec(data_size);
   move_dir(4);
   for (int t = 0; t < t_size; t++) {
@@ -486,10 +540,10 @@ vector<T> link1<T>::smearing_HYP(const vector<T> &array,
         for (int x = 0; x < x_size; x++) {
           go(x, y, z, t);
           vec[PLACE4_LINK_DIR] = (1 - alpha1) * get_matrix(array);
-          for (int d = 1; d < 4; d++) {
+          for (int i = 1; i < 4; i++) {
             vec[PLACE4_LINK_DIR] =
                 vec[PLACE4_LINK_DIR] +
-                alpha1 / 6. * staples_third(smearing_second, d);
+                alpha1 / 6. * staples_third(smearing_second, indexes, i, 4);
           }
           vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
         }
@@ -512,22 +566,6 @@ vector<T> link1<T>::smearing_HYP(const vector<T> &array,
   return vec;
 }
 
-template <class T> int link1<T>::position_first(int a, int b) {
-  int i;
-  int j;
-  if (a < b) {
-    i = a;
-    j = b;
-  }
-  if (a > b) {
-    i = b;
-    j = a;
-  }
-  if (a == b)
-    std::cout << "wrong directions " << a << " " << b << endl;
-  return (i - 1) * (8 - i) / 2 + j - i - 1;
-}
-
 template <class T>
 vector<T> link1<T>::smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
   vector<T> vec(data_size);
@@ -540,10 +578,11 @@ vector<T> link1<T>::smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
             move_dir(i);
             vec[PLACE4_LINK_DIR] = (1 - alpha_APE) * array[PLACE4_LINK_DIR];
             for (int d = 1; d < 4; d++) {
-              if (d != i)
+              if (d != i) {
                 vec[PLACE4_LINK_DIR] =
                     vec[PLACE4_LINK_DIR] +
                     (alpha_APE / 6.) * staples_first(array, d);
+              }
             }
             vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
           }

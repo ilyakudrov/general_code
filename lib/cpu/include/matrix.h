@@ -18,7 +18,7 @@ public:
 
   FLOAT tr();
   su2 inverse();
-  su2 conj();
+  su2 conj() const;
   su2 proj();
   FLOAT module();
 };
@@ -39,7 +39,7 @@ public:
 
   FLOAT tr();
   abelian inverse();
-  abelian conj();
+  abelian conj() const;
   abelian proj();
   FLOAT module();
 };

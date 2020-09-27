@@ -18,6 +18,7 @@ extern int t_size;
 #include "matrix.h"
 #include "stdlib.h"
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 template <class T> class link1 {
@@ -65,25 +66,26 @@ public:
   FLOAT field3(const vector<T> &polyakov_loop, int D,
                int x); // attached to the "left" source and points to another
   T staples_first(const vector<T> &vec, int eta);
-  T staples_second(const vector<vector<T>> &smearing_first, int eta, int nu);
+  T staples_second(const vector<vector<T>> &smearing_first,
+                   unordered_map<int, int> &indexes, int rho, int mu, int nu);
   T staples_second_refresh(const vector<T> &vec, int eta, int nu,
                            FLOAT alpha3); // staples for refreshing
                                           // algorythm(refresh link every step)
-  T staples_third(const vector<vector<T>> &smearing_second, int eta);
+  T staples_third(const vector<vector<T>> &smearing_second,
+                  unordered_map<int, int> indexes, int nu, int mu);
   T staples_third_refresh(const vector<T> &vec, int eta, FLOAT alpha2,
                           FLOAT alpha3);
-  vector<T> smearing_first(const vector<T> &array, FLOAT alpha3, int nu,
+  vector<T> smearing_first(const vector<T> &array, FLOAT alpha3, int mu, int nu,
                            int rho);
   vector<vector<T>> smearing_first_full(const vector<T> &array, FLOAT alpha3);
   vector<T> smearing_second(const vector<T> &array,
                             vector<vector<T>> &smearing_first, FLOAT alpha2,
-                            int nu);
+                            int mu, int nu);
   vector<vector<T>> smearing_second_full(const vector<T> &array,
                                          vector<vector<T>> &smearing_first,
                                          FLOAT alpha2);
   vector<T> smearing_HYP(const vector<T> &array,
                          vector<vector<T>> &smearing_second, FLOAT alpha1);
-  inline int position_first(int a, int b);
   vector<T> smearing_APE(const vector<T> &array, FLOAT alpha_APE);
   T smearing_first_refresh(const vector<T> &vec, int nu, int rho,
                            FLOAT alpha3); // refresh link every step
@@ -104,3 +106,5 @@ public:
 };
 
 template <class T> ostream &operator<<(ostream &os, const link1<T> &link);
+void make_map_first(unordered_map<int, int> &indexes);
+void make_map_second(unordered_map<int, int> &indexes);

@@ -9,6 +9,7 @@
 #include <ctime>
 #include <iostream>
 #include <stdio.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -53,16 +54,21 @@ int main(int argc, char *argv[]) {
        << endl;
   cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array) / 2 << endl;
 
-  int T_min = 1, T_max = 2;
-  int R_min = 1, R_max = 2;
+  double start;
+  double end;
+
+  int T_min = 1, T_max = 3;
+  int R_min = 1, R_max = 3;
 
   vector<FLOAT> vec_wilson;
   start_time = clock();
+
   vec_wilson = wilson(conf_qc2dstag.array, R_min, R_max, T_min, T_max);
+
   end_time = clock();
   search_time = end_time - start_time;
   cout << "wilson time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-  cout << "wilson_loops" << endl;
+  cout << "wilson_loops:" << endl;
   for (int T = T_min; T <= T_max; T++) {
     for (int R = R_min; R <= R_max; R++) {
       cout << "T = " << T << " R = " << R << " "
@@ -110,16 +116,16 @@ int main(int argc, char *argv[]) {
   int x_trans_min = -12;
   int x_trans_max = 12;
 
-     start_time = clock();
+  start_time = clock();
   result electric_x = wilson_plaket_correlator_electric_x(
-      wilson_vec, plaket_time_vec, R, T, x_trans_min, x_trans_max, R/2);
+      wilson_vec, plaket_time_vec, R, T, x_trans_min, x_trans_max, R / 2);
   end_time = clock();
   search_time = end_time - start_time;
   cout << "electric_x time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
 
   start_time = clock();
   result magnetic_x = wilson_plaket_correlator_magnetic_x(
-      wilson_vec, plaket_space_vec, R, T, x_trans_min, x_trans_max, R/2);
+      wilson_vec, plaket_space_vec, R, T, x_trans_min, x_trans_max, R / 2);
   end_time = clock();
   search_time = end_time - start_time;
 
@@ -131,7 +137,7 @@ int main(int argc, char *argv[]) {
          << endl;
   }
 
-  /*x_size = 32;
+  x_size = 32;
   y_size = 32;
   z_size = 32;
   t_size = 32;
@@ -188,5 +194,5 @@ int main(int argc, char *argv[]) {
 
   end_time = clock();
   search_time = end_time - start_time;
-  cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;*/
+  cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
 }
