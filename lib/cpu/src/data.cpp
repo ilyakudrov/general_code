@@ -49,6 +49,41 @@ template <> void data<su2>::read_float(char const *file_name) {
   stream.close();
 }
 
+vector<float> read_full_ml5(char const *file_name, int conf_num) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  ifstream stream(file_name);
+  vector<float> v(conf_num * data_size1 * 4);
+  if (!stream.read((char *)&v[0], conf_num * data_size1 * 4 * sizeof(float)))
+    cout << "read_full_ml5<su2> error: " << file_name << endl;
+  return v;
+  stream.close();
+}
+
+template <>
+void data<su2>::read_float_ml5(const vector<float> &array_ml5, int conf_num) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  su2 A;
+  int i;
+  SPACE_ITER_START
+  for (int mu = 1; mu <= 4; mu++) {
+    if (mu == 4) {
+      i = 4 *
+          (t * x_size * y_size * z_size + x + y * x_size + z * x_size * y_size);
+    } else {
+      i = 4 * (t * x_size * y_size * z_size + x + y * x_size +
+               z * x_size * y_size) +
+          mu;
+    }
+    A.a0 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4];
+    A.a3 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 1];
+    A.a2 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 2];
+    A.a1 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 3];
+    array.push_back(A);
+  }
+  SPACE_ITER_END
+}
+
 template <> void data<abelian>::read_float(char const *file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();

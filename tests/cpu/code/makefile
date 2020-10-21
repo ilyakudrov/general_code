@@ -2,8 +2,7 @@ INCLUDE_PATH=../../../lib/cpu/include
 SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
-FLOAT=double
-FLAGS=-O3 -D DOUBLE #-DFLOAT=$(FLOAT)
+FLAGS=-O3 -D DOUBLE
 OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general

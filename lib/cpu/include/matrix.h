@@ -21,6 +21,7 @@ public:
   su2 conj() const;
   su2 proj();
   FLOAT module();
+  su2 sigma3_mult() const;
 };
 
 su2 operator+(const su2 &A, const su2 &B);

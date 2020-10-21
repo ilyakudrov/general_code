@@ -29,6 +29,7 @@ su2 su2::proj() {
   return su2(a0 / powf(rho, 0.5), a1 / powf(rho, 0.5), a2 / powf(rho, 0.5),
              a3 / powf(rho, 0.5));
 }
+su2 su2::sigma3_mult() const { return su2(a0, -a1, -a2, a3); }
 
 su2 operator+(const su2 &A, const su2 &B) {
   return su2(A.a0 + B.a0, A.a1 + B.a1, A.a2 + B.a2, A.a3 + B.a3);

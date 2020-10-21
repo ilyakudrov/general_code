@@ -581,6 +581,14 @@ FLOAT polyakov_loop_corelator(const vector<T> &array, int D) {
   return aver[0];
 }
 
+FLOAT MAG_functional_su2(const vector<su2> &array) {
+  FLOAT result = 0;
+  for (int i = 0; i < data_size; i++) {
+    result += (array[i].sigma3_mult() * array[i].conj()).tr();
+  }
+  return result / (2 * data_size);
+}
+
 // monopoles
 
 /*void length(loop* ll, int& ss1){

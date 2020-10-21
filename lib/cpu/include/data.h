@@ -17,6 +17,7 @@ public:
   std::vector<T> array;
   data();
   void read_float(char const *file_name); // read conf file of floats
+  void read_float_ml5(const vector<float> &array_ml5, int conf_num);
   void read_float_fortran(char const *file_name);
   void read_double(char const *file_name); // read conf file of double
   void read_double_qc2dstag(char const *file_name);
@@ -28,3 +29,4 @@ public:
   void read_float_fortran_convert_abelian(char const *file_name);
   void read_float_convert_abelian(char const *file_name);
 };
+vector<float> read_full_ml5(char const *file_name, int conf_num);

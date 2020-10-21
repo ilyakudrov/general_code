@@ -124,7 +124,7 @@ template <class T> T link1<T>::plaket_mu(const vector<T> &array, int mu) {
   T A = get_matrix(array);
   move(dir, 1);
   move_dir(-mu); // the same temporal direction as polyakov loop, connected to
-                 // schwinger line, has
+  // schwinger line, has
   A = A * get_matrix(array);
   move(-mu, 1);
   move_dir(-dir);

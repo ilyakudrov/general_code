@@ -82,6 +82,8 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
 // Polyakov_correlator
 template <class T> FLOAT polyakov_loop_corelator(const vector<T> &array, int D);
 
+FLOAT MAG_functional_su2(const vector<su2> &array);
+
 // monopoles
 /*template <class T> void length(loop *ll, int &ss1);
 template <class T>
