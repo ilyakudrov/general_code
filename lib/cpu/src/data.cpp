@@ -20,6 +20,7 @@
   }                                                                            \
   }
 
+// global variables for lattice size (should be removed)
 extern int x_size;
 extern int y_size;
 extern int z_size;

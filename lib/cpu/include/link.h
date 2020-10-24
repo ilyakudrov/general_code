@@ -7,6 +7,7 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
+// size of floating point numbers used in code
 #ifdef DOUBLE
 #define FLOAT double
 #else
@@ -21,36 +22,56 @@ extern int t_size;
 #include <unordered_map>
 #include <vector>
 
+// Class link1 goes on a periodic 4D lattice and calculates some obseervables
+// can take matrices from vector of matrices in usual order (see data.h)
+// numeration of directions is as follows
+// x - 1, y - 2, z - 3, t - 4 (in arrays numeratioon starts with 0)
 template <class T> class link1 {
 public:
+  // lattice sizes
   int lattice_size[4];
-  int coordinate[4]; // 0..lattise_size[i]-1
+  // coordinates of the site
+  // coordinate[i] = 0..lattise_size[i]-1
+  int coordinate[4];
+  // current direction of the link
+  // negative values means opposite direction
   int direction;
 
   link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
         int lattice_size_t);
 
+  // prints link information
   void print_link();
+
+  // moves link in direction dir on step steps
   void move(int dir, int step);
+
+  // goes on site with following coordinates
   void go(int x, int y, int z, int t);
+
+  // changes direction to dir
   void move_dir(int dir); // changes the direction
+
+  // gets place in different arrays (see link.cpp)
   int get_place();
   int get_place1();
-  T get_matrix(const vector<T> &vec); // works with negative
-                                      // directions(takes inverse matrix)
-  FLOAT border_sign(int mu);
-  FLOAT get_angle_abelian(const vector<T> &vec);
-  T schwinger_line(
-      const vector<T> &array, int d, int dir,
-      int x); // link is attached to "left" source and directed to the plaket
-  T plaket_mu(const vector<T> &array,
-              int mu); // mu is the second direction
-  T plaket_average4(const vector<T> &array, int mu);
-  T polyakov_loop(const vector<T> &array); // attached to where it loops and
-                                           // directed to the temporal direction
+
+  // gets matrix on carrent link, gets conjugate if direction is opposite
+  T get_matrix(const vector<T> &vec);
+
+  // calculates plaket matrix in current direction and mu plane
+  T plaket_mu(const vector<T> &array, int mu);
+
+  // calculates polyakov loop in currect direction
+  T polyakov_loop(const vector<T> &array);
+
+  // calculate wilson loop of r*t size in current direction and 4-th direction
+  // plane
   T wilson_loop(const vector<T> &array, int r, int t);
+
+  // used in wilson_loop
   T wilson_line(const vector<T> &array, int length);
-  // first numeratoк
+
   // d - distance between "left" source and plaket
   // D - distance between sources
   FLOAT field1(
