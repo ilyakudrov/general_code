@@ -3,7 +3,7 @@ SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
 FLAGS=-O3 -D DOUBLE
-OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o
+OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
@@ -26,6 +26,8 @@ $(OBJ_PATH)/result.o: $(SRC_PATH)/result.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/result.cpp -o $(OBJ_PATH)/result.o
 $(OBJ_PATH)/matrix.o: $(SRC_PATH)/matrix.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/matrix.cpp -o $(OBJ_PATH)/matrix.o
+$(OBJ_PATH)/smearing.o: $(SRC_PATH)/smearing.cpp
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/smearing.cpp -o $(OBJ_PATH)/smearing.o
 $(OBJ_PATH)/eigen.o: $(SRC_PATH)/eigen.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/eigen.cpp -o $(OBJ_PATH)/eigen.o
 $(OBJ_PATH)/monopoles.o: $(SRC_PATH)/monopoles.cpp

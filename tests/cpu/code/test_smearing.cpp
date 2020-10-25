@@ -3,12 +3,12 @@
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/observables.h"
 #include "../../../lib/cpu/include/result.h"
+#include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
-#include <omp.h>
 #include <stdio.h>
 
 using namespace std;
@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
   vector<vector<su2>> smearing_first(9, vector<su2>(1));
   vector<vector<su2>> smearing_second(6, vector<su2>(1));
 
-  link1<su2> link(x_size, y_size, z_size, t_size);
-  link1<abelian> link_double(x_size, y_size, z_size, t_size);
+  link1 link(x_size, y_size, z_size, t_size);
+  link1 link_double(x_size, y_size, z_size, t_size);
   data<su2> conf;
   data<su2> smeared;
   data<abelian> conf_abelian;
@@ -47,10 +47,9 @@ int main(int argc, char *argv[]) {
   double start;
   double end;
 
-  smearing_first = link.smearing_first_full(conf.array, alpha3);
-  smearing_second =
-      link.smearing_second_full(conf.array, smearing_first, alpha2);
-  smeared.array = link.smearing_HYP(conf.array, smearing_second, alpha1);
+  smearing_first = smearing_first_full(conf.array, alpha3);
+  smearing_second = smearing_second_full(conf.array, smearing_first, alpha2);
+  smeared.array = smearing_HYP(conf.array, smearing_second, alpha1);
 
   for (int i = 0; i < 4; i++) {
     cout << "smearing_HYP test " << smeared.array[i] << endl;
@@ -61,20 +60,15 @@ int main(int argc, char *argv[]) {
   cout << "0.174894 0.667862 0.674797 0.260808" << endl;
   cout << "-0.704066 -0.13241 0.453476 -0.530206" << endl;
 
-  smeared.array = link.smearing_HYP_refresh(conf, alpha1, alpha2, alpha3);
+  smeared.array = smearing_HYP_refresh(conf, alpha1, alpha2, alpha3);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];
     cout << "smearing_HYP_refresh test " << A.a0 << " " << A.a1 << " " << A.a2
          << " " << A.a3 << endl;
   }
-  cout << "right:" << endl;
-  cout << "-0.110943 0.629543 -0.583767 0.500582" << endl;
-  cout << "0.318657 -0.218438 -0.415944 0.823245" << endl;
-  cout << "0.174894 0.667862 0.674797 0.260808" << endl;
-  cout << "-0.704066 -0.13241 0.453476 -0.530206" << endl;
 
-  smeared.array = link.smearing_APE(conf.array, alpha_APE);
+  smeared.array = smearing_APE(conf.array, alpha_APE);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];
@@ -87,7 +81,7 @@ int main(int argc, char *argv[]) {
   cout << "0.125318 0.626699 0.730398 0.240963" << endl;
   cout << "-0.632818 0.13761 0.745239 0.158818" << endl;
 
-  smeared.array = link.smearing_stout(conf, stout_rho);
+  smeared.array = smearing_stout(conf, stout_rho);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];

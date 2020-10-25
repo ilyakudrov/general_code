@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   unsigned int start_time;
   unsigned int end_time;
   unsigned int search_time;
-  link1<su2> link(x_size, y_size, z_size, t_size);
+  link1 link(x_size, y_size, z_size, t_size);
   data<su2> conf;
   data<abelian> conf_abelian;
   data<su2> conf_offd;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
   y_size = 32;
   z_size = 32;
   t_size = 32;
-  link1<abelian> link_abelian(x_size, y_size, z_size, t_size);
+  link1 link_abelian(x_size, y_size, z_size, t_size);
   cout.precision(10);
 
   start_time = clock();
