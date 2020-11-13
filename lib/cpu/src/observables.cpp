@@ -1,7 +1,7 @@
 #define data_size 4 * x_size *y_size *z_size *t_size
 #define PLACE3_DIR                                                             \
   (t) * 3 * x_size *y_size *z_size + (z)*3 * x_size *y_size + (y)*3 * x_size + \
-      (x)*3 + dir - 1
+      (x)*3 + dir
 // #define PLACE1_NODIR                                                           \
 //   (t) * 3 * x_size *y_size *z_size + (z)*3 * x_size *y_size + (y)*3 * x_size + \
 //       (x)*3 - 1
@@ -15,20 +15,30 @@
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
       (link.coordinate[1]) * 3 * x_size + (link.coordinate[0]) * 3 +           \
-      link.direction - 1
+      link.direction
 #define PLACE_PLAKET_SPACE                                                     \
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
-      (link.coordinate[1]) * 3 * x_size + (link.coordinate[0]) * 3 - 1
+      (link.coordinate[1]) * 3 * x_size + (link.coordinate[0]) * 3
 #define PLACE1_LINK_NODIR                                                      \
   (link.coordinate[3]) * x_size *y_size *z_size +                              \
       (link.coordinate[2]) * x_size *y_size + (link.coordinate[1]) * x_size +  \
       (link.coordinate[0])
+
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
+    link.coordinate[3] = t;                                                    \
+    link.update(3);                                                            \
     for (int z = 0; z < z_size; z++) {                                         \
+      link.coordinate[2] = z;                                                  \
+      link.update(2);                                                          \
       for (int y = 0; y < y_size; y++) {                                       \
-        for (int x = 0; x < x_size; x++) {
+        link.coordinate[1] = y;                                                \
+        link.update(1);                                                        \
+        for (int x = 0; x < x_size; x++) {                                     \
+          link.coordinate[0] = x;                                              \
+          link.update(0);
+
 #define SPACE_ITER_END                                                         \
   }                                                                            \
   }                                                                            \
@@ -37,8 +47,14 @@
 
 #define ITER_START_ZYX                                                         \
   for (int z = 0; z < z_size; z++) {                                           \
+    link.coordinate[2] = z;                                                    \
+    link.update(2);                                                            \
     for (int y = 0; y < y_size; y++) {                                         \
-      for (int x = 0; x < x_size; x++) {
+      link.coordinate[1] = y;                                                  \
+      link.update(1);                                                          \
+      for (int x = 0; x < x_size; x++) {                                       \
+        link.coordinate[0] = x;                                                \
+        link.update(0);
 
 #define ITER_END_3                                                             \
   }                                                                            \
@@ -52,11 +68,10 @@ template <class T> FLOAT plaket_time(const vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
   result res(0);
   FLOAT aver[2];
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    link.go(x, y, z, t);
-    res.array.push_back(link.plaket_mu(array, 4).tr());
+    res.array.push_back(link.plaket_mu(array, 3).tr());
     SPACE_ITER_END;
   }
   res.average(aver);
@@ -68,9 +83,8 @@ template <class T> FLOAT plaket_space(const vector<T> &array) {
   result res(0);
   FLOAT aver[2];
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int mu = 1; mu < 4; mu++) {
-    for (int nu = mu + 1; nu < 4; nu++) {
+  for (int mu = 0; mu < 3; mu++) {
+    for (int nu = mu + 1; nu < 3; nu++) {
       link.move_dir(nu);
       res.array.push_back(link.plaket_mu(array, mu).tr());
     }
@@ -82,12 +96,11 @@ template <class T> FLOAT plaket_space(const vector<T> &array) {
 
 template <class T> FLOAT plaket(const vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result res(0);
+  result res(data_size / 4 * 6);
   FLOAT aver[2];
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int mu = 1; mu < 5; mu++) {
-    for (int nu = mu + 1; nu < 5; nu++) {
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
       link.move_dir(nu);
       res.array.push_back(link.plaket_mu(array, mu).tr());
     }
@@ -98,6 +111,7 @@ template <class T> FLOAT plaket(const vector<T> &array) {
 }
 
 // fast wilson_loop
+// TODO: optimize
 template <class T>
 vector<FLOAT> wilson(const vector<T> &array, int r_min, int r_max, int time_min,
                      int time_max) {
@@ -106,26 +120,27 @@ vector<FLOAT> wilson(const vector<T> &array, int r_min, int r_max, int time_min,
   vector<vector<T>> time_lines(time_max - time_min + 1);
   vector<T> space_lines;
   for (int i = time_min; i <= time_max; i++) {
-    time_lines[i - time_min] = wilson_lines(array, 4, i);
+    time_lines[i - time_min] = wilson_lines(array, 3, i);
   }
   T A;
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     for (int r = r_min; r <= r_max; r++) {
       if (r == r_min)
         space_lines = wilson_lines(array, dir, r);
       else
         space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
       for (int time = time_min; time <= time_max; time++) {
+        // TODO: elaborate
         for (int t = 0; t < t_size; t++) {
           ITER_START_ZYX
           link.go(x, y, z, t);
           A = time_lines[time - time_min][PLACE1_LINK_NODIR];
-          link.move(4, time);
+          link.move(3, time);
           A = A * space_lines[PLACE1_LINK_NODIR];
-          link.move(-4, time);
+          link.move(3, -time);
           link.move(dir, r);
           A = A * time_lines[time - time_min][PLACE1_LINK_NODIR].conj();
-          link.move(-dir, r);
+          link.move(dir, -r);
           A = A * space_lines[PLACE1_LINK_NODIR].conj();
           wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] +=
               A.tr();
@@ -146,10 +161,52 @@ vector<T> wilson_lines(const vector<T> &array, int mu, int length) {
   link.move_dir(mu);
   vector<T> vec(data_size / 4);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
   vec[PLACE1_LINK_NODIR] = link.wilson_line(array, length);
   SPACE_ITER_END;
   return vec;
+}
+
+// off-axis wilson loop
+template <class T>
+vector<FLOAT> wilson_offaxis(const vector<T> &array, int r_min, int r_max,
+                             int time_min, int time_max, int ratio) {
+  link1 link(x_size, y_size, z_size, t_size);
+  vector<FLOAT> wilson((time_max - time_min + 1) * (r_max - r_min + 1));
+  vector<vector<T>> time_lines(time_max - time_min + 1);
+  vector<T> space_lines;
+  for (int i = time_min; i <= time_max; i++) {
+    time_lines[i - time_min] = wilson_lines(array, 3, i);
+  }
+  T A;
+  for (int dir = 0; dir < 3; dir++) {
+    for (int r = r_min; r <= r_max; r++) {
+      if (r == r_min)
+        space_lines = wilson_lines(array, dir, r);
+      else
+        space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
+      for (int time = time_min; time <= time_max; time++) {
+        for (int t = 0; t < t_size; t++) {
+          ITER_START_ZYX
+          link.go(x, y, z, t);
+          A = time_lines[time - time_min][PLACE1_LINK_NODIR];
+          link.move(3, time);
+          A = A * space_lines[PLACE1_LINK_NODIR];
+          link.move(3, -time);
+          link.move(dir, r);
+          A = A * time_lines[time - time_min][PLACE1_LINK_NODIR].conj();
+          link.move(dir, -r);
+          A = A * space_lines[PLACE1_LINK_NODIR].conj();
+          wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] +=
+              A.tr();
+          ITER_END_3
+        }
+      }
+    }
+  }
+  for (int i = 0; i < (time_max - time_min + 1) * (r_max - r_min + 1); i++) {
+    wilson[i] = wilson[i] / (data_size / 4 * 3);
+  }
+  return wilson;
 }
 
 template <class T>
@@ -159,7 +216,6 @@ vector<T> wilson_line_increase(const vector<T> &array, const vector<T> &lines,
   link.move_dir(mu);
   vector<T> lines_new(data_size / 4);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
   link.move(mu, length);
   lines_new[PLACE1_NODIR] = lines[PLACE1_NODIR] * link.get_matrix(array);
   SPACE_ITER_END;
@@ -170,9 +226,8 @@ template <class T> FLOAT polyakov(const vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
   result res(0);
   FLOAT aver[2];
-  link.move_dir(4);
+  link.move_dir(3);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
   res.array.push_back(link.polyakov_loop(array).tr());
   SPACE_ITER_END;
   res.average(aver);
@@ -183,10 +238,9 @@ template <class T> vector<T> calculate_plaket_time(const vector<T> array) {
   vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 1; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[PLACE3_DIR] = link.plaket_mu(array, -4);
+    vec.push_back(link.plaket_mu(array, 3));
   }
   SPACE_ITER_END;
   return vec;
@@ -196,9 +250,8 @@ template <class T> vector<T> calculate_plaket_space(const vector<T> &array) {
   vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int dir = 1; dir < 4; dir++) {
-    for (int j = dir + 1; j < 4; j++) {
+  for (int dir = 0; dir < 3; dir++) {
+    for (int j = dir + 1; j < 3; j++) {
       link.move_dir(dir);
       vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(array, j);
     }
@@ -210,10 +263,8 @@ template <class T> vector<T> calculate_plaket_space(const vector<T> &array) {
 template <class T> vector<T> calculate_polyakov_loop(const vector<T> &array) {
   vector<T> vec((data_size) / 4);
   link1 link(x_size, y_size, z_size, t_size);
-  int dir = 4;
-  link.move_dir(4);
+  link.move_dir(3);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
   vec[PLACE1_NODIR] = link.polyakov_loop(array);
   SPACE_ITER_END;
   return vec;
@@ -223,10 +274,9 @@ template <class T>
 vector<T> calculate_wilson_loop(const vector<T> &array, int r, int time) {
   vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    link.go(x, y, z, t);
     vec[PLACE3_DIR] = link.wilson_loop(array, r, time);
     SPACE_ITER_END;
   }
@@ -238,11 +288,10 @@ vector<vector<T>> calculate_schwinger_line(const vector<T> &array, int d,
                                            int x_trans) {
   vector<vector<T>> vec(3, vector<T>(data_size));
   link1 link(x_size, y_size, z_size, t_size);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    link.go(x, y, z, t);
-    for (int nu = 1; nu < 4; nu++) {
+    for (int nu = 0; nu < 3; nu++) {
       if (nu != dir)
         vec[nu - 1][PLACE3_DIR] = link.schwinger_line(array, d, nu, x_trans);
     }
@@ -260,10 +309,9 @@ void wilson_plaket_schwinger_electric(const vector<vector<T>> &schwinger_line,
                                       vector<result> &field3, int d, int D,
                                       int x_trans) {
   link1 link(x_size, y_size, z_size, t_size);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     T A, B;
     SPACE_ITER_START;
-    link.go(x, y, z, t);
     A = polyakov_loop[PLACE1_LINK_NODIR];
     // B = schwinger_line;
     link.move(dir, d);
@@ -285,10 +333,9 @@ vector<FLOAT> calculate_plaket_time_tr(const vector<T> &array) {
   vector<FLOAT> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[PLACE3_DIR] = link.plaket_mu(array, -4).tr();
+    vec[PLACE3_DIR] = link.plaket_mu(array, 3).tr();
   }
   SPACE_ITER_END;
   return vec;
@@ -300,11 +347,10 @@ vector<FLOAT> calculate_plaket_space_tr(const vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
   int place_dir;
   SPACE_ITER_START;
-  link.go(x, y, z, t);
-  for (int dir = 1; dir < 4; dir++) {
-    for (int j = dir + 1; j < 4; j++) {
+  for (int dir = 0; dir < 3; dir++) {
+    for (int j = dir + 1; j < 3; j++) {
       link.move_dir(dir);
-      vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(array, j).tr();
+      vec[PLACE1_NODIR * 3 + dir + j] = link.plaket_mu(array, j).tr();
     }
   }
   SPACE_ITER_END;
@@ -315,24 +361,24 @@ FLOAT plaket4_time_optimized(const vector<FLOAT> &plaket_tr, link1 &link) {
   FLOAT a = plaket_tr[PLACE_PLAKET_TIME];
   link.move(link.direction, -1);
   a += plaket_tr[PLACE_PLAKET_TIME];
-  link.move(4, 1);
+  link.move(3, -1);
   a += plaket_tr[PLACE_PLAKET_TIME];
   link.move(link.direction, 1);
   a += plaket_tr[PLACE_PLAKET_TIME];
-  link.move(4, -1);
+  link.move(3, 1);
   return a / 4;
 }
 
 FLOAT plaket4_space_optimized(const vector<FLOAT> &plaket_tr, link1 &link,
                               int nu) {
-  FLOAT a = plaket_tr[PLACE_PLAKET_SPACE + link.direction + nu - 2];
+  FLOAT a = plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
   link.move(link.direction, -1);
-  a += plaket_tr[PLACE_PLAKET_SPACE + link.direction + nu - 2];
-  link.move(nu, 1);
-  a += plaket_tr[PLACE_PLAKET_SPACE + link.direction + nu - 2];
-  link.move(link.direction, 1);
-  a += plaket_tr[PLACE_PLAKET_SPACE + link.direction + nu - 2];
+  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
   link.move(nu, -1);
+  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+  link.move(link.direction, 1);
+  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+  link.move(nu, 1);
   return a / 4;
 }
 
@@ -341,10 +387,9 @@ vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r,
                                        int time) {
   vector<FLOAT> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    link.go(x, y, z, t);
     vec[PLACE3_DIR] = link.wilson_loop(array, r, time).tr();
     SPACE_ITER_END;
   }
@@ -363,28 +408,27 @@ result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
   result final(0);
   FLOAT aver[2];
   FLOAT a;
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    link.go(x, y, z, t);
     a = wilson_loop_tr[PLACE3_DIR];
-    link.move(4, time / 2);
+    link.move(3, time / 2);
     link.move(dir, d_min);
     for (int d = d_min; d <= d_max; d++) {
       if (x_trans == 0) {
-        for (int mu = 1; mu < 4; mu++) {
+        for (int mu = 0; mu < 3; mu++) {
           link.move_dir(mu);
           vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
         }
       } else {
-        for (int nu = 1; nu < 4; nu++) {
+        for (int nu = 0; nu < 3; nu++) {
           if (nu != dir) {
             link.move(nu, x_trans);
-            for (int mu = 1; mu < 4; mu++) {
+            for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
               vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
             }
             link.move(nu, -2 * x_trans);
-            for (int mu = 1; mu < 4; mu++) {
+            for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
               vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
             }
@@ -419,19 +463,17 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
   result final(0);
   FLOAT aver[2];
   FLOAT a;
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    link.go(x, y, z, t);
-    // link.move_dir(dir);
     a = wilson_loop_tr[PLACE3_DIR];
-    link.move(4, time / 2);
+    link.move(3, time / 2);
     link.move(dir, d);
-    for (int nu = 1; nu < 4; nu++) {
+    for (int nu = 0; nu < 3; nu++) {
       if (nu != dir) {
         link.move(nu, x_trans_min - 1);
         for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
           link.move(nu, 1);
-          for (int mu = 1; mu < 4; mu++) {
+          for (int mu = 0; mu < 3; mu++) {
             link.move_dir(mu);
             vec[x_trans - x_trans_min] +=
                 a * plaket4_time_optimized(plaket_tr, link);
@@ -462,35 +504,34 @@ result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
   result final(0);
   FLOAT aver[2];
   FLOAT a;
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    link.go(x, y, z, t);
     link.move_dir(dir);
     a = wilson_loop_tr[PLACE3_DIR];
-    link.move(4, time / 2);
+    link.move(3, time / 2);
     link.move(dir, d_min);
     for (int d = d_min; d <= d_max; d++) {
       if (x_trans == 0) {
-        for (int mu = 1; mu < 4; mu++) {
-          for (int j = mu + 1; j < 4; j++) {
+        for (int mu = 0; mu < 3; mu++) {
+          for (int j = mu + 1; j < 3; j++) {
             link.move_dir(mu);
             vec[d - d_min] += a * plaket4_space_optimized(plaket_tr, link, j);
           }
         }
       } else {
-        for (int nu = 1; nu < 4; nu++) {
+        for (int nu = 0; nu < 3; nu++) {
           if (nu != dir) {
             link.move(nu, x_trans);
-            for (int mu = 1; mu < 4; mu++) {
-              for (int j = mu + 1; j < 4; j++) {
+            for (int mu = 0; mu < 3; mu++) {
+              for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
                 vec[d - d_min] +=
                     a * plaket4_space_optimized(plaket_tr, link, j);
               }
             }
             link.move(nu, -2 * x_trans);
-            for (int mu = 1; mu < 4; mu++) {
-              for (int j = mu + 1; j < 4; j++) {
+            for (int mu = 0; mu < 3; mu++) {
+              for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
                 vec[d - d_min] +=
                     a * plaket4_space_optimized(plaket_tr, link, j);
@@ -527,19 +568,18 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
   result final(0);
   FLOAT aver[2];
   FLOAT a;
-  for (int dir = 1; dir < 4; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    link.go(x, y, z, t);
     a = wilson_loop_tr[PLACE3_DIR];
-    link.move(4, T / 2);
+    link.move(3, T / 2);
     link.move(dir, d);
-    for (int nu = 1; nu < 4; nu++) {
+    for (int nu = 0; nu < 3; nu++) {
       if (nu != dir) {
         link.move(nu, x_trans_min - 1);
         for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
           link.move(nu, 1);
-          for (int mu = 1; mu < 4; mu++) {
-            for (int j = mu + 1; j < 4; j++) {
+          for (int mu = 0; mu < 3; mu++) {
+            for (int j = mu + 1; j < 3; j++) {
               link.move_dir(mu);
               vec[x_trans - x_trans_min] +=
                   a * plaket4_space_optimized(plaket_tr, link, j);
@@ -566,9 +606,8 @@ FLOAT polyakov_loop_corelator(const vector<T> &array, int D) {
   result vec(0);
   FLOAT aver[2];
   FLOAT a;
-  for (int mu = 1; mu < 4; mu++) {
+  for (int mu = 0; mu < 3; mu++) {
     SPACE_ITER_START;
-    link.go(x, y, z, t);
     a = polyakov_loop[PLACE1_LINK_NODIR].tr();
     link.move(mu, D);
     a *= polyakov_loop[PLACE1_LINK_NODIR].conj().tr();

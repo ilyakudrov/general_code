@@ -40,10 +40,17 @@ su2 operator+(const su2 &A, const su2 &B);
 su2 operator-(const su2 &A, const su2 &B);
 su2 operator*(const FLOAT &x, const su2 &A);
 su2 operator*(const su2 &A, const FLOAT &x);
+
+// matrix multiplication A * B
 su2 operator*(const su2 &A, const su2 &B);
 
-ostream &operator<<(ostream &os, const su2 &A);
+// matrix multiplication A * B
+su2 operator*(const su2 &A, const su2 *B);
 
+// matrix multiplication A * B.conj()
+su2 operator^(const su2 &A, const su2 *B);
+
+ostream &operator<<(ostream &os, const su2 &A);
 
 // abelian variable (module * exp(i * phi))
 class abelian {
@@ -67,6 +74,9 @@ abelian operator+(const abelian &A, const abelian &B);
 abelian operator-(const abelian &A, const abelian &B);
 abelian operator*(const FLOAT &x, const abelian &A);
 abelian operator*(const abelian &A, const FLOAT &x);
+
 abelian operator*(const abelian &A, const abelian &B);
+abelian operator*(const abelian &A, const abelian *B);
+abelian operator^(const abelian &A, const abelian *B);
 
 ostream &operator<<(ostream &os, const abelian &A);

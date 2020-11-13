@@ -25,7 +25,7 @@ extern int t_size;
 // Class link1 goes on a periodic 4D lattice and calculates some obseervables
 // can take matrices from vector of matrices in usual order (see data.h)
 // numeration of directions is as follows
-// x - 1, y - 2, z - 3, t - 4 (in arrays numeratioon starts with 0)
+// x - 0, y - 1, z - 2, t - 3 (in arrays numeratioon starts with 0)
 class link1 {
 public:
   // lattice sizes
@@ -33,18 +33,28 @@ public:
   // coordinates of the site
   // coordinate[i] = 0..lattise_size[i]-1
   int coordinate[4];
+  // holds previous values of coordinates
+  int coordinate_old[4];
   // current direction of the link
-  // negative values means opposite direction
+  // only positive values make sense
   int direction;
+  // holds a place of matrix in array at direction 0 and current lattice site
+  int place;
+  // holds distance to move in array after moving on the lattice in each
+  // direction
+  int multiplier[4] = {4, x_size * 4, x_size *y_size * 4,
+                       x_size *y_size *z_size * 4};
 
   link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
         int lattice_size_t);
 
-  // prints link information
-  void print_link();
-
-  // moves link in direction dir on step steps
+  // moves link in direction dir on step steps and updates place and
+  // coordinates_old
+  // dir is positive, step may be negative
   void move(int dir, int step);
+
+  // update coordinates after some changes
+  void update(int dir);
 
   // goes on site with following coordinates
   void go(int x, int y, int z, int t);
@@ -52,14 +62,13 @@ public:
   // changes direction to dir
   void move_dir(int dir);
 
-  // gets place in different arrays (see link.cpp)
-  int get_place();
-  int get_place1();
-
-  // gets matrix on carrent link, gets conjugate if direction is opposite
-  template <class T> T get_matrix(const vector<T> &vec);
+  // gets matrix on current link, only gets matrices in positive directions
+  // in order to get conjugated matrix use .conj() or ^ operator in matrix
+  // returns pointer for better performance
+  template <class T> const T *get_matrix(const vector<T> &array);
 
   // calculates plaket matrix in current direction and mu plane
+  // only positive directions make sense
   template <class T> T plaket_mu(const vector<T> &array, int mu);
 
   // calculate schwinger line matrix in current direction and dir plane of
@@ -74,6 +83,7 @@ public:
   template <class T> T wilson_loop(const vector<T> &array, int r, int t);
 
   // used in wilson_loop
+  // calculates straight lines for wilson loop in advance
   template <class T> T wilson_line(const vector<T> &array, int length);
 
   // d - distance between "left" source and plaket

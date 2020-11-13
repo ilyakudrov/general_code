@@ -19,6 +19,7 @@ using namespace std;
 class result {
 public:
   vector<FLOAT> array;
+
   result(int size);
   result();
   void average(FLOAT a[2]);

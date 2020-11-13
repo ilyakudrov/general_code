@@ -8,13 +8,8 @@
 #define PLACE3_LINK_DIR                                                        \
   (coordinate[3]) * 3 * lattice_size[0] * lattice_size[1] * lattice_size[2] +  \
       (coordinate[2]) * 3 * lattice_size[0] * lattice_size[1] +                \
-      (coordinate[1]) * 3 * lattice_size[0] + (coordinate[0]) * 3 +            \
-      abs(direction) - 1
-#define PLACE4_LINK_DIR                                                        \
-  (coordinate[3]) * 4 * lattice_size[0] * lattice_size[1] * lattice_size[2] +  \
-      (coordinate[2]) * 4 * lattice_size[0] * lattice_size[1] +                \
-      (coordinate[1]) * 4 * lattice_size[0] + (coordinate[0]) * 4 +            \
-      abs(direction) - 1
+      (coordinate[1]) * 3 * lattice_size[0] + (coordinate[0]) * 3 + direction
+
 #define PLACE1_LINK_NODIR                                                      \
   (coordinate[3]) * lattice_size[0] * lattice_size[1] * lattice_size[2] +      \
       (coordinate[2]) * lattice_size[0] * lattice_size[1] +                    \
@@ -26,10 +21,12 @@ link1::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
   lattice_size[1] = lattice_size_y;
   lattice_size[2] = lattice_size_z;
   lattice_size[3] = lattice_size_t;
-  direction = 1;
+  direction = 0;
   for (int i = 0; i < 4; i++) {
     coordinate[i] = 0;
+    coordinate_old[i] = 0;
   }
+  place = 0;
 }
 
 ostream &operator<<(ostream &os, const link1 &link) {
@@ -40,11 +37,17 @@ ostream &operator<<(ostream &os, const link1 &link) {
 }
 
 void link1::move(int dir, int step) {
-  coordinate[abs(dir) - 1] +=
-      (step * (dir / abs(dir)) + lattice_size[abs(dir) - 1]);
-  coordinate[abs(dir) - 1] =
-      coordinate[abs(dir) - 1] % lattice_size[abs(dir) - 1];
+  coordinate[dir] += (lattice_size[dir] + step);
+  coordinate[dir] = coordinate[dir] % lattice_size[dir];
+  place += (coordinate[dir] - coordinate_old[dir]) * multiplier[dir];
+  coordinate_old[dir] = coordinate[dir];
 }
+
+void link1::update(int dir) {
+  place += (coordinate[dir] - coordinate_old[dir]) * multiplier[dir];
+  coordinate_old[dir] = coordinate[dir];
+}
+
 void link1::go(int x, int y, int z, int t) {
   coordinate[0] = x;
   coordinate[1] = y;
@@ -52,43 +55,29 @@ void link1::go(int x, int y, int z, int t) {
   coordinate[3] = t;
 }
 void link1::move_dir(int dir) { direction = dir; }
-int link1::get_place() { return PLACE4_LINK_DIR; }
-int link1::get_place1() { return PLACE1_LINK_NODIR; }
 
-template <class T> T link1::get_matrix(const vector<T> &vec) {
-  T A;
-  if (direction / abs(direction) == 1) {
-    return vec[PLACE4_LINK_DIR];
-  }
-  if (direction / abs(direction) == -1) {
-    move(direction, 1);
-    A = vec[PLACE4_LINK_DIR];
-    move(direction, -1);
-    return A.conj();
-  } else {
-    cout << "error in get_matrix" << endl;
-    return A;
-  }
+template <class T> const T *link1::get_matrix(const vector<T> &array) {
+  return &array[place + direction];
 }
 
 template <class T> T link1::plaket_mu(const vector<T> &array, int mu) {
   int dir = direction;
-  T A = get_matrix(array);
+  T A = *get_matrix(array);
   move(dir, 1);
-  move_dir(-mu); // the same temporal direction as polyakov loop, connected to
-  // schwinger line, has
-  A = A * get_matrix(array);
-  move(-mu, 1);
-  move_dir(-dir);
-  A = A * get_matrix(array);
-  move(-dir, 1);
   move_dir(mu);
   A = A * get_matrix(array);
+  move_dir(dir);
+  move(dir, -1);
   move(mu, 1);
+  A = A ^ get_matrix(array);
+  move_dir(mu);
+  move(mu, -1);
+  A = A ^ get_matrix(array);
   move_dir(dir);
   return A;
 }
 
+// TODO: elaborate
 template <class T>
 T link1::schwinger_line(const vector<T> &array, int d, int dir, int x) {
   int dir1 = direction;
@@ -103,8 +92,8 @@ T link1::schwinger_line(const vector<T> &array, int d, int dir, int x) {
     move(dir, 1);
   }
   move_dir(dir1);
-  move(-dir, x);
-  move(-dir1, d);
+  move(dir, -x);
+  move(dir1, -d);
   return A;
 }
 
@@ -124,20 +113,20 @@ template <class T> T link1::wilson_loop(const vector<T> &array, int r, int t) {
     A = A * get_matrix(array);
     move(dir, 1);
   }
-  move_dir(4);
+  move_dir(3);
   for (int i = 0; i < t; i++) {
     A = A * get_matrix(array);
-    move(4, 1);
+    move(3, 1);
   }
-  move_dir(-dir);
+  move_dir(dir);
   for (int i = 0; i < r; i++) {
-    A = A * get_matrix(array);
-    move(-dir, 1);
+    move(dir, -1);
+    A = A ^ get_matrix(array);
   }
-  move_dir(-4);
+  move_dir(3);
   for (int i = 0; i < t; i++) {
-    A = A * get_matrix(array);
-    move(-4, 1);
+    move(3, -1);
+    A = A ^ get_matrix(array);
   }
   move_dir(dir);
   return A;
@@ -153,6 +142,22 @@ template <class T> T link1::wilson_line(const vector<T> &array, int length) {
   return A;
 }
 
+// template <class T>
+// T link1::wilson_line_offaxis(const vector<T> &array, vector<int> &pattern) {
+//   int dir = direction;
+//   T A;
+//   for (int i = 0; i < pattern.size(); i++) {
+//     if ()
+//       A = A *
+//   }
+//   for (int i = 0; i < length; i++) {
+//     A = A * get_matrix(array);
+//     move(dir, 1);
+//   }
+//   return A;
+// }
+
+// TODO: elaborate directions
 template <class T>
 FLOAT link1::field1(const vector<vector<T>> &schwinger_line,
                     const vector<T> &plaket, const vector<T> &polyakov_loop,
@@ -162,20 +167,21 @@ FLOAT link1::field1(const vector<vector<T>> &schwinger_line,
   move(dir1, d);
   move(dir, x);
   T B = plaket[PLACE3_LINK_DIR];
-  move(-dir, x);
-  move(-dir1, d);
-  move_dir(-4);
+  move(dir, -x);
+  move(dir1, -d);
+  move_dir(-3);
   T A = polyakov_loop[PLACE1_LINK_NODIR];
   A = A.conj() * C * B;
   A = A * C.conj();
   move(dir1, D);
-  move_dir(4);
+  move_dir(3);
   B = polyakov_loop[PLACE1_LINK_NODIR];
-  move(-dir1, D);
+  move(dir1, -D);
   move_dir(dir1);
   return A.tr() * B.tr();
 }
 
+// TODO: elaborate directions
 template <class T>
 FLOAT link1::field2(const vector<T> &plaket, const vector<T> &polyakov_loop,
                     int d, int D, int dir, int x) {
@@ -186,15 +192,16 @@ FLOAT link1::field2(const vector<T> &plaket, const vector<T> &polyakov_loop,
   move(dir, x);
   move_dir(dir1);
   T B = plaket[PLACE3_LINK_DIR];
-  move(-dir, x);
+  move(dir, -x);
   move(dir1, D - d);
   move_dir(4);
   T C = polyakov_loop[PLACE1_LINK_NODIR];
-  move(-dir1, D);
+  move(dir1, -D);
   move_dir(dir1);
   return B.tr() * C.tr() * A.conj().tr();
 }
 
+// TODO: elaborate directions
 template <class T>
 FLOAT link1::field3(const vector<T> &polyakov_loop, int D, int x) {
   int dir1 = direction;
@@ -203,7 +210,7 @@ FLOAT link1::field3(const vector<T> &polyakov_loop, int D, int x) {
   move(dir1, D);
   move_dir(4);
   T B = polyakov_loop[PLACE1_LINK_NODIR];
-  move(-dir1, D);
+  move(dir1, -D);
   move_dir(dir1);
   return A.conj().tr() * B.tr();
 }
@@ -290,7 +297,7 @@ template <class T> int link1::current_test(FLOAT *J) {
 // specializations
 
 // su2
-template su2 link1::get_matrix(const vector<su2> &vec);
+template const su2 *link1::get_matrix(const vector<su2> &vec);
 template su2 link1::plaket_mu(const vector<su2> &array, int mu);
 template su2 link1::schwinger_line(const vector<su2> &array, int d, int dir,
                                    int x);
@@ -307,7 +314,7 @@ template FLOAT link1::field2(const vector<su2> &plaket,
 template FLOAT link1::field3(const vector<su2> &polyakov_loop, int D, int x);
 
 // abelian
-template abelian link1::get_matrix(const vector<abelian> &vec);
+template const abelian *link1::get_matrix(const vector<abelian> &vec);
 template abelian link1::plaket_mu(const vector<abelian> &array, int mu);
 template abelian link1::schwinger_line(const vector<abelian> &array, int d,
                                        int dir, int x);

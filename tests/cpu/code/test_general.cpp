@@ -32,11 +32,11 @@ int main(int argc, char *argv[]) {
   data<abelian> conf_abelian;
   data<su2> conf_offd;
   data<su2> conf_qc2dstag;
-  char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  char const *path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
   char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
   char const *path_offd = "../../confs/offd/mu0.00/CON_OFF_MAG_033.LAT";
   char const *path_qc2dstag = "../../confs/qc2dstag/mu0.05/CONF0001";
-  conf.read_float(path1);
+  conf.read_float(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   conf_offd.read_double_fortran(path_offd);
 
@@ -48,14 +48,13 @@ int main(int argc, char *argv[]) {
   data<su2> conf_ml5;
   vector<float> array_ml5 = read_full_ml5(
       "/home/ilya/code/test/qc2dstag_reading/MAG_conf/beta5.ml5", 1000);
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 1; i++) {
     conf_ml5.read_float_ml5(array_ml5, i);
     cout << "ml5 plaket " << plaket(conf_ml5.array) / 2 << endl;
     cout << "ml5 plaket_time " << plaket_time(conf_ml5.array) / 2 << endl;
     cout << "ml5 plaket_space " << plaket_space(conf_ml5.array) / 2 << endl;
     cout << "ml5 polyakov " << polyakov(conf_ml5.array) / 2 << endl;
-    cout << "MAG_functional ml5 " << MAG_functional_su2(conf_ml5.array) * 2
-         << endl;
+    cout << "MAG_functional ml5 " << MAG_functional_su2(conf_ml5.array) << endl;
 
     int T_min = 1, T_max = 2;
     int R_min = 1, R_max = 8;
@@ -84,10 +83,6 @@ int main(int argc, char *argv[]) {
   t_size = 40;
 
   conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
-
-  for (int i = 0; i < 10; i++) {
-    cout << conf_qc2dstag.array[i] << endl;
-  }
 
   start_time = clock();
   cout << "MAG_functional_su2 " << MAG_functional_su2(conf_qc2dstag.array)
@@ -232,7 +227,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   cout << "su2" << endl;
-  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066"
+  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066 "
        << endl;
   cout << "test plaket_time " << plaket_time(conf.array) / 2
        << " right: 0.6770628794" << endl;

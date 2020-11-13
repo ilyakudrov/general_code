@@ -1,6 +1,6 @@
 #include "../include/result.h"
 
-result::result(int size) { array = vector<FLOAT>(size); }
+result::result(int size) { array.reserve(size); }
 result::result() { array = vector<FLOAT>(0); }
 void result::average(FLOAT a[2]) {
   if (array.size() == 0) {
