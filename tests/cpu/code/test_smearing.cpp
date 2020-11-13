@@ -1,7 +1,7 @@
+#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/observables.h"
 #include "../../../lib/cpu/include/result.h"
 #include "../../../lib/cpu/include/smearing.h"
 

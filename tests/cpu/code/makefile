@@ -3,7 +3,7 @@ SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
 FLAGS=-O3 -D DOUBLE -g
-OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/observables.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o
+OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -lprofiler -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
@@ -20,8 +20,10 @@ $(OBJ_PATH)/link.o: $(SRC_PATH)/link.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/link.cpp -o $(OBJ_PATH)/link.o
 $(OBJ_PATH)/data.o: $(SRC_PATH)/data.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/data.cpp -o $(OBJ_PATH)/data.o
-$(OBJ_PATH)/observables.o: $(SRC_PATH)/observables.cpp
-	$(GCC) $(FLAGS) -c $(SRC_PATH)/observables.cpp -o $(OBJ_PATH)/observables.o
+$(OBJ_PATH)/basic_observables.o: $(SRC_PATH)/basic_observables.cpp
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/basic_observables.cpp -o $(OBJ_PATH)/basic_observables.o
+$(OBJ_PATH)/flux_tube.o: $(SRC_PATH)/flux_tube.cpp
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/flux_tube.cpp -o $(OBJ_PATH)/flux_tube.o
 $(OBJ_PATH)/result.o: $(SRC_PATH)/result.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/result.cpp -o $(OBJ_PATH)/result.o
 $(OBJ_PATH)/matrix.o: $(SRC_PATH)/matrix.cpp
