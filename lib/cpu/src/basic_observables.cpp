@@ -41,14 +41,12 @@
 
 #define ITER_START_ZYX                                                         \
   for (int z = 0; z < z_size; z++) {                                           \
-    link.coordinate[2] = z;                                                    \
-    link.update(2);                                                            \
     for (int y = 0; y < y_size; y++) {                                         \
-      link.coordinate[1] = y;                                                  \
-      link.update(1);                                                          \
       for (int x = 0; x < x_size; x++) {                                       \
-        link.coordinate[0] = x;                                                \
-        link.update(0);
+        link.go(x, y, z, t);                                                   \
+        link.update(0);                                                        \
+        link.update(1);                                                        \
+        link.update(2);
 
 #define ITER_END_3                                                             \
   }                                                                            \
