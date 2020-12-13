@@ -86,6 +86,9 @@ public:
   // calculates straight lines for wilson loop in advance
   template <class T> T wilson_line(const vector<T> &array, int length);
 
+  template <class T>
+  T wilson_line_offaxis(const vector<T> &array, const vector<int> &pattern);
+
   // d - distance between "left" source and plaket
   // D - distance between sources
   template <class T>

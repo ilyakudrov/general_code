@@ -142,20 +142,36 @@ template <class T> T link1::wilson_line(const vector<T> &array, int length) {
   return A;
 }
 
-// template <class T>
-// T link1::wilson_line_offaxis(const vector<T> &array, vector<int> &pattern) {
-//   int dir = direction;
-//   T A;
-//   for (int i = 0; i < pattern.size(); i++) {
-//     if ()
-//       A = A *
-//   }
-//   for (int i = 0; i < length; i++) {
-//     A = A * get_matrix(array);
-//     move(dir, 1);
-//   }
-//   return A;
-// }
+// calculates offaxis spatial line of wilson loop according to pattern
+// pattern defines directions of links along the line
+// it consists of positive and negative integers which correspond to spatial
+// directions x - 1, y - 2, z - 3
+template <class T>
+T link1::wilson_line_offaxis(const vector<T> &array,
+                             const vector<int> &pattern) {
+  T A;
+
+  // iterate through pattern
+  for (int i = 0; i < pattern.size(); i++) {
+    move_dir(abs(pattern[i]) - 1);
+
+    // if positive direction
+    if (pattern[i] > 0) {
+      A = A * get_matrix(array);
+      move(abs(pattern[i]) - 1, 1);
+    }
+
+    // if negative direction
+    else if (pattern[i] < 0) {
+      move(abs(pattern[i]) - 1, -1);
+      A = A ^ get_matrix(array);
+    } else {
+      cout << "wilson_line_offaxis pattern direction error " << pattern[i]
+           << endl;
+    }
+  }
+  return A;
+}
 
 // TODO: elaborate directions
 template <class T>
@@ -304,6 +320,8 @@ template su2 link1::schwinger_line(const vector<su2> &array, int d, int dir,
 template su2 link1::polyakov_loop(const vector<su2> &array);
 template su2 link1::wilson_loop(const vector<su2> &array, int r, int t);
 template su2 link1::wilson_line(const vector<su2> &array, int length);
+template su2 link1::wilson_line_offaxis(const vector<su2> &array,
+                                        const vector<int> &pattern);
 template FLOAT link1::field1(const vector<vector<su2>> &schwinger_line,
                              const vector<su2> &plaket,
                              const vector<su2> &polyakov_loop, int d, int D,
@@ -321,6 +339,8 @@ template abelian link1::schwinger_line(const vector<abelian> &array, int d,
 template abelian link1::polyakov_loop(const vector<abelian> &array);
 template abelian link1::wilson_loop(const vector<abelian> &array, int r, int t);
 template abelian link1::wilson_line(const vector<abelian> &array, int length);
+template abelian link1::wilson_line_offaxis(const vector<abelian> &array,
+                                            const vector<int> &pattern);
 template FLOAT link1::field1(const vector<vector<abelian>> &schwinger_line,
                              const vector<abelian> &plaket,
                              const vector<abelian> &polyakov_loop, int d, int D,

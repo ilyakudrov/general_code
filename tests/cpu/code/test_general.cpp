@@ -85,6 +85,90 @@ int main(int argc, char *argv[]) {
 
   conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
 
+  vector<int> direction_test = {3, 2, 1};
+  vector<int> pattern_test = make_offaxis_pattern(direction_test);
+
+  cout << "initial pattern ";
+  for (int i = 0; i < pattern_test.size(); i++) {
+    cout << pattern_test[i] << " ";
+  }
+  cout << endl;
+
+  start_time = clock();
+
+  vector<su2> space_lines_test1;
+  for (int i = 1; i < 10; i++) {
+    vector<int> pattern_test1;
+    for (int j = 0; j < i; j++) {
+      for (int k = 0; k < pattern_test.size(); k++) {
+        pattern_test1.push_back(pattern_test[k]);
+      }
+    }
+
+    cout << "pattern_test1 ";
+    for (int i = 0; i < pattern_test1.size(); i++) {
+      cout << pattern_test1[i] << " ";
+    }
+    cout << endl;
+
+    space_lines_test1 =
+        wilson_lines_offaxis(conf_qc2dstag.array, pattern_test1);
+    cout << space_lines_test1[0] << endl;
+  }
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "test1 loop time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
+  vector<int> direction_test1(3);
+
+  start_time = clock();
+
+  vector<su2> space_lines_test2;
+  space_lines_test2 = wilson_lines_offaxis(conf_qc2dstag.array, pattern_test);
+  for (int i = 2; i < 10; i++) {
+    for (int j = 0; j < 3; j++) {
+      direction_test1[j] = direction_test[j] * (i - 1);
+    }
+
+    cout << "direction_test1 ";
+    for (int i = 0; i < direction_test1.size(); i++) {
+      cout << direction_test1[i] << " ";
+    }
+    cout << endl;
+
+    space_lines_test2 = wilson_lines_offaxis_increase(
+        conf_qc2dstag.array, space_lines_test2, pattern_test, direction_test1);
+    cout << space_lines_test2[0] << endl;
+  }
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "test2 loop time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+
+  vector<vector<int>> directions;
+  directions = generate_directions(4);
+  for (int i = 0; i < directions.size(); i++) {
+    cout << directions[i][0] << " " << directions[i][1] << " "
+         << directions[i][2] << " " << endl;
+  }
+
+  start_time = clock();
+
+  vector<wilson_result> wilson_offaxis_result =
+      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 20, 1, 1);
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  cout << "offaxis wilson loop time: " << search_time * 1. / CLOCKS_PER_SEC
+       << endl;
+
+  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
+    cout << "wilson loop: " << wilson_offaxis_result[i].wilson_loop
+         << " time size: " << wilson_offaxis_result[i].time_size
+         << " space size: " << wilson_offaxis_result[i].space_size << endl;
+  }
+
   start_time = clock();
   cout << "MAG_functional_su2 " << MAG_functional_su2(conf_qc2dstag.array)
        << endl;
@@ -107,8 +191,8 @@ int main(int argc, char *argv[]) {
   double start;
   double end;
 
-  int T_min = 1, T_max = 3;
-  int R_min = 1, R_max = 3;
+  int T_min = 1, T_max = 1;
+  int R_min = 1, R_max = 1;
 
   vector<FLOAT> vec_wilson;
   start_time = clock();
@@ -228,7 +312,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   cout << "su2" << endl;
-  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066 "
+  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066"
        << endl;
   cout << "test plaket_time " << plaket_time(conf.array) / 2
        << " right: 0.6770628794" << endl;
