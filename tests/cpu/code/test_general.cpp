@@ -33,10 +33,11 @@ int main(int argc, char *argv[]) {
   data<abelian> conf_abelian;
   data<su2> conf_offd;
   data<su2> conf_qc2dstag;
-  char const *path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
-  char const *path_offd = "../../confs/offd/mu0.00/CON_OFF_MAG_033.LAT";
-  char const *path_qc2dstag = "../../confs/qc2dstag/mu0.05/CONF0001";
+  string path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  string path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
+  string path_offd = "../../confs/offd/mu0.00/CON_OFF_MAG_033.LAT";
+  string path_qc2dstag = "../../confs/qc2dstag/mu0.05/CONF0001";
+  string path_ml5 = "/home/ilya/code/test/qc2dstag_reading/MAG_conf/beta5.ml5";
   conf.read_float(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   conf_offd.read_double_fortran(path_offd);
@@ -47,8 +48,7 @@ int main(int argc, char *argv[]) {
   t_size = 2;
 
   data<su2> conf_ml5;
-  vector<float> array_ml5 = read_full_ml5(
-      "/home/ilya/code/test/qc2dstag_reading/MAG_conf/beta5.ml5", 1000);
+  vector<float> array_ml5 = read_full_ml5(path_ml5, 1000);
   for (int i = 0; i < 1; i++) {
     conf_ml5.read_float_ml5(array_ml5, i);
     cout << "ml5 plaket " << plaket(conf_ml5.array) / 2 << endl;
@@ -85,67 +85,6 @@ int main(int argc, char *argv[]) {
 
   conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
 
-  vector<int> direction_test = {3, 2, 1};
-  vector<int> pattern_test = make_offaxis_pattern(direction_test);
-
-  cout << "initial pattern ";
-  for (int i = 0; i < pattern_test.size(); i++) {
-    cout << pattern_test[i] << " ";
-  }
-  cout << endl;
-
-  start_time = clock();
-
-  vector<su2> space_lines_test1;
-  for (int i = 1; i < 10; i++) {
-    vector<int> pattern_test1;
-    for (int j = 0; j < i; j++) {
-      for (int k = 0; k < pattern_test.size(); k++) {
-        pattern_test1.push_back(pattern_test[k]);
-      }
-    }
-
-    cout << "pattern_test1 ";
-    for (int i = 0; i < pattern_test1.size(); i++) {
-      cout << pattern_test1[i] << " ";
-    }
-    cout << endl;
-
-    space_lines_test1 =
-        wilson_lines_offaxis(conf_qc2dstag.array, pattern_test1);
-    cout << space_lines_test1[0] << endl;
-  }
-
-  end_time = clock();
-  search_time = end_time - start_time;
-  cout << "test1 loop time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-
-  vector<int> direction_test1(3);
-
-  start_time = clock();
-
-  vector<su2> space_lines_test2;
-  space_lines_test2 = wilson_lines_offaxis(conf_qc2dstag.array, pattern_test);
-  for (int i = 2; i < 10; i++) {
-    for (int j = 0; j < 3; j++) {
-      direction_test1[j] = direction_test[j] * (i - 1);
-    }
-
-    cout << "direction_test1 ";
-    for (int i = 0; i < direction_test1.size(); i++) {
-      cout << direction_test1[i] << " ";
-    }
-    cout << endl;
-
-    space_lines_test2 = wilson_lines_offaxis_increase(
-        conf_qc2dstag.array, space_lines_test2, pattern_test, direction_test1);
-    cout << space_lines_test2[0] << endl;
-  }
-
-  end_time = clock();
-  search_time = end_time - start_time;
-  cout << "test2 loop time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-
   vector<vector<int>> directions;
   directions = generate_directions(4);
   for (int i = 0; i < directions.size(); i++) {
@@ -156,7 +95,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 20, 1, 1);
+      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 3, 1, 1);
 
   end_time = clock();
   search_time = end_time - start_time;

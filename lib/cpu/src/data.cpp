@@ -32,7 +32,7 @@ template <class T> data<T>::data() {
   array.reserve(4 * x_size * y_size * z_size * t_size);
 }
 
-template <> void data<su2>::read_float(char const *file_name) {
+template <> void data<su2>::read_float(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -50,7 +50,7 @@ template <> void data<su2>::read_float(char const *file_name) {
   stream.close();
 }
 
-vector<float> read_full_ml5(char const *file_name, int conf_num) {
+vector<float> read_full_ml5(string &file_name, int conf_num) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ifstream stream(file_name);
   vector<float> v(conf_num * data_size1 * 4);
@@ -85,7 +85,7 @@ void data<su2>::read_float_ml5(const vector<float> &array_ml5, int conf_num) {
   SPACE_ITER_END
 }
 
-template <> void data<abelian>::read_float(char const *file_name) {
+template <> void data<abelian>::read_float(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -98,7 +98,7 @@ template <> void data<abelian>::read_float(char const *file_name) {
   stream.close();
 }
 
-template <> void data<su2>::read_float_fortran(char const *file_name) {
+template <> void data<su2>::read_float_fortran(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -116,7 +116,7 @@ template <> void data<su2>::read_float_fortran(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_float_fortran(char const *file_name) {
+template <> void data<abelian>::read_float_fortran(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -130,7 +130,7 @@ template <> void data<abelian>::read_float_fortran(char const *file_name) {
 }
 
 template <>
-void data<abelian>::read_float_fortran_convert_abelian(char const *file_name) {
+void data<abelian>::read_float_fortran_convert_abelian(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -144,8 +144,7 @@ void data<abelian>::read_float_fortran_convert_abelian(char const *file_name) {
   stream.close();
 }
 
-template <>
-void data<abelian>::read_float_convert_abelian(char const *file_name) {
+template <> void data<abelian>::read_float_convert_abelian(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -158,7 +157,7 @@ void data<abelian>::read_float_convert_abelian(char const *file_name) {
   stream.close();
 }
 
-template <> void data<su2>::read_double(char const *file_name) {
+template <> void data<su2>::read_double(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -176,7 +175,7 @@ template <> void data<su2>::read_double(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_double(char const *file_name) {
+template <> void data<abelian>::read_double(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -189,7 +188,7 @@ template <> void data<abelian>::read_double(char const *file_name) {
   stream.close();
 }
 
-template <> void data<su2>::read_double_qc2dstag(char const *file_name) {
+template <> void data<su2>::read_double_qc2dstag(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -214,11 +213,11 @@ template <> void data<su2>::read_double_qc2dstag(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_double_qc2dstag(char const *file_name) {
+template <> void data<abelian>::read_double_qc2dstag(string &file_name) {
   cout << "there's no reason for implementation" << endl;
 }
 
-template <> void data<su2>::read_double_fortran(char const *file_name) {
+template <> void data<su2>::read_double_fortran(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -237,7 +236,7 @@ template <> void data<su2>::read_double_fortran(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_double_fortran(char const *file_name) {
+template <> void data<abelian>::read_double_fortran(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   ifstream stream(file_name);
@@ -251,7 +250,7 @@ template <> void data<abelian>::read_double_fortran(char const *file_name) {
   stream.close();
 }
 
-template <> void data<su2>::write_float(char const *file_name) {
+template <> void data<su2>::write_float(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ofstream stream(file_name);
   vector<float> v(data_size1 * 4);
@@ -266,7 +265,7 @@ template <> void data<su2>::write_float(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::write_float(char const *file_name) {
+template <> void data<abelian>::write_float(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ofstream stream(file_name);
   vector<float> v(data_size1);
@@ -278,7 +277,7 @@ template <> void data<abelian>::write_float(char const *file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::write_float_fortran(char const *file_name) {
+template <> void data<abelian>::write_float_fortran(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ofstream stream(file_name);
   vector<float> v(data_size1 + 2);
@@ -290,7 +289,7 @@ template <> void data<abelian>::write_float_fortran(char const *file_name) {
   stream.close();
 }
 
-template <> void data<su2>::write_double(char const *file_name) {
+template <> void data<su2>::write_double(string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   ofstream stream(file_name);
   vector<FLOAT> v(data_size1 * 4);
