@@ -36,9 +36,8 @@ template <class T>
 vector<FLOAT> calculate_plaket_time_tr(const vector<T> &array);
 template <class T>
 vector<FLOAT> calculate_plaket_space_tr(const vector<T> &array);
-FLOAT plaket4_time_optimized(const vector<FLOAT> &plaket_tr, link1 &link);
-FLOAT plaket4_space_optimized(const vector<FLOAT> &plaket_tr, link1 &link,
-                              int nu);
+FLOAT plaket4_time(const vector<FLOAT> &plaket_tr, link1 &link);
+FLOAT plaket4_space(const vector<FLOAT> &plaket_tr, link1 &link, int nu);
 template <class T>
 vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r, int time);
 

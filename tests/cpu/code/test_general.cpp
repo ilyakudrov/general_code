@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 3, 1, 1);
+      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 3, 1, 3);
 
   end_time = clock();
   search_time = end_time - start_time;

@@ -157,7 +157,7 @@ vector<FLOAT> calculate_plaket_time_tr(const vector<T> &array) {
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[PLACE3_DIR] = link.plaket_mu(array, 3).tr();
+    vec[link.place / 4 * 3 + dir] = link.plaket_mu(array, 3).tr();
   }
   SPACE_ITER_END;
   return vec;
@@ -172,34 +172,33 @@ vector<FLOAT> calculate_plaket_space_tr(const vector<T> &array) {
   for (int dir = 0; dir < 3; dir++) {
     for (int j = dir + 1; j < 3; j++) {
       link.move_dir(dir);
-      vec[PLACE1_NODIR * 3 + dir + j] = link.plaket_mu(array, j).tr();
+      vec[link.place / 4 * 3 + dir + j] = link.plaket_mu(array, j).tr();
     }
   }
   SPACE_ITER_END;
   return vec;
 }
 
-FLOAT plaket4_time_optimized(const vector<FLOAT> &plaket_tr, link1 &link) {
-  FLOAT a = plaket_tr[PLACE_PLAKET_TIME];
+FLOAT plaket4_time(const vector<FLOAT> &plaket_tr, link1 &link) {
+  FLOAT a = plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(link.direction, -1);
-  a += plaket_tr[PLACE_PLAKET_TIME];
+  a += plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(3, -1);
-  a += plaket_tr[PLACE_PLAKET_TIME];
+  a += plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(link.direction, 1);
-  a += plaket_tr[PLACE_PLAKET_TIME];
+  a += plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(3, 1);
   return a / 4;
 }
 
-FLOAT plaket4_space_optimized(const vector<FLOAT> &plaket_tr, link1 &link,
-                              int nu) {
-  FLOAT a = plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+FLOAT plaket4_space(const vector<FLOAT> &plaket_tr, link1 &link, int nu) {
+  FLOAT a = plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(link.direction, -1);
-  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+  a += plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(nu, -1);
-  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+  a += plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(link.direction, 1);
-  a += plaket_tr[PLACE_PLAKET_SPACE * 3 + link.direction + nu];
+  a += plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(nu, 1);
   return a / 4;
 }
@@ -212,7 +211,7 @@ vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r,
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    vec[PLACE3_DIR] = link.wilson_loop(array, r, time).tr();
+    vec[link.place / 4 * 3 + dir] = link.wilson_loop(array, r, time).tr();
     SPACE_ITER_END;
   }
   return vec;
@@ -224,22 +223,19 @@ result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
                                          int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[d_max - d_min + 1];
-  for (int i = 0; i < d_max - d_min + 1; i++) {
-    vec[i] = 0;
-  }
   result final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    a = wilson_loop_tr[PLACE3_DIR];
+    a = wilson_loop_tr[link.place / 4 * 3 + dir];
     link.move(3, time / 2);
     link.move(dir, d_min);
     for (int d = d_min; d <= d_max; d++) {
       if (x_trans == 0) {
         for (int mu = 0; mu < 3; mu++) {
           link.move_dir(mu);
-          vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
+          vec[d - d_min] += a * plaket4_time(plaket_tr, link);
         }
       } else {
         for (int nu = 0; nu < 3; nu++) {
@@ -247,12 +243,12 @@ result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
             link.move(nu, x_trans);
             for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
-              vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
+              vec[d - d_min] += a * plaket4_time(plaket_tr, link);
             }
             link.move(nu, -2 * x_trans);
             for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
-              vec[d - d_min] += a * plaket4_time_optimized(plaket_tr, link);
+              vec[d - d_min] += a * plaket4_time(plaket_tr, link);
             }
             link.move(nu, x_trans);
           }
@@ -279,15 +275,12 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
                                            int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[x_trans_max - x_trans_min + 1];
-  for (int i = 0; i < x_trans_max - x_trans_min + 1; i++) {
-    vec[i] = 0;
-  }
   result final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    a = wilson_loop_tr[PLACE3_DIR];
+    a = wilson_loop_tr[link.place / 4 * 3 + dir];
     link.move(3, time / 2);
     link.move(dir, d);
     for (int nu = 0; nu < 3; nu++) {
@@ -297,8 +290,7 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
           link.move(nu, 1);
           for (int mu = 0; mu < 3; mu++) {
             link.move_dir(mu);
-            vec[x_trans - x_trans_min] +=
-                a * plaket4_time_optimized(plaket_tr, link);
+            vec[x_trans - x_trans_min] += a * plaket4_time(plaket_tr, link);
           }
         }
         link.move(nu, -x_trans_max);
@@ -320,16 +312,13 @@ result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
                                          int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[d_max - d_min + 1];
-  for (int i = 0; i < d_max - d_min + 1; i++) {
-    vec[i] = 0;
-  }
   result final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     link.move_dir(dir);
-    a = wilson_loop_tr[PLACE3_DIR];
+    a = wilson_loop_tr[link.place / 4 * 3 + dir];
     link.move(3, time / 2);
     link.move(dir, d_min);
     for (int d = d_min; d <= d_max; d++) {
@@ -337,7 +326,7 @@ result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
         for (int mu = 0; mu < 3; mu++) {
           for (int j = mu + 1; j < 3; j++) {
             link.move_dir(mu);
-            vec[d - d_min] += a * plaket4_space_optimized(plaket_tr, link, j);
+            vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
           }
         }
       } else {
@@ -347,16 +336,14 @@ result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
             for (int mu = 0; mu < 3; mu++) {
               for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
-                vec[d - d_min] +=
-                    a * plaket4_space_optimized(plaket_tr, link, j);
+                vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
               }
             }
             link.move(nu, -2 * x_trans);
             for (int mu = 0; mu < 3; mu++) {
               for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
-                vec[d - d_min] +=
-                    a * plaket4_space_optimized(plaket_tr, link, j);
+                vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
               }
             }
             link.move(nu, x_trans);
@@ -384,15 +371,12 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
                                            int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[x_trans_max - x_trans_min + 1];
-  for (int i = 0; i < x_trans_max - x_trans_min + 1; i++) {
-    vec[i] = 0;
-  }
   result final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
-    a = wilson_loop_tr[PLACE3_DIR];
+    a = wilson_loop_tr[link.place / 4 * 3 + dir];
     link.move(3, T / 2);
     link.move(dir, d);
     for (int nu = 0; nu < 3; nu++) {
@@ -404,7 +388,7 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
             for (int j = mu + 1; j < 3; j++) {
               link.move_dir(mu);
               vec[x_trans - x_trans_min] +=
-                  a * plaket4_space_optimized(plaket_tr, link, j);
+                  a * plaket4_space(plaket_tr, link, j);
             }
           }
         }

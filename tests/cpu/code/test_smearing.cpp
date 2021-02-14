@@ -34,9 +34,9 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  char const *path1 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  char const *path_abelian = "../../confs/su2/abelian/CON_MON_MAG_031.LAT";
-  conf.read_float(path1);
+  string path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  conf.read_float(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   FLOAT aver[2];
 

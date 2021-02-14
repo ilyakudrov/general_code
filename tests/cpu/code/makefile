@@ -5,7 +5,7 @@ GCC=g++
 FLAGS=-O3 -D DOUBLE -g
 OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -lprofiler -o test_general
+	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -o test_smearing
 test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES)
