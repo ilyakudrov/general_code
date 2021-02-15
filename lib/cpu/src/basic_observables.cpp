@@ -171,6 +171,28 @@ vector<T> wilson_line_increase(const vector<T> &array, const vector<T> &lines,
   return lines_new;
 }
 
+// average over equal spacial sizes
+void wilson_offaxis_reduce(vector<wilson_result> &wilson_offaxis_result) {
+  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
+    for (int j = 0; j < wilson_offaxis_result.size(); j++) {
+      if (wilson_offaxis_result[i].space_size ==
+              wilson_offaxis_result[j].space_size &&
+          wilson_offaxis_result[i].time_size ==
+              wilson_offaxis_result[j].time_size &&
+          i != j) {
+        wilson_offaxis_result[i].wilson_loop =
+            (wilson_offaxis_result[i].wilson_loop *
+                 wilson_offaxis_result[i].statistics_size +
+             wilson_offaxis_result[j].wilson_loop *
+                 wilson_offaxis_result[j].statistics_size) /
+            (wilson_offaxis_result[i].statistics_size +
+             wilson_offaxis_result[j].statistics_size);
+        wilson_offaxis_result.erase(wilson_offaxis_result.begin() + j);
+      }
+    }
+  }
+}
+
 // off-axis wilson loop
 // directions are for space lines of wilson loops
 template <class T>
@@ -252,21 +274,21 @@ wilson_offaxis(const vector<T> &array, const vector<vector<int>> directions,
         // reflect pattern
         pattern_reflected = reflect_pattern(pattern_permutated, reflection);
 
-        // pattern after permutation, reflection and increase
-        vector<int> pattern_prolonged;
-
-        // prolong pattern fo fit the length
-        for (int j = 0; j < round(r_min / length_initial + 0.5); j++) {
-          for (int k = 0; k < pattern.size(); k++) {
-            pattern_prolonged.push_back(pattern_reflected[k]);
-          }
-        }
-
         // iterate through all lengths in range [r_min, r_max]
         // + 0.5 to round up, -0.5 - to round down
         for (int length_multiplier = round(r_min / length_initial + 0.5);
              length_multiplier <= round(r_max / length_initial - 0.5);
              length_multiplier++) {
+
+          // pattern after permutation, reflection and increase
+          vector<int> pattern_prolonged;
+
+          // prolong pattern fo fit the length
+          for (int j = 0; j < length_multiplier; j++) {
+            for (int k = 0; k < pattern.size(); k++) {
+              pattern_prolonged.push_back(pattern_reflected[k]);
+            }
+          }
 
           // direction after permutation, reflection and increase
           vector<int> direction_prolonged(3);
@@ -276,13 +298,16 @@ wilson_offaxis(const vector<T> &array, const vector<vector<int>> directions,
                 direction_reflected[i] * (length_multiplier - 1);
           }
 
+          // TODO: fix increase of wilson line and check if it reduces time of
+          // calculations
           // calculate space line in this direction
-          if (round(r_min / length_initial + 0.5)) {
-            space_lines = wilson_lines_offaxis(array, pattern_prolonged);
-          } else {
-            space_lines = wilson_lines_offaxis_increase(
-                array, space_lines, pattern, direction_prolonged);
-          }
+          // if (round(r_min / length_initial + 0.5) == length_multiplier) {
+          //   space_lines = wilson_lines_offaxis(array, pattern_prolonged);
+          // } else {
+          //   space_lines = wilson_lines_offaxis_increase(
+          //       array, space_lines, pattern, direction_prolonged);
+          // }
+          space_lines = wilson_lines_offaxis(array, pattern_prolonged);
 
           for (int i = 0; i < 3; i++) {
             direction_prolonged[i] += direction_reflected[i];
@@ -313,7 +338,10 @@ wilson_offaxis(const vector<T> &array, const vector<vector<int>> directions,
         wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
                   [time - time_min]
                       .average(aver);
-
+        result.statistics_size =
+            wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
+                      [time - time_min]
+                          .array.size();
         result.wilson_loop = aver[0];
         result.time_size = time;
         result.space_size = length_initial * length_multiplier;

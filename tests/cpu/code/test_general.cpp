@@ -87,20 +87,26 @@ int main(int argc, char *argv[]) {
 
   vector<vector<int>> directions;
   directions = generate_directions(4);
-  for (int i = 0; i < directions.size(); i++) {
-    cout << directions[i][0] << " " << directions[i][1] << " "
-         << directions[i][2] << " " << endl;
-  }
 
   start_time = clock();
 
   vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 0.5, 3, 1, 3);
+      wilson_offaxis(conf_qc2dstag.array, directions, 4.9, 6, 10, 10);
 
   end_time = clock();
   search_time = end_time - start_time;
   cout << "offaxis wilson loop time: " << search_time * 1. / CLOCKS_PER_SEC
        << endl;
+
+  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
+    cout << "wilson loop: " << wilson_offaxis_result[i].wilson_loop
+         << " time size: " << wilson_offaxis_result[i].time_size
+         << " space size: " << wilson_offaxis_result[i].space_size << endl;
+  }
+
+  wilson_offaxis_reduce(wilson_offaxis_result);
+
+  cout << endl << "after reuction" << endl;
 
   for (int i = 0; i < wilson_offaxis_result.size(); i++) {
     cout << "wilson loop: " << wilson_offaxis_result[i].wilson_loop
@@ -130,8 +136,8 @@ int main(int argc, char *argv[]) {
   double start;
   double end;
 
-  int T_min = 1, T_max = 1;
-  int R_min = 1, R_max = 1;
+  int T_min = 10, T_max = 10;
+  int R_min = 5, R_max = 6;
 
   vector<FLOAT> vec_wilson;
   start_time = clock();
@@ -251,7 +257,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   cout << "su2" << endl;
-  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066"
+  cout << "test plaket " << plaket(conf.array) / 2 << " right: 0.6769540066 "
        << endl;
   cout << "test plaket_time " << plaket_time(conf.array) / 2
        << " right: 0.6770628794" << endl;

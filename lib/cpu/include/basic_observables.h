@@ -33,7 +33,10 @@ struct wilson_result {
   FLOAT wilson_loop;
   int time_size;
   FLOAT space_size;
+  int statistics_size;
 };
+
+void wilson_offaxis_reduce(vector<wilson_result> &wilson_offaxis_result);
 
 template <class T>
 vector<wilson_result>
