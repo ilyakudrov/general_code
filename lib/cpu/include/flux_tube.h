@@ -41,18 +41,18 @@ FLOAT plaket4_space(const vector<FLOAT> &plaket_tr, link1 &link, int nu);
 template <class T>
 vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r, int time);
 
-result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
-                                         const vector<FLOAT> &plaket_tr, int r,
-                                         int time, int x_trans, int d_min,
-                                         int d_max);
+vector<FLOAT>
+wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
+                                  const vector<FLOAT> &plaket_tr, int r,
+                                  int time, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
                                            const vector<FLOAT> &plaket_tr,
                                            int r, int time, int x_trans_min,
                                            int x_trans_max, int d);
-result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
-                                         const vector<FLOAT> &plaket_tr, int r,
-                                         int time, int x_trans, int d_min,
-                                         int d_max);
+vector<FLOAT>
+wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
+                                  const vector<FLOAT> &plaket_tr, int r,
+                                  int time, int x_trans, int d_min, int d_max);
 result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
                                            const vector<FLOAT> &plaket_tr,
                                            int r, int time, int x_trans_min,

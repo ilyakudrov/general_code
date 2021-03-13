@@ -217,13 +217,61 @@ vector<FLOAT> calculate_wilson_loop_tr(const vector<T> &array, int r,
   return vec;
 }
 
-result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
-                                         const vector<FLOAT> &plaket_tr, int r,
-                                         int time, int x_trans, int d_min,
-                                         int d_max) {
+// calculate vector of wilson loop traces with particular time size
+// template <class T>
+// vector<vector<FLOAT>> calculate_wilson_loop_tr(const vector<T> &array,
+//                                                vector<int> space_sizes,
+//                                                int time_size) {
+//   link1 link(x_size, y_size, z_size, t_size);
+//   vector<vector<FLOAT>> wilson(space_sizes.size());
+//   vector<vector<T>> time_lines(time_max - time_min + 1);
+//   vector<T> space_lines;
+//   for (int i = time_min; i <= time_max; i++) {
+//     time_lines[i - time_min] = wilson_lines(array, 3, i);
+//   }
+//   T A;
+//   for (int dir = 0; dir < 3; dir++) {
+//     for (int r = r_min; r <= r_max; r++) {
+//       if (r == r_min)
+//         space_lines = wilson_lines(array, dir, r);
+//       else
+//         space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
+//       for (int time = time_min; time <= time_max; time++) {
+
+//         SPACE_ITER_START
+
+//         A = time_lines[time - time_min][link.place / 4];
+//         link.move(3, time);
+//         A = A * space_lines[link.place / 4];
+//         link.move(3, -time);
+//         link.move(dir, r);
+//         A = A * time_lines[time - time_min][link.place / 4].conj();
+//         link.move(dir, -r);
+//         A = A * space_lines[link.place / 4].conj();
+
+//         wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] +=
+//         A.tr();
+
+//         SPACE_ITER_END
+//       }
+//     }
+//   }
+//   for (int i = 0; i < (time_max - time_min + 1) * (r_max - r_min + 1); i++) {
+//     wilson[i] = wilson[i] / (DATA_SIZE / 4 * 3);
+//   }
+//   return wilson;
+// }
+
+vector<FLOAT>
+wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
+                                  const vector<FLOAT> &plaket_tr, int r,
+                                  int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[d_max - d_min + 1];
-  result final(0);
+  for (int i = 0; i < d_max - d_min + 1; i++) {
+    vec[i] = 0;
+  }
+  vector<FLOAT> final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
@@ -264,7 +312,7 @@ result wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
   else
     count = data_size / 4 * 36;
   for (int d = d_min; d <= d_max; d++) {
-    final.array.push_back(vec[d - d_min] / count);
+    final.push_back(vec[d - d_min] / count);
   }
   return final;
 }
@@ -306,13 +354,16 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
   return final;
 }
 
-result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
-                                         const vector<FLOAT> &plaket_tr, int r,
-                                         int time, int x_trans, int d_min,
-                                         int d_max) {
+vector<FLOAT>
+wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
+                                  const vector<FLOAT> &plaket_tr, int r,
+                                  int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[d_max - d_min + 1];
-  result final(0);
+  for (int i = 0; i < d_max - d_min + 1; i++) {
+    vec[i] = 0;
+  }
+  vector<FLOAT> final;
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
@@ -360,7 +411,7 @@ result wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
   else
     count = data_size / 4 * 36;
   for (int d = d_min; d <= d_max; d++) {
-    final.array.push_back(vec[d - d_min] / count);
+    final.push_back(vec[d - d_min] / count);
   }
   return final;
 }
