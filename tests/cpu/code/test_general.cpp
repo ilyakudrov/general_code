@@ -172,47 +172,45 @@ int main(int argc, char *argv[]) {
   cout << "prepare time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
 
   start_time = clock();
-  result electric = wilson_plaket_correlator_electric(
+  vector<FLOAT> electric = wilson_plaket_correlator_electric(
       wilson_vec, plaket_time_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
   cout << "electric time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
 
   start_time = clock();
-  result magnetic = wilson_plaket_correlator_magnetic(
+  vector<FLOAT> magnetic = wilson_plaket_correlator_magnetic(
       wilson_vec, plaket_space_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
 
   cout << "magnetic time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-  for (int i = 0; i < electric.array.size(); i++) {
-    cout << "electric R = " << R << " T= " << T << " " << electric.array[i]
-         << endl;
-    cout << "magnetic R = " << R << " T= " << T << " " << magnetic.array[i]
-         << endl;
+  for (int i = 0; i < electric.size(); i++) {
+    cout << "electric R = " << R << " T= " << T << " " << electric[i] << endl;
+    cout << "magnetic R = " << R << " T= " << T << " " << magnetic[i] << endl;
   }
 
   int x_trans_min = -12;
   int x_trans_max = 12;
 
   start_time = clock();
-  result electric_x = wilson_plaket_correlator_electric_x(
+  vector<FLOAT> electric_x = wilson_plaket_correlator_electric_x(
       wilson_vec, plaket_time_vec, R, T, x_trans_min, x_trans_max, R / 2);
   end_time = clock();
   search_time = end_time - start_time;
   cout << "electric_x time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
 
   start_time = clock();
-  result magnetic_x = wilson_plaket_correlator_magnetic_x(
+  vector<FLOAT> magnetic_x = wilson_plaket_correlator_magnetic_x(
       wilson_vec, plaket_space_vec, R, T, x_trans_min, x_trans_max, R / 2);
   end_time = clock();
   search_time = end_time - start_time;
 
   cout << "magnetic_x time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-  for (int i = 0; i < electric_x.array.size(); i++) {
-    cout << "electric_x R = " << R << " T= " << T << " " << electric_x.array[i]
+  for (int i = 0; i < electric_x.size(); i++) {
+    cout << "electric_x R = " << R << " T= " << T << " " << electric_x[i]
          << endl;
-    cout << "magnetic_x R = " << R << " T= " << T << " " << magnetic_x.array[i]
+    cout << "magnetic_x R = " << R << " T= " << T << " " << magnetic_x[i]
          << endl;
   }
 

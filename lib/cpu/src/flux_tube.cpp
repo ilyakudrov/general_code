@@ -317,13 +317,12 @@ wilson_plaket_correlator_electric(const vector<FLOAT> &wilson_loop_tr,
   return final;
 }
 
-result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
-                                           const vector<FLOAT> &plaket_tr,
-                                           int r, int time, int x_trans_min,
-                                           int x_trans_max, int d) {
+vector<FLOAT> wilson_plaket_correlator_electric_x(
+    const vector<FLOAT> &wilson_loop_tr, const vector<FLOAT> &plaket_tr, int r,
+    int time, int x_trans_min, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[x_trans_max - x_trans_min + 1];
-  result final(0);
+  vector<FLOAT> final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
@@ -349,7 +348,7 @@ result wilson_plaket_correlator_electric_x(const vector<FLOAT> &wilson_loop_tr,
   int count;
   count = data_size / 4 * 18;
   for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
-    final.array.push_back(vec[x_trans - x_trans_min] / count);
+    final.push_back(vec[x_trans - x_trans_min] / count);
   }
   return final;
 }
@@ -416,13 +415,12 @@ wilson_plaket_correlator_magnetic(const vector<FLOAT> &wilson_loop_tr,
   return final;
 }
 
-result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
-                                           const vector<FLOAT> &plaket_tr,
-                                           int R, int T, int x_trans_min,
-                                           int x_trans_max, int d) {
+vector<FLOAT> wilson_plaket_correlator_magnetic_x(
+    const vector<FLOAT> &wilson_loop_tr, const vector<FLOAT> &plaket_tr, int R,
+    int T, int x_trans_min, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
   FLOAT vec[x_trans_max - x_trans_min + 1];
-  result final(0);
+  vector<FLOAT> final(0);
   FLOAT aver[2];
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
@@ -451,7 +449,7 @@ result wilson_plaket_correlator_magnetic_x(const vector<FLOAT> &wilson_loop_tr,
   int count;
   count = data_size / 4 * 18;
   for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
-    final.array.push_back(vec[x_trans - x_trans_min] / count);
+    final.push_back(vec[x_trans - x_trans_min] / count);
   }
   return final;
 }
