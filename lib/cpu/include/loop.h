@@ -1,0 +1,16 @@
+#pragma once
+
+#include "../include/link.h"
+
+class loop {
+public:
+  // link1 node;
+  int coordinate[4];
+  vector<loop *> link;
+
+  loop(const link1 &node1);
+  loop(const loop &l);
+
+  //  function calculates where to make the next step
+  int get_dir(int i);
+};
