@@ -48,6 +48,10 @@ public:
   link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
         int lattice_size_t);
 
+  link1(const link1 &link);
+
+  link1();
+
   // moves link in direction dir on step steps and updates place and
   // coordinates_old
   // dir is positive, step may be negative
@@ -108,9 +112,9 @@ public:
                int x); // attached to the "left" source and points to another
 
   // monopoles
-  /*FLOAT monopole_plaket(data<T> &conf, int i, int j); // monopole_plaket
-  FLOAT get_current(data<T> &conf);
-  int current_test(FLOAT *J);*/
+  FLOAT monopole_plaket_mu(vector<FLOAT> &angles, int mu);
+  int current_test(FLOAT *J);
+  void get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J);
 };
 
 ostream &operator<<(ostream &os, const link1 &link);

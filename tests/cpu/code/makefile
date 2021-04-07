@@ -3,7 +3,7 @@ SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
 FLAGS=-O3 -D DOUBLE
-OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o
+OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
@@ -12,6 +12,8 @@ test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES) -o test_eigenvectors
 test_flux_tube: $(OBJ_PATH)/test_flux_tube.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_flux_tube.o $(OBJFILES) -o test_flux_tube
+test_monopoles: $(OBJ_PATH)/test_monopoles.o $(OBJFILES)
+	$(GCC) $(OBJ_PATH)/test_monopoles.o $(OBJFILES) -o test_monopoles
 $(OBJ_PATH)/test_general.o: test_general.cpp
 	$(GCC) $(FLAGS) -c test_general.cpp -o $(OBJ_PATH)/test_general.o
 $(OBJ_PATH)/test_smearing.o: test_smearing.cpp
@@ -20,6 +22,8 @@ $(OBJ_PATH)/test_eigenvectors.o: test_eigenvectors.cpp
 	$(GCC) $(FLAGS) -c test_eigenvectors.cpp -o $(OBJ_PATH)/test_eigenvectors.o
 $(OBJ_PATH)/test_flux_tube.o: test_flux_tube.cpp
 	$(GCC) $(FLAGS) -c test_flux_tube.cpp -o $(OBJ_PATH)/test_flux_tube.o
+$(OBJ_PATH)/test_monopoles.o: test_monopoles.cpp
+	$(GCC) $(FLAGS) -c test_monopoles.cpp -o $(OBJ_PATH)/test_monopoles.o
 $(OBJ_PATH)/link.o: $(SRC_PATH)/link.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/link.cpp -o $(OBJ_PATH)/link.o
 $(OBJ_PATH)/data.o: $(SRC_PATH)/data.cpp
@@ -38,5 +42,7 @@ $(OBJ_PATH)/eigen.o: $(SRC_PATH)/eigen.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/eigen.cpp -o $(OBJ_PATH)/eigen.o
 $(OBJ_PATH)/monopoles.o: $(SRC_PATH)/monopoles.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/monopoles.cpp -o $(OBJ_PATH)/monopoles.o
+$(OBJ_PATH)/loop.o: $(SRC_PATH)/loop.cpp
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/loop.cpp -o $(OBJ_PATH)/loop.o
 clean:
 	rm -rf $(OBJ_PATH)/*.o

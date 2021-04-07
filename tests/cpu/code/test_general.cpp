@@ -42,42 +42,6 @@ int main(int argc, char *argv[]) {
   conf_abelian.read_float_fortran(path_abelian);
   conf_offd.read_double_fortran(path_offd);
 
-  x_size = 8;
-  y_size = 8;
-  z_size = 8;
-  t_size = 2;
-
-  data<su2> conf_ml5;
-  vector<float> array_ml5 = read_full_ml5(path_ml5, 1000);
-  for (int i = 0; i < 1; i++) {
-    conf_ml5.read_float_ml5(array_ml5, i);
-    cout << "ml5 plaket " << plaket(conf_ml5.array) / 2 << endl;
-    cout << "ml5 plaket_time " << plaket_time(conf_ml5.array) / 2 << endl;
-    cout << "ml5 plaket_space " << plaket_space(conf_ml5.array) / 2 << endl;
-    cout << "ml5 polyakov " << polyakov(conf_ml5.array) / 2 << endl;
-    cout << "MAG_functional ml5 " << MAG_functional_su2(conf_ml5.array) << endl;
-
-    int T_min = 1, T_max = 2;
-    int R_min = 1, R_max = 8;
-
-    vector<FLOAT> vec_wilson;
-    start_time = clock();
-
-    vec_wilson = wilson(conf_ml5.array, R_min, R_max, T_min, T_max);
-
-    end_time = clock();
-    search_time = end_time - start_time;
-    cout << "wilson time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
-    cout << "wilson_loops:" << endl;
-    for (int T = T_min; T <= T_max; T++) {
-      for (int R = R_min; R <= R_max; R++) {
-        cout << "T = " << T << " R = " << R << " "
-             << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)]
-             << endl;
-      }
-    }
-  }
-
   x_size = 40;
   y_size = 40;
   z_size = 40;
