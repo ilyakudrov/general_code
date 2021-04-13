@@ -82,6 +82,18 @@ void link1::go(int x, int y, int z, int t) {
 }
 void link1::move_dir(int dir) { direction = dir; }
 
+void link1::go_update(int x, int y, int z, int t) {
+  coordinate[0] = x;
+  coordinate[1] = y;
+  coordinate[2] = z;
+  coordinate[3] = t;
+
+  update(0);
+  update(1);
+  update(2);
+  update(3);
+}
+
 template <class T> const T *link1::get_matrix(const vector<T> &array) {
   return &array[place + direction];
 }
@@ -261,7 +273,7 @@ FLOAT link1::field3(const vector<T> &polyakov_loop, int D, int x) {
 
 // calclate monopole plaket from angles in link.direction-mu plane
 FLOAT link1::monopole_plaket_mu(vector<FLOAT> &angles, int mu) {
-  float angle = angles[place + direction];
+  FLOAT angle = angles[place + direction];
   move(direction, 1);
   angle += angles[place + mu];
   move(direction, -1);
@@ -278,7 +290,8 @@ FLOAT link1::monopole_plaket_mu(vector<FLOAT> &angles, int mu) {
   return angle;
 }
 
-void link1::get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J) {
+void link1::get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J,
+                        vector<FLOAT> &angles) {
   FLOAT j0, j1, j2, j3;
   link1 linkx(*this);
   linkx.move(0, 1);
@@ -288,54 +301,57 @@ void link1::get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J) {
   linkz.move(2, 1);
   link1 linkt(*this);
   linkt.move(3, 1);
+
+  move(3, 1);
+  linkx.move(3, 1);
+  linky.move(3, 1);
+  linkz.move(3, 1);
   j3 = monopole_plaket[3][linkx.place / 4] - monopole_plaket[3][place / 4] -
        (monopole_plaket[1][linky.place / 4] - monopole_plaket[1][place / 4]) +
        monopole_plaket[0][linkz.place / 4] - monopole_plaket[0][place / 4];
+  move(3, -1);
+  linkx.move(3, -1);
+  linky.move(3, -1);
+  linkz.move(3, -1);
+  move(0, 1);
+  linkt.move(0, 1);
+  linky.move(0, 1);
+  linkz.move(0, 1);
   j0 = -(monopole_plaket[3][linkt.place / 4] - monopole_plaket[3][place / 4]) -
        (monopole_plaket[5][linky.place / 4] - monopole_plaket[5][place / 4]) +
        monopole_plaket[4][linkz.place / 4] - monopole_plaket[4][place / 4];
+  move(0, -1);
+  linkt.move(0, -1);
+  linky.move(0, -1);
+  linkz.move(0, -1);
+  move(1, 1);
+  linkt.move(1, 1);
+  linkx.move(1, 1);
+  linkz.move(1, 1);
   j1 = monopole_plaket[1][linkt.place / 4] - monopole_plaket[1][place / 4] +
        monopole_plaket[5][linkx.place / 4] - monopole_plaket[5][place / 4] -
        (monopole_plaket[2][linkz.place / 4] - monopole_plaket[2][place / 4]);
+  move(1, -1);
+  linkt.move(1, -1);
+  linkx.move(1, -1);
+  linkz.move(1, -1);
+  move(2, 1);
+  linkt.move(2, 1);
+  linkx.move(2, 1);
+  linky.move(2, 1);
   j2 = -(monopole_plaket[0][linkt.place / 4] - monopole_plaket[0][place / 4]) -
        (monopole_plaket[4][linkx.place / 4] - monopole_plaket[4][place / 4]) +
        monopole_plaket[2][linky.place / 4] - monopole_plaket[2][place / 4];
-
-  if (coordinate[0] == 2 && coordinate[1] == 0 && coordinate[2] == 0 &&
-      coordinate[3] == 0) {
-    cout << j0 << " " << j1 << " " << j2 << " " << j3 << endl;
-    cout << monopole_plaket[3][linkt.place / 4] << " "
-         << monopole_plaket[3][place / 4] << endl;
-    cout << monopole_plaket[5][linky.place / 4] << " "
-         << monopole_plaket[5][place / 4] << endl;
-    cout << monopole_plaket[4][linkz.place / 4] << " "
-         << monopole_plaket[4][place / 4] << endl;
-  }
+  move(2, -1);
+  linkt.move(2, -1);
+  linkx.move(2, -1);
+  linky.move(2, -1);
 
   J[0] = j0 / 2 / Pi;
   J[1] = j1 / 2 / Pi;
   J[2] = j2 / 2 / Pi;
   J[3] = j3 / 2 / Pi;
 }
-
-/*template <class T> int link1::current_test(FLOAT *J) {
-  for (int i = 1; i <= 4; i++) {
-    move_dir(i);
-    if ((J[get_place()] > 0.3) || (J[get_place()] < -0.3)) {
-      return i;
-    }
-  }
-
-  for (int i = 1; i <= 4; i++) {
-    move_dir(i);
-    move(i, -1);
-    if ((J[get_place()] > 0.3) || (J[get_place()] < -0.3)) {
-      return -i;
-    }
-    move(i, 1);
-  }
-  return 0;
-}*/
 
 // specializations
 

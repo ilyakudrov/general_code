@@ -66,6 +66,9 @@ public:
   // changes direction to dir
   void move_dir(int dir);
 
+  // go and update
+  void go_update(int x, int y, int z, int t);
+
   // gets matrix on current link, only gets matrices in positive directions
   // in order to get conjugated matrix use .conj() or ^ operator in matrix
   // returns pointer for better performance
@@ -114,7 +117,8 @@ public:
   // monopoles
   FLOAT monopole_plaket_mu(vector<FLOAT> &angles, int mu);
   int current_test(FLOAT *J);
-  void get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J);
+  void get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J,
+                   vector<FLOAT> &angles);
 };
 
 ostream &operator<<(ostream &os, const link1 &link);

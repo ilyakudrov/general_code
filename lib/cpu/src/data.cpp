@@ -149,7 +149,7 @@ template <> void data<abelian>::read_float_convert_abelian(string &file_name) {
   array.clear();
   ifstream stream(file_name);
   vector<float> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(float)))
+  if (!stream.read((char *)&v[0], (data_size1 * 4 + 1) * sizeof(float)))
     cout << "read_float_convert_abelian<abelian> error: " << file_name << endl;
   for (int i = 0; i < data_size1; i++) {
     array.push_back(abelian(1, (FLOAT)atan2(v[i * 4 + 3], v[i * 4 + 0])));
