@@ -14,11 +14,9 @@
 #include <math.h>
 #include <vector>
 
-using namespace std;
-
 class result {
 public:
-  vector<FLOAT> array;
+  std::vector<FLOAT> array;
 
   result(int size);
   result();

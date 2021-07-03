@@ -6,7 +6,7 @@ class loop {
 public:
   // link1 node;
   int coordinate[4];
-  vector<loop *> link;
+  std::vector<loop *> link;
 
   loop(const link1 &node1);
   loop(const loop &l);

@@ -1,7 +1,7 @@
 #include "../include/result.h"
 
 result::result(int size) { array.reserve(size); }
-result::result() { array = vector<FLOAT>(0); }
+result::result() { array = std::vector<FLOAT>(0); }
 void result::average(FLOAT a[2]) {
   if (array.size() == 0) {
     a[0] = 0;
@@ -24,15 +24,15 @@ void result::average(FLOAT a[2]) {
 void result::read(char const *file_name, int size1) {
   array.clear();
   array.reserve(size1);
-  ifstream stream(file_name);
+  std::ifstream stream(file_name);
   if (!stream.read((char *)&array[0], size1 * sizeof(FLOAT)))
-    cout << "result::read error: " << file_name << endl;
+    std::cout << "result::read error: " << file_name << std::endl;
   stream.close();
 }
 void result::read_float(char const *file_name, int size1) {
   array.clear();
-  ifstream stream(file_name);
-  vector<float> vec(size1);
+  std::ifstream stream(file_name);
+  std::vector<float> vec(size1);
   stream.read((char *)&vec[0], size1 * sizeof(float));
   for (int i = 0; i < size1; i++) {
     array.push_back((FLOAT)vec[i]);
@@ -40,7 +40,7 @@ void result::read_float(char const *file_name, int size1) {
   stream.close();
 }
 void result::write(char const *file_name) {
-  ofstream stream(file_name);
+  std::ofstream stream(file_name);
   stream.write((char *)&array[0], array.size() * sizeof(FLOAT));
   stream.close();
 }
@@ -86,7 +86,7 @@ FLOAT result::average_n(int n) {
 }
 void average_jack(FLOAT a[2], result &val1, result &val2, result &val3) {
   int size = val1.array.size();
-  vector<FLOAT> vec(size);
+  std::vector<FLOAT> vec(size);
   FLOAT aver1[2];
   FLOAT aver2[2];
   FLOAT aver3[2];
@@ -108,7 +108,7 @@ void average_jack(FLOAT a[2], result &val1, result &val2, result &val3) {
 
 void average_jack_wilson(FLOAT a[2], result &val1, result &val2, result &val3) {
   int size = val1.array.size();
-  vector<FLOAT> vec(size);
+  std::vector<FLOAT> vec(size);
   FLOAT aver1[2];
   FLOAT aver2[2];
   FLOAT aver3[2];
@@ -131,7 +131,7 @@ void average_jack_wilson(FLOAT a[2], result &val1, result &val2, result &val3) {
 void average_jack_sum(FLOAT a[2], result &val11, result &val12, result &val2,
                       result &val3, result &val4) {
   int size = val11.array.size();
-  vector<FLOAT> vec(size);
+  std::vector<FLOAT> vec(size);
   FLOAT aver11[2];
   FLOAT aver12[2];
   FLOAT aver2[2];
@@ -159,7 +159,7 @@ void average_jack_sum(FLOAT a[2], result &val11, result &val12, result &val2,
 void average_jack_difference(FLOAT a[2], result &val11, result &val12,
                              result &val2, result &val3, result &val4) {
   int size = val11.array.size();
-  vector<FLOAT> vec(size);
+  std::vector<FLOAT> vec(size);
   FLOAT aver11[2];
   FLOAT aver12[2];
   FLOAT aver2[2];
@@ -186,7 +186,7 @@ void average_jack_difference(FLOAT a[2], result &val11, result &val12,
 
 void average_jackknife(FLOAT a[2], result &val1) {
   int size = val1.array.size();
-  vector<FLOAT> vec(size);
+  std::vector<FLOAT> vec(size);
   FLOAT aver[2];
   val1.average(aver);
   FLOAT b = aver[0];
@@ -226,7 +226,7 @@ FLOAT bootstrap_wilson(FLOAT aver[2], result &val1, result &val2,
 
 void average_bootstrap_wilson(FLOAT a[2], result &val1, result &val2,
                               result &val3, int k) {
-  vector<FLOAT> vec(k);
+  std::vector<FLOAT> vec(k);
   FLOAT aver1[2];
   for (int i = 0; i < k; i++) {
     vec[i] = bootstrap_wilson(aver1, val1, val2, val3);

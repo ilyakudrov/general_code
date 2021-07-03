@@ -37,9 +37,8 @@
   }                                                                            \
   }
 
-using namespace std;
-
-template <class T> T staples_first(const vector<T> &vec, link1 &link, int eta) {
+template <class T>
+T staples_first(const std::vector<T> &vec, link1 &link, int eta) {
   T A;
   T B;
   int dir = link.direction;
@@ -67,8 +66,9 @@ template <class T> T staples_first(const vector<T> &vec, link1 &link, int eta) {
 }
 
 template <class T>
-T staples_second(const vector<vector<T>> &smearing_first, link1 &link,
-                 unordered_map<int, int> &indexes, int rho, int mu, int nu) {
+T staples_second(const std::vector<std::vector<T>> &smearing_first, link1 &link,
+                 std::unordered_map<int, int> &indexes, int rho, int mu,
+                 int nu) {
   T A;
   T B;
   int a = 0;
@@ -92,8 +92,8 @@ T staples_second(const vector<vector<T>> &smearing_first, link1 &link,
 }
 
 template <class T>
-T staples_second_refresh(const vector<T> &vec, link1 &link, int eta, int nu,
-                         FLOAT alpha3) {
+T staples_second_refresh(const std::vector<T> &vec, link1 &link, int eta,
+                         int nu, FLOAT alpha3) {
   T A;
   T B;
   int dir = link.direction;
@@ -121,8 +121,8 @@ T staples_second_refresh(const vector<T> &vec, link1 &link, int eta, int nu,
 }
 
 template <class T>
-T staples_third(const vector<vector<T>> &smearing_second, link1 &link,
-                unordered_map<int, int> indexes, int nu, int mu) {
+T staples_third(const std::vector<std::vector<T>> &smearing_second, link1 &link,
+                std::unordered_map<int, int> indexes, int nu, int mu) {
   T A;
   T B;
   A = smearing_second[indexes[nu * 10 + mu]][PLACE1_LINK_NODIR];
@@ -143,7 +143,7 @@ T staples_third(const vector<vector<T>> &smearing_second, link1 &link,
 }
 
 template <class T>
-T staples_third_refresh(const vector<T> &vec, link1 &link, int eta,
+T staples_third_refresh(const std::vector<T> &vec, link1 &link, int eta,
                         FLOAT alpha2, FLOAT alpha3) {
   T A;
   T B;
@@ -172,10 +172,10 @@ T staples_third_refresh(const vector<T> &vec, link1 &link, int eta,
 }
 
 template <class T>
-vector<T> smearing_first(const vector<T> &array, FLOAT alpha3, int mu, int nu,
-                         int rho) {
+std::vector<T> smearing_first(const std::vector<T> &array, FLOAT alpha3, int mu,
+                              int nu, int rho) {
   link1 link(x_size, y_size, z_size, t_size);
-  vector<T> vec(data_size / 4);
+  std::vector<T> vec(data_size / 4);
   link.move_dir(mu);
   SPACE_ITER_START
   vec[PLACE1_LINK_NODIR] = (1 - alpha3) * *link.get_matrix(array);
@@ -190,7 +190,7 @@ vector<T> smearing_first(const vector<T> &array, FLOAT alpha3, int mu, int nu,
   return vec;
 }
 
-void make_map_first(unordered_map<int, int> &indexes) {
+void make_map_first(std::unordered_map<int, int> &indexes) {
   int key;
   int count = 0;
   for (int i = 0; i <= 2; i++) {
@@ -218,10 +218,11 @@ void make_map_first(unordered_map<int, int> &indexes) {
 }
 
 template <class T>
-vector<vector<T>> smearing_first_full(const vector<T> &array, FLOAT alpha3) {
-  unordered_map<int, int> indexes;
+std::vector<std::vector<T>> smearing_first_full(const std::vector<T> &array,
+                                                FLOAT alpha3) {
+  std::unordered_map<int, int> indexes;
   make_map_first(indexes);
-  vector<vector<T>> smearing(9, vector<T>(data_size / 4));
+  std::vector<std::vector<T>> smearing(9, std::vector<T>(data_size / 4));
   int key;
   for (int i = 0; i <= 2; i++) {
     for (int j = 0; j <= 2; j++) {
@@ -243,13 +244,13 @@ vector<vector<T>> smearing_first_full(const vector<T> &array, FLOAT alpha3) {
 }
 
 template <class T>
-vector<T> smearing_second(const vector<T> &array,
-                          vector<vector<T>> &smearing_first, FLOAT alpha2,
-                          int mu, int nu) {
+std::vector<T> smearing_second(const std::vector<T> &array,
+                               std::vector<std::vector<T>> &smearing_first,
+                               FLOAT alpha2, int mu, int nu) {
   link1 link(x_size, y_size, z_size, t_size);
-  unordered_map<int, int> indexes;
+  std::unordered_map<int, int> indexes;
   make_map_first(indexes);
-  vector<T> vec(data_size / 4);
+  std::vector<T> vec(data_size / 4);
   link.move_dir(mu);
   SPACE_ITER_START
   vec[PLACE1_LINK_NODIR] = (1 - alpha2) * *link.get_matrix(array);
@@ -266,7 +267,7 @@ vector<T> smearing_second(const vector<T> &array,
   return vec;
 }
 
-void make_map_second(unordered_map<int, int> &indexes) {
+void make_map_second(std::unordered_map<int, int> &indexes) {
   int key;
   int count = 0;
   for (int i = 0; i <= 2; i++) {
@@ -282,12 +283,13 @@ void make_map_second(unordered_map<int, int> &indexes) {
 }
 
 template <class T>
-vector<vector<T>> smearing_second_full(const vector<T> &array,
-                                       vector<vector<T>> &smearing_first,
-                                       FLOAT alpha2) {
-  unordered_map<int, int> indexes;
+std::vector<std::vector<T>>
+smearing_second_full(const std::vector<T> &array,
+                     std::vector<std::vector<T>> &smearing_first,
+                     FLOAT alpha2) {
+  std::unordered_map<int, int> indexes;
   make_map_second(indexes);
-  vector<vector<T>> smearing(6, vector<T>(data_size / 4));
+  std::vector<std::vector<T>> smearing(6, std::vector<T>(data_size / 4));
   int key;
   for (int i = 0; i <= 2; i++) {
     key = i * 10 + 3;
@@ -303,12 +305,13 @@ vector<vector<T>> smearing_second_full(const vector<T> &array,
 }
 
 template <class T>
-vector<T> smearing_HYP(const vector<T> &array,
-                       vector<vector<T>> &smearing_second, FLOAT alpha1) {
+std::vector<T> smearing_HYP(const std::vector<T> &array,
+                            std::vector<std::vector<T>> &smearing_second,
+                            FLOAT alpha1) {
   link1 link(x_size, y_size, z_size, t_size);
-  unordered_map<int, int> indexes;
+  std::unordered_map<int, int> indexes;
   make_map_second(indexes);
-  vector<T> vec(data_size);
+  std::vector<T> vec(data_size);
   link.move_dir(3);
   SPACE_ITER_START
   vec[PLACE4_LINK_DIR] = (1 - alpha1) * *link.get_matrix(array);
@@ -329,9 +332,9 @@ vector<T> smearing_HYP(const vector<T> &array,
 }
 
 template <class T>
-vector<T> smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
+std::vector<T> smearing_APE(const std::vector<T> &array, FLOAT alpha_APE) {
   link1 link(x_size, y_size, z_size, t_size);
-  vector<T> vec(data_size);
+  std::vector<T> vec(data_size);
   SPACE_ITER_START
   link.go(x, y, z, t);
   for (int i = 0; i < 3; i++) {
@@ -355,8 +358,8 @@ vector<T> smearing_APE(const vector<T> &array, FLOAT alpha_APE) {
 }
 
 template <class T>
-T smearing_first_refresh(const vector<T> &vec, link1 &link, int nu, int rho,
-                         FLOAT alpha3) {
+T smearing_first_refresh(const std::vector<T> &vec, link1 &link, int nu,
+                         int rho, FLOAT alpha3) {
   T A;
   A = (1 - alpha3) * *link.get_matrix(vec);
   for (int d = 0; d < 4; d++) {
@@ -369,7 +372,7 @@ T smearing_first_refresh(const vector<T> &vec, link1 &link, int nu, int rho,
 }
 
 template <class T>
-T smearing_second_refresh(const vector<T> &vec, link1 &link, int nu,
+T smearing_second_refresh(const std::vector<T> &vec, link1 &link, int nu,
                           FLOAT alpha2, FLOAT alpha3) {
   T A;
   A = (1 - alpha2) * *link.get_matrix(vec);
@@ -383,10 +386,10 @@ T smearing_second_refresh(const vector<T> &vec, link1 &link, int nu,
 }
 
 template <class T>
-vector<T> smearing_HYP_refresh(data<T> &conf, FLOAT alpha1, FLOAT alpha2,
-                               FLOAT alpha3) {
+std::vector<T> smearing_HYP_refresh(data<T> &conf, FLOAT alpha1, FLOAT alpha2,
+                                    FLOAT alpha3) {
   link1 link(x_size, y_size, z_size, t_size);
-  vector<T> vec(data_size);
+  std::vector<T> vec(data_size);
   vec = conf.array;
   T A;
   link.move_dir(3);
@@ -401,9 +404,9 @@ vector<T> smearing_HYP_refresh(data<T> &conf, FLOAT alpha1, FLOAT alpha2,
 }
 
 template <class T>
-vector<T> smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
+std::vector<T> smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
   link1 link(x_size, y_size, z_size, t_size);
-  vector<T> vec(data_size);
+  std::vector<T> vec(data_size);
   vec = conf.array;
   T A;
   SPACE_ITER_START
@@ -420,9 +423,9 @@ vector<T> smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
   return vec;
 }
 
-vector<su2> smearing_stout(data<su2> &conf, FLOAT rho) {
+std::vector<su2> smearing_stout(data<su2> &conf, FLOAT rho) {
   link1 link(x_size, y_size, z_size, t_size);
-  vector<su2> vec(data_size);
+  std::vector<su2> vec(data_size);
   vec = conf.array;
   SPACE_ITER_START
   for (int i = 0; i < 4; i++) {
@@ -475,87 +478,98 @@ su2 stout_omega(data<su2> &conf, link1 &link, FLOAT rho) {
 // specialications
 
 // su2
-template su2 staples_first(const vector<su2> &vec, link1 &link, int eta);
-template su2 staples_second(const vector<vector<su2>> &smearing_first,
-                            link1 &link, unordered_map<int, int> &indexes,
+template su2 staples_first(const std::vector<su2> &vec, link1 &link, int eta);
+template su2 staples_second(const std::vector<std::vector<su2>> &smearing_first,
+                            link1 &link, std::unordered_map<int, int> &indexes,
                             int rho, int mu, int nu);
 template su2
-staples_second_refresh(const vector<su2> &vec, link1 &link, int eta, int nu,
+staples_second_refresh(const std::vector<su2> &vec, link1 &link, int eta,
+                       int nu,
                        FLOAT alpha3); // staples for refreshing
                                       // algorythm(refresh link every step)
-template su2 staples_third(const vector<vector<su2>> &smearing_second,
-                           link1 &link, unordered_map<int, int> indexes, int nu,
-                           int mu);
-template su2 staples_third_refresh(const vector<su2> &vec, link1 &link, int eta,
-                                   FLOAT alpha2, FLOAT alpha3);
-template vector<su2> smearing_first(const vector<su2> &array, FLOAT alpha3,
-                                    int mu, int nu, int rho);
-template vector<vector<su2>> smearing_first_full(const vector<su2> &array,
-                                                 FLOAT alpha3);
-template vector<su2> smearing_second(const vector<su2> &array,
-                                     vector<vector<su2>> &smearing_first,
-                                     FLOAT alpha2, int mu, int nu);
-template vector<vector<su2>>
-smearing_second_full(const vector<su2> &array,
-                     vector<vector<su2>> &smearing_first, FLOAT alpha2);
-template vector<su2> smearing_HYP(const vector<su2> &array,
-                                  vector<vector<su2>> &smearing_second,
-                                  FLOAT alpha1);
-template vector<su2> smearing_APE(const vector<su2> &array, FLOAT alpha_APE);
-template su2 smearing_first_refresh(const vector<su2> &vec, link1 &link, int nu,
-                                    int rho,
+template su2 staples_third(const std::vector<std::vector<su2>> &smearing_second,
+                           link1 &link, std::unordered_map<int, int> indexes,
+                           int nu, int mu);
+template su2 staples_third_refresh(const std::vector<su2> &vec, link1 &link,
+                                   int eta, FLOAT alpha2, FLOAT alpha3);
+template std::vector<su2> smearing_first(const std::vector<su2> &array,
+                                         FLOAT alpha3, int mu, int nu, int rho);
+template std::vector<std::vector<su2>>
+smearing_first_full(const std::vector<su2> &array, FLOAT alpha3);
+template std::vector<su2>
+smearing_second(const std::vector<su2> &array,
+                std::vector<std::vector<su2>> &smearing_first, FLOAT alpha2,
+                int mu, int nu);
+template std::vector<std::vector<su2>>
+smearing_second_full(const std::vector<su2> &array,
+                     std::vector<std::vector<su2>> &smearing_first,
+                     FLOAT alpha2);
+template std::vector<su2>
+smearing_HYP(const std::vector<su2> &array,
+             std::vector<std::vector<su2>> &smearing_second, FLOAT alpha1);
+template std::vector<su2> smearing_APE(const std::vector<su2> &array,
+                                       FLOAT alpha_APE);
+template su2 smearing_first_refresh(const std::vector<su2> &vec, link1 &link,
+                                    int nu, int rho,
                                     FLOAT alpha3); // refresh link every step
-template su2 smearing_second_refresh(const vector<su2> &vec, link1 &link,
+template su2 smearing_second_refresh(const std::vector<su2> &vec, link1 &link,
                                      int nu, FLOAT alpha2,
                                      FLOAT alpha3); // refresh link every step
-template vector<su2>
+template std::vector<su2>
 smearing_HYP_refresh(data<su2> &conf, FLOAT alpha1, FLOAT alpha2,
                      FLOAT alpha3); // refresh link every step
-template vector<su2>
+template std::vector<su2>
 smearing_APE_refresh(data<su2> &conf,
                      FLOAT alpha_APE); // refresh link every step
 
 // abelian
-template abelian staples_first(const vector<abelian> &vec, link1 &link,
+template abelian staples_first(const std::vector<abelian> &vec, link1 &link,
                                int eta);
-template abelian staples_second(const vector<vector<abelian>> &smearing_first,
-                                link1 &link, unordered_map<int, int> &indexes,
-                                int rho, int mu, int nu);
 template abelian
-staples_second_refresh(const vector<abelian> &vec, link1 &link, int eta, int nu,
+staples_second(const std::vector<std::vector<abelian>> &smearing_first,
+               link1 &link, std::unordered_map<int, int> &indexes, int rho,
+               int mu, int nu);
+template abelian
+staples_second_refresh(const std::vector<abelian> &vec, link1 &link, int eta,
+                       int nu,
                        FLOAT alpha3); // staples for refreshing
                                       // algorythm(refresh link every step)
-template abelian staples_third(const vector<vector<abelian>> &smearing_second,
-                               link1 &link, unordered_map<int, int> indexes,
-                               int nu, int mu);
-template abelian staples_third_refresh(const vector<abelian> &vec, link1 &link,
-                                       int eta, FLOAT alpha2, FLOAT alpha3);
-template vector<abelian> smearing_first(const vector<abelian> &array,
-                                        FLOAT alpha3, int mu, int nu, int rho);
-template vector<vector<abelian>>
-smearing_first_full(const vector<abelian> &array, FLOAT alpha3);
-template vector<abelian>
-smearing_second(const vector<abelian> &array,
-                vector<vector<abelian>> &smearing_first, FLOAT alpha2, int mu,
-                int nu);
-template vector<vector<abelian>>
-smearing_second_full(const vector<abelian> &array,
-                     vector<vector<abelian>> &smearing_first, FLOAT alpha2);
-template vector<abelian> smearing_HYP(const vector<abelian> &array,
-                                      vector<vector<abelian>> &smearing_second,
-                                      FLOAT alpha1);
-template vector<abelian> smearing_APE(const vector<abelian> &array,
-                                      FLOAT alpha_APE);
 template abelian
-smearing_first_refresh(const vector<abelian> &vec, link1 &link, int nu, int rho,
+staples_third(const std::vector<std::vector<abelian>> &smearing_second,
+              link1 &link, std::unordered_map<int, int> indexes, int nu,
+              int mu);
+template abelian staples_third_refresh(const std::vector<abelian> &vec,
+                                       link1 &link, int eta, FLOAT alpha2,
+                                       FLOAT alpha3);
+template std::vector<abelian> smearing_first(const std::vector<abelian> &array,
+                                             FLOAT alpha3, int mu, int nu,
+                                             int rho);
+template std::vector<std::vector<abelian>>
+smearing_first_full(const std::vector<abelian> &array, FLOAT alpha3);
+template std::vector<abelian>
+smearing_second(const std::vector<abelian> &array,
+                std::vector<std::vector<abelian>> &smearing_first, FLOAT alpha2,
+                int mu, int nu);
+template std::vector<std::vector<abelian>>
+smearing_second_full(const std::vector<abelian> &array,
+                     std::vector<std::vector<abelian>> &smearing_first,
+                     FLOAT alpha2);
+template std::vector<abelian>
+smearing_HYP(const std::vector<abelian> &array,
+             std::vector<std::vector<abelian>> &smearing_second, FLOAT alpha1);
+template std::vector<abelian> smearing_APE(const std::vector<abelian> &array,
+                                           FLOAT alpha_APE);
+template abelian
+smearing_first_refresh(const std::vector<abelian> &vec, link1 &link, int nu,
+                       int rho,
                        FLOAT alpha3); // refresh link every step
 template abelian
-smearing_second_refresh(const vector<abelian> &vec, link1 &link, int nu,
+smearing_second_refresh(const std::vector<abelian> &vec, link1 &link, int nu,
                         FLOAT alpha2,
                         FLOAT alpha3); // refresh link every step
-template vector<abelian>
+template std::vector<abelian>
 smearing_HYP_refresh(data<abelian> &conf, FLOAT alpha1, FLOAT alpha2,
                      FLOAT alpha3); // refresh link every step
-template vector<abelian>
+template std::vector<abelian>
 smearing_APE_refresh(data<abelian> &conf,
                      FLOAT alpha_APE); // refresh link every step

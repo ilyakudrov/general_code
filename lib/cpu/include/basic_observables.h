@@ -11,22 +11,21 @@
 #include "matrix.h"
 #include "result.h"
 
-using namespace std;
-
 // Plaket
-template <class T> FLOAT plaket_time(const vector<T> &array);
-template <class T> FLOAT plaket_space(const vector<T> &array);
-template <class T> FLOAT plaket(const vector<T> &array);
+template <class T> FLOAT plaket_time(const std::vector<T> &array);
+template <class T> FLOAT plaket_space(const std::vector<T> &array);
+template <class T> FLOAT plaket(const std::vector<T> &array);
 
 // Wilson loop
 template <class T>
-vector<FLOAT> wilson(const vector<T> &array, int r_min, int r_max, int time_min,
-                     int time_max);
+std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
+                          int time_min, int time_max);
 template <class T>
-vector<T> wilson_lines(const vector<T> &array, int mu, int length);
+std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length);
 template <class T>
-vector<T> wilson_line_increase(const vector<T> &array, const vector<T> &lines,
-                               int mu, int length);
+std::vector<T> wilson_line_increase(const std::vector<T> &array,
+                                    const std::vector<T> &lines, int mu,
+                                    int length);
 
 // contains offaxis wilson loop information
 struct wilson_result {
@@ -36,49 +35,53 @@ struct wilson_result {
   int statistics_size;
 };
 
-void wilson_offaxis_reduce(vector<wilson_result> &wilson_offaxis_result);
+void wilson_offaxis_reduce(std::vector<wilson_result> &wilson_offaxis_result);
 
 template <class T>
-vector<wilson_result>
-wilson_offaxis(const vector<T> &array, const vector<vector<int>> directions,
-               FLOAT r_min, FLOAT r_max, int time_min, int time_max);
+std::vector<wilson_result>
+wilson_offaxis(const std::vector<T> &array,
+               const std::vector<std::vector<int>> directions, FLOAT r_min,
+               FLOAT r_max, int time_min, int time_max);
 
-vector<vector<int>> generate_permutations(const vector<int> &direction);
+std::vector<std::vector<int>>
+generate_permutations(const std::vector<int> &direction);
 
-vector<vector<int>> generate_reflections(const vector<int> &direction);
-
-template <class T>
-FLOAT calculate_wilson_loop_offaxis(const vector<T> &time_lines, int time,
-                                    const vector<T> &space_lines,
-                                    const vector<int> &direction);
+std::vector<std::vector<int>>
+generate_reflections(const std::vector<int> &direction);
 
 template <class T>
-vector<T> wilson_lines_offaxis(const vector<T> &array,
-                               const vector<int> pattern);
+FLOAT calculate_wilson_loop_offaxis(const std::vector<T> &time_lines, int time,
+                                    const std::vector<T> &space_lines,
+                                    const std::vector<int> &direction);
 
 template <class T>
-vector<T> wilson_lines_offaxis_increase(const vector<T> &array,
-                                        const vector<T> &lines1,
-                                        const vector<int> pattern,
-                                        const vector<int> direction);
+std::vector<T> wilson_lines_offaxis(const std::vector<T> &array,
+                                    const std::vector<int> pattern);
 
-vector<vector<int>> generate_directions(int length_max);
+template <class T>
+std::vector<T> wilson_lines_offaxis_increase(const std::vector<T> &array,
+                                             const std::vector<T> &lines1,
+                                             const std::vector<int> pattern,
+                                             const std::vector<int> direction);
 
-bool is_direction_same(const vector<int> &direction1,
-                       const vector<int> &direction2);
+std::vector<std::vector<int>> generate_directions(int length_max);
 
-vector<int> permutate_pattern(const vector<int> &pattern,
-                              const vector<int> permutation);
+bool is_direction_same(const std::vector<int> &direction1,
+                       const std::vector<int> &direction2);
 
-vector<int> reflect_pattern(const vector<int> &pattern,
-                            const vector<int> reflection);
+std::vector<int> permutate_pattern(const std::vector<int> &pattern,
+                                   const std::vector<int> permutation);
 
-vector<int> make_offaxis_pattern(const vector<int> &line_direction);
+std::vector<int> reflect_pattern(const std::vector<int> &pattern,
+                                 const std::vector<int> reflection);
+
+std::vector<int> make_offaxis_pattern(const std::vector<int> &line_direction);
 
 // Polyakov loop
-template <class T> FLOAT polyakov(const vector<T> &array);
+template <class T> FLOAT polyakov(const std::vector<T> &array);
 
 // Polyakov_correlator
-template <class T> FLOAT polyakov_loop_corelator(const vector<T> &array, int D);
+template <class T>
+FLOAT polyakov_loop_corelator(const std::vector<T> &array, int D);
 
-FLOAT MAG_functional_su2(const vector<su2> &array);
+FLOAT MAG_functional_su2(const std::vector<su2> &array);

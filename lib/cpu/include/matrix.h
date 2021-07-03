@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 // su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
 class su2 {
 public:
@@ -50,7 +48,7 @@ su2 operator*(const su2 &A, const su2 *B);
 // matrix multiplication A * B.conj()
 su2 operator^(const su2 &A, const su2 *B);
 
-ostream &operator<<(ostream &os, const su2 &A);
+std::ostream &operator<<(std::ostream &os, const su2 &A);
 
 // abelian variable (module * exp(i * phi))
 class abelian {
@@ -79,4 +77,4 @@ abelian operator*(const abelian &A, const abelian &B);
 abelian operator*(const abelian &A, const abelian *B);
 abelian operator^(const abelian &A, const abelian *B);
 
-ostream &operator<<(ostream &os, const abelian &A);
+std::ostream &operator<<(std::ostream &os, const abelian &A);

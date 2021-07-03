@@ -2,8 +2,8 @@ INCLUDE_PATH=../../../lib/cpu/include
 SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
-FLAGS=-O3 -D DOUBLE
-OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o
+FLAGS=-O3 -D DOUBLE -march=native -mtune=native -ffast-math
+OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o $(OBJ_PATH)/eigen.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)

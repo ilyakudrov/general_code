@@ -11,8 +11,6 @@
 #include <iostream>
 #include <stdio.h>
 
-using namespace std;
-
 int x_size = 32;
 int y_size = 32;
 int z_size = 32;
@@ -25,8 +23,8 @@ int main(int argc, char *argv[]) {
   FLOAT alpha_APE = 0.3;
   FLOAT stout_rho = 0.15;
 
-  vector<vector<su2>> smearing_first(9, vector<su2>(1));
-  vector<vector<su2>> smearing_second(6, vector<su2>(1));
+  std::vector<std::vector<su2>> smearing_first(9, std::vector<su2>(1));
+  std::vector<std::vector<su2>> smearing_second(6, std::vector<su2>(1));
 
   link1 link(x_size, y_size, z_size, t_size);
   link1 link_double(x_size, y_size, z_size, t_size);
@@ -34,13 +32,13 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  string path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  std::string path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
   conf.read_float(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   FLOAT aver[2];
 
-  cout.precision(10);
+  std::cout.precision(10);
   su2 A;
   unsigned int start_time = clock();
 
@@ -52,49 +50,50 @@ int main(int argc, char *argv[]) {
   smeared.array = smearing_HYP(conf.array, smearing_second, alpha1);
 
   for (int i = 0; i < 4; i++) {
-    cout << "smearing_HYP test " << smeared.array[i] << endl;
+    std::cout << "smearing_HYP test " << smeared.array[i] << std::endl;
   }
-  cout << "right:" << endl;
-  cout << "-0.110943 0.629543 -0.583767 0.500582" << endl;
-  cout << "0.318657 -0.218438 -0.415944 0.823245" << endl;
-  cout << "0.174894 0.667862 0.674797 0.260808" << endl;
-  cout << "-0.704066 -0.13241 0.453476 -0.530206" << endl;
+  std::cout << "right:" << std::endl;
+  std::cout << "-0.110943 0.629543 -0.583767 0.500582" << std::endl;
+  std::cout << "0.318657 -0.218438 -0.415944 0.823245" << std::endl;
+  std::cout << "0.174894 0.667862 0.674797 0.260808" << std::endl;
+  std::cout << "-0.704066 -0.13241 0.453476 -0.530206" << std::endl;
 
   smeared.array = smearing_HYP_refresh(conf, alpha1, alpha2, alpha3);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];
-    cout << "smearing_HYP_refresh test " << A.a0 << " " << A.a1 << " " << A.a2
-         << " " << A.a3 << endl;
+    std::cout << "smearing_HYP_refresh test " << A.a0 << " " << A.a1 << " "
+              << A.a2 << " " << A.a3 << std::endl;
   }
 
   smeared.array = smearing_APE(conf.array, alpha_APE);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];
-    cout << "smearing_APE test " << A.a0 << " " << A.a1 << " " << A.a2 << " "
-         << A.a3 << endl;
+    std::cout << "smearing_APE test " << A.a0 << " " << A.a1 << " " << A.a2
+              << " " << A.a3 << std::endl;
   }
-  cout << "right:" << endl;
-  cout << "-0.0833883 0.641689 -0.604086 0.465147" << endl;
-  cout << "0.336007 -0.177589 -0.426239 0.820903" << endl;
-  cout << "0.125318 0.626699 0.730398 0.240963" << endl;
-  cout << "-0.632818 0.13761 0.745239 0.158818" << endl;
+  std::cout << "right:" << std::endl;
+  std::cout << "-0.0833883 0.641689 -0.604086 0.465147" << std::endl;
+  std::cout << "0.336007 -0.177589 -0.426239 0.820903" << std::endl;
+  std::cout << "0.125318 0.626699 0.730398 0.240963" << std::endl;
+  std::cout << "-0.632818 0.13761 0.745239 0.158818" << std::endl;
 
   smeared.array = smearing_stout(conf, stout_rho);
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];
-    cout << "smearing_stout test " << A.a0 << " " << A.a1 << " " << A.a2 << " "
-         << A.a3 << endl;
+    std::cout << "smearing_stout test " << A.a0 << " " << A.a1 << " " << A.a2
+              << " " << A.a3 << std::endl;
   }
-  cout << "right:" << endl;
-  cout << "-0.0185375 0.684286 -0.660024 0.30948" << endl;
-  cout << "0.363087 -0.0991993 -0.575234 0.726246" << endl;
-  cout << "0.172742 0.633665 0.73173 0.182208" << endl;
-  cout << "-0.816237 -0.0404862 0.571983 -0.0703786" << endl;
+  std::cout << "right:" << std::endl;
+  std::cout << "-0.0185375 0.684286 -0.660024 0.30948" << std::endl;
+  std::cout << "0.363087 -0.0991993 -0.575234 0.726246" << std::endl;
+  std::cout << "0.172742 0.633665 0.73173 0.182208" << std::endl;
+  std::cout << "-0.816237 -0.0404862 0.571983 -0.0703786" << std::endl;
 
   unsigned int end_time = clock();
   unsigned int search_time = end_time - start_time;
-  cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC << endl;
+  std::cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC
+            << std::endl;
 }

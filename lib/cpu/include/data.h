@@ -26,36 +26,36 @@ public:
   data();
 
   // read conf file of floats, usual ordering
-  void read_float(string &file_name);
+  void read_float(std::string &file_name);
 
   // read conf file of floats, ml5 ordering
   // takes vector of floats, which is obtained by read_full_ml5 function, and
   // number of a configuration
-  void read_float_ml5(const vector<float> &array_ml5, int conf_num);
+  void read_float_ml5(const std::vector<float> &array_ml5, int conf_num);
 
   // read conf file of floats, fortran ordering
-  void read_float_fortran(string &file_name);
+  void read_float_fortran(std::string &file_name);
 
   // read conf file of doubles, usual ordering
-  void read_double(string &file_name);
+  void read_double(std::string &file_name);
 
   // read conf file of doubles, qc2dstag ordering
-  void read_double_qc2dstag(string &file_name);
+  void read_double_qc2dstag(std::string &file_name);
 
   // read conf file of doubles, fortran ordering
-  void read_double_fortran(string &file_name);
+  void read_double_fortran(std::string &file_name);
 
   // writes conf in file, usual ordering, double
-  void write_double(string &file_name);
+  void write_double(std::string &file_name);
 
   // writes conf in file, usual ordering, float
-  void write_float(string &file_name);
+  void write_float(std::string &file_name);
 
   // writes conf in file, fortran ordering, float
-  void write_float_fortran(string &file_name);
+  void write_float_fortran(std::string &file_name);
 
-  void read_float_fortran_convert_abelian(string &file_name);
-  void read_float_convert_abelian(string &file_name);
+  void read_float_fortran_convert_abelian(std::string &file_name);
+  void read_float_convert_abelian(std::string &file_name);
 };
 // read conf_num configurations from ml5 file and write them to vector in order
-vector<float> read_full_ml5(string &file_name, int conf_num);
+std::vector<float> read_full_ml5(std::string &file_name, int conf_num);

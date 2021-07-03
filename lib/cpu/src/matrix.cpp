@@ -63,7 +63,7 @@ su2 operator^(const su2 &A, const su2 *B) {
              -A.a0 * B->a3 + B->a0 * A.a3 - A.a2 * B->a1 + A.a1 * B->a2);
 };
 
-ostream &operator<<(ostream &os, const su2 &A) {
+std::ostream &operator<<(std::ostream &os, const su2 &A) {
   os << "a0 = " << A.a0 << " "
      << "a1 = " << A.a1 << " "
      << "a2 = " << A.a2 << " "
@@ -122,8 +122,8 @@ abelian operator^(const abelian &A, const abelian *B) {
   return abelian(A.r * B->r, A.phi - B->phi);
 };
 
-ostream &operator<<(ostream &os, const abelian &A) {
+std::ostream &operator<<(std::ostream &os, const abelian &A) {
   os << "r = " << A.r << " "
-     << "phi = " << A.phi << " " << endl;
+     << "phi = " << A.phi << " " << std::endl;
   return os;
 }

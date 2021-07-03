@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std;
-
 extern int x_size;
 extern int y_size;
 extern int z_size;
@@ -72,53 +70,61 @@ public:
   // gets matrix on current link, only gets matrices in positive directions
   // in order to get conjugated matrix use .conj() or ^ operator in matrix
   // returns pointer for better performance
-  template <class T> const T *get_matrix(const vector<T> &array);
+  template <class T> const T *get_matrix(const std::vector<T> &array);
 
   // calculates plaket matrix in current direction and mu plane
   // only positive directions make sense
-  template <class T> T plaket_mu(const vector<T> &array, int mu);
+  template <class T> T plaket_mu(const std::vector<T> &array, int mu);
+
+  template <class T>
+  T plaket_schwinger_average(const std::vector<T> &array, int mu);
 
   // calculate schwinger line matrix in current direction and dir plane of
   template <class T>
-  T schwinger_line(const vector<T> &array, int d, int dir, int x);
+  T schwinger_line(const std::vector<T> &array, int d, int dir, int x);
 
   // calculates polyakov loop in currect direction
-  template <class T> T polyakov_loop(const vector<T> &array);
+  template <class T> T polyakov_loop(const std::vector<T> &array);
 
   // calculate wilson loop of r*t size in current direction and 4-th direction
   // plane
-  template <class T> T wilson_loop(const vector<T> &array, int r, int t);
+  template <class T> T wilson_loop(const std::vector<T> &array, int r, int t);
+
+  template <class T>
+  T wilson_loop_schwinger(const std::vector<T> &array, int r, int t);
 
   // used in wilson_loop
   // calculates straight lines for wilson loop in advance
-  template <class T> T wilson_line(const vector<T> &array, int length);
+  template <class T> T wilson_line(const std::vector<T> &array, int length);
 
   template <class T>
-  T wilson_line_offaxis(const vector<T> &array, const vector<int> &pattern);
+  T wilson_line_offaxis(const std::vector<T> &array,
+                        const std::vector<int> &pattern);
 
   // d - distance between "left" source and plaket
   // D - distance between sources
   template <class T>
   FLOAT field1(
-      const vector<vector<T>> &schwinger_line, const vector<T> &plaket,
-      const vector<T> &polyakov_loop, int d, int D, int dir,
+      const std::vector<std::vector<T>> &schwinger_line,
+      const std::vector<T> &plaket, const std::vector<T> &polyakov_loop, int d,
+      int D, int dir,
       int x); // Link is attached to the "left" source, dir points to the plaket
   // second numerator
   template <class T>
   FLOAT
-  field2(const vector<T> &plaket, const vector<T> &polyakov_loop, int d, int D,
-         int dir,
+  field2(const std::vector<T> &plaket, const std::vector<T> &polyakov_loop,
+         int d, int D, int dir,
          int x); // attached to the "left" source, dir points to the plaket
   // denominator
   template <class T>
-  FLOAT field3(const vector<T> &polyakov_loop, int D,
+  FLOAT field3(const std::vector<T> &polyakov_loop, int D,
                int x); // attached to the "left" source and points to another
 
   // monopoles
-  FLOAT monopole_plaket_mu(vector<FLOAT> &angles, int mu);
+  FLOAT monopole_plaket_mu(std::vector<FLOAT> &angles, int mu);
   int current_test(FLOAT *J);
-  void get_current(vector<vector<FLOAT>> &monopole_plaket, FLOAT *J,
-                   vector<FLOAT> &angles);
+  void get_current(std::vector<std::vector<FLOAT>> &monopole_plaket, FLOAT *J,
+                   std::vector<FLOAT> &angles);
 };
 
-ostream &operator<<(ostream &os, const link1 &link);
+std::ostream &operator<<(std::ostream &os, const link1 &link);
