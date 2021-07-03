@@ -308,5 +308,17 @@ template <> void data<su2>::write_double(std::string &file_name) {
   stream.close();
 }
 
+template <> void data<abelian>::write_double(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  std::ofstream stream(file_name);
+  std::vector<double> v(data_size1);
+  for (int i = 0; i < data_size1; i++) {
+    v[i] = (double)array[i].phi;
+  }
+  if (!stream.write((char *)&v[0], (data_size1) * sizeof(double)))
+    std::cout << "write_double<abelian> error: " << file_name << std::endl;
+  stream.close();
+}
+
 template class data<su2>;
 template class data<abelian>;
