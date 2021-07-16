@@ -90,6 +90,8 @@ public:
   // plane
   template <class T> T wilson_loop(const std::vector<T> &array, int r, int t);
 
+  double wilson_loop_abelian(const std::vector<double> &array, int r, int t);
+
   template <class T>
   T wilson_loop_schwinger(const std::vector<T> &array, int r, int t);
 

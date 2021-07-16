@@ -231,6 +231,30 @@ T link1::wilson_loop(const std::vector<T> &array, int r, int t) {
   return A;
 }
 
+double link1::wilson_loop_abelian(const std::vector<double> &array, int r,
+                                  int t) {
+  int dir = direction;
+  double A = 0;
+  for (int i = 0; i < r; i++) {
+    A = A + array[place + dir];
+    move(dir, 1);
+  }
+  for (int i = 0; i < t; i++) {
+    A = A + array[place + 3];
+    move(3, 1);
+  }
+  for (int i = 0; i < r; i++) {
+    move(dir, -1);
+    A = A - array[place + dir];
+  }
+  for (int i = 0; i < t; i++) {
+    move(3, -1);
+    A = A - array[place + 3];
+  }
+  move_dir(dir);
+  return A;
+}
+
 template <class T>
 T link1::wilson_loop_schwinger(const std::vector<T> &array, int r, int t) {
   int dir = direction;

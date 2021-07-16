@@ -20,6 +20,11 @@ template <class T> FLOAT plaket(const std::vector<T> &array);
 template <class T>
 std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
                           int time_min, int time_max);
+
+std::vector<double> read_abelian_fortran(std::string path_abelian);
+
+double wilson_abelian(const std::vector<double> &array, int r, int t);
+
 template <class T>
 std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length);
 template <class T>

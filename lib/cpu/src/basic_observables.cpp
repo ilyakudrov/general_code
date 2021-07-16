@@ -117,10 +117,11 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
   T A;
   for (int dir = 0; dir < 3; dir++) {
     for (int r = r_min; r <= r_max; r++) {
-      if (r == r_min)
-        space_lines = wilson_lines(array, dir, r);
-      else
-        space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
+      // if (r == r_min)
+      //   space_lines = wilson_lines(array, dir, r);
+      // else
+      //   space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
+      space_lines = wilson_lines(array, dir, r);
       for (int time = time_min; time <= time_max; time++) {
 
         SPACE_ITER_START
@@ -146,14 +147,52 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
   return wilson;
 }
 
+std::vector<double> read_abelian_fortran(std::string path_abelian) {
+  std::vector<double> conf_abelian;
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  conf_abelian.reserve(data_size1);
+  std::ifstream stream(path_abelian);
+  std::vector<double> v(data_size1);
+  stream.ignore(4);
+  if (!stream.read((char *)&v[0], (data_size1) * sizeof(double)))
+    std::cout << "read_abelian_fortran_test error: " << path_abelian
+              << std::endl;
+  for (int i = 0; i < data_size1; i++) {
+    conf_abelian.push_back(v[i]);
+  }
+  stream.close();
+  return conf_abelian;
+}
+
+double wilson_abelian(const std::vector<double> &array, int r, int time) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  double wilson = 0;
+
+  SPACE_ITER_START
+
+  for (int mu = 0; mu < 3; mu++) {
+    link.move_dir(mu);
+    wilson += cos(link.wilson_loop_abelian(array, r, time));
+  }
+
+  SPACE_ITER_END
+
+  wilson = wilson / (3 * x_size * y_size * z_size * t_size);
+  return wilson;
+}
+
 template <class T>
 std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length) {
   link1 link(x_size, y_size, z_size, t_size);
   link.move_dir(mu);
   std::vector<T> vec;
   vec.reserve(DATA_SIZE / 4);
+  int place;
   SPACE_ITER_START;
-  vec[link.place / 4] = link.wilson_line(array, length);
+  place = link.place;
+  place = place / 4;
+  vec[place] = link.wilson_line(array, length);
   SPACE_ITER_END;
   return vec;
 }
@@ -484,10 +523,13 @@ std::vector<T> wilson_lines_offaxis(const std::vector<T> &array,
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<T> lines;
   lines.reserve(DATA_SIZE / 4);
+  int place;
 
   SPACE_ITER_START;
 
-  lines[link.place / 4] = link.wilson_line_offaxis(array, pattern);
+  place = link.place;
+  place = place / 4;
+  lines[place] = link.wilson_line_offaxis(array, pattern);
 
   SPACE_ITER_END;
 
