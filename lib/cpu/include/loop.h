@@ -5,7 +5,7 @@
 class loop {
 public:
   // link1 node;
-  int coordinate[4];
+  std::vector<int> coordinate;
   std::vector<int> charge;
   std::vector<loop *> link;
 

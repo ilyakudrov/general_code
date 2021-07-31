@@ -26,6 +26,12 @@ std::vector<loop *> calculate_clusters(std::vector<FLOAT> &J);
 
 std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles);
 
+// functions for obtaining information about clusters for testing
+
+void print_currents(loop *ll);
+
+void check_for_coordinate(loop *loop, int coordinate[4], bool &include);
+
 // monopole observables
 
 int cluster_length(loop *ll);
@@ -38,6 +44,12 @@ std::vector<int> length_mu(loop *ll);
 
 void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu);
 
-void print_currents(loop *ll);
+double cluster_variation(loop *loop);
 
-void check_for_coordinate(loop *loop, int coordinate[4], bool &include);
+void cluster_variation_recurrent(loop *loop, double &variation,
+                                 std::vector<int> distance, const link1 &link);
+
+int site_number(loop *loop);
+
+void site_number_recurrent(loop *loop, int &link_number,
+                           std::unordered_map<int, int> &loop_sites);
