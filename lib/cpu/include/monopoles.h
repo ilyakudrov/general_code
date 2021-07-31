@@ -28,8 +28,16 @@ std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles);
 
 // monopole observables
 
-void cluster_length(loop *ll, int &length);
+int cluster_length(loop *ll);
+
+void cluster_length_recurrent(loop *ll, int &length);
 
 void cluster_sites(loop *ll);
 
-void length_mu(loop *ll, std::vector<int> &lengths_mu);
+std::vector<int> length_mu(loop *ll);
+
+void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu);
+
+void print_currents(loop *ll);
+
+void check_for_coordinate(loop *loop, int coordinate[4], bool &include);

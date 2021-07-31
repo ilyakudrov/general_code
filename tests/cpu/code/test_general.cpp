@@ -23,16 +23,16 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
-  x_size = 40;
+  y_size = 32;
+  z_size = 32;
+  t_size = 32;
+  x_size = 32;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
-  data<su2> conf_qc2dstag;
-  // data<abelian> conf_qc2dstag;
+  // data<su2> conf_qc2dstag;
+  data<abelian> conf_qc2dstag;
   //   std::string path_qc2dstag =
   //   "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201"; std::string path_qc2dstag
   //   = "/home/ilya/soft/lattice/mag/confs/fixated/su2/"
@@ -43,16 +43,39 @@ int main(int argc, char *argv[]) {
   // std::string path_qc2dstag =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/"
   //     "decomposed/monopole/qc2dstag/40^4/mu0.05/s0/conf_monopole_0202";
+  // std::string path_qc2dstag =
+  // "../../confs/decomposed/monopole/qc2dstag/40^4/"
+  //                             "mu0.05/s0/conf_monopole_0201";
+  // std::string path_qc2dstag =
+  // "../../confs/decomposed/monopole/qc2dstag/40^4/"
+  //                             "mu0.05/s0/conf_monopole_0201";
+  // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
+  //                             "confs/32^4/CON_32^3x32_031.LAT";
+  std::string path_qc2dstag =
+      "../../confs/su2_dynam/monopole/CON_MON_MAG_031.LAT";
+  // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
+  //                             "confs/monopoless/32^4/CON_OFFD_031";
   // std::string path_qc2dstag = "../../confs/decomposed/monopole/"
   //                             "qc2dstag/40^4/mu0.05/s0/conf_monopole_0201";
-  std::string path_qc2dstag =
-      "../../confs/smeared/qc2dstag/40^4/mu0.05/s0/conf_APE_alpha=0.7_0202";
+  // std::string path_qc2dstag =
+  //     "../../confs/smeared/qc2dstag/40^4/mu0.05/s0/conf_APE_alpha=0.7_0202";
 
-  conf_qc2dstag.read_double(path_qc2dstag);
+  // conf_qc2dstag.read_double(path_qc2dstag);
   // conf_qc2dstag.read_double_fortran(path_qc2dstag);
+  conf_qc2dstag.read_float_fortran(path_qc2dstag);
 
-  int T_min = 1, T_max = 4;
-  int R_min = 1, R_max = 6;
+  std::vector<double> conf_abelian = read_abelian_fortran_float(path_qc2dstag);
+  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 1, 1)
+            << std::endl;
+  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 1, 18)
+            << std::endl;
+  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 18, 1)
+            << std::endl;
+  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 18, 18)
+            << std::endl;
+
+  int T_min = 14, T_max = 18;
+  int R_min = 14, R_max = 18;
 
   std::vector<FLOAT> vec_wilson;
   start_time = clock();
@@ -78,7 +101,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 0.9, 6, 1, 4);
+      wilson_offaxis(conf_qc2dstag.array, directions, 14, 18, 14, 18);
 
   end_time = clock();
   search_time = end_time - start_time;
@@ -127,8 +150,8 @@ int main(int argc, char *argv[]) {
   double start;
   double end;
 
-  int R = 20;
-  int T = 8;
+  int R = 8;
+  int T = 4;
   int d_min = -5;
   int d_max = 0;
 

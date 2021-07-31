@@ -23,6 +23,8 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
 
 std::vector<double> read_abelian_fortran(std::string path_abelian);
 
+std::vector<double> read_abelian_fortran_float(std::string path_abelian);
+
 double wilson_abelian(const std::vector<double> &array, int r, int t);
 
 template <class T>

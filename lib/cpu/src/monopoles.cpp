@@ -1,4 +1,5 @@
 #include "../include/monopoles.h"
+#include <cmath>
 
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
@@ -225,6 +226,7 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
   std::vector<loop *> neighbours_new;
   loop *loop_tmp;
   link1 link(x_size, y_size, z_size, t_size);
+  int J_tmp;
 
   // for all previously found sites of cluster find new sites with current
   for (int i = 0; i < neighbours.size(); i++) {
@@ -235,36 +237,42 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
     // if a current is found, add it to cluster and to std::vector of new sites
     for (int mu = 0; mu < 4; mu++) {
       if (J[link.place + mu] > 0.3) {
+        J_tmp = std::lround(J[link.place + mu]);
         J[link.place + mu] = 0.;
         link.move(mu, 1);
         loop_tmp = new loop(link);
         neighbours[i]->link.push_back(loop_tmp);
-        neighbours_new.push_back(loop_tmp);
-        link.move(mu, -1);
-      } else if (J[link.place + mu] < -0.3) {
-        J[link.place + mu] = 0.;
-        link.move(mu, 1);
-        loop_tmp = new loop(link);
-        loop_tmp->link.push_back(neighbours[i]);
-        neighbours_new.push_back(loop_tmp);
+        neighbours[i]->charge.push_back(J_tmp);
+        neighbours.push_back(loop_tmp);
         link.move(mu, -1);
       }
+      // else if (J[link.place + mu] < -0.3) {
+      //   J[link.place + mu] = 0.;
+      //   link.move(mu, 1);
+      //   loop_tmp = new loop(link);
+      //   loop_tmp->link.push_back(neighbours[i]);
+      //   neighbours.push_back(loop_tmp);
+      //   link.move(mu, -1);
+      // }
     }
     for (int mu = 0; mu < 4; mu++) {
       link.move(mu, -1);
-      if (J[link.place + mu] > 0.3) {
-        J[link.place + mu] = 0.;
-        loop_tmp = new loop(link);
-        loop_tmp->link.push_back(neighbours[i]);
-        neighbours_new.push_back(loop_tmp);
-      }
-      link.move(mu, 1);
       if (J[link.place + mu] < -0.3) {
+        J_tmp = std::lround(J[link.place + mu]);
         J[link.place + mu] = 0.;
         loop_tmp = new loop(link);
+        // loop_tmp->link.push_back(neighbours[i]);
         neighbours[i]->link.push_back(loop_tmp);
-        neighbours_new.push_back(loop_tmp);
+        neighbours[i]->charge.push_back(J_tmp);
+        neighbours.push_back(loop_tmp);
       }
+      // else if (J[link.place + mu] < -0.3) {
+      //   J[link.place + mu] = 0.;
+      //   loop_tmp = new loop(link);
+      //   neighbours[i]->link.push_back(loop_tmp);
+      //   neighbours.push_back(loop_tmp);
+      // }
+      link.move(mu, 1);
     }
   }
 
@@ -311,10 +319,19 @@ std::vector<loop *> calculate_clusters(std::vector<FLOAT> &J) {
 
 // monopole observables
 
-void cluster_length(loop *ll, int &length) {
+int cluster_length(loop *ll) {
+  int length = 0;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  cluster_length_recurrent(ll, length);
+
+  return length;
+}
+
+void cluster_length_recurrent(loop *ll, int &length) {
   for (int i = 0; i < ll->link.size(); i++) {
-    length++;
-    cluster_length(ll->link[i], length);
+    cluster_length_recurrent(ll->link[i], length);
+    length += abs(ll->charge[i]);
   }
 }
 
@@ -327,12 +344,44 @@ void cluster_sites(loop *ll) {
   }
 }
 
-void length_mu(loop *ll, std::vector<int> &lengths_mu) {
-  int dir = 0;
+std::vector<int> length_mu(loop *ll) {
+  std::vector<int> lengths_mu = {0, 0, 0, 0};
+  link1 link(x_size, y_size, z_size, t_size);
+
+  length_mu_recurrent(ll, lengths_mu);
+
+  return lengths_mu;
+}
+
+void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu) {
   for (int i = 0; i < ll->link.size(); i++) {
-    length_mu(ll->link[i], lengths_mu);
-    for (int mu = 0; mu < 4; mu++) {
-      lengths_mu[mu] += ll->link[i]->coordinate[mu] - ll->coordinate[mu];
-    }
+    length_mu_recurrent(ll->link[i], lengths_mu);
+    int mu = 0;
+    int difference;
+    do {
+      difference = ll->link[i]->coordinate[mu] - ll->coordinate[mu];
+      mu++;
+    } while (difference == 0);
+    mu--;
+    lengths_mu[mu] += ll->charge[i];
+  }
+}
+
+void print_currents(loop *ll) {
+  std::cout << ll->coordinate[0] << " " << ll->coordinate[1] << " "
+            << ll->coordinate[2] << " " << ll->coordinate[3] << std::endl;
+  for (int i = 0; i < ll->link.size(); i++) {
+    print_currents(ll->link[i]);
+  }
+}
+
+void check_for_coordinate(loop *loop, int coordinate[4], bool &include) {
+  if (loop->coordinate[0] == coordinate[0] &&
+      loop->coordinate[1] == coordinate[1] &&
+      loop->coordinate[2] == coordinate[2] &&
+      loop->coordinate[3] == coordinate[3])
+    include = true;
+  for (int i = 0; i < loop->link.size(); i++) {
+    check_for_coordinate(loop->link[i], coordinate, include);
   }
 }

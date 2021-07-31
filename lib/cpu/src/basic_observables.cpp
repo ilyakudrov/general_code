@@ -164,6 +164,23 @@ std::vector<double> read_abelian_fortran(std::string path_abelian) {
   return conf_abelian;
 }
 
+std::vector<double> read_abelian_fortran_float(std::string path_abelian) {
+  std::vector<double> conf_abelian;
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  conf_abelian.reserve(data_size1);
+  std::ifstream stream(path_abelian);
+  std::vector<float> v(data_size1);
+  stream.ignore(4);
+  if (!stream.read((char *)&v[0], (data_size1) * sizeof(float)))
+    std::cout << "read_abelian_fortran_test error: " << path_abelian
+              << std::endl;
+  for (int i = 0; i < data_size1; i++) {
+    conf_abelian.push_back((double)v[i]);
+  }
+  stream.close();
+  return conf_abelian;
+}
+
 double wilson_abelian(const std::vector<double> &array, int r, int time) {
   link1 link(x_size, y_size, z_size, t_size);
 
