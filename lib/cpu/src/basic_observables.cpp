@@ -142,8 +142,96 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
     }
   }
   for (int i = 0; i < (time_max - time_min + 1) * (r_max - r_min + 1); i++) {
-    wilson[i] = wilson[i] / (DATA_SIZE / 4 * 3);
+    wilson[i] = wilson[i] / ((FLOAT)DATA_SIZE / 4 * 3);
   }
+  return wilson;
+}
+
+template <class T>
+FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
+                              int mu, int nu, int r1, int r2) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  T A;
+  FLOAT wilson = 0;
+
+  SPACE_ITER_START
+
+  A = lines1[link.place / 4];
+  link.move(mu, r1);
+  A = A * lines2[link.place / 4];
+  link.move(mu, -r1);
+  link.move(nu, r2);
+  A = A * lines1[link.place / 4].conj();
+  link.move(nu, -r2);
+  A = A * lines2[link.place / 4].conj();
+
+  wilson += A.tr();
+
+  SPACE_ITER_END
+
+  wilson = wilson / (x_size * y_size * z_size * t_size);
+
+  return wilson;
+}
+
+template <class T>
+void wilson_loops_spatial_plane(
+    const std::vector<T> &array,
+    std::unordered_map<int, std::vector<T>> &space_lines,
+    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
+    int r_max) {
+  std::vector<T> space_lines_single;
+
+  for (int r1 = r_min; r1 <= r_max; r1++) {
+    space_lines_single = wilson_lines(array, nu, r1);
+    for (int r2 = r_min; r2 <= r_max; r2++) {
+      if (r2 >= r1) {
+        wilson[std::tuple<int, int>{r1, r2}] += wilson_loop_single_size(
+            space_lines[r2], space_lines_single, mu, nu, r2, r1);
+      } else if (r1 > r2) {
+        wilson[std::tuple<int, int>{r2, r1}] += wilson_loop_single_size(
+            space_lines[r2], space_lines_single, mu, nu, r2, r1);
+      }
+    }
+  }
+}
+
+// spatial wilson_loops
+template <class T>
+std::map<std::tuple<int, int>, FLOAT>
+wilson_spatial(const std::vector<T> &array, int r_min, int r_max) {
+  link1 link(x_size, y_size, z_size, t_size);
+  std::map<std::tuple<int, int>, FLOAT> wilson;
+  std::unordered_map<int, std::vector<T>> space_lines;
+
+  // (0, 1) and (0, 2) plane
+  for (int r = r_min; r <= r_max; r++) {
+    space_lines[r] = wilson_lines(array, 0, r);
+  }
+
+  wilson_loops_spatial_plane(array, space_lines, wilson, 0, 1, r_min, r_max);
+  wilson_loops_spatial_plane(array, space_lines, wilson, 0, 2, r_min, r_max);
+
+  // (1, 2) plane
+  for (int r = r_min; r <= r_max; r++) {
+    space_lines[r] = wilson_lines(array, 1, r);
+  }
+
+  wilson_loops_spatial_plane(array, space_lines, wilson, 1, 2, r_min, r_max);
+
+  for (int r1 = r_min; r1 <= r_max; r1++) {
+    for (int r2 = r1; r2 <= r_max; r2++) {
+      if (r1 == r2)
+        wilson[std::tuple<int, int>{r1, r2}] =
+            wilson[std::tuple<int, int>{r1, r2}] / 3;
+
+      else
+        wilson[std::tuple<int, int>{r1, r2}] =
+            wilson[std::tuple<int, int>{r1, r2}] / 6;
+    }
+  }
+
   return wilson;
 }
 
@@ -203,8 +291,7 @@ template <class T>
 std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length) {
   link1 link(x_size, y_size, z_size, t_size);
   link.move_dir(mu);
-  std::vector<T> vec;
-  vec.reserve(DATA_SIZE / 4);
+  std::vector<T> vec(DATA_SIZE / 4);
   int place;
   SPACE_ITER_START;
   place = link.place;
@@ -356,15 +443,6 @@ wilson_offaxis(const std::vector<T> &array,
                 direction_reflected[i] * (length_multiplier - 1);
           }
 
-          // TODO: fix increase of wilson line and check if it reduces time of
-          // calculations
-          // calculate space line in this direction
-          // if (round(r_min / length_initial + 0.5) == length_multiplier) {
-          //   space_lines = wilson_lines_offaxis(array, pattern_prolonged);
-          // } else {
-          //   space_lines = wilson_lines_offaxis_increase(
-          //       array, space_lines, pattern, direction_prolonged);
-          // }
           space_lines = wilson_lines_offaxis(array, pattern_prolonged);
 
           for (int i = 0; i < 3; i++) {
@@ -530,7 +608,7 @@ FLOAT calculate_wilson_loop_offaxis(const std::vector<T> &time_lines, int time,
 
   SPACE_ITER_END
 
-  return result / (DATA_SIZE / 4);
+  return result / ((FLOAT)DATA_SIZE / 4);
 }
 
 // calculate space lines in particular direction on a lattice
@@ -538,8 +616,7 @@ template <class T>
 std::vector<T> wilson_lines_offaxis(const std::vector<T> &array,
                                     const std::vector<int> pattern) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<T> lines;
-  lines.reserve(DATA_SIZE / 4);
+  std::vector<T> lines(DATA_SIZE / 4);
   int place;
 
   SPACE_ITER_START;
@@ -561,8 +638,7 @@ std::vector<T> wilson_lines_offaxis_increase(const std::vector<T> &array,
                                              const std::vector<int> pattern,
                                              const std::vector<int> direction) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<T> lines;
-  lines.reserve(DATA_SIZE / 4);
+  std::vector<T> lines(DATA_SIZE / 4);
   int place;
 
   SPACE_ITER_START;
@@ -683,22 +759,48 @@ template <class T> FLOAT polyakov(const std::vector<T> &array) {
 }
 
 template <class T>
-FLOAT polyakov_loop_corelator(const std::vector<T> &array, int D) {
-  std::vector<T> polyakov_loop = calculate_polyakov_loop(array);
+std::vector<FLOAT> calculate_polyakov_loops(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result vec(0);
-  FLOAT aver[2];
-  FLOAT a;
+  std::vector<FLOAT> polyakov_loops(x_size * y_size * z_size * t_size);
+  link.move_dir(3);
+  SPACE_ITER_START;
+
+  polyakov_loops[link.place / 4] = link.polyakov_loop(array).tr();
+
+  SPACE_ITER_END;
+
+  return polyakov_loops;
+}
+
+template <class T>
+std::map<int, FLOAT> polyakov_loop_correlator(const std::vector<T> &conf,
+                                              int D_min, int D_max) {
+  std::vector<FLOAT> polyakov_loops = calculate_polyakov_loops(conf);
+  std::map<int, FLOAT> polyakov_loop_correlator;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  FLOAT polyakov_tmp;
+  SPACE_ITER_START
+
   for (int mu = 0; mu < 3; mu++) {
-    SPACE_ITER_START;
-    a = polyakov_loop[PLACE1_LINK_NODIR].tr();
-    link.move(mu, D);
-    a *= polyakov_loop[PLACE1_LINK_NODIR].conj().tr();
-    vec.array.push_back(a);
-    SPACE_ITER_END;
+    polyakov_tmp = polyakov_loops[link.place / 4];
+    link.move(mu, D_min - 1);
+    for (int D = D_min; D <= D_max; D++) {
+      link.move(mu, 1);
+      polyakov_loop_correlator[D] +=
+          polyakov_tmp * polyakov_loops[link.place / 4];
+    }
+    link.move(mu, -D_max);
   }
-  vec.average(aver);
-  return aver[0];
+
+  SPACE_ITER_END;
+
+  for (auto it = polyakov_loop_correlator.begin();
+       it != polyakov_loop_correlator.end(); ++it) {
+    it->second = it->second / (x_size * y_size * z_size * t_size * 3);
+  }
+
+  return polyakov_loop_correlator;
 }
 
 FLOAT MAG_functional_su2(const std::vector<su2> &array) {
@@ -734,7 +836,20 @@ template std::vector<su2> wilson_lines_offaxis_increase(
     const std::vector<su2> &array, const std::vector<su2> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
 template FLOAT polyakov(const std::vector<su2> &array);
-template FLOAT polyakov_loop_corelator(const std::vector<su2> &array, int D);
+template std::vector<FLOAT>
+calculate_polyakov_loops(const std::vector<su2> &array);
+template std::map<int, FLOAT>
+polyakov_loop_correlator(const std::vector<su2> &conf, int D_min, int D_max);
+template FLOAT wilson_loop_single_size(std::vector<su2> lines1,
+                                       std::vector<su2> lines2, int mu, int nu,
+                                       int r1, int r2);
+template void wilson_loops_spatial_plane(
+    const std::vector<su2> &array,
+    std::unordered_map<int, std::vector<su2>> &space_lines,
+    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
+    int r_max);
+template std::map<std::tuple<int, int>, FLOAT>
+wilson_spatial(const std::vector<su2> &array, int r_min, int r_max);
 
 // abelian
 template FLOAT plaket_time(const std::vector<abelian> &array);
@@ -766,5 +881,18 @@ template std::vector<abelian> wilson_lines_offaxis_increase(
     const std::vector<int> pattern, const std::vector<int> direction);
 
 template FLOAT polyakov(const std::vector<abelian> &array);
-template FLOAT polyakov_loop_corelator(const std::vector<abelian> &array,
-                                       int D);
+template std::vector<FLOAT>
+calculate_polyakov_loops(const std::vector<abelian> &array);
+template std::map<int, FLOAT>
+polyakov_loop_correlator(const std::vector<abelian> &conf, int D_min,
+                         int D_max);
+template FLOAT wilson_loop_single_size(std::vector<abelian> lines1,
+                                       std::vector<abelian> lines2, int mu,
+                                       int nu, int r1, int r2);
+template void wilson_loops_spatial_plane(
+    const std::vector<abelian> &array,
+    std::unordered_map<int, std::vector<abelian>> &space_lines,
+    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
+    int r_max);
+template std::map<std::tuple<int, int>, FLOAT>
+wilson_spatial(const std::vector<abelian> &array, int r_min, int r_max);

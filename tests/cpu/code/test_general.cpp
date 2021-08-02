@@ -9,7 +9,9 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <map>
 #include <stdio.h>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -23,23 +25,23 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  y_size = 32;
-  z_size = 32;
-  t_size = 32;
-  x_size = 32;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
+  x_size = 40;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
-  // data<su2> conf_qc2dstag;
-  data<abelian> conf_qc2dstag;
-  //   std::string path_qc2dstag =
-  //   "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201"; std::string path_qc2dstag
+  data<su2> conf_qc2dstag;
+  // data<abelian> conf_qc2dstag;
+  std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
+  // std::string path_qc2dstag
   //   = "/home/ilya/soft/lattice/mag/confs/fixated/su2/"
   //                          "qc2dstag/32^4/mu0.00/conf_fixed_0201";
-  //   std::string path_qc2dstag =
-  //   "/home/ilya/soft/lattice/general_code/tests/confs/"
-  //                          "qc2dstag/32^4/mu0.00/CONF0201";
+  // std::string path_qc2dstag =
+  //     "/home/ilya/soft/lattice/general_code/tests/confs/"
+  //     "qc2dstag/32^4/mu0.00/CONF0201";
   // std::string path_qc2dstag =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/"
   //     "decomposed/monopole/qc2dstag/40^4/mu0.05/s0/conf_monopole_0202";
@@ -51,8 +53,8 @@ int main(int argc, char *argv[]) {
   //                             "mu0.05/s0/conf_monopole_0201";
   // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
   //                             "confs/32^4/CON_32^3x32_031.LAT";
-  std::string path_qc2dstag =
-      "../../confs/su2_dynam/monopole/CON_MON_MAG_031.LAT";
+  // std::string path_qc2dstag =
+  //     "../../confs/su2_dynam/monopole/CON_MON_MAG_031.LAT";
   // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
   //                             "confs/monopoless/32^4/CON_OFFD_031";
   // std::string path_qc2dstag = "../../confs/decomposed/monopole/"
@@ -60,20 +62,33 @@ int main(int argc, char *argv[]) {
   // std::string path_qc2dstag =
   //     "../../confs/smeared/qc2dstag/40^4/mu0.05/s0/conf_APE_alpha=0.7_0202";
 
-  // conf_qc2dstag.read_double(path_qc2dstag);
+  conf_qc2dstag.read_double(path_qc2dstag);
   // conf_qc2dstag.read_double_fortran(path_qc2dstag);
-  conf_qc2dstag.read_float_fortran(path_qc2dstag);
+  // conf_qc2dstag.read_float_fortran(path_qc2dstag);
 
-  std::vector<double> conf_abelian = read_abelian_fortran_float(path_qc2dstag);
-  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 1, 1)
-            << std::endl;
-  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 1, 18)
-            << std::endl;
-  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 18, 1)
-            << std::endl;
-  std::cout << "wilson abelian test " << wilson_abelian(conf_abelian, 18, 18)
-            << std::endl;
+  // polyakov correlator
+  std::map<int, FLOAT> polyakov_correlator =
+      polyakov_loop_correlator(conf_qc2dstag.array, 4, 16);
 
+  for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
+       ++it) {
+    std::cout << "distance: " << it->first
+              << " polyakov_correlator: " << it->second << std::endl;
+  }
+  std::cout << std::endl;
+
+  // spatial wilson_lines
+  std::map<std::tuple<int, int>, FLOAT> wilson_spat =
+      wilson_spatial(conf_qc2dstag.array, 4, 16);
+
+  for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
+    std::cout << "distance: (" << std::get<0>(it->first) << ", "
+              << std::get<1>(it->first) << ")"
+              << " wilson_spatial: " << it->second << std::endl;
+  }
+  std::cout << std::endl;
+
+  // on-axis wilson loops
   int T_min = 14, T_max = 18;
   int R_min = 14, R_max = 18;
 
@@ -84,7 +99,7 @@ int main(int argc, char *argv[]) {
 
   end_time = clock();
   search_time = end_time - start_time;
-  std::cout << "wilson time: " << search_time * 1. / CLOCKS_PER_SEC
+  std::cout << "on-axis wilson time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
   std::cout << "wilson_loops:" << std::endl;
   for (int T = T_min; T <= T_max; T++) {
@@ -95,6 +110,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // off-axis wilson loops
   std::vector<std::vector<int>> directions;
   directions = generate_directions(4);
 
@@ -126,13 +142,7 @@ int main(int argc, char *argv[]) {
               << std::endl;
   }
 
-  start_time = clock();
-  // cout << "MAG_functional_su2 " << MAG_functional_su2(conf_qc2dstag.array)
-  //      << endl;
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << " time: " << search_time * 1. / CLOCKS_PER_SEC << std::endl;
-
+  // plakets and polyakov loop
   start_time = clock();
   std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) / 2
             << std::endl;
@@ -146,73 +156,4 @@ int main(int argc, char *argv[]) {
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
-
-  double start;
-  double end;
-
-  int R = 8;
-  int T = 4;
-  int d_min = -5;
-  int d_max = 0;
-
-  start_time = clock();
-  std::vector<FLOAT> wilson_vec =
-      calculate_wilson_loop_tr(conf_qc2dstag.array, R, T);
-  std::vector<FLOAT> plaket_time_vec =
-      calculate_plaket_time_tr(conf_qc2dstag.array);
-  std::vector<FLOAT> plaket_space_vec =
-      calculate_plaket_space_tr(conf_qc2dstag.array);
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "prepare time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
-
-  start_time = clock();
-  std::vector<FLOAT> electric = wilson_plaket_correlator_electric(
-      wilson_vec, plaket_time_vec, R, T, 0, d_min, d_max);
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "electric time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
-
-  start_time = clock();
-  std::vector<FLOAT> magnetic = wilson_plaket_correlator_magnetic(
-      wilson_vec, plaket_space_vec, R, T, 0, d_min, d_max);
-  end_time = clock();
-  search_time = end_time - start_time;
-
-  std::cout << "magnetic time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
-  for (int i = 0; i < electric.size(); i++) {
-    std::cout << "electric R = " << R << " T= " << T << " " << electric[i]
-              << std::endl;
-    std::cout << "magnetic R = " << R << " T= " << T << " " << magnetic[i]
-              << std::endl;
-  }
-
-  int x_trans_min = -12;
-  int x_trans_max = 12;
-
-  start_time = clock();
-  std::vector<FLOAT> electric_x = wilson_plaket_correlator_electric_x(
-      wilson_vec, plaket_time_vec, R, T, x_trans_min, x_trans_max, R / 2);
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "electric_x time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
-
-  start_time = clock();
-  std::vector<FLOAT> magnetic_x = wilson_plaket_correlator_magnetic_x(
-      wilson_vec, plaket_space_vec, R, T, x_trans_min, x_trans_max, R / 2);
-  end_time = clock();
-  search_time = end_time - start_time;
-
-  std::cout << "magnetic_x time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
-  for (int i = 0; i < electric_x.size(); i++) {
-    std::cout << "electric_x R = " << R << " T= " << T << " " << electric_x[i]
-              << std::endl;
-    std::cout << "magnetic_x R = " << R << " T= " << T << " " << magnetic_x[i]
-              << std::endl;
-  }
 }

@@ -10,6 +10,8 @@
 #include "link.h"
 #include "matrix.h"
 #include "result.h"
+#include <map>
+#include <unordered_map>
 
 // Plaket
 template <class T> FLOAT plaket_time(const std::vector<T> &array);
@@ -20,6 +22,21 @@ template <class T> FLOAT plaket(const std::vector<T> &array);
 template <class T>
 std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
                           int time_min, int time_max);
+
+template <class T>
+FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
+                              int mu, int nu, int r1, int r2);
+
+template <class T>
+void wilson_loops_spatial_plane(
+    const std::vector<T> &array,
+    std::unordered_map<int, std::vector<T>> &space_lines,
+    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
+    int r_max);
+
+template <class T>
+std::map<std::tuple<int, int>, FLOAT>
+wilson_spatial(const std::vector<T> &array, int r_min, int r_max);
 
 std::vector<double> read_abelian_fortran(std::string path_abelian);
 
@@ -89,6 +106,10 @@ template <class T> FLOAT polyakov(const std::vector<T> &array);
 
 // Polyakov_correlator
 template <class T>
-FLOAT polyakov_loop_corelator(const std::vector<T> &array, int D);
+std::vector<FLOAT> calculate_polyakov_loops(const std::vector<T> &array);
+
+template <class T>
+std::map<int, FLOAT> polyakov_loop_correlator(const std::vector<T> &conf,
+                                              int D_min, int D_max);
 
 FLOAT MAG_functional_su2(const std::vector<su2> &array);

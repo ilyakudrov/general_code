@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (length == 8) {
+    if (length == 34) {
       std::cout << "length: " << length
                 << " ;variation: " << cluster_variation(LL[i]) / length
                 << std::endl;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
   std::cout << "windings: " << std::endl;
   std::cout << std::endl;
 
-  for (auto it = windings.cbegin(); it != windings.cend(); ++it) {
+  for (auto it = windings.begin(); it != windings.end(); ++it) {
     std::cout << it->first << " " << it->second << "\n";
   }
 }
