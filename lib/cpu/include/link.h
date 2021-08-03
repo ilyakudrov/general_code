@@ -17,6 +17,7 @@ extern int t_size;
 #include "matrix.h"
 #include "stdlib.h"
 #include <iostream>
+#include <map>
 #include <unordered_map>
 #include <vector>
 

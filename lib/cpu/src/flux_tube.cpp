@@ -357,17 +357,12 @@ std::vector<FLOAT> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
 //   return wilson;
 // }
 
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
-  FLOAT vec[d_max - d_min + 1];
-  for (int i = 0; i < d_max - d_min + 1; i++) {
-    vec[i] = 0;
-  }
-  std::vector<FLOAT> final(0);
-  FLOAT aver[2];
+  std::map<int, FLOAT> correlator;
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
@@ -378,7 +373,7 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
       if (x_trans == 0) {
         for (int mu = 0; mu < 3; mu++) {
           link.move_dir(mu);
-          vec[d - d_min] += a * plaket4_time(plaket_tr, link);
+          correlator[d] += a * plaket4_time(plaket_tr, link);
         }
       } else {
         for (int nu = 0; nu < 3; nu++) {
@@ -386,12 +381,12 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
             link.move(nu, x_trans);
             for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
-              vec[d - d_min] += a * plaket4_time(plaket_tr, link);
+              correlator[d] += a * plaket4_time(plaket_tr, link);
             }
             link.move(nu, -2 * x_trans);
             for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
-              vec[d - d_min] += a * plaket4_time(plaket_tr, link);
+              correlator[d - d_min] += a * plaket4_time(plaket_tr, link);
             }
             link.move(nu, x_trans);
           }
@@ -406,10 +401,10 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
     count = data_size / 4 * 9;
   else
     count = data_size / 4 * 36;
-  for (int d = d_min; d <= d_max; d++) {
-    final.push_back(vec[d - d_min] / count);
+  for (auto it = correlator.begin(); it != correlator.end(); ++it) {
+    it->second = it->second / count;
   }
-  return final;
+  return correlator;
 }
 
 std::vector<FLOAT>

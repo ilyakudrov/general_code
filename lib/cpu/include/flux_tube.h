@@ -49,7 +49,7 @@ template <class T>
 std::vector<FLOAT> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
                                             int time);
 
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max);
