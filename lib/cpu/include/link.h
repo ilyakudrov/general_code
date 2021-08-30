@@ -101,6 +101,9 @@ public:
   template <class T> T wilson_line(const std::vector<T> &array, int length);
 
   template <class T>
+  T wilson_line_single(const std::vector<T> &array, int length);
+
+  template <class T>
   T wilson_line_offaxis(const std::vector<T> &array,
                         const std::vector<int> &pattern);
 

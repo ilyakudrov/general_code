@@ -301,6 +301,16 @@ T link1::wilson_line(const std::vector<T> &array, int length) {
   return A;
 }
 
+template <class T>
+T link1::wilson_line_single(const std::vector<T> &array, int length) {
+  T A;
+  for (int i = 0; i < length; i++) {
+    A = A * array[place / 4];
+    move(direction, 1);
+  }
+  return A;
+}
+
 // calculates offaxis spatial line of wilson loop according to pattern
 // pattern defines directions of links along the line
 // it consists of positive and negative integers which correspond to spatial
@@ -490,6 +500,8 @@ template su2 link1::wilson_loop(const std::vector<su2> &array, int r, int t);
 template su2 link1::wilson_loop_schwinger(const std::vector<su2> &array, int r,
                                           int t);
 template su2 link1::wilson_line(const std::vector<su2> &array, int length);
+template su2 link1::wilson_line_single(const std::vector<su2> &array,
+                                       int length);
 template su2 link1::wilson_line_offaxis(const std::vector<su2> &array,
                                         const std::vector<int> &pattern);
 template FLOAT
@@ -517,6 +529,8 @@ template abelian link1::wilson_loop_schwinger(const std::vector<abelian> &array,
                                               int r, int t);
 template abelian link1::wilson_line(const std::vector<abelian> &array,
                                     int length);
+template abelian link1::wilson_line_single(const std::vector<abelian> &array,
+                                           int length);
 template abelian link1::wilson_line_offaxis(const std::vector<abelian> &array,
                                             const std::vector<int> &pattern);
 template FLOAT

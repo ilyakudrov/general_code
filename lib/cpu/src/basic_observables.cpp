@@ -53,6 +53,21 @@
   }                                                                            \
   }
 
+#define SPACE_ITER_START_3D                                                    \
+  for (int z = 0; z < z_size; z++) {                                           \
+    for (int y = 0; y < y_size; y++) {                                         \
+      for (int x = 0; x < x_size; x++) {                                       \
+        link.go(x, y, z, t);                                                   \
+        link.update(0);                                                        \
+        link.update(1);                                                        \
+        link.update(2);                                                        \
+        link.update(3);
+
+#define SPACE_ITER_END_3D                                                      \
+  }                                                                            \
+  }                                                                            \
+  }
+
 #include "../include/basic_observables.h"
 #include "../include/flux_tube.h"
 #include "../include/link.h"
@@ -148,6 +163,26 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
 }
 
 template <class T>
+std::vector<T> wilson_lines_single(const std::vector<T> &array, int length) {
+  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<T> vec(DATA_SIZE / 4);
+  int place;
+
+  // #pragma omp parallel for shared(vec) private(link, place)
+  for (int t = 0; t < t_size; t++) {
+
+    SPACE_ITER_START_3D
+
+    place = link.place;
+    place = place / 4;
+    vec[place] = link.wilson_line_single(array, length);
+
+    SPACE_ITER_END_3D
+  }
+  return vec;
+}
+
+template <class T>
 FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
                               int mu, int nu, int r1, int r2) {
   link1 link(x_size, y_size, z_size, t_size);
@@ -155,83 +190,67 @@ FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
   T A;
   FLOAT wilson = 0;
 
-  SPACE_ITER_START
+#pragma omp parallel for shared(lines1, lines2) private(link, A)
+  for (int t = 0; t < t_size; t++) {
 
-  A = lines1[link.place / 4];
-  link.move(mu, r1);
-  A = A * lines2[link.place / 4];
-  link.move(mu, -r1);
-  link.move(nu, r2);
-  A = A * lines1[link.place / 4].conj();
-  link.move(nu, -r2);
-  A = A * lines2[link.place / 4].conj();
+    SPACE_ITER_START_3D
 
-  wilson += A.tr();
+    A = lines1[link.place / 4];
+    link.move(mu, r1);
+    A = A * lines2[link.place / 4];
+    link.move(mu, -r1);
+    link.move(nu, r2);
+    A = A * lines1[link.place / 4].conj();
+    link.move(nu, -r2);
+    A = A * lines2[link.place / 4].conj();
 
-  SPACE_ITER_END
+    wilson += A.tr();
+
+    SPACE_ITER_END_3D
+  }
 
   wilson = wilson / (x_size * y_size * z_size * t_size);
 
   return wilson;
 }
 
-template <class T>
-void wilson_loops_spatial_plane(
-    const std::vector<T> &array,
-    std::unordered_map<int, std::vector<T>> &space_lines,
-    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
-    int r_max) {
-  std::vector<T> space_lines_single;
-
-  for (int r1 = r_min; r1 <= r_max; r1++) {
-    space_lines_single = wilson_lines(array, nu, r1);
-    for (int r2 = r_min; r2 <= r_max; r2++) {
-      if (r2 >= r1) {
-        wilson[std::tuple<int, int>{r1, r2}] += wilson_loop_single_size(
-            space_lines[r2], space_lines_single, mu, nu, r2, r1);
-      } else if (r1 > r2) {
-        wilson[std::tuple<int, int>{r2, r1}] += wilson_loop_single_size(
-            space_lines[r2], space_lines_single, mu, nu, r2, r1);
-      }
-    }
-  }
-}
-
 // spatial wilson_loops
 template <class T>
 std::map<std::tuple<int, int>, FLOAT>
-wilson_spatial(const std::vector<T> &array, int r_min, int r_max) {
+wilson_spatial(const std::vector<T> &array,
+               std::map<std::tuple<int, int>, std::vector<T>> smeared,
+               int time_min, int time_max, int r_min, int r_max) {
   link1 link(x_size, y_size, z_size, t_size);
   std::map<std::tuple<int, int>, FLOAT> wilson;
-  std::unordered_map<int, std::vector<T>> space_lines;
+  std::vector<T> space_lines;
+  std::unordered_map<int, std::vector<T>> time_lines;
 
-  // (0, 1) and (0, 2) plane
-  for (int r = r_min; r <= r_max; r++) {
-    space_lines[r] = wilson_lines(array, 0, r);
-  }
+  for (int i = 0; i < 3; i++) {
+    for (int t = time_min; t <= time_max; t++) {
+      time_lines[t] = wilson_lines(array, i, t);
+    }
 
-  wilson_loops_spatial_plane(array, space_lines, wilson, 0, 1, r_min, r_max);
-  wilson_loops_spatial_plane(array, space_lines, wilson, 0, 2, r_min, r_max);
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        for (int r = r_min; r <= r_max; r++) {
+          space_lines =
+              wilson_lines_single(smeared[std::tuple<int, int>{i, j}], r);
 
-  // (1, 2) plane
-  for (int r = r_min; r <= r_max; r++) {
-    space_lines[r] = wilson_lines(array, 1, r);
-  }
-
-  wilson_loops_spatial_plane(array, space_lines, wilson, 1, 2, r_min, r_max);
-
-  for (int r1 = r_min; r1 <= r_max; r1++) {
-    for (int r2 = r1; r2 <= r_max; r2++) {
-      if (r1 == r2)
-        wilson[std::tuple<int, int>{r1, r2}] =
-            wilson[std::tuple<int, int>{r1, r2}] / 3;
-
-      else
-        wilson[std::tuple<int, int>{r1, r2}] =
-            wilson[std::tuple<int, int>{r1, r2}] / 6;
+          for (int t = time_min; t <= time_max; t++) {
+            wilson[std::tuple<int, int>{t, r}] +=
+                wilson_loop_single_size(time_lines[t], space_lines, i, j, t, r);
+          }
+        }
+      }
     }
   }
 
+  for (int t = time_min; t <= time_max; t++) {
+    for (int r = r_min; r <= r_max; r++) {
+      wilson[std::tuple<int, int>{t, r}] =
+          wilson[std::tuple<int, int>{t, r}] / 6;
+    }
+  }
   return wilson;
 }
 
@@ -840,16 +859,15 @@ template std::vector<FLOAT>
 calculate_polyakov_loops(const std::vector<su2> &array);
 template std::map<int, FLOAT>
 polyakov_loop_correlator(const std::vector<su2> &conf, int D_min, int D_max);
+template std::vector<su2> wilson_lines_single(const std::vector<su2> &array,
+                                              int length);
 template FLOAT wilson_loop_single_size(std::vector<su2> lines1,
                                        std::vector<su2> lines2, int mu, int nu,
                                        int r1, int r2);
-template void wilson_loops_spatial_plane(
-    const std::vector<su2> &array,
-    std::unordered_map<int, std::vector<su2>> &space_lines,
-    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
-    int r_max);
 template std::map<std::tuple<int, int>, FLOAT>
-wilson_spatial(const std::vector<su2> &array, int r_min, int r_max);
+wilson_spatial(const std::vector<su2> &array,
+               std::map<std::tuple<int, int>, std::vector<su2>> smeared,
+               int time_min, int time_max, int r_min, int r_max);
 
 // abelian
 template FLOAT plaket_time(const std::vector<abelian> &array);
@@ -886,13 +904,12 @@ calculate_polyakov_loops(const std::vector<abelian> &array);
 template std::map<int, FLOAT>
 polyakov_loop_correlator(const std::vector<abelian> &conf, int D_min,
                          int D_max);
+template std::vector<abelian>
+wilson_lines_single(const std::vector<abelian> &array, int length);
 template FLOAT wilson_loop_single_size(std::vector<abelian> lines1,
                                        std::vector<abelian> lines2, int mu,
                                        int nu, int r1, int r2);
-template void wilson_loops_spatial_plane(
-    const std::vector<abelian> &array,
-    std::unordered_map<int, std::vector<abelian>> &space_lines,
-    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
-    int r_max);
 template std::map<std::tuple<int, int>, FLOAT>
-wilson_spatial(const std::vector<abelian> &array, int r_min, int r_max);
+wilson_spatial(const std::vector<abelian> &array,
+               std::map<std::tuple<int, int>, std::vector<abelian>> smeared,
+               int time_min, int time_max, int r_min, int r_max);

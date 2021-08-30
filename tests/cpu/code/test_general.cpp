@@ -4,12 +4,14 @@
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/result.h"
+#include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <map>
+#include <omp.h>
 #include <stdio.h>
 #include <tuple>
 #include <unordered_map>
@@ -77,9 +79,22 @@ int main(int argc, char *argv[]) {
   }
   std::cout << std::endl;
 
+  double alpha_APE = 0.7;
+
+  double omp_time;
+
+  omp_time = omp_get_wtime();
+
+  std::map<std::tuple<int, int>, std::vector<su2>> APE_2d =
+      smearing_APE_2d(conf_qc2dstag.array, alpha_APE);
+
+  for (int i = 0; i < 10; i++) {
+    smearing_APE_2d_continue(APE_2d, alpha_APE);
+  }
+
   // spatial wilson_lines
   std::map<std::tuple<int, int>, FLOAT> wilson_spat =
-      wilson_spatial(conf_qc2dstag.array, 4, 16);
+      wilson_spatial(conf_qc2dstag.array, APE_2d, 4, 8, 4, 8);
 
   for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
     std::cout << "distance: (" << std::get<0>(it->first) << ", "
@@ -87,6 +102,9 @@ int main(int argc, char *argv[]) {
               << " wilson_spatial: " << it->second << std::endl;
   }
   std::cout << std::endl;
+
+  omp_time = omp_get_wtime() - omp_time;
+  std::cout << "wilson_spatial time: " << omp_time << std::endl;
 
   // on-axis wilson loops
   int T_min = 14, T_max = 18;

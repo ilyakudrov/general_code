@@ -5,9 +5,9 @@ GCC=g++
 FLAGS=-O3 -D DOUBLE -march=native -mtune=native -ffast-math
 OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o $(OBJ_PATH)/eigen.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
+	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general -fopenmp
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -o test_smearing
+	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -o test_smearing -fopenmp
 test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES) -o test_eigenvectors
 test_flux_tube: $(OBJ_PATH)/test_flux_tube.o $(OBJFILES)
@@ -29,7 +29,7 @@ $(OBJ_PATH)/link.o: $(SRC_PATH)/link.cpp
 $(OBJ_PATH)/data.o: $(SRC_PATH)/data.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/data.cpp -o $(OBJ_PATH)/data.o
 $(OBJ_PATH)/basic_observables.o: $(SRC_PATH)/basic_observables.cpp
-	$(GCC) $(FLAGS) -c $(SRC_PATH)/basic_observables.cpp -o $(OBJ_PATH)/basic_observables.o
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/basic_observables.cpp -o $(OBJ_PATH)/basic_observables.o -fopenmp
 $(OBJ_PATH)/flux_tube.o: $(SRC_PATH)/flux_tube.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/flux_tube.cpp -o $(OBJ_PATH)/flux_tube.o
 $(OBJ_PATH)/result.o: $(SRC_PATH)/result.cpp
@@ -37,7 +37,7 @@ $(OBJ_PATH)/result.o: $(SRC_PATH)/result.cpp
 $(OBJ_PATH)/matrix.o: $(SRC_PATH)/matrix.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/matrix.cpp -o $(OBJ_PATH)/matrix.o
 $(OBJ_PATH)/smearing.o: $(SRC_PATH)/smearing.cpp
-	$(GCC) $(FLAGS) -c $(SRC_PATH)/smearing.cpp -o $(OBJ_PATH)/smearing.o
+	$(GCC) $(FLAGS) -c $(SRC_PATH)/smearing.cpp -o $(OBJ_PATH)/smearing.o -fopenmp
 $(OBJ_PATH)/eigen.o: $(SRC_PATH)/eigen.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/eigen.cpp -o $(OBJ_PATH)/eigen.o
 $(OBJ_PATH)/monopoles.o: $(SRC_PATH)/monopoles.cpp

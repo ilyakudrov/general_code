@@ -24,19 +24,16 @@ std::vector<FLOAT> wilson(const std::vector<T> &array, int r_min, int r_max,
                           int time_min, int time_max);
 
 template <class T>
+std::vector<T> wilson_lines_single(const std::vector<T> &array, int length);
+template <class T>
 FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
                               int mu, int nu, int r1, int r2);
 
 template <class T>
-void wilson_loops_spatial_plane(
-    const std::vector<T> &array,
-    std::unordered_map<int, std::vector<T>> &space_lines,
-    std::map<std::tuple<int, int>, FLOAT> &wilson, int mu, int nu, int r_min,
-    int r_max);
-
-template <class T>
 std::map<std::tuple<int, int>, FLOAT>
-wilson_spatial(const std::vector<T> &array, int r_min, int r_max);
+wilson_spatial(const std::vector<T> &array,
+               std::map<std::tuple<int, int>, std::vector<T>> smeared,
+               int time_min, int time_max, int r_min, int r_max);
 
 std::vector<double> read_abelian_fortran(std::string path_abelian);
 

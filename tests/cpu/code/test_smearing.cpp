@@ -9,18 +9,19 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <omp.h>
 #include <stdio.h>
 
-int x_size = 32;
-int y_size = 32;
-int z_size = 32;
-int t_size = 32;
+int x_size = 40;
+int y_size = 40;
+int z_size = 40;
+int t_size = 40;
 
 int main(int argc, char *argv[]) {
   FLOAT alpha1 = 1;
   FLOAT alpha2 = 1;
   FLOAT alpha3 = 0.5;
-  FLOAT alpha_APE = 0.3;
+  FLOAT alpha_APE = 0.7;
   FLOAT stout_rho = 0.15;
 
   std::vector<std::vector<su2>> smearing_first(9, std::vector<su2>(1));
@@ -32,15 +33,31 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  std::string path_su2 = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
+  std::string path_su2 = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
   std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  conf.read_float(path_su2);
+  conf.read_double_qc2dstag(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   FLOAT aver[2];
 
   std::cout.precision(10);
   su2 A;
-  unsigned int start_time = clock();
+  unsigned int start_time;
+  unsigned int end_time;
+  unsigned int search_time;
+
+  double omp_time;
+
+  omp_time = omp_get_wtime();
+
+  std::map<std::tuple<int, int>, std::vector<su2>> APE_2d_test =
+      smearing_APE_2d(conf.array, alpha_APE);
+
+  smearing_APE_2d_continue(APE_2d_test, alpha_APE);
+
+  omp_time = omp_get_wtime() - omp_time;
+  std::cout << "APE_2d_test time: " << omp_time << std::endl;
+
+  start_time = clock();
 
   double start;
   double end;
@@ -92,8 +109,8 @@ int main(int argc, char *argv[]) {
   std::cout << "0.172742 0.633665 0.73173 0.182208" << std::endl;
   std::cout << "-0.816237 -0.0404862 0.571983 -0.0703786" << std::endl;
 
-  unsigned int end_time = clock();
-  unsigned int search_time = end_time - start_time;
+  end_time = clock();
+  search_time = end_time - start_time;
   std::cout << "working time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
 }

@@ -48,6 +48,19 @@ std::vector<T> smearing_HYP(const std::vector<T> &array,
 template <class T>
 std::vector<T> smearing_APE(const std::vector<T> &array, FLOAT alpha_APE);
 template <class T>
+std::map<std::tuple<int, int>, std::vector<T>>
+smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE);
+template <class T>
+void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<T>> &smeared, FLOAT alpha_APE);
+template <class T>
+void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<T>> &smeared, int mu,
+    FLOAT alpha_APE);
+template <class T>
+T staples_2d_continue(std::vector<T> &array1, std::vector<T> &array2,
+                      link1 &link, int i, int j);
+template <class T>
 T smearing_first_refresh(const std::vector<T> &vec, link1 &link, int nu,
                          int rho,
                          FLOAT alpha3); // refresh link every step

@@ -37,6 +37,21 @@
   }                                                                            \
   }
 
+#define SPACE_ITER_START_3D                                                    \
+  for (int z = 0; z < z_size; z++) {                                           \
+    for (int y = 0; y < y_size; y++) {                                         \
+      for (int x = 0; x < x_size; x++) {                                       \
+        link.go(x, y, z, t);                                                   \
+        link.update(0);                                                        \
+        link.update(1);                                                        \
+        link.update(2);                                                        \
+        link.update(3);
+
+#define SPACE_ITER_END_3D                                                      \
+  }                                                                            \
+  }                                                                            \
+  }
+
 template <class T>
 T staples_first(const std::vector<T> &vec, link1 &link, int eta) {
   T A;
@@ -358,6 +373,116 @@ std::vector<T> smearing_APE(const std::vector<T> &array, FLOAT alpha_APE) {
 }
 
 template <class T>
+std::map<std::tuple<int, int>, std::vector<T>>
+smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE) {
+  std::map<std::tuple<int, int>, std::vector<T>> smeared;
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  // not smeared direction
+  for (int i = 0; i < 3; i++) {
+    // 2 other smeared directions
+    for (int j = 0; j < 3; j++) {
+
+      if (i != j) {
+        std::vector<T> vec(x_size * y_size * z_size * t_size);
+
+        // #pragma omp parallel for shared(array, vec) private(link)
+        for (int t = 0; t < t_size; t++) {
+          link.move_dir(j);
+
+          SPACE_ITER_START_3D
+
+          vec[link.place / 4] = (1 - alpha_APE) * array[link.place + j];
+
+          for (int d = 0; d < 3; d++) {
+            if (d != i && d != j) {
+              vec[link.place / 4] =
+                  vec[link.place / 4] +
+                  (alpha_APE / 2.) * staples_first(array, link, d);
+            }
+          }
+          vec[link.place / 4] = vec[link.place / 4].proj();
+
+          SPACE_ITER_END_3D
+        }
+        smeared[std::tuple<int, int>{i, j}] = std::move(vec);
+      }
+    }
+  }
+  return smeared;
+}
+
+template <class T>
+void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<T>> &smeared, FLOAT alpha_APE) {
+  for (int i = 0; i < 3; i++) {
+    smearing_APE_2d_continue_plane(smeared, i, alpha_APE);
+  }
+}
+
+template <class T>
+void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<T>> &smeared, int mu,
+    FLOAT alpha_APE) {
+  std::vector<int> directions;
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  for (int i = 0; i < 3; i++) {
+    if (i != mu) {
+
+      std::vector<T> vec(x_size * y_size * z_size * t_size);
+
+      for (int k = 0; k < 3; k++) {
+        if (k != i && k != mu) {
+
+          SPACE_ITER_START
+
+          vec[link.place / 4] =
+              (1 - alpha_APE) *
+              smeared[std::tuple<int, int>{mu, i}][link.place / 4];
+
+          vec[link.place / 4] =
+              vec[link.place / 4] +
+              (alpha_APE / 2.) *
+                  staples_2d_continue(smeared[std::tuple<int, int>{mu, i}],
+                                      smeared[std::tuple<int, int>{mu, k}],
+                                      link, i, k);
+
+          vec[link.place / 4] = vec[link.place / 4].proj();
+
+          SPACE_ITER_END
+        }
+      }
+      smeared[std::tuple<int, int>{mu, i}] = std::move(vec);
+    }
+  }
+}
+
+template <class T>
+T staples_2d_continue(std::vector<T> &array1, std::vector<T> &array2,
+                      link1 &link, int i, int j) {
+  T A;
+  T B;
+  A = array2[link.place / 4];
+  link.move(j, 1);
+  A = A * array1[link.place / 4];
+  link.move(i, 1);
+  link.move(j, -1);
+  A = A ^ &array2[link.place / 4];
+  link.move(i, -1);
+  link.move(j, -1);
+  B = array2[link.place / 4].conj();
+  B = B * array1[link.place / 4];
+  link.move(i, 1);
+  B = B * array2[link.place / 4];
+  link.move(j, 1);
+  link.move(i, -1);
+  return (A + B);
+}
+
+template <class T>
 T smearing_first_refresh(const std::vector<T> &vec, link1 &link, int nu,
                          int rho, FLOAT alpha3) {
   T A;
@@ -509,6 +634,16 @@ smearing_HYP(const std::vector<su2> &array,
              std::vector<std::vector<su2>> &smearing_second, FLOAT alpha1);
 template std::vector<su2> smearing_APE(const std::vector<su2> &array,
                                        FLOAT alpha_APE);
+template std::map<std::tuple<int, int>, std::vector<su2>>
+smearing_APE_2d(const std::vector<su2> &array, FLOAT alpha_APE);
+template void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<su2>> &smeared, FLOAT alpha_APE);
+template void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<su2>> &smeared, int mu,
+    FLOAT alpha_APE);
+template su2 staples_2d_continue(std::vector<su2> &array1,
+                                 std::vector<su2> &array2, link1 &link, int i,
+                                 int j);
 template su2 smearing_first_refresh(const std::vector<su2> &vec, link1 &link,
                                     int nu, int rho,
                                     FLOAT alpha3); // refresh link every step
@@ -559,6 +694,17 @@ smearing_HYP(const std::vector<abelian> &array,
              std::vector<std::vector<abelian>> &smearing_second, FLOAT alpha1);
 template std::vector<abelian> smearing_APE(const std::vector<abelian> &array,
                                            FLOAT alpha_APE);
+template std::map<std::tuple<int, int>, std::vector<abelian>>
+smearing_APE_2d(const std::vector<abelian> &array, FLOAT alpha_APE);
+template void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<abelian>> &smeared,
+    FLOAT alpha_APE);
+template void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<abelian>> &smeared, int mu,
+    FLOAT alpha_APE);
+template abelian staples_2d_continue(std::vector<abelian> &array1,
+                                     std::vector<abelian> &array2, link1 &link,
+                                     int i, int j);
 template abelian
 smearing_first_refresh(const std::vector<abelian> &vec, link1 &link, int nu,
                        int rho,
