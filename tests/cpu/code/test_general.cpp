@@ -79,6 +79,8 @@ int main(int argc, char *argv[]) {
   }
   std::cout << std::endl;
 
+  polyakov_correlator.clear();
+
   double alpha_APE = 0.7;
 
   double omp_time;
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
 
   // spatial wilson_lines
   std::map<std::tuple<int, int>, FLOAT> wilson_spat =
-      wilson_spatial(conf_qc2dstag.array, APE_2d, 4, 8, 4, 8);
+      wilson_spatial(conf_qc2dstag.array, APE_2d, 6, 12, 4, 20);
 
   for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
     std::cout << "distance: (" << std::get<0>(it->first) << ", "
