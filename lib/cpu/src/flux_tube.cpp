@@ -206,8 +206,6 @@ std::vector<FLOAT> wilson_plaket_schwinger_electric(
     link.move(dir, d_min);
     d = d_min;
     while (d < 0 && d < d_max) {
-      if (x == 0 && y == 0 && z == 0 && t == 0)
-        std::cout << d << std::endl;
       A = (A * schwinger_lines[abs(d) - 1][dir][link.place / 4]) *
           plaket[link.place / 4] *
           schwinger_lines[abs(d) - 1][dir][link.place / 4];
@@ -216,8 +214,6 @@ std::vector<FLOAT> wilson_plaket_schwinger_electric(
       link.move(dir, 1);
     }
     while (d == 0 && d < d_max) {
-      if (x == 0 && y == 0 && z == 0 && t == 0)
-        std::cout << d << std::endl;
       A = A * plaket[link.place / 4];
       result[d - d_min] += A.tr();
       d++;
@@ -225,8 +221,6 @@ std::vector<FLOAT> wilson_plaket_schwinger_electric(
     if (d_min > 0)
       link.move(dir, -d_min);
     while (d <= d_max) {
-      if (x == 0 && y == 0 && z == 0 && t == 0)
-        std::cout << d << std::endl;
       A = (A ^ &schwinger_lines[abs(d) - 1][dir][link.place / 4]);
       link.move(dir, d);
       A = A * plaket[link.place / 4];

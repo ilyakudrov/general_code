@@ -9,11 +9,11 @@ test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -o test_smearing -fopenmp
 test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES) -o test_eigenvectors
+	$(GCC) $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES) -o test_eigenvectors -fopenmp
 test_flux_tube: $(OBJ_PATH)/test_flux_tube.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_flux_tube.o $(OBJFILES) -o test_flux_tube
+	$(GCC) $(OBJ_PATH)/test_flux_tube.o $(OBJFILES) -o test_flux_tube -fopenmp
 test_monopoles: $(OBJ_PATH)/test_monopoles.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_monopoles.o $(OBJFILES) -o test_monopoles
+	$(GCC) $(OBJ_PATH)/test_monopoles.o $(OBJFILES) -o test_monopoles -fopenmp
 $(OBJ_PATH)/test_general.o: test_general.cpp
 	$(GCC) $(FLAGS) -c test_general.cpp -o $(OBJ_PATH)/test_general.o
 $(OBJ_PATH)/test_smearing.o: test_smearing.cpp
