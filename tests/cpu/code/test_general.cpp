@@ -11,7 +11,6 @@
 #include <ctime>
 #include <iostream>
 #include <map>
-#include <omp.h>
 #include <stdio.h>
 #include <tuple>
 #include <unordered_map>
@@ -83,10 +82,6 @@ int main(int argc, char *argv[]) {
 
   double alpha_APE = 0.7;
 
-  double omp_time;
-
-  omp_time = omp_get_wtime();
-
   std::map<std::tuple<int, int>, std::vector<su2>> APE_2d =
       smearing_APE_2d(conf_qc2dstag.array, alpha_APE);
 
@@ -104,9 +99,6 @@ int main(int argc, char *argv[]) {
               << " wilson_spatial: " << it->second << std::endl;
   }
   std::cout << std::endl;
-
-  omp_time = omp_get_wtime() - omp_time;
-  std::cout << "wilson_spatial time: " << omp_time << std::endl;
 
   // on-axis wilson loops
   int T_min = 14, T_max = 18;

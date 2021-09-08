@@ -387,7 +387,6 @@ smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE) {
       if (i != j) {
         std::vector<T> vec(x_size * y_size * z_size * t_size);
 
-        // #pragma omp parallel for shared(array, vec) private(link)
         for (int t = 0; t < t_size; t++) {
           link.move_dir(j);
 

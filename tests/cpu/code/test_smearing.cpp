@@ -9,7 +9,6 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
-#include <omp.h>
 #include <stdio.h>
 
 int x_size = 40;
@@ -45,17 +44,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  double omp_time;
-
-  omp_time = omp_get_wtime();
-
   std::map<std::tuple<int, int>, std::vector<su2>> APE_2d_test =
       smearing_APE_2d(conf.array, alpha_APE);
 
   smearing_APE_2d_continue(APE_2d_test, alpha_APE);
-
-  omp_time = omp_get_wtime() - omp_time;
-  std::cout << "APE_2d_test time: " << omp_time << std::endl;
 
   start_time = clock();
 
