@@ -168,7 +168,6 @@ std::vector<T> wilson_lines_single(const std::vector<T> &array, int length) {
   std::vector<T> vec(DATA_SIZE / 4);
   int place;
 
-  // #pragma omp parallel for shared(vec) private(link, place)
   for (int t = 0; t < t_size; t++) {
 
     SPACE_ITER_START_3D
@@ -190,7 +189,6 @@ FLOAT wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
   T A;
   FLOAT wilson = 0;
 
-#pragma omp parallel for shared(lines1, lines2) private(link, A)
   for (int t = 0; t < t_size; t++) {
 
     SPACE_ITER_START_3D

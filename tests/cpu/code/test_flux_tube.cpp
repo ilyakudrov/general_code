@@ -9,6 +9,7 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <map>
 #include <stdio.h>
 #include <unordered_map>
 #include <vector>
@@ -40,16 +41,6 @@ int main(int argc, char *argv[]) {
 
   int R = 10;
   int T = 10;
-  start_time = clock();
-  std::vector<std::vector<std::vector<su2>>> schwinger_lines_short;
-  for (int d = 1; d <= R + 5; d++) {
-    schwinger_lines_short.push_back(
-        calculate_schwinger_lines_short(conf_qc2dstag.array, d));
-  }
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "schwinger_lines_short time: "
-            << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
   start_time = clock();
   std::vector<su2> plaket_electric =
@@ -60,17 +51,17 @@ int main(int argc, char *argv[]) {
             << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
   start_time = clock();
-  std::vector<FLOAT> schwinger_electric = wilson_plaket_schwinger_electric(
-      conf_qc2dstag.array, schwinger_lines_short, plaket_electric, -5, R + 5, T,
-      R);
+  std::map<int, FLOAT> schwinger_electric = wilson_plaket_schwinger_electric(
+      conf_qc2dstag.array, plaket_electric, -5, R + 5, T, R);
   end_time = clock();
   search_time = end_time - start_time;
   std::cout << "wilson_plaket_schwinger_electric time: "
             << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
-  for (int i = 0; i < schwinger_electric.size(); i++) {
-    std::cout << "d = " << i - 5
-              << " schwinger_electric = " << schwinger_electric[i] << std::endl;
+  for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
+       ++it) {
+    std::cout << "d = " << it->first << " schwinger_electric = " << it->second
+              << std::endl;
   }
 
   std::cout << "wilson plaket flux tube test" << std::endl;
