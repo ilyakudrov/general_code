@@ -19,17 +19,14 @@
 
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
-    link.coordinate[3] = t;                                                    \
-    link.update(3);                                                            \
     for (int z = 0; z < z_size; z++) {                                         \
-      link.coordinate[2] = z;                                                  \
-      link.update(2);                                                          \
       for (int y = 0; y < y_size; y++) {                                       \
-        link.coordinate[1] = y;                                                \
-        link.update(1);                                                        \
         for (int x = 0; x < x_size; x++) {                                     \
-          link.coordinate[0] = x;                                              \
-          link.update(0);
+          link.go(x, y, z, t);                                                 \
+          link.update(0);                                                      \
+          link.update(1);                                                      \
+          link.update(2);                                                      \
+          link.update(3);
 
 #define SPACE_ITER_END                                                         \
   }                                                                            \
@@ -387,24 +384,30 @@ smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE) {
       if (i != j) {
         std::vector<T> vec(x_size * y_size * z_size * t_size);
 
-        for (int t = 0; t < t_size; t++) {
-          link.move_dir(j);
+        link.move_dir(j);
 
-          SPACE_ITER_START_3D
+        // for (int t = 0; t < t_size; t++) {
+        // link.move_dir(j);
 
-          vec[link.place / 4] = (1 - alpha_APE) * array[link.place + j];
+        // SPACE_ITER_START_3D
 
-          for (int d = 0; d < 3; d++) {
-            if (d != i && d != j) {
-              vec[link.place / 4] =
-                  vec[link.place / 4] +
-                  (alpha_APE / 2.) * staples_first(array, link, d);
-            }
+        SPACE_ITER_START
+
+        vec[link.place / 4] = (1 - alpha_APE) * array[link.place + j];
+
+        for (int d = 0; d < 3; d++) {
+          if (d != i && d != j) {
+            vec[link.place / 4] =
+                vec[link.place / 4] +
+                (alpha_APE / 2.) * staples_first(array, link, d);
           }
-          vec[link.place / 4] = vec[link.place / 4].proj();
-
-          SPACE_ITER_END_3D
         }
+        vec[link.place / 4] = vec[link.place / 4].proj();
+
+        SPACE_ITER_END
+
+        // SPACE_ITER_END_3D
+        // }
         smeared[std::tuple<int, int>{i, j}] = std::move(vec);
       }
     }
@@ -431,52 +434,54 @@ void smearing_APE_2d_continue_plane(
   std::vector<std::vector<T>> vec(
       2, std::vector<T>(x_size * y_size * z_size * t_size));
 
+  int nu1, nu2;
+
   for (int i = 0; i < 2; i++) {
     if (i != mu) {
 
       for (int k = i + 1; k < 3; k++) {
-        if (k != i && k != mu) {
-
-          SPACE_ITER_START
-
-          vec[0][link.place / 4] =
-              (1 - alpha_APE) *
-              smeared[std::tuple<int, int>{mu, i}][link.place / 4];
-
-          vec[0][link.place / 4] =
-              vec[0][link.place / 4] +
-              (alpha_APE / 2.) *
-                  staples_2d_continue(smeared[std::tuple<int, int>{mu, i}],
-                                      smeared[std::tuple<int, int>{mu, k}],
-                                      link, i, k);
-
-          vec[0][link.place / 4] = vec[0][link.place / 4].proj();
-
-          SPACE_ITER_END
-
-          SPACE_ITER_START
-
-          vec[1][link.place / 4] =
-              (1 - alpha_APE) *
-              smeared[std::tuple<int, int>{mu, k}][link.place / 4];
-
-          vec[1][link.place / 4] =
-              vec[1][link.place / 4] +
-              (alpha_APE / 2.) *
-                  staples_2d_continue(smeared[std::tuple<int, int>{mu, k}],
-                                      smeared[std::tuple<int, int>{mu, i}],
-                                      link, k, i);
-
-          vec[1][link.place / 4] = vec[1][link.place / 4].proj();
-
-          SPACE_ITER_END
-
-          smeared[std::tuple<int, int>{mu, i}] = std::move(vec[0]);
-          smeared[std::tuple<int, int>{mu, k}] = std::move(vec[1]);
+        if (k != mu) {
+          nu1 = i;
+          nu2 = k;
         }
       }
     }
   }
+
+  SPACE_ITER_START
+
+  vec[0][link.place / 4] =
+      (1 - alpha_APE) * smeared[std::tuple<int, int>{mu, nu1}][link.place / 4];
+
+  vec[0][link.place / 4] =
+      vec[0][link.place / 4] +
+      (alpha_APE / 2.) *
+          staples_2d_continue(smeared[std::tuple<int, int>{mu, nu1}],
+                              smeared[std::tuple<int, int>{mu, nu2}], link, nu1,
+                              nu2);
+
+  vec[0][link.place / 4] = vec[0][link.place / 4].proj();
+
+  SPACE_ITER_END
+
+  SPACE_ITER_START
+
+  vec[1][link.place / 4] =
+      (1 - alpha_APE) * smeared[std::tuple<int, int>{mu, nu2}][link.place / 4];
+
+  vec[1][link.place / 4] =
+      vec[1][link.place / 4] +
+      (alpha_APE / 2.) *
+          staples_2d_continue(smeared[std::tuple<int, int>{mu, nu2}],
+                              smeared[std::tuple<int, int>{mu, nu1}], link, nu2,
+                              nu1);
+
+  vec[1][link.place / 4] = vec[1][link.place / 4].proj();
+
+  SPACE_ITER_END
+
+  smeared[std::tuple<int, int>{mu, nu1}] = std::move(vec[0]);
+  smeared[std::tuple<int, int>{mu, nu2}] = std::move(vec[1]);
 }
 
 template <class T>
