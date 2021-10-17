@@ -26,10 +26,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
-  x_size = 40;
+  y_size = 32;
+  z_size = 32;
+  t_size = 32;
+  x_size = 32;
 
   std::cout.precision(17);
 
@@ -37,7 +37,13 @@ int main(int argc, char *argv[]) {
   data<su2> conf_qc2dstag;
   // data<abelian> conf_qc2dstag;
   std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  // std::string path_qc2dstag
+  // std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
+  // std::string path_qc2dstag =
+  //     "../../confs/qc2dstag/32^4/smeared/mu0.00/conf_APE_alpha=0.7_0548";
+  // std::string path_qc2dstag =
+  //     "../../confs/MA_gauged/qc2dstag/40^4/mu0.00/conf_abelian_0201";
+  // std::string
+  // path_qc2dstag
   //   = "/home/ilya/soft/lattice/mag/confs/fixated/su2/"
   //                          "qc2dstag/32^4/mu0.00/conf_fixed_0201";
   // std::string path_qc2dstag =
@@ -52,18 +58,21 @@ int main(int argc, char *argv[]) {
   // std::string path_qc2dstag =
   // "../../confs/decomposed/monopole/qc2dstag/40^4/"
   //                             "mu0.05/s0/conf_monopole_0201";
-  // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
+  // std::string path_qc2dstag =
+  // "/home/ilya/soft/lattice/decomposition/test/"
   //                             "confs/32^4/CON_32^3x32_031.LAT";
   // std::string path_qc2dstag =
   //     "../../confs/su2_dynam/monopole/CON_MON_MAG_031.LAT";
-  // std::string path_qc2dstag = "/home/ilya/soft/lattice/decomposition/test/"
+  // std::string path_qc2dstag =
+  // "/home/ilya/soft/lattice/decomposition/test/"
   //                             "confs/monopoless/32^4/CON_OFFD_031";
   // std::string path_qc2dstag = "../../confs/decomposed/monopole/"
   //                             "qc2dstag/40^4/mu0.05/s0/conf_monopole_0201";
   // std::string path_qc2dstag =
   //     "../../confs/smeared/qc2dstag/40^4/mu0.05/s0/conf_APE_alpha=0.7_0202";
 
-  conf_qc2dstag.read_double(path_qc2dstag);
+  conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
+  // conf_qc2dstag.read_double(path_qc2dstag);
   // conf_qc2dstag.read_double_fortran(path_qc2dstag);
   // conf_qc2dstag.read_float_fortran(path_qc2dstag);
 
@@ -91,7 +100,7 @@ int main(int argc, char *argv[]) {
 
   // spatial wilson_lines
   std::map<std::tuple<int, int>, FLOAT> wilson_spat =
-      wilson_spatial(conf_qc2dstag.array, APE_2d, 6, 12, 4, 20);
+      wilson_spatial(conf_qc2dstag.array, APE_2d, 6, 8, 4, 8);
 
   for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
     std::cout << "distance: (" << std::get<0>(it->first) << ", "
@@ -129,7 +138,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 14, 18, 14, 18);
+      wilson_offaxis(conf_qc2dstag.array, directions, 6, 8, 6, 8);
 
   end_time = clock();
   search_time = end_time - start_time;
