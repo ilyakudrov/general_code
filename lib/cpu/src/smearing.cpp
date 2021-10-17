@@ -373,6 +373,32 @@ std::vector<T> smearing_APE(const std::vector<T> &array, FLOAT alpha_APE) {
 }
 
 template <class T>
+std::vector<T> smearing1_APE(const std::vector<T> &array, FLOAT alpha_APE) {
+  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<T> vec(data_size);
+  SPACE_ITER_START
+  link.go(x, y, z, t);
+  for (int i = 0; i < 3; i++) {
+    link.move_dir(i);
+    vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+    for (int d = 0; d < 3; d++) {
+      if (d != i) {
+        vec[PLACE4_LINK_DIR] =
+            vec[PLACE4_LINK_DIR] + alpha_APE * staples_first(array, link, d);
+      }
+    }
+    vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+  }
+  SPACE_ITER_END
+  link.move_dir(3);
+  SPACE_ITER_START
+  link.go(x, y, z, t);
+  vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+  SPACE_ITER_END
+  return vec;
+}
+
+template <class T>
 std::map<std::tuple<int, int>, std::vector<T>>
 smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE) {
   std::map<std::tuple<int, int>, std::vector<T>> smeared;
@@ -653,6 +679,8 @@ smearing_HYP(const std::vector<su2> &array,
              std::vector<std::vector<su2>> &smearing_second, FLOAT alpha1);
 template std::vector<su2> smearing_APE(const std::vector<su2> &array,
                                        FLOAT alpha_APE);
+template std::vector<su2> smearing1_APE(const std::vector<su2> &array,
+                                        FLOAT alpha_APE);
 template std::map<std::tuple<int, int>, std::vector<su2>>
 smearing_APE_2d(const std::vector<su2> &array, FLOAT alpha_APE);
 template void smearing_APE_2d_continue(
@@ -713,6 +741,8 @@ smearing_HYP(const std::vector<abelian> &array,
              std::vector<std::vector<abelian>> &smearing_second, FLOAT alpha1);
 template std::vector<abelian> smearing_APE(const std::vector<abelian> &array,
                                            FLOAT alpha_APE);
+template std::vector<abelian> smearing1_APE(const std::vector<abelian> &array,
+                                            FLOAT alpha_APE);
 template std::map<std::tuple<int, int>, std::vector<abelian>>
 smearing_APE_2d(const std::vector<abelian> &array, FLOAT alpha_APE);
 template void smearing_APE_2d_continue(

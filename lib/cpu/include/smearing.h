@@ -48,6 +48,8 @@ std::vector<T> smearing_HYP(const std::vector<T> &array,
 template <class T>
 std::vector<T> smearing_APE(const std::vector<T> &array, FLOAT alpha_APE);
 template <class T>
+std::vector<T> smearing1_APE(const std::vector<T> &array, FLOAT alpha_APE);
+template <class T>
 std::map<std::tuple<int, int>, std::vector<T>>
 smearing_APE_2d(const std::vector<T> &array, FLOAT alpha_APE);
 template <class T>
