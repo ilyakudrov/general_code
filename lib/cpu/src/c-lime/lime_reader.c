@@ -1,5 +1,5 @@
-#include <../../include/c-lime/lime_config.h>
-#include <../../include/c-lime/lime.h>
+#include "../../include/c-lime/lime_config.h"
+#include "../../include/c-lime/lime.h"
 #include <stdio.h>
 #include <stdlib.h>
 
