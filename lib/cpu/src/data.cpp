@@ -1,10 +1,10 @@
 #include "../include/data.h"
 #include "../include/link.h"
 
+#include "../include/c-lime/lime.h"
+#include "../include/c-lime/lime_config.h"
+#include "../include/c-lime/lime_fixed_types.h"
 #include <cstring>
-#include <lime.h>
-#include <lime_config.h>
-#include <lime_fixed_types.h>
 
 #define MAX_BYTES 64000
 
