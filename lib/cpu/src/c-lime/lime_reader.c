@@ -1,13 +1,13 @@
-#include <lime_config.h>
-#include <lime.h>
+#include <../../include/c-lime/lime_config.h>
+#include <../../include/c-lime/lime.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <lime_utils.h>
-#include <lime_binary_header.h>
+#include "../../include/c-lime/lime_utils.h"
+#include "../../include/c-lime/lime_binary_header.h"
 
 /* If we don't have fseeko, define it */
-#include <lime_fseeko.h>
+#include "../../include/c-lime/lime_fseeko.h"
 
 //#undef LIME_DEBUG
 

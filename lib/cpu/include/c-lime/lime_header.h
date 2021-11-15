@@ -1,9 +1,9 @@
 #ifndef LIME_HEADER_H
 #define LIME_HEADER_H
 
-#include <lime_defs.h>
+#include "lime_defs.h"
 #include <sys/types.h>
-#include <lime_fixed_types.h>
+#include "lime_fixed_types.h"
 
 /** \brief -- The header structure for a lime record */
 typedef struct { 

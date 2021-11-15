@@ -2,8 +2,8 @@
 #define LIME_READER_H
 
 #include <stdio.h>
-#include <lime_defs.h>
-#include <lime_header.h>
+#include "lime_defs.h"
+#include "lime_header.h"
 #include <sys/types.h>
 
 

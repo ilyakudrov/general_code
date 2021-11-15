@@ -1,8 +1,8 @@
 #ifndef LIME_WRITER_H
 #define LIME_WRITER_H
 
-#include <lime_defs.h>
-#include <lime_header.h>
+#include "lime_defs.h"
+#include "lime_header.h"
 #include <sys/types.h>
 #include <stdio.h>
 

@@ -1,9 +1,9 @@
-#include <lime_config.h>
+#include "../../include/c-lime/lime_config.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <lime_defs.h>
-#include <lime_utils.h>
-#include <lime_fixed_types.h>
+#include "../../include/c-lime/lime_defs.h"
+#include "../../include/c-lime/lime_utils.h"
+#include "../../include/c-lime/lime_fixed_types.h"
 
 int lime_padding(size_t nbytes)
 {

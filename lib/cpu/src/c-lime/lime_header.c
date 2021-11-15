@@ -1,6 +1,6 @@
-#include <lime_config.h>
-#include <lime.h>
-#include <lime_fixed_types.h>
+#include "../../include/c-lime/lime_config.h"
+#include "../../include/c-lime/lime.h"
+#include "../../include/c-lime/lime_fixed_types.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
