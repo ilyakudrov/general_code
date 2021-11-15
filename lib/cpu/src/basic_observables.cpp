@@ -911,3 +911,45 @@ template std::map<std::tuple<int, int>, FLOAT>
 wilson_spatial(const std::vector<abelian> &array,
                std::map<std::tuple<int, int>, std::vector<abelian>> smeared,
                int time_min, int time_max, int r_min, int r_max);
+
+// su3_full
+template FLOAT plaket_time(const std::vector<su3_full> &array);
+template FLOAT plaket_space(const std::vector<su3_full> &array);
+template FLOAT plaket(const std::vector<su3_full> &array);
+template std::vector<FLOAT> wilson(const std::vector<su3_full> &array,
+                                   int r_min, int r_max, int time_min,
+                                   int time_max);
+template std::vector<su3_full> wilson_lines(const std::vector<su3_full> &array,
+                                            int mu, int length);
+template std::vector<su3_full>
+wilson_line_increase(const std::vector<su3_full> &array,
+                     const std::vector<su3_full> &lines, int mu, int length);
+template std::vector<wilson_result>
+wilson_offaxis(const std::vector<su3_full> &array,
+               const std::vector<std::vector<int>> directions, FLOAT r_min,
+               FLOAT r_max, int time_min, int time_max);
+template FLOAT
+calculate_wilson_loop_offaxis(const std::vector<su3_full> &time_lines, int time,
+                              const std::vector<su3_full> &space_lines,
+                              const std::vector<int> &direction);
+template std::vector<su3_full>
+wilson_lines_offaxis(const std::vector<su3_full> &array,
+                     const std::vector<int> pattern);
+template std::vector<su3_full> wilson_lines_offaxis_increase(
+    const std::vector<su3_full> &array, const std::vector<su3_full> &lines1,
+    const std::vector<int> pattern, const std::vector<int> direction);
+template FLOAT polyakov(const std::vector<su3_full> &array);
+template std::vector<FLOAT>
+calculate_polyakov_loops(const std::vector<su3_full> &array);
+template std::map<int, FLOAT>
+polyakov_loop_correlator(const std::vector<su3_full> &conf, int D_min,
+                         int D_max);
+template std::vector<su3_full>
+wilson_lines_single(const std::vector<su3_full> &array, int length);
+template FLOAT wilson_loop_single_size(std::vector<su3_full> lines1,
+                                       std::vector<su3_full> lines2, int mu,
+                                       int nu, int r1, int r2);
+template std::map<std::tuple<int, int>, FLOAT>
+wilson_spatial(const std::vector<su3_full> &array,
+               std::map<std::tuple<int, int>, std::vector<su3_full>> smeared,
+               int time_min, int time_max, int r_min, int r_max);

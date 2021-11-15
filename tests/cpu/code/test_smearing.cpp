@@ -11,16 +11,16 @@
 #include <iostream>
 #include <stdio.h>
 
-int x_size = 40;
-int y_size = 40;
-int z_size = 40;
-int t_size = 40;
+int x_size = 32;
+int y_size = 32;
+int z_size = 32;
+int t_size = 32;
 
 int main(int argc, char *argv[]) {
   FLOAT alpha1 = 1;
   FLOAT alpha2 = 1;
   FLOAT alpha3 = 0.5;
-  FLOAT alpha_APE = 0.7;
+  FLOAT alpha_APE = 0.5;
   FLOAT stout_rho = 0.15;
 
   std::vector<std::vector<su2>> smearing_first(9, std::vector<su2>(1));
@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  std::string path_su2 = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
+  std::string path_su2 = "../../confs/su2_dynam/32^4/CON_32^3x32_001.LAT";
   std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  conf.read_double_qc2dstag(path_su2);
+  conf.read_float_fortran(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
   FLOAT aver[2];
 
@@ -75,7 +75,48 @@ int main(int argc, char *argv[]) {
               << A.a2 << " " << A.a3 << std::endl;
   }
 
-  smeared.array = smearing_APE(conf.array, alpha_APE);
+  int T_min = 1, T_max = 3;
+  int R_min = 1, R_max = 3;
+
+  std::vector<FLOAT> vec_wilson;
+
+  start_time = clock();
+
+  vec_wilson = wilson(conf.array, R_min, R_max, T_min, T_max);
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  std::cout << "on-axis wilson time: " << search_time * 1. / CLOCKS_PER_SEC
+            << std::endl;
+  std::cout << "wilson_loops:" << std::endl;
+  for (int T = T_min; T <= T_max; T++) {
+    for (int R = R_min; R <= R_max; R++) {
+      std::cout << "T = " << T << " R = " << R << " "
+                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)] /
+                       2
+                << std::endl;
+    }
+  }
+
+  smeared.array = smearing1_APE(conf.array, alpha_APE);
+
+  start_time = clock();
+
+  vec_wilson = wilson(smeared.array, R_min, R_max, T_min, T_max);
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  std::cout << "on-axis wilson time: " << search_time * 1. / CLOCKS_PER_SEC
+            << std::endl;
+  std::cout << "wilson_loops:" << std::endl;
+  for (int T = T_min; T <= T_max; T++) {
+    for (int R = R_min; R <= R_max; R++) {
+      std::cout << "T = " << T << " R = " << R << " "
+                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)] /
+                       2
+                << std::endl;
+    }
+  }
 
   for (int i = 0; i < 4; i++) {
     A = smeared.array[i];

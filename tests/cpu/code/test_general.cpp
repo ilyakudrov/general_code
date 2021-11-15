@@ -26,58 +26,39 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  y_size = 32;
-  z_size = 32;
-  t_size = 32;
-  x_size = 32;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 6;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
-  data<su2> conf_qc2dstag;
+  // data<su2> conf_qc2dstag;
+  data<su3_full> conf_qc2dstag;
   // data<abelian> conf_qc2dstag;
-  std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  // std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
+  // std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
+  // std::string path_qc2dstag = "../../confs/SU3_conf/nt6/conf.0501";
+  std::string path_qc2dstag =
+      "../../confs/SU3_conf/nt6/conf.gaugefixed_0501.mdp.ildg";
   // std::string path_qc2dstag =
-  //     "../../confs/qc2dstag/32^4/smeared/mu0.00/conf_APE_alpha=0.7_0548";
-  // std::string path_qc2dstag =
-  //     "../../confs/MA_gauged/qc2dstag/40^4/mu0.00/conf_abelian_0201";
-  // std::string
-  // path_qc2dstag
-  //   = "/home/ilya/soft/lattice/mag/confs/fixated/su2/"
-  //                          "qc2dstag/32^4/mu0.00/conf_fixed_0201";
-  // std::string path_qc2dstag =
-  //     "/home/ilya/soft/lattice/general_code/tests/confs/"
-  //     "qc2dstag/32^4/mu0.00/CONF0201";
-  // std::string path_qc2dstag =
-  //     "/home/ilya/soft/lattice/general_code/tests/confs/"
-  //     "decomposed/monopole/qc2dstag/40^4/mu0.05/s0/conf_monopole_0202";
-  // std::string path_qc2dstag =
-  // "../../confs/decomposed/monopole/qc2dstag/40^4/"
-  //                             "mu0.05/s0/conf_monopole_0201";
-  // std::string path_qc2dstag =
-  // "../../confs/decomposed/monopole/qc2dstag/40^4/"
-  //                             "mu0.05/s0/conf_monopole_0201";
-  // std::string path_qc2dstag =
-  // "/home/ilya/soft/lattice/decomposition/test/"
-  //                             "confs/32^4/CON_32^3x32_031.LAT";
-  // std::string path_qc2dstag =
-  //     "../../confs/su2_dynam/monopole/CON_MON_MAG_031.LAT";
-  // std::string path_qc2dstag =
-  // "/home/ilya/soft/lattice/decomposition/test/"
-  //                             "confs/monopoless/32^4/CON_OFFD_031";
-  // std::string path_qc2dstag = "../../confs/decomposed/monopole/"
-  //                             "qc2dstag/40^4/mu0.05/s0/conf_monopole_0201";
-  // std::string path_qc2dstag =
-  //     "../../confs/smeared/qc2dstag/40^4/mu0.05/s0/conf_APE_alpha=0.7_0202";
+  // "../../confs/su2_dynam/32^4/CON_32^3x32_001.LAT";
 
-  conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
-  // conf_qc2dstag.read_double(path_qc2dstag);
+  // conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
+  conf_qc2dstag.read_double(path_qc2dstag);
   // conf_qc2dstag.read_double_fortran(path_qc2dstag);
   // conf_qc2dstag.read_float_fortran(path_qc2dstag);
 
+  std::string path_out_test =
+      "../../confs/SU3_conf/nt6/conf.gaugefixed_0501_test";
+  conf_qc2dstag.write_double(path_out_test);
+
+  for (int i = 0; i < 10; i++) {
+    std::cout << conf_qc2dstag.array[i] << std::endl;
+  }
+
   // polyakov correlator
-  std::map<int, FLOAT> polyakov_correlator =
+  /*std::map<int, FLOAT> polyakov_correlator =
       polyakov_loop_correlator(conf_qc2dstag.array, 4, 16);
 
   for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
@@ -107,11 +88,11 @@ int main(int argc, char *argv[]) {
               << std::get<1>(it->first) << ")"
               << " wilson_spatial: " << it->second << std::endl;
   }
-  std::cout << std::endl;
+  std::cout << std::endl;*/
 
   // on-axis wilson loops
-  int T_min = 14, T_max = 18;
-  int R_min = 14, R_max = 18;
+  int T_min = 1, T_max = 3;
+  int R_min = 1, R_max = 3;
 
   std::vector<FLOAT> vec_wilson;
   start_time = clock();
@@ -126,7 +107,8 @@ int main(int argc, char *argv[]) {
   for (int T = T_min; T <= T_max; T++) {
     for (int R = R_min; R <= R_max; R++) {
       std::cout << "T = " << T << " R = " << R << " "
-                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)]
+                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)] /
+                       2
                 << std::endl;
     }
   }
@@ -138,7 +120,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 6, 8, 6, 8);
+      wilson_offaxis(conf_qc2dstag.array, directions, 2, 3, 2, 3);
 
   end_time = clock();
   search_time = end_time - start_time;
@@ -165,13 +147,13 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   start_time = clock();
-  std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) / 3
             << std::endl;
-  std::cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array) / 3
             << std::endl;
-  std::cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array) / 3
             << std::endl;
-  std::cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array) / 3
             << std::endl;
   end_time = clock();
   search_time = end_time - start_time;

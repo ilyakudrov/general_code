@@ -127,3 +127,183 @@ std::ostream &operator<<(std::ostream &os, const abelian &A) {
      << "phi = " << A.phi << " " << std::endl;
   return os;
 }
+
+// su3_full methods
+su3_full::su3_full() {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j)
+        matrix[i][j] = 0;
+      else
+        matrix[i][j] = 1;
+    }
+  }
+}
+
+su3_full::su3_full(std::complex<FLOAT> B[3][3]) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      matrix[i][j] = B[i][j];
+    }
+  }
+}
+
+FLOAT su3_full::tr() {
+  std::complex<FLOAT> tmp = 0;
+  for (int i = 0; i < 3; i++) {
+    tmp += matrix[i][i];
+  }
+  return tmp.real();
+}
+
+su3_full su3_full::inverse() {
+  su3_full B;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      B.matrix[i][j] = std::conj(matrix[j][i]);
+    }
+  }
+  return B;
+}
+
+std::complex<FLOAT> determinant_part(std::complex<FLOAT> B[3][3], int i, int j,
+                                     int k) {
+  return B[0][i] * (B[1][j] * B[2][k] - B[2][j] * B[1][k]);
+}
+
+FLOAT su3_full::module() {
+  std::complex<FLOAT> determinant;
+  determinant = determinant_part(matrix, 0, 1, 2);
+  determinant -= determinant_part(matrix, 1, 0, 2);
+  determinant += determinant_part(matrix, 2, 0, 1);
+  return determinant.real();
+}
+
+std::complex<FLOAT> su3_full::determinant() {
+  std::complex<FLOAT> determinant;
+  determinant = determinant_part(matrix, 0, 1, 2);
+  determinant -= determinant_part(matrix, 1, 0, 2);
+  determinant += determinant_part(matrix, 2, 0, 1);
+  return determinant;
+}
+
+std::complex<FLOAT> su3_full::unitarity_check() {
+  su3_full A = this->conj();
+  A = A * this;
+
+  std::complex<FLOAT> diagonal = 0, non_diagonal = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i == j)
+        diagonal += A.matrix[i][j];
+      else
+        non_diagonal += A.matrix[i][j];
+    }
+  }
+  return non_diagonal;
+}
+
+su3_full su3_full::conj() const {
+  su3_full B;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      B.matrix[i][j] = std::conj(matrix[j][i]);
+    }
+  }
+  return B;
+}
+
+su3_full su3_full::proj() { return su3_full(); }
+
+su3_full operator+(const su3_full &A, const su3_full &B) {
+  su3_full C;
+  std::complex<FLOAT> a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = A.matrix[i][j] + B.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3_full operator-(const su3_full &A, const su3_full &B) {
+  su3_full C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = A.matrix[i][j] - B.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3_full operator*(const FLOAT &x, const su3_full &A) {
+  su3_full C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3_full operator*(const su3_full &A, const FLOAT &x) {
+  su3_full C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+};
+
+su3_full operator*(const su3_full &A, const su3_full &B) {
+  su3_full C;
+  std::complex<FLOAT> a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = 0;
+      for (int k = 0; k < 3; k++) {
+        a += A.matrix[i][k] * B.matrix[k][j];
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3_full operator*(const su3_full &A, const su3_full *B) {
+  su3_full C;
+  std::complex<FLOAT> a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = 0;
+      for (int k = 0; k < 3; k++) {
+        a += A.matrix[i][k] * B->matrix[k][j];
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3_full operator^(const su3_full &A, const su3_full *B) {
+  su3_full C;
+  std::complex<FLOAT> a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = 0;
+      for (int k = 0; k < 3; k++) {
+        a += A.matrix[i][k] * std::conj(B->matrix[j][k]);
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+std::ostream &operator<<(std::ostream &os, const su3_full &A) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      os << A.matrix[i][j];
+    }
+    os << std::endl;
+  }
+  return os;
+}

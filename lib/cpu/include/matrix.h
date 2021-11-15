@@ -6,6 +6,7 @@
 #define FLOAT float
 #endif
 
+#include <complex>
 #include <iostream>
 
 // su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
@@ -78,3 +79,46 @@ abelian operator*(const abelian &A, const abelian *B);
 abelian operator^(const abelian &A, const abelian *B);
 
 std::ostream &operator<<(std::ostream &os, const abelian &A);
+
+// su3 matrix in 3x3 complex matrix representation
+class su3_full {
+public:
+  std::complex<FLOAT> matrix[3][3];
+  su3_full(std::complex<FLOAT> B[3][3]);
+  su3_full();
+
+  // calculate trace of the matrix
+  FLOAT tr();
+
+  // calculate inverse of the matrix
+  su3_full inverse();
+
+  // calculate conjugate of the matrix
+  su3_full conj() const;
+
+  // gets projection onto su3 group
+  su3_full proj();
+
+  // calculates module of vector in sigma matrices representation
+  FLOAT module();
+
+  std::complex<FLOAT> determinant();
+
+  std::complex<FLOAT> unitarity_check();
+};
+
+su3_full operator+(const su3_full &A, const su3_full &B);
+su3_full operator-(const su3_full &A, const su3_full &B);
+su3_full operator*(const FLOAT &x, const su3_full &A);
+su3_full operator*(const su3_full &A, const FLOAT &x);
+
+// matrix multiplication A * B
+su3_full operator*(const su3_full &A, const su3_full &B);
+
+// matrix multiplication A * B
+su3_full operator*(const su3_full &A, const su3_full *B);
+
+// matrix multiplication A * B.conj()
+su3_full operator^(const su3_full &A, const su3_full *B);
+
+std::ostream &operator<<(std::ostream &os, const su3_full &A);

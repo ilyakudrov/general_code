@@ -3,11 +3,13 @@ SRC_PATH=../../../lib/cpu/src
 OBJ_PATH=../../../lib/cpu/obj
 GCC=g++
 FLAGS=-O3 -D DOUBLE -march=native -mtune=native -ffast-math
+C_PATH=../../../lib/cpu/src/c-lime
+C_FILES=$(C_PATH)/lime_fseeko.c  $(C_PATH)/lime_header.c  $(C_PATH)/lime_reader.c  $(C_PATH)/lime_utils.c  $(C_PATH)/lime_writer.c
 OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o $(OBJ_PATH)/eigen.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -o test_general
+	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) -I/home/ilya/soft/source/c-lime/include $(C_FILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
-	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -o test_smearing
+	$(GCC) $(OBJ_PATH)/test_smearing.o $(OBJFILES) -I/home/ilya/soft/source/c-lime/include $(C_FILES) -o test_smearing
 test_eigenvectors: $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_eigenvectors.o $(OBJFILES) -o test_eigenvectors
 test_flux_tube: $(OBJ_PATH)/test_flux_tube.o $(OBJFILES)

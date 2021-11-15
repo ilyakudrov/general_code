@@ -587,10 +587,10 @@ std::vector<T> smearing_APE_refresh(data<T> &conf, FLOAT alpha_APE) {
   SPACE_ITER_START
   for (int i = 1; i < 4; i++) {
     link.move_dir(i);
-    A = (1 - alpha_APE) * conf.array[PLACE4_LINK_DIR];
+    A = conf.array[PLACE4_LINK_DIR];
     for (int d = 0; d < 3; d++) {
       if (d != i)
-        A = A + (alpha_APE / 4.) * staples_first(vec, link, d);
+        A = A + alpha_APE * staples_first(vec, link, d);
     }
     vec[PLACE4_LINK_DIR] = A.proj();
   }
