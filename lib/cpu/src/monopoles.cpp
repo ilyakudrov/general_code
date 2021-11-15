@@ -117,8 +117,7 @@ std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path) {
       dir = 1;
     else
       dir = dir1 + 1;
-    angles.push_back(
-        (FLOAT)atan2(v[PLACE_QC2DSTAG + 3], v[PLACE_QC2DSTAG + 1]));
+    angles.push_back((FLOAT)atan2(v[PLACE_QC2DSTAG + 3], v[PLACE_QC2DSTAG]));
   }
   SPACE_ITER_END_SIMPLE
   stream.close();

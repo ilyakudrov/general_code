@@ -33,23 +33,25 @@ int main(int argc, char *argv[]) {
 
   // std::string path_abelian =
   // "../../confs/abelian/mu0.00/CON_32^3x32_0001.LAT"; string path_abelian =
-  // "../../confs/mon_wl/mu0.00/CON_MON_MAG_031.LAT"; string path_abelian =
-  // "../../confs/qc2dstag/mu0.05/s0/CONF0201"; string path_abelian =
+  // "../../confs/mon_wl/mu0.00/CON_MON_MAG_031.LAT";
+  std::string path_abelian =
+      "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
+  // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
   // std::string path_abelian =
   // "/home/ilya/soft/lattice/decomposition/test/confs/"
   //                            "monopole/40^4/conf_monopole_0201";
-  std::string path_abelian = "../../confs/decomposed/monopole/qc2dstag/40^4/"
-                             "mu0.05/s0/conf_monopole_0203";
+  // std::string path_abelian = "../../confs/decomposed/monopole/qc2dstag/40^4/"
+  //                            "mu0.05/s0/conf_monopole_0203";
   // std::string path_abelian =
   // "../../confs/decomposed/monopoless/qc2dstag/40^4/"
   //                            "mu0.05/s0/conf_monopoless_0201";
 
-  // std::vector<FLOAT> angles =
-  // read_float_fortran_convet_abelian(path_abelian); std::vector<FLOAT> angles
+  std::vector<FLOAT> angles = read_double_qc2dstag_convet_abelian(path_abelian);
+  // std::vector<FLOAT> angles
   // = read_angles_float_fortran(path_abelian); std::vector<FLOAT> angles =
-  // read_double_qc2dstag_convet_abelian(path_abelian); std::vector<FLOAT>
-  std::vector<FLOAT> angles = read_angles_double_fortran(path_abelian);
+  // read_double_qc2dstag_convet_abelian(path_abelian);
+  // std::vector<FLOAT> angles = read_angles_double_fortran(path_abelian);
   // std::vector<FLOAT> angles =
   // read_float_fortran_convet_abelian(path_abelian); std::vector<FLOAT> angles
   // = read_double_fortran_convet_abelian(path_abelian);
