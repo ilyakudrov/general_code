@@ -34,7 +34,7 @@ public:
   void read_float_ml5(const std::vector<float> &array_ml5, int conf_num);
 
   // read conf file of floats, fortran ordering
-  void read_float_fortran(std::string &file_name);
+  void read_float_fortran(std::string &file_name, int bites_skip);
 
   // read conf file of doubles, usual ordering
   void read_double(std::string &file_name);
@@ -43,7 +43,7 @@ public:
   void read_double_qc2dstag(std::string &file_name);
 
   // read conf file of doubles, fortran ordering
-  void read_double_fortran(std::string &file_name);
+  void read_double_fortran(std::string &file_name, int bites_skip);
 
   // writes conf in file, usual ordering, double
   void write_double(std::string &file_name);

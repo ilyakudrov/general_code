@@ -105,34 +105,38 @@ template <> void data<abelian>::read_float(std::string &file_name) {
   stream.close();
 }
 
-template <> void data<su2>::read_float_fortran(std::string &file_name) {
+template <>
+void data<su2>::read_float_fortran(std::string &file_name, int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4 + 2);
-  if (!stream.read((char *)&v[0], (data_size1 * 4 + 2) * sizeof(float)))
+  std::vector<float> v(data_size1 * 4);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(float)))
     std::cout << "read_float_fortran<su2> error: " << file_name << std::endl;
   su2 A;
   for (int i = 0; i < data_size1; i++) {
-    A.a0 = (FLOAT)v[i * 4 + 1];
-    A.a1 = (FLOAT)v[i * 4 + 2];
-    A.a2 = (FLOAT)v[i * 4 + 3];
-    A.a3 = (FLOAT)v[i * 4 + 4];
+    A.a0 = (FLOAT)v[i * 4];
+    A.a1 = (FLOAT)v[i * 4 + 1];
+    A.a2 = (FLOAT)v[i * 4 + 2];
+    A.a3 = (FLOAT)v[i * 4 + 3];
     array.push_back(A);
   }
   stream.close();
 }
 
-template <> void data<abelian>::read_float_fortran(std::string &file_name) {
+template <>
+void data<abelian>::read_float_fortran(std::string &file_name, int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 + 2);
-  if (!stream.read((char *)&v[0], (data_size1 + 2) * sizeof(float)))
+  std::vector<float> v(data_size1);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size1) * sizeof(float)))
     std::cout << "read_float_fortran<abelian> error: " << file_name
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)v[i + 1]));
+    array.push_back(abelian(1, (FLOAT)v[i]));
   }
   stream.close();
 }
@@ -207,6 +211,45 @@ double reverseValue(const char *data) {
     dest[i] = data[sizeof(double) - i - 1];
   }
   return result;
+}
+
+template <>
+void data<su3_full>::read_double_fortran(std::string &file_name,
+                                         int bites_skip) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.resize(data_size1);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size1 * 18);
+
+  stream.ignore(4);
+  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+    std::cout << "data<su3_full>::read_double_fortran error: " << file_name
+              << std::endl;
+
+  long int index = 0;
+
+  link1 link(x_size, y_size, z_size, t_size);
+  for (int mu = 0; mu < 4; mu++) {
+    for (int j = 0; j < 3; j++) {
+      for (int k = 0; k < 3; k++) {
+        for (int t = 0; t < t_size; t++) {
+          for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+              for (int x = 0; x < x_size; x++) {
+                link.go_update(x, y, z, t);
+
+                array[link.place + mu].matrix[k][j] =
+                    std::complex<double>(v[index], v[index + 1]);
+
+                index += 2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  stream.close();
 }
 
 template <> void data<su3_full>::read_double(std::string &file_name) {
@@ -290,12 +333,13 @@ template <> void data<abelian>::read_double_qc2dstag(std::string &file_name) {
   std::cout << "there's no reason for implementation" << std::endl;
 }
 
-template <> void data<su2>::read_double_fortran(std::string &file_name) {
+template <>
+void data<su2>::read_double_fortran(std::string &file_name, int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 4);
-  stream.ignore(4);
+  stream.ignore(bites_skip);
   if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(double)))
     std::cout << "read_double_fortran<su2> error: " << file_name << std::endl;
   su2 A;
@@ -309,7 +353,9 @@ template <> void data<su2>::read_double_fortran(std::string &file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_double_fortran(std::string &file_name) {
+template <>
+void data<abelian>::read_double_fortran(std::string &file_name,
+                                        int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);

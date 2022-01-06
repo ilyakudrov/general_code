@@ -124,6 +124,37 @@ std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path) {
   return angles;
 }
 
+std::vector<FLOAT> read_inverse_laplacian(std::string &file_path) {
+  int data_size =
+      (x_size / 2 + 1) * (y_size / 2 + 1) * (z_size / 2 + 1) * (t_size / 2 + 1);
+  std::vector<FLOAT> laplace(data_size);
+  std::vector<double> v(data_size);
+  std::ifstream stream(file_path);
+  stream.ignore(4);
+  if (!stream.read((char *)&v[0], data_size * sizeof(double)))
+    std::cout << "read_float_convert_abelian<abelian> error: " << file_path
+              << std::endl;
+
+  link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
+                     t_size / 2 + 1);
+
+  int index = 0;
+
+  for (int x = 0; x < x_size / 2 + 1; x++) {
+    for (int y = 0; y < y_size / 2 + 1; y++) {
+      for (int z = 0; z < z_size / 2 + 1; z++) {
+        for (int t = 0; t < t_size / 2 + 1; t++) {
+          link_laplace.go_update(x, y, z, t);
+          laplace[link_laplace.place / 4] = v[index];
+          index++;
+        }
+      }
+    }
+  }
+
+  return laplace;
+}
+
 // calculate monopole_plaketes on the lattice
 std::vector<std::vector<FLOAT>>
 calculate_monopole_plaket(std::vector<FLOAT> &angles) {
@@ -146,6 +177,80 @@ calculate_monopole_plaket(std::vector<FLOAT> &angles) {
     }
   }
   return plakets;
+}
+
+double get_monopole_angle(std::vector<std::vector<FLOAT>> &monopole_plaket,
+                          link1 &link_tmp, std::vector<FLOAT> &laplace,
+                          int mu) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
+                     t_size / 2 + 1);
+
+  double monopole_angle = 0;
+  double angle_tmp;
+
+  SPACE_ITER_START
+
+  link_laplace.go_update(0, 0, 0, 0);
+  link_laplace.move(0, link_tmp.coordinate[0] - x);
+  link_laplace.move(0, link_tmp.coordinate[1] - y);
+  link_laplace.move(0, link_tmp.coordinate[2] - z);
+  link_laplace.move(0, link_tmp.coordinate[3] - t);
+
+  for (int nu = 0; nu < 4; nu++) {
+    if (nu != mu) {
+      int factor;
+      int a, b;
+      if (mu < nu) {
+        a = mu;
+        b = nu;
+        factor = 1;
+      } else {
+        a = nu;
+        b = mu;
+        factor = -1;
+      }
+      int index = 0;
+      for (int i = 0; i <= a; i++) {
+        for (int j = i + 1; j < 4; j++) {
+          if (i == a && j == b)
+            break;
+          index++;
+        }
+      }
+      angle_tmp = monopole_plaket[index][link.place / 4];
+      link.move(nu, -1);
+      monopole_angle += factor * laplace[link_laplace.place / 4] *
+                        (angle_tmp - monopole_plaket[index][link.place / 4]);
+    }
+  }
+
+  SPACE_ITER_END
+
+  return monopole_angle;
+}
+
+std::vector<FLOAT> make_monopole_angles(std::vector<FLOAT> &angles,
+                                        std::vector<FLOAT> &laplace) {
+
+  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<std::vector<FLOAT>> monopole_plaket =
+      calculate_monopole_plaket(angles);
+
+  std::vector<FLOAT> monopole_angles(4 * x_size * y_size * z_size * t_size);
+
+  SPACE_ITER_START
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    monopole_angles[link.place + mu] =
+        get_monopole_angle(monopole_plaket, link, laplace, mu);
+  }
+
+  SPACE_ITER_END
+
+  return monopole_angles;
 }
 
 std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles) {

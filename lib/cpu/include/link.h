@@ -41,8 +41,7 @@ public:
   int place;
   // holds distance to move in array after moving on the lattice in each
   // direction
-  int multiplier[4] = {4, x_size * 4, x_size *y_size * 4,
-                       x_size *y_size *z_size * 4};
+  int multiplier[4];
 
   link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
         int lattice_size_t);

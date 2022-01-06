@@ -21,6 +21,10 @@ link1::link1(int lattice_size_x, int lattice_size_y, int lattice_size_z,
   lattice_size[1] = lattice_size_y;
   lattice_size[2] = lattice_size_z;
   lattice_size[3] = lattice_size_t;
+  multiplier[0] = 4;
+  multiplier[1] = lattice_size[0] * 4;
+  multiplier[2] = lattice_size[0] * lattice_size[1] * 4;
+  multiplier[3] = lattice_size[0] * lattice_size[1] * lattice_size[2] * 4;
   direction = 0;
   for (int i = 0; i < 4; i++) {
     coordinate[i] = 0;
@@ -35,6 +39,10 @@ link1::link1(const link1 &link) {
   lattice_size[2] = link.lattice_size[2];
   lattice_size[3] = link.lattice_size[3];
   direction = link.direction;
+  multiplier[0] = 4;
+  multiplier[1] = lattice_size[0] * 4;
+  multiplier[2] = lattice_size[0] * lattice_size[1] * 4;
+  multiplier[3] = lattice_size[0] * lattice_size[1] * lattice_size[2] * 4;
   for (int i = 0; i < 4; i++) {
     coordinate[i] = link.coordinate[i];
     coordinate_old[i] = link.coordinate_old[i];
@@ -48,6 +56,10 @@ link1::link1() {
   lattice_size[2] = z_size;
   lattice_size[3] = t_size;
   direction = 0;
+  multiplier[0] = 4;
+  multiplier[1] = lattice_size[0] * 4;
+  multiplier[2] = lattice_size[0] * lattice_size[1] * 4;
+  multiplier[3] = lattice_size[0] * lattice_size[1] * lattice_size[2] * 4;
   for (int i = 0; i < 4; i++) {
     coordinate[i] = 0;
     coordinate_old[i] = 0;

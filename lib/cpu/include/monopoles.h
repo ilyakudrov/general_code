@@ -14,6 +14,7 @@ std::vector<FLOAT> read_angles_double_fortran(std::string &file_path);
 std::vector<FLOAT> read_float_fortran_convet_abelian(std::string &file_path);
 std::vector<FLOAT> read_double_fortran_convet_abelian(std::string &file_path);
 std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path);
+std::vector<FLOAT> read_inverse_laplacian(std::string &file_path);
 
 int find_current(link1 &link, std::vector<FLOAT> &J);
 
@@ -23,6 +24,9 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
 void find_cluster(loop *ll, std::vector<FLOAT> &J);
 
 std::vector<loop *> calculate_clusters(std::vector<FLOAT> &J);
+
+std::vector<FLOAT> make_monopole_angles(std::vector<FLOAT> &angles,
+                                        std::vector<FLOAT> &laplace);
 
 std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles);
 
