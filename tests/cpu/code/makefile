@@ -5,7 +5,7 @@ GCC=g++
 FLAGS=-O3 -march=native -mtune=native -ffast-math
 C_PATH=../../../lib/cpu/src/c-lime
 C_FILES=$(C_PATH)/lime_fseeko.c  $(C_PATH)/lime_header.c  $(C_PATH)/lime_reader.c  $(C_PATH)/lime_utils.c  $(C_PATH)/lime_writer.c
-OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/result.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/abelian_projection_su3.o
+OBJFILES=$(OBJ_PATH)/link.o $(OBJ_PATH)/data.o $(OBJ_PATH)/basic_observables.o $(OBJ_PATH)/flux_tube.o $(OBJ_PATH)/matrix.o $(OBJ_PATH)/smearing.o $(OBJ_PATH)/monopoles.o $(OBJ_PATH)/loop.o $(OBJ_PATH)/eigen.o $(OBJ_PATH)/abelian_projection_su3.o
 test_general: $(OBJ_PATH)/test_general.o $(OBJFILES)
 	$(GCC) $(OBJ_PATH)/test_general.o $(OBJFILES) $(C_FILES) -o test_general
 test_smearing: $(OBJ_PATH)/test_smearing.o $(OBJFILES)
@@ -38,8 +38,6 @@ $(OBJ_PATH)/basic_observables.o: $(SRC_PATH)/basic_observables.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/basic_observables.cpp -o $(OBJ_PATH)/basic_observables.o
 $(OBJ_PATH)/flux_tube.o: $(SRC_PATH)/flux_tube.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/flux_tube.cpp -o $(OBJ_PATH)/flux_tube.o
-$(OBJ_PATH)/result.o: $(SRC_PATH)/result.cpp
-	$(GCC) $(FLAGS) -c $(SRC_PATH)/result.cpp -o $(OBJ_PATH)/result.o
 $(OBJ_PATH)/matrix.o: $(SRC_PATH)/matrix.cpp
 	$(GCC) $(FLAGS) -c $(SRC_PATH)/matrix.cpp -o $(OBJ_PATH)/matrix.o
 $(OBJ_PATH)/smearing.o: $(SRC_PATH)/smearing.cpp

@@ -3,7 +3,6 @@
 #include "data.h"
 #include "link.h"
 #include "matrix.h"
-#include "result.h"
 
 // Wilson_plaket_schwinger_correlator
 template <class T>

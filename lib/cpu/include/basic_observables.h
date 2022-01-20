@@ -3,7 +3,6 @@
 #include "data.h"
 #include "link.h"
 #include "matrix.h"
-#include "result.h"
 #include <map>
 #include <unordered_map>
 

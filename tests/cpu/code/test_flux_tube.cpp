@@ -3,7 +3,6 @@
 #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/result.h"
 
 #include <cstdlib>
 #include <cstring>

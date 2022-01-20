@@ -5,7 +5,6 @@
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/monopoles.h"
-#include "../../../lib/cpu/include/result.h"
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>

@@ -71,51 +71,49 @@
 #include "../include/basic_observables.h"
 #include "../include/flux_tube.h"
 #include "../include/link.h"
+#include <numeric>
 
 template <class T> double plaket_time(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result res(0);
-  double aver[2];
+  std::vector<double> plaket;
+  plaket.reserve(x_size * y_size * z_size * t_size * 3);
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    res.array.push_back(link.plaket_mu(array, 3).tr());
+    plaket.push_back(link.plaket_mu(array, 3).tr());
     SPACE_ITER_END;
   }
-  res.average(aver);
-  return aver[0];
+  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
 }
 
 template <class T> double plaket_space(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result res(0);
-  double aver[2];
+  std::vector<double> plaket;
+  plaket.reserve(x_size * y_size * z_size * t_size * 3);
   SPACE_ITER_START;
   for (int mu = 0; mu < 3; mu++) {
     for (int nu = mu + 1; nu < 3; nu++) {
       link.move_dir(nu);
-      res.array.push_back(link.plaket_mu(array, mu).tr());
+      plaket.push_back(link.plaket_mu(array, mu).tr());
     }
   }
   SPACE_ITER_END;
-  res.average(aver);
-  return aver[0];
+  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
 }
 
 template <class T> double plaket(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result res(DATA_SIZE / 4 * 6);
-  double aver[2];
+  std::vector<double> plaket;
+  plaket.reserve(x_size * y_size * z_size * t_size * 6);
   SPACE_ITER_START;
   for (int mu = 0; mu < 4; mu++) {
     for (int nu = mu + 1; nu < 4; nu++) {
       link.move_dir(nu);
-      res.array.push_back(link.plaket_mu(array, mu).tr());
+      plaket.push_back(link.plaket_mu(array, mu).tr());
     }
   }
   SPACE_ITER_END;
-  res.average(aver);
-  return aver[0];
+  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
 }
 
 // fast wilson_loop
@@ -395,10 +393,10 @@ wilson_offaxis(const std::vector<T> &array,
     pattern = make_offaxis_pattern(direction);
 
     // wilson loops for one direction
-    std::vector<std::vector<result>> wilson_tmp(
+    std::vector<std::vector<std::vector<double>>> wilson_tmp(
         round(r_max / length_initial - 0.5) -
             round(r_min / length_initial + 0.5) + 1,
-        std::vector<result>(time_max - time_min + 1));
+        std::vector<std::vector<double>>(time_max - time_min + 1));
 
     // generate all reflections of the pattern
     std::vector<std::vector<int>> reflections;
@@ -472,7 +470,7 @@ wilson_offaxis(const std::vector<T> &array,
 
             wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
                       [time - time_min]
-                          .array.push_back(calculate_wilson_loop_offaxis(
+                          .push_back(calculate_wilson_loop_offaxis(
                               time_lines[time - time_min], time, space_lines,
                               direction_prolonged));
           }
@@ -480,7 +478,6 @@ wilson_offaxis(const std::vector<T> &array,
       }
     }
     // push back the result
-    double aver[2];
     wilson_result result;
     for (int length_multiplier = round(r_min / length_initial + 0.5);
          length_multiplier <= round(r_max / length_initial - 0.5);
@@ -488,14 +485,23 @@ wilson_offaxis(const std::vector<T> &array,
 
       for (int time = time_min; time <= time_max; time++) {
 
-        wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
-                  [time - time_min]
-                      .average(aver);
         result.statistics_size =
             wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
                       [time - time_min]
-                          .array.size();
-        result.wilson_loop = aver[0];
+                          .size();
+        result.wilson_loop =
+            accumulate(
+                wilson_tmp[length_multiplier -
+                           round(r_min / length_initial + 0.5)][time - time_min]
+                    .cbegin(),
+                wilson_tmp[length_multiplier -
+                           round(r_min / length_initial + 0.5)][time - time_min]
+                    .cend(),
+                0.0) /
+            wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
+                      [time - time_min]
+                          .size();
+        ;
         result.time_size = time;
         result.space_size = length_initial * length_multiplier;
 
@@ -765,14 +771,14 @@ std::vector<int> make_offaxis_pattern(const std::vector<int> &line_direction) {
 
 template <class T> double polyakov(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  result res(0);
-  double aver[2];
+  std::vector<double> polyakov_loop;
+  polyakov_loop.reserve(x_size * y_size * z_size * t_size);
   link.move_dir(3);
   SPACE_ITER_START;
-  res.array.push_back(link.polyakov_loop(array).tr());
+  polyakov_loop.push_back(link.polyakov_loop(array).tr());
   SPACE_ITER_END;
-  res.average(aver);
-  return aver[0];
+  return accumulate(polyakov_loop.cbegin(), polyakov_loop.cend(), 0.0) /
+         polyakov_loop.size();
 }
 
 template <class T>

@@ -3,7 +3,6 @@
 #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/result.h"
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
@@ -109,13 +108,12 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   start_time = clock();
-  std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) << std::endl;
+  std::cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array)
             << std::endl;
-  std::cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array)
             << std::endl;
-  std::cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array) / 2
-            << std::endl;
-  std::cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array) / 2
+  std::cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array)
             << std::endl;
   end_time = clock();
   search_time = end_time - start_time;
@@ -139,8 +137,7 @@ int main(int argc, char *argv[]) {
   for (int T = T_min; T <= T_max; T++) {
     for (int R = R_min; R <= R_max; R++) {
       std::cout << "T = " << T << " R = " << R << " "
-                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)] /
-                       2
+                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)]
                 << std::endl;
     }
   }
