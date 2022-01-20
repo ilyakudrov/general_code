@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
             << std::endl;
 
   start_time = clock();
-  std::vector<FLOAT> magnetic = wilson_plaket_correlator_magnetic(
+  std::map<int, FLOAT> magnetic = wilson_plaket_correlator_magnetic(
       wilson_vec, plaket_space_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
@@ -116,8 +116,8 @@ int main(int argc, char *argv[]) {
               << " " << it->second << std::endl;
   }
   std::cout << std::endl;
-  for (int i = 0; i < magnetic.size(); i++) {
-    std::cout << "magnetic R = " << R << " T= " << T << " d " << i + d_min
-              << " " << magnetic[i] << std::endl;
+  for (auto it = magnetic.begin(); it != magnetic.end(); ++it) {
+    std::cout << "magnetic R = " << R << " T= " << T << " d " << it->first
+              << " " << it->second << std::endl;
   }
 }

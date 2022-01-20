@@ -53,17 +53,15 @@ std::map<int, FLOAT>
 wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max);
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
                                     const std::vector<FLOAT> &plaket_tr, int r,
-                                    int time, int x_trans_min, int x_trans_max,
-                                    int d);
-std::vector<FLOAT>
+                                    int time, int x_trans_max, int d);
+std::map<int, FLOAT>
 wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max);
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
                                     const std::vector<FLOAT> &plaket_tr, int r,
-                                    int time, int x_trans_min, int x_trans_max,
-                                    int d);
+                                    int time, int x_trans_max, int d);

@@ -362,7 +362,7 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::map<int, FLOAT> correlator;
+  std::vector<FLOAT> correlator(d_max - d_min + 1, 0.0);
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
@@ -373,7 +373,7 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
       if (x_trans == 0) {
         for (int mu = 0; mu < 3; mu++) {
           link.move_dir(mu);
-          correlator[d] += a * plaket4_time(plaket_tr, link);
+          correlator[d - d_min] += a * plaket4_time(plaket_tr, link);
         }
       } else {
         for (int nu = 0; nu < 3; nu++) {
@@ -381,7 +381,7 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
             link.move(nu, x_trans);
             for (int mu = 0; mu < 3; mu++) {
               link.move_dir(mu);
-              correlator[d] += a * plaket4_time(plaket_tr, link);
+              correlator[d - d_min] += a * plaket4_time(plaket_tr, link);
             }
             link.move(nu, -2 * x_trans);
             for (int mu = 0; mu < 3; mu++) {
@@ -401,21 +401,19 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
     count = data_size / 4 * 9;
   else
     count = data_size / 4 * 36;
-  for (auto it = correlator.begin(); it != correlator.end(); ++it) {
-    it->second = it->second / count;
+  std::map<int, FLOAT> result;
+  for (int i = 0; i < correlator.size(); i++) {
+    result[i + d_min] = correlator[i] / count;
   }
-  return correlator;
+  return result;
 }
 
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
                                     const std::vector<FLOAT> &plaket_tr, int r,
-                                    int time, int x_trans_min, int x_trans_max,
-                                    int d) {
+                                    int time, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
-  FLOAT vec[x_trans_max - x_trans_min + 1];
-  std::vector<FLOAT> final(0);
-  FLOAT aver[2];
+  std::vector<FLOAT> correlator(x_trans_max + 1, 0.0);
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
@@ -424,12 +422,23 @@ wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
     link.move(dir, d);
     for (int nu = 0; nu < 3; nu++) {
       if (nu != dir) {
-        link.move(nu, x_trans_min - 1);
-        for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
+        link.move(nu, -x_trans_max);
+        for (int x_trans = x_trans_max; x_trans > 0; --x_trans) {
+          for (int mu = 0; mu < 3; mu++) {
+            link.move_dir(mu);
+            correlator[x_trans] += a * plaket4_time(plaket_tr, link);
+          }
+          link.move(nu, 1);
+        }
+        for (int mu = 0; mu < 3; mu++) {
+          link.move_dir(mu);
+          correlator[0] += a * plaket4_time(plaket_tr, link);
+        }
+        for (int x_trans = 1; x_trans <= x_trans_max; ++x_trans) {
           link.move(nu, 1);
           for (int mu = 0; mu < 3; mu++) {
             link.move_dir(mu);
-            vec[x_trans - x_trans_min] += a * plaket4_time(plaket_tr, link);
+            correlator[x_trans] += a * plaket4_time(plaket_tr, link);
           }
         }
         link.move(nu, -x_trans_max);
@@ -438,24 +447,21 @@ wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
     SPACE_ITER_END
   }
   int count;
-  count = data_size / 4 * 18;
-  for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
-    final.push_back(vec[x_trans - x_trans_min] / count);
+  count = x_size * y_size * z_size * t_size * 36;
+  std::map<int, FLOAT> result;
+  result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
+  for (int i = 1; i <= correlator.size(); i++) {
+    result[i] = correlator[i] / count;
   }
-  return final;
+  return result;
 }
 
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
                                   const std::vector<FLOAT> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
-  FLOAT vec[d_max - d_min + 1];
-  for (int i = 0; i < d_max - d_min + 1; i++) {
-    vec[i] = 0;
-  }
-  std::vector<FLOAT> final;
-  FLOAT aver[2];
+  std::vector<FLOAT> correlator(d_max - d_min + 1, 0.0);
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
@@ -468,7 +474,7 @@ wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
         for (int mu = 0; mu < 3; mu++) {
           for (int j = mu + 1; j < 3; j++) {
             link.move_dir(mu);
-            vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
+            correlator[d - d_min] += a * plaket4_space(plaket_tr, link, j);
           }
         }
       } else {
@@ -478,14 +484,14 @@ wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
             for (int mu = 0; mu < 3; mu++) {
               for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
-                vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
+                correlator[d - d_min] += a * plaket4_space(plaket_tr, link, j);
               }
             }
             link.move(nu, -2 * x_trans);
             for (int mu = 0; mu < 3; mu++) {
               for (int j = mu + 1; j < 3; j++) {
                 link.move_dir(mu);
-                vec[d - d_min] += a * plaket4_space(plaket_tr, link, j);
+                correlator[d - d_min] += a * plaket4_space(plaket_tr, link, j);
               }
             }
             link.move(nu, x_trans);
@@ -501,21 +507,19 @@ wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
     count = data_size / 4 * 9;
   else
     count = data_size / 4 * 36;
-  for (int d = d_min; d <= d_max; d++) {
-    final.push_back(vec[d - d_min] / count);
+  std::map<int, FLOAT> result;
+  for (int i = 0; i < correlator.size(); i++) {
+    result[i + d_min] = correlator[i] / count;
   }
-  return final;
+  return result;
 }
 
-std::vector<FLOAT>
+std::map<int, FLOAT>
 wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
                                     const std::vector<FLOAT> &plaket_tr, int R,
-                                    int T, int x_trans_min, int x_trans_max,
-                                    int d) {
+                                    int T, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
-  FLOAT vec[x_trans_max - x_trans_min + 1];
-  std::vector<FLOAT> final(0);
-  FLOAT aver[2];
+  std::vector<FLOAT> correlator(x_trans_max + 1, 0.0);
   FLOAT a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
@@ -524,14 +528,28 @@ wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
     link.move(dir, d);
     for (int nu = 0; nu < 3; nu++) {
       if (nu != dir) {
-        link.move(nu, x_trans_min - 1);
-        for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
+        link.move(nu, -x_trans_max);
+        for (int x_trans = x_trans_max; x_trans > 0; --x_trans) {
+          for (int mu = 0; mu < 3; mu++) {
+            for (int j = mu + 1; j < 3; j++) {
+              link.move_dir(mu);
+              correlator[x_trans] += a * plaket4_space(plaket_tr, link, j);
+            }
+          }
+          link.move(nu, 1);
+        }
+        for (int mu = 0; mu < 3; mu++) {
+          for (int j = mu + 1; j < 3; j++) {
+            link.move_dir(mu);
+            correlator[0] += a * plaket4_space(plaket_tr, link, j);
+          }
+        }
+        for (int x_trans = 1; x_trans <= x_trans_max; ++x_trans) {
           link.move(nu, 1);
           for (int mu = 0; mu < 3; mu++) {
             for (int j = mu + 1; j < 3; j++) {
               link.move_dir(mu);
-              vec[x_trans - x_trans_min] +=
-                  a * plaket4_space(plaket_tr, link, j);
+              correlator[x_trans] += a * plaket4_space(plaket_tr, link, j);
             }
           }
         }
@@ -541,11 +559,13 @@ wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
     SPACE_ITER_END
   }
   int count;
-  count = data_size / 4 * 18;
-  for (int x_trans = x_trans_min; x_trans <= x_trans_max; x_trans++) {
-    final.push_back(vec[x_trans - x_trans_min] / count);
+  count = x_size * y_size * z_size * t_size * 36;
+  std::map<int, FLOAT> result;
+  result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
+  for (int i = 1; i <= correlator.size(); i++) {
+    result[i] = correlator[i] / count;
   }
-  return final;
+  return result;
 }
 
 // su2
