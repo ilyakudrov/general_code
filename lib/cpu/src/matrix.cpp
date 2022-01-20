@@ -16,7 +16,7 @@ su2::su2(FLOAT b0, FLOAT b1, FLOAT b2, FLOAT b3) {
   a3 = b3;
 }
 
-FLOAT su2::tr() { return 2 * a0; }
+FLOAT su2::tr() { return a0; }
 
 su2 su2::inverse() {
   FLOAT rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
@@ -153,7 +153,7 @@ FLOAT su3_full::tr() {
   for (int i = 0; i < 3; i++) {
     tmp += matrix[i][i];
   }
-  return tmp.real();
+  return tmp.real() / 3;
 }
 
 su3_full su3_full::inverse() {
