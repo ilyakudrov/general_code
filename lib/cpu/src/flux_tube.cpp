@@ -187,7 +187,7 @@ calculate_wilson_loops_schwinger(const std::vector<T> &array, int r, int t) {
 }
 
 template <class T>
-std::map<int, FLOAT>
+std::map<int, double>
 wilson_plaket_schwinger_electric(const std::vector<T> &array,
                                  const std::vector<T> &plaket, int d_min,
                                  int d_max, int t, int r) {
@@ -196,7 +196,7 @@ wilson_plaket_schwinger_electric(const std::vector<T> &array,
 
   std::vector<std::vector<T>> wilson_loops =
       calculate_wilson_loops_schwinger(array, r, t);
-  std::map<int, FLOAT> result;
+  std::map<int, double> result;
   T A;
   for (int d = d_min; d <= d_max; d++) {
 
@@ -243,8 +243,8 @@ wilson_plaket_schwinger_electric(const std::vector<T> &array,
 }
 
 template <class T>
-std::vector<FLOAT> calculate_plaket_time_tr(const std::vector<T> &array) {
-  std::vector<FLOAT> vec(data_size / 4 * 3);
+std::vector<double> calculate_plaket_time_tr(const std::vector<T> &array) {
+  std::vector<double> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
@@ -256,8 +256,8 @@ std::vector<FLOAT> calculate_plaket_time_tr(const std::vector<T> &array) {
 }
 
 template <class T>
-std::vector<FLOAT> calculate_plaket_space_tr(const std::vector<T> &array) {
-  std::vector<FLOAT> vec(data_size / 4 * 3);
+std::vector<double> calculate_plaket_space_tr(const std::vector<T> &array) {
+  std::vector<double> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   int place_dir;
   SPACE_ITER_START;
@@ -271,8 +271,8 @@ std::vector<FLOAT> calculate_plaket_space_tr(const std::vector<T> &array) {
   return vec;
 }
 
-FLOAT plaket4_time(const std::vector<FLOAT> &plaket_tr, link1 &link) {
-  FLOAT a = plaket_tr[link.place / 4 * 3 + link.direction];
+double plaket4_time(const std::vector<double> &plaket_tr, link1 &link) {
+  double a = plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(link.direction, -1);
   a += plaket_tr[link.place / 4 * 3 + link.direction];
   link.move(3, -1);
@@ -283,8 +283,9 @@ FLOAT plaket4_time(const std::vector<FLOAT> &plaket_tr, link1 &link) {
   return a / 4;
 }
 
-FLOAT plaket4_space(const std::vector<FLOAT> &plaket_tr, link1 &link, int nu) {
-  FLOAT a = plaket_tr[link.place / 4 * 3 + link.direction + nu];
+double plaket4_space(const std::vector<double> &plaket_tr, link1 &link,
+                     int nu) {
+  double a = plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(link.direction, -1);
   a += plaket_tr[link.place / 4 * 3 + link.direction + nu];
   link.move(nu, -1);
@@ -296,9 +297,9 @@ FLOAT plaket4_space(const std::vector<FLOAT> &plaket_tr, link1 &link, int nu) {
 }
 
 template <class T>
-std::vector<FLOAT> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
-                                            int time) {
-  std::vector<FLOAT> vec(data_size / 4 * 3);
+std::vector<double> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
+                                             int time) {
+  std::vector<double> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
@@ -311,13 +312,13 @@ std::vector<FLOAT> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
 
 // calculate std::vector of wilson loop traces with particular time size
 // template <class T>
-// std::vector<std::vector<FLOAT>> calculate_wilson_loop_tr(const
+// std::vector<std::vector<double>> calculate_wilson_loop_tr(const
 // std::vector<T> &array,
 //                                                std::vector<int>
 //                                                space_sizes, int time_size)
 //                                                {
 //   link1 link(x_size, y_size, z_size, t_size);
-//   std::vector<std::vector<FLOAT>> wilson(space_sizes.size());
+//   std::vector<std::vector<double>> wilson(space_sizes.size());
 //   std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
 //   std::vector<T> space_lines;
 //   for (int i = time_min; i <= time_max; i++) {
@@ -357,13 +358,13 @@ std::vector<FLOAT> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
 //   return wilson;
 // }
 
-std::map<int, FLOAT>
-wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
-                                  const std::vector<FLOAT> &plaket_tr, int r,
+std::map<int, double>
+wilson_plaket_correlator_electric(const std::vector<double> &wilson_loop_tr,
+                                  const std::vector<double> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<FLOAT> correlator(d_max - d_min + 1, 0.0);
-  FLOAT a;
+  std::vector<double> correlator(d_max - d_min + 1, 0.0);
+  double a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     a = wilson_loop_tr[link.place / 4 * 3 + dir];
@@ -401,20 +402,20 @@ wilson_plaket_correlator_electric(const std::vector<FLOAT> &wilson_loop_tr,
     count = data_size / 4 * 9;
   else
     count = data_size / 4 * 36;
-  std::map<int, FLOAT> result;
+  std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i + d_min] = correlator[i] / count;
   }
   return result;
 }
 
-std::map<int, FLOAT>
-wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
-                                    const std::vector<FLOAT> &plaket_tr, int r,
+std::map<int, double>
+wilson_plaket_correlator_electric_x(const std::vector<double> &wilson_loop_tr,
+                                    const std::vector<double> &plaket_tr, int r,
                                     int time, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<FLOAT> correlator(x_trans_max + 1, 0.0);
-  FLOAT a;
+  std::vector<double> correlator(x_trans_max + 1, 0.0);
+  double a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     a = wilson_loop_tr[link.place / 4 * 3 + dir];
@@ -448,7 +449,7 @@ wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
   }
   int count;
   count = x_size * y_size * z_size * t_size * 36;
-  std::map<int, FLOAT> result;
+  std::map<int, double> result;
   result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
   for (int i = 1; i <= correlator.size(); i++) {
     result[i] = correlator[i] / count;
@@ -456,13 +457,13 @@ wilson_plaket_correlator_electric_x(const std::vector<FLOAT> &wilson_loop_tr,
   return result;
 }
 
-std::map<int, FLOAT>
-wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
-                                  const std::vector<FLOAT> &plaket_tr, int r,
+std::map<int, double>
+wilson_plaket_correlator_magnetic(const std::vector<double> &wilson_loop_tr,
+                                  const std::vector<double> &plaket_tr, int r,
                                   int time, int x_trans, int d_min, int d_max) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<FLOAT> correlator(d_max - d_min + 1, 0.0);
-  FLOAT a;
+  std::vector<double> correlator(d_max - d_min + 1, 0.0);
+  double a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     link.move_dir(dir);
@@ -507,20 +508,20 @@ wilson_plaket_correlator_magnetic(const std::vector<FLOAT> &wilson_loop_tr,
     count = data_size / 4 * 9;
   else
     count = data_size / 4 * 36;
-  std::map<int, FLOAT> result;
+  std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i + d_min] = correlator[i] / count;
   }
   return result;
 }
 
-std::map<int, FLOAT>
-wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
-                                    const std::vector<FLOAT> &plaket_tr, int R,
+std::map<int, double>
+wilson_plaket_correlator_magnetic_x(const std::vector<double> &wilson_loop_tr,
+                                    const std::vector<double> &plaket_tr, int R,
                                     int T, int x_trans_max, int d) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<FLOAT> correlator(x_trans_max + 1, 0.0);
-  FLOAT a;
+  std::vector<double> correlator(x_trans_max + 1, 0.0);
+  double a;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     a = wilson_loop_tr[link.place / 4 * 3 + dir];
@@ -560,7 +561,7 @@ wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
   }
   int count;
   count = x_size * y_size * z_size * t_size * 36;
-  std::map<int, FLOAT> result;
+  std::map<int, double> result;
   result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
   for (int i = 1; i <= correlator.size(); i++) {
     result[i] = correlator[i] / count;
@@ -570,7 +571,7 @@ wilson_plaket_correlator_magnetic_x(const std::vector<FLOAT> &wilson_loop_tr,
 
 // su2
 
-template std::map<int, FLOAT>
+template std::map<int, double>
 wilson_plaket_schwinger_electric(const std::vector<su2> &array,
                                  const std::vector<su2> &plaket, int d_min,
                                  int d_max, int t, int r);
@@ -582,20 +583,20 @@ template std::vector<su2>
 calculate_schwinger_lines_short(const std::vector<su2> &array, int d);
 template std::vector<std::vector<su2>>
 calculate_schwinger_line(const std::vector<su2> &array, int d, int x_trans);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_plaket_time_tr(const std::vector<su2> &array);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_plaket_space_tr(const std::vector<su2> &array);
 template std::vector<su2>
 calculate_polyakov_loop(const std::vector<su2> &array);
 template std::vector<su2> calculate_wilson_loop(const std::vector<su2> &array,
                                                 int r, int time);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_wilson_loop_tr(const std::vector<su2> &array, int r, int time);
 
 // abelian
 
-template std::map<int, FLOAT>
+template std::map<int, double>
 wilson_plaket_schwinger_electric(const std::vector<abelian> &array,
                                  const std::vector<abelian> &plaket, int d_min,
                                  int d_max, int t, int r);
@@ -607,13 +608,13 @@ template std::vector<std::vector<abelian>>
 calculate_schwinger_line(const std::vector<abelian> &array, int d, int x_trans);
 template std::vector<abelian>
 calculate_schwinger_lines_short(const std::vector<abelian> &array, int d);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_plaket_time_tr(const std::vector<abelian> &array);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_plaket_space_tr(const std::vector<abelian> &array);
 template std::vector<abelian>
 calculate_polyakov_loop(const std::vector<abelian> &array);
 template std::vector<abelian>
 calculate_wilson_loop(const std::vector<abelian> &array, int r, int time);
-template std::vector<FLOAT>
+template std::vector<double>
 calculate_wilson_loop_tr(const std::vector<abelian> &array, int r, int time);

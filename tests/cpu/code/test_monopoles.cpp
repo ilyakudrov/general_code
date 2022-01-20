@@ -47,16 +47,17 @@ int main(int argc, char *argv[]) {
   // "../../confs/decomposed/monopoless/qc2dstag/40^4/"
   //                            "mu0.05/s0/conf_monopoless_0201";
 
-  std::vector<FLOAT> angles = read_double_qc2dstag_convet_abelian(path_abelian);
-  // std::vector<FLOAT> angles
-  // = read_angles_float_fortran(path_abelian); std::vector<FLOAT> angles =
+  std::vector<double> angles =
+      read_double_qc2dstag_convet_abelian(path_abelian);
+  // std::vector<double> angles
+  // = read_angles_float_fortran(path_abelian); std::vector<double> angles =
   // read_double_qc2dstag_convet_abelian(path_abelian);
-  // std::vector<FLOAT> angles = read_angles_double_fortran(path_abelian);
-  // std::vector<FLOAT> angles =
-  // read_float_fortran_convet_abelian(path_abelian); std::vector<FLOAT> angles
+  // std::vector<double> angles = read_angles_double_fortran(path_abelian);
+  // std::vector<double> angles =
+  // read_float_fortran_convet_abelian(path_abelian); std::vector<double> angles
   // = read_double_fortran_convet_abelian(path_abelian);
 
-  std::vector<FLOAT> J = calculate_current(angles);
+  std::vector<double> J = calculate_current(angles);
   std::vector<loop *> LL = calculate_clusters(J);
 
   std::cout << "number of clusters " << LL.size() << std::endl;

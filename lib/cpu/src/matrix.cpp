@@ -9,23 +9,23 @@ su2::su2() {
   a3 = 0;
 }
 
-su2::su2(FLOAT b0, FLOAT b1, FLOAT b2, FLOAT b3) {
+su2::su2(double b0, double b1, double b2, double b3) {
   a0 = b0;
   a1 = b1;
   a2 = b2;
   a3 = b3;
 }
 
-FLOAT su2::tr() { return a0; }
+double su2::tr() { return a0; }
 
 su2 su2::inverse() {
-  FLOAT rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
+  double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   return su2(a0 / rho, -a1 / rho, -a2 / rho, -a3 / rho);
 }
-FLOAT su2::module() { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
+double su2::module() { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
 su2 su2::conj() const { return su2(a0, -a1, -a2, -a3); }
 su2 su2::proj() {
-  FLOAT rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
+  double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   return su2(a0 / powf(rho, 0.5), a1 / powf(rho, 0.5), a2 / powf(rho, 0.5),
              a3 / powf(rho, 0.5));
 }
@@ -37,10 +37,10 @@ su2 operator+(const su2 &A, const su2 &B) {
 su2 operator-(const su2 &A, const su2 &B) {
   return su2(A.a0 - B.a0, A.a1 - B.a1, A.a2 - B.a2, A.a3 - B.a3);
 };
-su2 operator*(const FLOAT &x, const su2 &A) {
+su2 operator*(const double &x, const su2 &A) {
   return su2(A.a0 * x, A.a1 * x, A.a2 * x, A.a3 * x);
 };
-su2 operator*(const su2 &A, const FLOAT &x) {
+su2 operator*(const su2 &A, const double &x) {
   return su2(A.a0 * x, A.a1 * x, A.a2 * x, A.a3 * x);
 };
 
@@ -77,15 +77,15 @@ abelian::abelian() {
   phi = 0;
 }
 
-abelian::abelian(FLOAT r1, FLOAT phi1) {
+abelian::abelian(double r1, double phi1) {
   r = r1;
   phi = phi1;
 }
 
-FLOAT abelian::tr() { return cos(phi); }
+double abelian::tr() { return cos(phi); }
 
 abelian abelian::inverse() { return abelian(1 / r, -phi); }
-FLOAT abelian::module() { return r; }
+double abelian::module() { return r; }
 abelian abelian::conj() const { return abelian(r, -phi); }
 abelian abelian::proj() { return abelian(1, phi); }
 
@@ -105,10 +105,10 @@ abelian operator-(const abelian &A, const abelian &B) {
                  atan2(A.r * sin(A.phi) - B.r * sin(B.phi),
                        A.r * cos(A.phi) - B.r * cos(B.phi)));
 };
-abelian operator*(const FLOAT &x, const abelian &A) {
+abelian operator*(const double &x, const abelian &A) {
   return abelian(A.r * x, A.phi);
 };
-abelian operator*(const abelian &A, const FLOAT &x) {
+abelian operator*(const abelian &A, const double &x) {
   return abelian(A.r * x, A.phi);
 };
 
@@ -140,7 +140,7 @@ su3_full::su3_full() {
   }
 }
 
-su3_full::su3_full(std::complex<FLOAT> B[3][3]) {
+su3_full::su3_full(std::complex<double> B[3][3]) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       matrix[i][j] = B[i][j];
@@ -148,8 +148,8 @@ su3_full::su3_full(std::complex<FLOAT> B[3][3]) {
   }
 }
 
-FLOAT su3_full::tr() {
-  std::complex<FLOAT> tmp = 0;
+double su3_full::tr() {
+  std::complex<double> tmp = 0;
   for (int i = 0; i < 3; i++) {
     tmp += matrix[i][i];
   }
@@ -166,32 +166,32 @@ su3_full su3_full::inverse() {
   return B;
 }
 
-std::complex<FLOAT> determinant_part(std::complex<FLOAT> B[3][3], int i, int j,
-                                     int k) {
+std::complex<double> determinant_part(std::complex<double> B[3][3], int i,
+                                      int j, int k) {
   return B[0][i] * (B[1][j] * B[2][k] - B[2][j] * B[1][k]);
 }
 
-FLOAT su3_full::module() {
-  std::complex<FLOAT> determinant;
+double su3_full::module() {
+  std::complex<double> determinant;
   determinant = determinant_part(matrix, 0, 1, 2);
   determinant -= determinant_part(matrix, 1, 0, 2);
   determinant += determinant_part(matrix, 2, 0, 1);
   return determinant.real();
 }
 
-std::complex<FLOAT> su3_full::determinant() {
-  std::complex<FLOAT> determinant;
+std::complex<double> su3_full::determinant() {
+  std::complex<double> determinant;
   determinant = determinant_part(matrix, 0, 1, 2);
   determinant -= determinant_part(matrix, 1, 0, 2);
   determinant += determinant_part(matrix, 2, 0, 1);
   return determinant;
 }
 
-std::complex<FLOAT> su3_full::unitarity_check() {
+std::complex<double> su3_full::unitarity_check() {
   su3_full A = this->conj();
   A = A * this;
 
-  std::complex<FLOAT> diagonal = 0, non_diagonal = 0;
+  std::complex<double> diagonal = 0, non_diagonal = 0;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       if (i == j)
@@ -217,7 +217,7 @@ su3_full su3_full::proj() { return su3_full(); }
 
 su3_full operator+(const su3_full &A, const su3_full &B) {
   su3_full C;
-  std::complex<FLOAT> a;
+  std::complex<double> a;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       C.matrix[i][j] = A.matrix[i][j] + B.matrix[i][j];
@@ -234,7 +234,7 @@ su3_full operator-(const su3_full &A, const su3_full &B) {
   }
   return C;
 };
-su3_full operator*(const FLOAT &x, const su3_full &A) {
+su3_full operator*(const double &x, const su3_full &A) {
   su3_full C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -243,7 +243,7 @@ su3_full operator*(const FLOAT &x, const su3_full &A) {
   }
   return C;
 };
-su3_full operator*(const su3_full &A, const FLOAT &x) {
+su3_full operator*(const su3_full &A, const double &x) {
   su3_full C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -255,7 +255,7 @@ su3_full operator*(const su3_full &A, const FLOAT &x) {
 
 su3_full operator*(const su3_full &A, const su3_full &B) {
   su3_full C;
-  std::complex<FLOAT> a;
+  std::complex<double> a;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       a = 0;
@@ -270,7 +270,7 @@ su3_full operator*(const su3_full &A, const su3_full &B) {
 
 su3_full operator*(const su3_full &A, const su3_full *B) {
   su3_full C;
-  std::complex<FLOAT> a;
+  std::complex<double> a;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       a = 0;
@@ -285,7 +285,7 @@ su3_full operator*(const su3_full &A, const su3_full *B) {
 
 su3_full operator^(const su3_full &A, const su3_full *B) {
   su3_full C;
-  std::complex<FLOAT> a;
+  std::complex<double> a;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       a = 0;

@@ -36,24 +36,24 @@
       (y)*x_size * 4 + (x)*4
 
 // read configuration of angles
-std::vector<FLOAT> read_angles_float_fortran(std::string &file_path) {
+std::vector<double> read_angles_float_fortran(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::vector<FLOAT> angles;
+  std::vector<double> angles;
   angles.reserve(data_size1);
   std::ifstream stream(file_path);
   std::vector<float> v(data_size1 + 2);
   if (!stream.read((char *)&v[0], (data_size1 + 2) * sizeof(float)))
     std::cout << "read_angles_float_fortran error: " << file_path << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    angles.push_back((FLOAT)v[i + 1]);
+    angles.push_back((double)v[i + 1]);
   }
   stream.close();
   return angles;
 }
 
-std::vector<FLOAT> read_angles_double_fortran(std::string &file_path) {
+std::vector<double> read_angles_double_fortran(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::vector<FLOAT> angles;
+  std::vector<double> angles;
   angles.reserve(data_size1);
   std::ifstream stream(file_path);
   std::vector<double> v(data_size1);
@@ -61,16 +61,16 @@ std::vector<FLOAT> read_angles_double_fortran(std::string &file_path) {
   if (!stream.read((char *)&v[0], (data_size1) * sizeof(double)))
     std::cout << "read_angles_double_fortran error: " << file_path << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    angles.push_back((FLOAT)v[i]);
+    angles.push_back((double)v[i]);
   }
   stream.close();
   return angles;
 }
 
 // read configuration of su2 matrices and extract abelian degrees of freedom
-std::vector<FLOAT> read_float_fortran_convet_abelian(std::string &file_path) {
+std::vector<double> read_float_fortran_convet_abelian(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::vector<FLOAT> angles;
+  std::vector<double> angles;
   angles.reserve(data_size1 * 4);
   std::ifstream stream(file_path);
   std::vector<float> v(data_size1 * 4 + 1);
@@ -78,15 +78,15 @@ std::vector<FLOAT> read_float_fortran_convet_abelian(std::string &file_path) {
     std::cout << "read_float_convert_abelian<abelian> error: " << file_path
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    angles.push_back((FLOAT)atan2(v[i * 4 + 4], v[i * 4 + 1]));
+    angles.push_back((double)atan2(v[i * 4 + 4], v[i * 4 + 1]));
   }
   stream.close();
   return angles;
 }
 
-std::vector<FLOAT> read_double_fortran_convet_abelian(std::string &file_path) {
+std::vector<double> read_double_fortran_convet_abelian(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::vector<FLOAT> angles;
+  std::vector<double> angles;
   angles.reserve(data_size1 * 4);
   std::ifstream stream(file_path);
   std::vector<double> v(data_size1 * 4);
@@ -95,15 +95,16 @@ std::vector<FLOAT> read_double_fortran_convet_abelian(std::string &file_path) {
     std::cout << "read_float_convert_abelian<abelian> error: " << file_path
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    angles.push_back((FLOAT)atan2(v[i * 4 + 3], v[i * 4]));
+    angles.push_back((double)atan2(v[i * 4 + 3], v[i * 4]));
   }
   stream.close();
   return angles;
 }
 
-std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path) {
+std::vector<double>
+read_double_qc2dstag_convet_abelian(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::vector<FLOAT> angles;
+  std::vector<double> angles;
   angles.reserve(data_size1 * 4);
   std::ifstream stream(file_path);
   std::vector<double> v(data_size1 * 4);
@@ -117,17 +118,17 @@ std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path) {
       dir = 1;
     else
       dir = dir1 + 1;
-    angles.push_back((FLOAT)atan2(v[PLACE_QC2DSTAG + 3], v[PLACE_QC2DSTAG]));
+    angles.push_back((double)atan2(v[PLACE_QC2DSTAG + 3], v[PLACE_QC2DSTAG]));
   }
   SPACE_ITER_END_SIMPLE
   stream.close();
   return angles;
 }
 
-std::vector<FLOAT> read_inverse_laplacian(std::string &file_path) {
+std::vector<double> read_inverse_laplacian(std::string &file_path) {
   int data_size =
       (x_size / 2 + 1) * (y_size / 2 + 1) * (z_size / 2 + 1) * (t_size / 2 + 1);
-  std::vector<FLOAT> laplace(data_size);
+  std::vector<double> laplace(data_size);
   std::vector<double> v(data_size);
   std::ifstream stream(file_path);
   stream.ignore(4);
@@ -156,10 +157,10 @@ std::vector<FLOAT> read_inverse_laplacian(std::string &file_path) {
 }
 
 // calculate monopole_plaketes on the lattice
-std::vector<std::vector<FLOAT>>
-calculate_monopole_plaket(std::vector<FLOAT> &angles) {
+std::vector<std::vector<double>>
+calculate_monopole_plaket(std::vector<double> &angles) {
   int data_size = x_size * y_size * z_size * t_size;
-  std::vector<std::vector<FLOAT>> plakets(6, std::vector<FLOAT>(data_size));
+  std::vector<std::vector<double>> plakets(6, std::vector<double>(data_size));
   link1 link(x_size, y_size, z_size, t_size);
 
   int count = 0;
@@ -179,8 +180,8 @@ calculate_monopole_plaket(std::vector<FLOAT> &angles) {
   return plakets;
 }
 
-double get_monopole_angle(std::vector<std::vector<FLOAT>> &monopole_plaket,
-                          link1 &link_tmp, std::vector<FLOAT> &laplace,
+double get_monopole_angle(std::vector<std::vector<double>> &monopole_plaket,
+                          link1 &link_tmp, std::vector<double> &laplace,
                           int mu) {
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -231,14 +232,14 @@ double get_monopole_angle(std::vector<std::vector<FLOAT>> &monopole_plaket,
   return monopole_angle;
 }
 
-std::vector<FLOAT> make_monopole_angles(std::vector<FLOAT> &angles,
-                                        std::vector<FLOAT> &laplace) {
+std::vector<double> make_monopole_angles(std::vector<double> &angles,
+                                         std::vector<double> &laplace) {
 
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<std::vector<FLOAT>> monopole_plaket =
+  std::vector<std::vector<double>> monopole_plaket =
       calculate_monopole_plaket(angles);
 
-  std::vector<FLOAT> monopole_angles(4 * x_size * y_size * z_size * t_size);
+  std::vector<double> monopole_angles(4 * x_size * y_size * z_size * t_size);
 
   SPACE_ITER_START
 
@@ -253,13 +254,13 @@ std::vector<FLOAT> make_monopole_angles(std::vector<FLOAT> &angles,
   return monopole_angles;
 }
 
-std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles) {
+std::vector<double> calculate_current(std::vector<double> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   link1 link(x_size, y_size, z_size, t_size);
 
-  std::vector<FLOAT> J(data_size);
+  std::vector<double> J(data_size);
 
-  std::vector<std::vector<FLOAT>> monopole_plaket =
+  std::vector<std::vector<double>> monopole_plaket =
       calculate_monopole_plaket(angles);
 
   SPACE_ITER_START
@@ -271,7 +272,7 @@ std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles) {
   return J;
 }
 
-int find_current(link1 &link, std::vector<FLOAT> &J) {
+int find_current(link1 &link, std::vector<double> &J) {
   for (int mu = 0; mu < 4; mu++) {
     if ((J[link.place + mu] > 0.3) || (J[link.place + mu] < -0.3))
       return mu + 1;
@@ -287,7 +288,7 @@ int find_current(link1 &link, std::vector<FLOAT> &J) {
 
 // find all directions with current and add loops with that neighbours
 std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
-                               std::vector<FLOAT> &J) {
+                               std::vector<double> &J) {
   // std::vector for new sites with current
   std::vector<loop *> neighbours_new;
   loop *loop_tmp;
@@ -332,7 +333,7 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
 }
 
 // find cluster which has site ll
-void find_cluster(loop *ll, std::vector<FLOAT> &J) {
+void find_cluster(loop *ll, std::vector<double> &J) {
   std::vector<loop *> neighbours = {ll};
 
   // while find_path finds new sites with current
@@ -343,7 +344,7 @@ void find_cluster(loop *ll, std::vector<FLOAT> &J) {
 }
 
 // find all clusters on a lattice not using recurrence
-std::vector<loop *> calculate_clusters(std::vector<FLOAT> &J) {
+std::vector<loop *> calculate_clusters(std::vector<double> &J) {
   int dir1;
 
   std::vector<loop *> LL;

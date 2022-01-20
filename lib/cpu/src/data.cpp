@@ -47,10 +47,10 @@ template <> void data<su2>::read_float(std::string &file_name) {
     std::cout << "read_float<su2> error: " << file_name << std::endl;
   su2 A;
   for (int i = 0; i < data_size1; i++) {
-    A.a0 = (FLOAT)v[i * 4];
-    A.a1 = (FLOAT)v[i * 4 + 1];
-    A.a2 = (FLOAT)v[i * 4 + 2];
-    A.a3 = (FLOAT)v[i * 4 + 3];
+    A.a0 = (double)v[i * 4];
+    A.a1 = (double)v[i * 4 + 1];
+    A.a2 = (double)v[i * 4 + 2];
+    A.a3 = (double)v[i * 4 + 3];
     array.push_back(A);
   }
   stream.close();
@@ -83,10 +83,10 @@ void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
                z * x_size * y_size) +
           mu;
     }
-    A.a0 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4];
-    A.a3 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 1];
-    A.a2 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 2];
-    A.a1 = (FLOAT)array_ml5[data_size1 * 4 * conf_num + i * 4 + 3];
+    A.a0 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4];
+    A.a3 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 1];
+    A.a2 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 2];
+    A.a1 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 3];
     array.push_back(A);
   }
   SPACE_ITER_END
@@ -100,7 +100,7 @@ template <> void data<abelian>::read_float(std::string &file_name) {
   if (!stream.read((char *)&v[0], data_size1 * sizeof(float)))
     std::cout << "read_float<abelian> error: " << file_name << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)v[i]));
+    array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
@@ -116,10 +116,10 @@ void data<su2>::read_float_fortran(std::string &file_name, int bites_skip) {
     std::cout << "read_float_fortran<su2> error: " << file_name << std::endl;
   su2 A;
   for (int i = 0; i < data_size1; i++) {
-    A.a0 = (FLOAT)v[i * 4];
-    A.a1 = (FLOAT)v[i * 4 + 1];
-    A.a2 = (FLOAT)v[i * 4 + 2];
-    A.a3 = (FLOAT)v[i * 4 + 3];
+    A.a0 = (double)v[i * 4];
+    A.a1 = (double)v[i * 4 + 1];
+    A.a2 = (double)v[i * 4 + 2];
+    A.a3 = (double)v[i * 4 + 3];
     array.push_back(A);
   }
   stream.close();
@@ -136,7 +136,7 @@ void data<abelian>::read_float_fortran(std::string &file_name, int bites_skip) {
     std::cout << "read_float_fortran<abelian> error: " << file_name
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)v[i]));
+    array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
@@ -151,7 +151,7 @@ void data<abelian>::read_float_fortran_convert_abelian(std::string &file_name) {
     std::cout << "read_float_fortran_convert_abelian<abelian> error: "
               << file_name << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)atan2(v[i * 4 + 4], v[i * 4 + 1])));
+    array.push_back(abelian(1, (double)atan2(v[i * 4 + 4], v[i * 4 + 1])));
   }
   stream.close();
 }
@@ -166,7 +166,7 @@ void data<abelian>::read_float_convert_abelian(std::string &file_name) {
     std::cout << "read_float_convert_abelian<abelian> error: " << file_name
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)atan2(v[i * 4 + 3], v[i * 4 + 0])));
+    array.push_back(abelian(1, (double)atan2(v[i * 4 + 3], v[i * 4 + 0])));
   }
   stream.close();
 }
@@ -180,10 +180,10 @@ template <> void data<su2>::read_double(std::string &file_name) {
     std::cout << "read_double<su2> error: " << file_name << std::endl;
   su2 A;
   for (int i = 0; i < data_size1; i++) {
-    A.a0 = (FLOAT)v[i * 4];
-    A.a1 = (FLOAT)v[i * 4 + 1];
-    A.a2 = (FLOAT)v[i * 4 + 2];
-    A.a3 = (FLOAT)v[i * 4 + 3];
+    A.a0 = (double)v[i * 4];
+    A.a1 = (double)v[i * 4 + 1];
+    A.a2 = (double)v[i * 4 + 2];
+    A.a3 = (double)v[i * 4 + 3];
     array.push_back(A);
   }
   stream.close();
@@ -197,7 +197,7 @@ template <> void data<abelian>::read_double(std::string &file_name) {
   if (!stream.read((char *)&v[0], data_size1 * sizeof(double)))
     std::cout << "read_double<abelian> error: " << file_name << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)v[i]));
+    array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
@@ -344,10 +344,10 @@ void data<su2>::read_double_fortran(std::string &file_name, int bites_skip) {
     std::cout << "read_double_fortran<su2> error: " << file_name << std::endl;
   su2 A;
   for (int i = 0; i < data_size1; i++) {
-    A.a0 = (FLOAT)v[i * 4];
-    A.a1 = (FLOAT)v[i * 4 + 1];
-    A.a2 = (FLOAT)v[i * 4 + 2];
-    A.a3 = (FLOAT)v[i * 4 + 3];
+    A.a0 = (double)v[i * 4];
+    A.a1 = (double)v[i * 4 + 1];
+    A.a2 = (double)v[i * 4 + 2];
+    A.a3 = (double)v[i * 4 + 3];
     array.push_back(A);
   }
   stream.close();
@@ -365,7 +365,7 @@ void data<abelian>::read_double_fortran(std::string &file_name,
     std::cout << "read_double_fortran<abelian> error: " << file_name
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (FLOAT)v[i]));
+    array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
@@ -413,12 +413,12 @@ template <> void data<abelian>::write_float_fortran(std::string &file_name) {
 template <> void data<su2>::write_double(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   std::ofstream stream(file_name);
-  std::vector<FLOAT> v(data_size1 * 4);
+  std::vector<double> v(data_size1 * 4);
   for (int i = 0; i < data_size1; i++) {
-    v[i * 4] = (FLOAT)array[i].a0;
-    v[i * 4 + 1] = (FLOAT)array[i].a1;
-    v[i * 4 + 2] = (FLOAT)array[i].a2;
-    v[i * 4 + 3] = (FLOAT)array[i].a3;
+    v[i * 4] = (double)array[i].a0;
+    v[i * 4 + 1] = (double)array[i].a1;
+    v[i * 4 + 2] = (double)array[i].a2;
+    v[i * 4 + 3] = (double)array[i].a3;
   }
   if (!stream.write((char *)&v[0], data_size1 * 4 * sizeof(double)))
     std::cout << "write_double<su2> error: " << file_name << std::endl;

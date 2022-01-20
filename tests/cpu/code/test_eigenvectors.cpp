@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
   data<su2> conf_qc2dstag;
   std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
 
-  FLOAT mu_q = 0.05;
+  double mu_q = 0.05;
   int vector_size = x_size * y_size * z_size * t_size * 2;
 
   conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     std::cout << vector_output[i].re << " i(" << vector_output[i].im << ")"
               << std::endl;
   }
-  FLOAT norm = 0;
+  double norm = 0;
   for (int i = 0; i < vector_output.size(); i++) {
     norm += vector_output[i].re * vector_output[i].re +
             vector_output[i].im * vector_output[i].im;

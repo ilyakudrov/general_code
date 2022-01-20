@@ -5,11 +5,11 @@
 
 using namespace std;
 
-vector<vector<FLOAT>> make_angles_SU3(vector<su3_full> &conf) {
+vector<vector<double>> make_angles_SU3(vector<su3_full> &conf) {
 
-  vector<vector<FLOAT>> angles(3, vector<FLOAT>(conf.size()));
+  vector<vector<double>> angles(3, vector<double>(conf.size()));
 
-  vector<FLOAT> angle_tmp(3);
+  vector<double> angle_tmp(3);
 
   for (int i = 0; i < conf.size(); i++) {
 

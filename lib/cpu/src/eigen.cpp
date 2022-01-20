@@ -18,7 +18,7 @@
   }
 
 std::vector<su2> make_matrix_staggered(const std::vector<su2> &conf,
-                                       FLOAT mu_q) {
+                                       double mu_q) {
   int matrix_size = x_size * y_size * z_size * t_size * 8;
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -127,7 +127,7 @@ void matrix_multiplication_su2(const complex *vec_input, complex *vec_output,
                       A.a0 * vec_input[1].im - A.a3 * vec_input[1].re;
 }
 
-FLOAT eta_sign(int mu, link1 &link) {
+double eta_sign(int mu, link1 &link) {
   int n = 0;
   for (int i = 0; i < mu; i++) {
     n += (link.coordinate[i]);

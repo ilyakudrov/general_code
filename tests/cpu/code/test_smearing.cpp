@@ -17,11 +17,11 @@ int z_size = 32;
 int t_size = 32;
 
 int main(int argc, char *argv[]) {
-  FLOAT alpha1 = 1;
-  FLOAT alpha2 = 1;
-  FLOAT alpha3 = 0.5;
-  FLOAT alpha_APE = 0.5;
-  FLOAT stout_rho = 0.15;
+  double alpha1 = 1;
+  double alpha2 = 1;
+  double alpha3 = 0.5;
+  double alpha_APE = 0.5;
+  double stout_rho = 0.15;
 
   std::vector<std::vector<su2>> smearing_first(9, std::vector<su2>(1));
   std::vector<std::vector<su2>> smearing_second(6, std::vector<su2>(1));
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
   conf.read_float_fortran(path_su2);
   conf_abelian.read_float_fortran(path_abelian);
-  FLOAT aver[2];
+  double aver[2];
 
   std::cout.precision(10);
   su2 A;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   int T_min = 1, T_max = 3;
   int R_min = 1, R_max = 3;
 
-  std::vector<FLOAT> vec_wilson;
+  std::vector<double> vec_wilson;
 
   start_time = clock();
 

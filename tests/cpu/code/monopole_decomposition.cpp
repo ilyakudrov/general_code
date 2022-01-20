@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
   // string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
 
-  // vector<FLOAT> inverse_laplacian = read_inverse_laplacian(laplacian_path);
+  // vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
   // link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
   //                    t_size / 2 + 1);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
   //   }
   // }
 
-  vector<vector<FLOAT>> angles = make_angles_SU3(conf.array);
+  vector<vector<double>> angles = make_angles_SU3(conf.array);
 
   for (int i = 0; i < 10; i++) {
     cout << angles[0][i] + angles[1][i] + angles[2][i] << endl;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
     cout << "color: " << color << endl;
 
-    std::vector<FLOAT> J = calculate_current(angles[color]);
+    std::vector<double> J = calculate_current(angles[color]);
     std::vector<loop *> LL = calculate_clusters(J);
 
     std::cout << "number of clusters " << LL.size() << std::endl;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // std::vector<FLOAT> monopole_angles =
+  // std::vector<double> monopole_angles =
   //     make_monopole_angles(angles[0], inverse_laplacian);
 
   // for (int i = 0; i < 10; i++) {

@@ -1,34 +1,28 @@
 #pragma once
 
-#ifdef DOUBLE
-#define FLOAT double
-#else
-#define FLOAT float
-#endif
-
 #include "../include/link.h"
 #include "../include/loop.h"
 
-std::vector<FLOAT> read_angles_float_fortran(std::string &file_path);
-std::vector<FLOAT> read_angles_double_fortran(std::string &file_path);
-std::vector<FLOAT> read_float_fortran_convet_abelian(std::string &file_path);
-std::vector<FLOAT> read_double_fortran_convet_abelian(std::string &file_path);
-std::vector<FLOAT> read_double_qc2dstag_convet_abelian(std::string &file_path);
-std::vector<FLOAT> read_inverse_laplacian(std::string &file_path);
+std::vector<double> read_angles_double_fortran(std::string &file_path);
+std::vector<double> read_angles_double_fortran(std::string &file_path);
+std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
+std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
+std::vector<double> read_double_qc2dstag_convet_abelian(std::string &file_path);
+std::vector<double> read_inverse_laplacian(std::string &file_path);
 
-int find_current(link1 &link, std::vector<FLOAT> &J);
+int find_current(link1 &link, std::vector<double> &J);
 
 std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
-                               std::vector<FLOAT> &J);
+                               std::vector<double> &J);
 
-void find_cluster(loop *ll, std::vector<FLOAT> &J);
+void find_cluster(loop *ll, std::vector<double> &J);
 
-std::vector<loop *> calculate_clusters(std::vector<FLOAT> &J);
+std::vector<loop *> calculate_clusters(std::vector<double> &J);
 
-std::vector<FLOAT> make_monopole_angles(std::vector<FLOAT> &angles,
-                                        std::vector<FLOAT> &laplace);
+std::vector<double> make_monopole_angles(std::vector<double> &angles,
+                                         std::vector<double> &laplace);
 
-std::vector<FLOAT> calculate_current(std::vector<FLOAT> &angles);
+std::vector<double> calculate_current(std::vector<double> &angles);
 
 // functions for obtaining information about clusters for testing
 

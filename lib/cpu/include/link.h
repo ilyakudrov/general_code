@@ -5,13 +5,6 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
-// size of floating point numbers used in code
-#ifdef DOUBLE
-#define FLOAT double
-#else
-#define FLOAT float
-#endif
-
 #include "data.h"
 #include "math.h"
 #include "matrix.h"
@@ -109,27 +102,27 @@ public:
   // d - distance between "left" source and plaket
   // D - distance between sources
   template <class T>
-  FLOAT field1(
+  double field1(
       const std::vector<std::vector<T>> &schwinger_line,
       const std::vector<T> &plaket, const std::vector<T> &polyakov_loop, int d,
       int D, int dir,
       int x); // Link is attached to the "left" source, dir points to the plaket
   // second numerator
   template <class T>
-  FLOAT
+  double
   field2(const std::vector<T> &plaket, const std::vector<T> &polyakov_loop,
          int d, int D, int dir,
          int x); // attached to the "left" source, dir points to the plaket
   // denominator
   template <class T>
-  FLOAT field3(const std::vector<T> &polyakov_loop, int D,
-               int x); // attached to the "left" source and points to another
+  double field3(const std::vector<T> &polyakov_loop, int D,
+                int x); // attached to the "left" source and points to another
 
   // monopoles
-  FLOAT monopole_plaket_mu(std::vector<FLOAT> &angles, int mu);
-  int current_test(FLOAT *J);
-  void get_current(std::vector<std::vector<FLOAT>> &monopole_plaket, FLOAT *J,
-                   std::vector<FLOAT> &angles);
+  double monopole_plaket_mu(std::vector<double> &angles, int mu);
+  int current_test(double *J);
+  void get_current(std::vector<std::vector<double>> &monopole_plaket, double *J,
+                   std::vector<double> &angles);
 };
 
 std::ostream &operator<<(std::ostream &os, const link1 &link);

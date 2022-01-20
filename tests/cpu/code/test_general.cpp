@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   // }
 
   // polyakov correlator
-  /*std::map<int, FLOAT> polyakov_correlator =
+  /*std::map<int, double> polyakov_correlator =
       polyakov_loop_correlator(conf_qc2dstag.array, 4, 16);
 
   for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
   }
 
   // spatial wilson_lines
-  std::map<std::tuple<int, int>, FLOAT> wilson_spat =
+  std::map<std::tuple<int, int>, double> wilson_spat =
       wilson_spatial(conf_qc2dstag.array, APE_2d, 6, 8, 4, 8);
 
   for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
   int T_min = 1, T_max = 8;
   int R_min = 1, R_max = 8;
 
-  std::vector<FLOAT> vec_wilson;
+  std::vector<double> vec_wilson;
   start_time = clock();
 
   vec_wilson = wilson(conf_qc2dstag.array, R_min, R_max, T_min, T_max);

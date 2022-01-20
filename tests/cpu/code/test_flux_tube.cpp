@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
             << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
   start_time = clock();
-  std::map<int, FLOAT> schwinger_electric = wilson_plaket_schwinger_electric(
+  std::map<int, double> schwinger_electric = wilson_plaket_schwinger_electric(
       conf_qc2dstag.array, plaket_electric, -5, R + 5, T, R);
   end_time = clock();
   search_time = end_time - start_time;
@@ -72,11 +72,11 @@ int main(int argc, char *argv[]) {
   int d_max = R;
 
   start_time = clock();
-  std::vector<FLOAT> wilson_vec =
+  std::vector<double> wilson_vec =
       calculate_wilson_loop_tr(conf_smeared.array, R, T);
-  std::vector<FLOAT> plaket_time_vec =
+  std::vector<double> plaket_time_vec =
       calculate_plaket_time_tr(conf_qc2dstag.array);
-  std::vector<FLOAT> plaket_space_vec =
+  std::vector<double> plaket_space_vec =
       calculate_plaket_space_tr(conf_qc2dstag.array);
   double wilson_loop = 0;
   double plaket = 0;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
             << std::endl;
 
   start_time = clock();
-  std::map<int, FLOAT> electric = wilson_plaket_correlator_electric(
+  std::map<int, double> electric = wilson_plaket_correlator_electric(
       wilson_vec, plaket_time_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
             << std::endl;
 
   start_time = clock();
-  std::map<int, FLOAT> magnetic = wilson_plaket_correlator_magnetic(
+  std::map<int, double> magnetic = wilson_plaket_correlator_magnetic(
       wilson_vec, plaket_space_vec, R, T, 0, d_min, d_max);
   end_time = clock();
   search_time = end_time - start_time;

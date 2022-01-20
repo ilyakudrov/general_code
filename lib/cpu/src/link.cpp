@@ -356,10 +356,10 @@ T link1::wilson_line_offaxis(const std::vector<T> &array,
 
 // TODO: elaborate directions
 template <class T>
-FLOAT link1::field1(const std::vector<std::vector<T>> &schwinger_line,
-                    const std::vector<T> &plaket,
-                    const std::vector<T> &polyakov_loop, int d, int D, int dir,
-                    int x) {
+double link1::field1(const std::vector<std::vector<T>> &schwinger_line,
+                     const std::vector<T> &plaket,
+                     const std::vector<T> &polyakov_loop, int d, int D, int dir,
+                     int x) {
   int dir1 = direction;
   T C = schwinger_line[dir - 1][PLACE3_LINK_DIR];
   move(dir1, d);
@@ -381,9 +381,9 @@ FLOAT link1::field1(const std::vector<std::vector<T>> &schwinger_line,
 
 // TODO: elaborate directions
 template <class T>
-FLOAT link1::field2(const std::vector<T> &plaket,
-                    const std::vector<T> &polyakov_loop, int d, int D, int dir,
-                    int x) {
+double link1::field2(const std::vector<T> &plaket,
+                     const std::vector<T> &polyakov_loop, int d, int D, int dir,
+                     int x) {
   int dir1 = direction;
   move_dir(-4);
   T A = polyakov_loop[PLACE1_LINK_NODIR];
@@ -402,7 +402,7 @@ FLOAT link1::field2(const std::vector<T> &plaket,
 
 // TODO: elaborate directions
 template <class T>
-FLOAT link1::field3(const std::vector<T> &polyakov_loop, int D, int x) {
+double link1::field3(const std::vector<T> &polyakov_loop, int D, int x) {
   int dir1 = direction;
   move_dir(-4);
   T A = polyakov_loop[PLACE1_LINK_NODIR];
@@ -417,8 +417,8 @@ FLOAT link1::field3(const std::vector<T> &polyakov_loop, int D, int x) {
 // monopoles
 
 // calclate monopole plaket from angles in link.direction-mu plane
-FLOAT link1::monopole_plaket_mu(std::vector<FLOAT> &angles, int mu) {
-  FLOAT angle = angles[place + direction];
+double link1::monopole_plaket_mu(std::vector<double> &angles, int mu) {
+  double angle = angles[place + direction];
   move(direction, 1);
   angle += angles[place + mu];
   move(direction, -1);
@@ -435,9 +435,9 @@ FLOAT link1::monopole_plaket_mu(std::vector<FLOAT> &angles, int mu) {
   return angle;
 }
 
-void link1::get_current(std::vector<std::vector<FLOAT>> &monopole_plaket,
-                        FLOAT *J, std::vector<FLOAT> &angles) {
-  FLOAT j0, j1, j2, j3;
+void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
+                        double *J, std::vector<double> &angles) {
+  double j0, j1, j2, j3;
   link1 linkx(*this);
   linkx.move(0, 1);
   link1 linky(*this);
@@ -516,16 +516,16 @@ template su2 link1::wilson_line_single(const std::vector<su2> &array,
                                        int length);
 template su2 link1::wilson_line_offaxis(const std::vector<su2> &array,
                                         const std::vector<int> &pattern);
-template FLOAT
+template double
 link1::field1(const std::vector<std::vector<su2>> &schwinger_line,
               const std::vector<su2> &plaket,
               const std::vector<su2> &polyakov_loop, int d, int D, int dir,
               int x);
-template FLOAT link1::field2(const std::vector<su2> &plaket,
-                             const std::vector<su2> &polyakov_loop, int d,
-                             int D, int dir, int x);
-template FLOAT link1::field3(const std::vector<su2> &polyakov_loop, int D,
-                             int x);
+template double link1::field2(const std::vector<su2> &plaket,
+                              const std::vector<su2> &polyakov_loop, int d,
+                              int D, int dir, int x);
+template double link1::field3(const std::vector<su2> &polyakov_loop, int D,
+                              int x);
 
 // abelian
 template const abelian *link1::get_matrix(const std::vector<abelian> &vec);
@@ -545,16 +545,16 @@ template abelian link1::wilson_line_single(const std::vector<abelian> &array,
                                            int length);
 template abelian link1::wilson_line_offaxis(const std::vector<abelian> &array,
                                             const std::vector<int> &pattern);
-template FLOAT
+template double
 link1::field1(const std::vector<std::vector<abelian>> &schwinger_line,
               const std::vector<abelian> &plaket,
               const std::vector<abelian> &polyakov_loop, int d, int D, int dir,
               int x);
-template FLOAT link1::field2(const std::vector<abelian> &plaket,
-                             const std::vector<abelian> &polyakov_loop, int d,
-                             int D, int dir, int x);
-template FLOAT link1::field3(const std::vector<abelian> &polyakov_loop, int D,
-                             int x);
+template double link1::field2(const std::vector<abelian> &plaket,
+                              const std::vector<abelian> &polyakov_loop, int d,
+                              int D, int dir, int x);
+template double link1::field3(const std::vector<abelian> &polyakov_loop, int D,
+                              int x);
 
 // su3_full
 template const su3_full *link1::get_matrix(const std::vector<su3_full> &vec);
@@ -574,13 +574,13 @@ template su3_full link1::wilson_line_single(const std::vector<su3_full> &array,
                                             int length);
 template su3_full link1::wilson_line_offaxis(const std::vector<su3_full> &array,
                                              const std::vector<int> &pattern);
-template FLOAT
+template double
 link1::field1(const std::vector<std::vector<su3_full>> &schwinger_line,
               const std::vector<su3_full> &plaket,
               const std::vector<su3_full> &polyakov_loop, int d, int D, int dir,
               int x);
-template FLOAT link1::field2(const std::vector<su3_full> &plaket,
-                             const std::vector<su3_full> &polyakov_loop, int d,
-                             int D, int dir, int x);
-template FLOAT link1::field3(const std::vector<su3_full> &polyakov_loop, int D,
-                             int x);
+template double link1::field2(const std::vector<su3_full> &plaket,
+                              const std::vector<su3_full> &polyakov_loop, int d,
+                              int D, int dir, int x);
+template double link1::field3(const std::vector<su3_full> &polyakov_loop, int D,
+                              int x);
