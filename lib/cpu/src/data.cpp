@@ -38,15 +38,16 @@ template <class T> data<T>::data() {
   array.reserve(4 * x_size * y_size * z_size * t_size);
 }
 
-template <> void data<su2>::read_float(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+template <> void data<su2>::read_float(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], data_size1 * 4 * sizeof(float)))
+  std::vector<float> v(data_size * 4);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
     std::cout << "read_float<su2> error: " << file_name << std::endl;
   su2 A;
-  for (int i = 0; i < data_size1; i++) {
+  for (int i = 0; i < data_size; i++) {
     A.a0 = (double)v[i * 4];
     A.a1 = (double)v[i * 4 + 1];
     A.a2 = (double)v[i * 4 + 2];
@@ -56,130 +57,48 @@ template <> void data<su2>::read_float(std::string &file_name) {
   stream.close();
 }
 
-std::vector<float> read_full_ml5(std::string &file_name, int conf_num) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::ifstream stream(file_name);
-  std::vector<float> v(conf_num * data_size1 * 4);
-  if (!stream.read((char *)&v[0], conf_num * data_size1 * 4 * sizeof(float)))
-    std::cout << "read_full_ml5<su2> error: " << file_name << std::endl;
-  return v;
-  stream.close();
-}
-
 template <>
-void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
-                               int conf_num) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  su2 A;
-  int i;
-  SPACE_ITER_START
-  for (int mu = 1; mu <= 4; mu++) {
-    if (mu == 4) {
-      i = 4 *
-          (t * x_size * y_size * z_size + x + y * x_size + z * x_size * y_size);
-    } else {
-      i = 4 * (t * x_size * y_size * z_size + x + y * x_size +
-               z * x_size * y_size) +
-          mu;
-    }
-    A.a0 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4];
-    A.a3 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 1];
-    A.a2 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 2];
-    A.a1 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 3];
-    array.push_back(A);
-  }
-  SPACE_ITER_END
-}
-
-template <> void data<abelian>::read_float(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+void data<abelian>::read_float(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], data_size1 * sizeof(float)))
+  std::vector<float> v(data_size);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
     std::cout << "read_float<abelian> error: " << file_name << std::endl;
-  for (int i = 0; i < data_size1; i++) {
+  for (int i = 0; i < data_size; i++) {
     array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
 
 template <>
-void data<su2>::read_float_fortran(std::string &file_name, int bites_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+void data<abelian>::read_double(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
+  std::vector<double> v(data_size);
   stream.ignore(bites_skip);
-  if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(float)))
-    std::cout << "read_float_fortran<su2> error: " << file_name << std::endl;
-  su2 A;
-  for (int i = 0; i < data_size1; i++) {
-    A.a0 = (double)v[i * 4];
-    A.a1 = (double)v[i * 4 + 1];
-    A.a2 = (double)v[i * 4 + 2];
-    A.a3 = (double)v[i * 4 + 3];
-    array.push_back(A);
-  }
-  stream.close();
-}
-
-template <>
-void data<abelian>::read_float_fortran(std::string &file_name, int bites_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<float> v(data_size1);
-  stream.ignore(bites_skip);
-  if (!stream.read((char *)&v[0], (data_size1) * sizeof(float)))
-    std::cout << "read_float_fortran<abelian> error: " << file_name
-              << std::endl;
-  for (int i = 0; i < data_size1; i++) {
+  if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
+    std::cout << "read_double<abelian> error: " << file_name << std::endl;
+  for (int i = 0; i < data_size; i++) {
     array.push_back(abelian(1, (double)v[i]));
   }
   stream.close();
 }
 
 template <>
-void data<abelian>::read_float_fortran_convert_abelian(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+void data<su2>::read_double(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(data_size);
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4 + 2);
-  if (!stream.read((char *)&v[0], (data_size1 * 4 + 2) * sizeof(float)))
-    std::cout << "read_float_fortran_convert_abelian<abelian> error: "
-              << file_name << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)atan2(v[i * 4 + 4], v[i * 4 + 1])));
-  }
-  stream.close();
-}
-
-template <>
-void data<abelian>::read_float_convert_abelian(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], (data_size1 * 4 + 1) * sizeof(float)))
-    std::cout << "read_float_convert_abelian<abelian> error: " << file_name
-              << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)atan2(v[i * 4 + 3], v[i * 4 + 0])));
-  }
-  stream.close();
-}
-
-template <> void data<su2>::read_double(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], data_size1 * 4 * sizeof(double)))
+  std::vector<double> v(data_size * 4);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(double)))
     std::cout << "read_double<su2> error: " << file_name << std::endl;
   su2 A;
-  for (int i = 0; i < data_size1; i++) {
+  for (int i = 0; i < data_size; i++) {
     A.a0 = (double)v[i * 4];
     A.a1 = (double)v[i * 4 + 1];
     A.a2 = (double)v[i * 4 + 2];
@@ -189,39 +108,14 @@ template <> void data<su2>::read_double(std::string &file_name) {
   stream.close();
 }
 
-template <> void data<abelian>::read_double(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], data_size1 * sizeof(double)))
-    std::cout << "read_double<abelian> error: " << file_name << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)v[i]));
-  }
-  stream.close();
-}
-
-double reverseValue(const char *data) {
-  double result;
-
-  char *dest = (char *)&result;
-
-  for (int i = 0; i < sizeof(double); i++) {
-    dest[i] = data[sizeof(double) - i - 1];
-  }
-  return result;
-}
-
 template <>
-void data<su3_full>::read_double_fortran(std::string &file_name,
-                                         int bites_skip) {
+void data<su3_full>::read_double(std::string &file_name, int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.resize(data_size1);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 18);
 
-  stream.ignore(4);
+  stream.ignore(bites_skip);
   if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
     std::cout << "data<su3_full>::read_double_fortran error: " << file_name
               << std::endl;
@@ -252,7 +146,18 @@ void data<su3_full>::read_double_fortran(std::string &file_name,
   stream.close();
 }
 
-template <> void data<su3_full>::read_double(std::string &file_name) {
+double reverseValue(const char *data) {
+  double result;
+
+  char *dest = (char *)&result;
+
+  for (int i = 0; i < sizeof(double); i++) {
+    dest[i] = data[sizeof(double) - i - 1];
+  }
+  return result;
+}
+
+template <> void data<su3_full>::read_ildg(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
 
@@ -304,6 +209,72 @@ template <> void data<su3_full>::read_double(std::string &file_name) {
   }
 }
 
+std::vector<float> read_full_ml5(std::string &file_name, int conf_num) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  std::ifstream stream(file_name);
+  std::vector<float> v(conf_num * data_size1 * 4);
+  if (!stream.read((char *)&v[0], conf_num * data_size1 * 4 * sizeof(float)))
+    std::cout << "read_full_ml5<su2> error: " << file_name << std::endl;
+  return v;
+  stream.close();
+}
+
+template <>
+void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
+                               int conf_num) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  su2 A;
+  int i;
+  SPACE_ITER_START
+  for (int mu = 1; mu <= 4; mu++) {
+    if (mu == 4) {
+      i = 4 *
+          (t * x_size * y_size * z_size + x + y * x_size + z * x_size * y_size);
+    } else {
+      i = 4 * (t * x_size * y_size * z_size + x + y * x_size +
+               z * x_size * y_size) +
+          mu;
+    }
+    A.a0 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4];
+    A.a3 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 1];
+    A.a2 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 2];
+    A.a1 = (double)array_ml5[data_size1 * 4 * conf_num + i * 4 + 3];
+    array.push_back(A);
+  }
+  SPACE_ITER_END
+}
+
+template <>
+void data<abelian>::read_float_fortran_convert_abelian(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  std::ifstream stream(file_name);
+  std::vector<float> v(data_size1 * 4 + 2);
+  if (!stream.read((char *)&v[0], (data_size1 * 4 + 2) * sizeof(float)))
+    std::cout << "read_float_fortran_convert_abelian<abelian> error: "
+              << file_name << std::endl;
+  for (int i = 0; i < data_size1; i++) {
+    array.push_back(abelian(1, (double)atan2(v[i * 4 + 4], v[i * 4 + 1])));
+  }
+  stream.close();
+}
+
+template <>
+void data<abelian>::read_float_convert_abelian(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  std::ifstream stream(file_name);
+  std::vector<float> v(data_size1 * 4);
+  if (!stream.read((char *)&v[0], (data_size1 * 4 + 1) * sizeof(float)))
+    std::cout << "read_float_convert_abelian<abelian> error: " << file_name
+              << std::endl;
+  for (int i = 0; i < data_size1; i++) {
+    array.push_back(abelian(1, (double)atan2(v[i * 4 + 3], v[i * 4 + 0])));
+  }
+  stream.close();
+}
+
 template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
@@ -331,43 +302,6 @@ template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
 
 template <> void data<abelian>::read_double_qc2dstag(std::string &file_name) {
   std::cout << "there's no reason for implementation" << std::endl;
-}
-
-template <>
-void data<su2>::read_double_fortran(std::string &file_name, int bites_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 4);
-  stream.ignore(bites_skip);
-  if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(double)))
-    std::cout << "read_double_fortran<su2> error: " << file_name << std::endl;
-  su2 A;
-  for (int i = 0; i < data_size1; i++) {
-    A.a0 = (double)v[i * 4];
-    A.a1 = (double)v[i * 4 + 1];
-    A.a2 = (double)v[i * 4 + 2];
-    A.a3 = (double)v[i * 4 + 3];
-    array.push_back(A);
-  }
-  stream.close();
-}
-
-template <>
-void data<abelian>::read_double_fortran(std::string &file_name,
-                                        int bites_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size1);
-  stream.ignore(4);
-  if (!stream.read((char *)&v[0], (data_size1) * sizeof(double)))
-    std::cout << "read_double_fortran<abelian> error: " << file_name
-              << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)v[i]));
-  }
-  stream.close();
 }
 
 template <> void data<su2>::write_float(std::string &file_name) {

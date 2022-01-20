@@ -36,85 +36,23 @@ int main(int argc, char *argv[]) {
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
-  data<su2> conf_qc2dstag;
-  // data<su3_full> conf_qc2dstag;
-  // data<abelian> conf_qc2dstag;
-  // std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  // std::string path_qc2dstag = "../../confs/SU3_conf/nt6/conf.0501";
-  // std::string path_qc2dstag = "../../confs/SU3_conf/nt6/conf.0502";
-  // std::string path_qc2dstag =
-  //     "../../confs/SU3_conf/nt6/conf.single_gaugefixed_0501.ildg_2";
-  // std::string path_qc2dstag =
-  //     "../../confs/su2_suzuki/monopole/CON_MON_MAG_017.LAT";
-  std::string path_qc2dstag = "../../confs/su2_suzuki/monopoless/"
-                              "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
-  // std::string path_qc2dstag =
-  //     "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
-  // std::string path_qc2dstag = "../../confs/su2_suzuki/monopole/"
-  //                             "HYP0_alpha=1_1_0.5_APE40_alpha=0.5/conf_0001";
-  // std::string path_qc2dstag =
-  // "../../confs/su2_dynam/32^4/CON_32^3x32_001.LAT";
-
-  // conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
-  conf_qc2dstag.read_double(path_qc2dstag);
-  // conf_qc2dstag.read_float_fortran(path_qc2dstag, 8);
-  // conf_qc2dstag.read_double_fortran(path_qc2dstag, 8);
-
-  // for (int i = 0; i < 10; i++) {
-  //   std::cout << conf_qc2dstag.array[i].module() << std::endl;
-  // }
-  // conf_qc2dstag.read_float_fortran(path_qc2dstag);
-
-  // std::string path_out_test =
-  //     "../../confs/SU3_conf/nt6/conf.gaugefixed_0501_test";
-  // conf_qc2dstag.write_double(path_out_test);
-
-  // for (int i = 0; i < 10; i++) {
-  //   std::cout << conf_qc2dstag.array[i] << std::endl;
-  // }
-
-  // polyakov correlator
-  /*std::map<int, double> polyakov_correlator =
-      polyakov_loop_correlator(conf_qc2dstag.array, 4, 16);
-
-  for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
-       ++it) {
-    std::cout << "distance: " << it->first
-              << " polyakov_correlator: " << it->second << std::endl;
-  }
-  std::cout << std::endl;
-
-  polyakov_correlator.clear();
-
-  double alpha_APE = 0.7;
-
-  std::map<std::tuple<int, int>, std::vector<su2>> APE_2d =
-      smearing_APE_2d(conf_qc2dstag.array, alpha_APE);
-
-  for (int i = 0; i < 10; i++) {
-    smearing_APE_2d_continue(APE_2d, alpha_APE);
-  }
-
-  // spatial wilson_lines
-  std::map<std::tuple<int, int>, double> wilson_spat =
-      wilson_spatial(conf_qc2dstag.array, APE_2d, 6, 8, 4, 8);
-
-  for (auto it = wilson_spat.begin(); it != wilson_spat.end(); ++it) {
-    std::cout << "distance: (" << std::get<0>(it->first) << ", "
-              << std::get<1>(it->first) << ")"
-              << " wilson_spatial: " << it->second << std::endl;
-  }
-  std::cout << std::endl;*/
+  // data<su2> conf;
+  // data<su3_full> conf;
+  data<abelian> conf;
+  // string conf_path = "../../confs/su2_suzuki/monopoless/"
+  //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
+  // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
+  string conf_path = "../../confs/su2_suzuki/monopole/CON_MON_MAG_001.LAT";
+  // conf.read_double(conf_path, 8);
+  conf.read_float(conf_path, 8);
 
   // plakets and polyakov loop
   start_time = clock();
-  std::cout << "qc2dstag plaket " << plaket(conf_qc2dstag.array) << std::endl;
-  std::cout << "qc2dstag plaket_time " << plaket_time(conf_qc2dstag.array)
+  std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
+  std::cout << "qc2dstag plaket_time " << plaket_time(conf.array) << std::endl;
+  std::cout << "qc2dstag plaket_space " << plaket_space(conf.array)
             << std::endl;
-  std::cout << "qc2dstag plaket_space " << plaket_space(conf_qc2dstag.array)
-            << std::endl;
-  std::cout << "qc2dstag polyakov " << polyakov(conf_qc2dstag.array)
-            << std::endl;
+  std::cout << "qc2dstag polyakov " << polyakov(conf.array) << std::endl;
   end_time = clock();
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time * 1. / CLOCKS_PER_SEC
@@ -127,7 +65,7 @@ int main(int argc, char *argv[]) {
   std::vector<double> vec_wilson;
   start_time = clock();
 
-  vec_wilson = wilson(conf_qc2dstag.array, R_min, R_max, T_min, T_max);
+  vec_wilson = wilson(conf.array, R_min, R_max, T_min, T_max);
 
   end_time = clock();
   search_time = end_time - start_time;
@@ -149,7 +87,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf_qc2dstag.array, directions, 2, 3, 2, 3);
+      wilson_offaxis(conf.array, directions, 2, 3, 2, 3);
 
   end_time = clock();
   search_time = end_time - start_time;
