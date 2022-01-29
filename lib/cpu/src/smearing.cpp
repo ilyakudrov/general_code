@@ -324,22 +324,20 @@ std::vector<T> smearing_HYP(const std::vector<T> &array,
   std::unordered_map<int, int> indexes;
   make_map_second(indexes);
   std::vector<T> vec(data_size);
-  link.move_dir(3);
   SPACE_ITER_START
-  vec[PLACE4_LINK_DIR] = (1 - alpha1) * *link.get_matrix(array);
+  vec[link.place + 3] = (1 - alpha1) * *link.get_matrix(array);
   for (int i = 0; i < 3; i++) {
-    vec[PLACE4_LINK_DIR] =
-        vec[PLACE4_LINK_DIR] +
+    vec[link.place + 3] =
+        vec[link.place + 3] +
         alpha1 / 6. * staples_third(smearing_second, link, indexes, i, 3);
   }
-  vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+  vec[link.place + 3] = vec[link.place + 3].proj();
   SPACE_ITER_END
   for (int d = 0; d < 3; d++) {
-    link.move_dir(d);
     SPACE_ITER_START
-    vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+    vec[link.place + d] = array[link.place + d];
+    SPACE_ITER_END
   }
-  SPACE_ITER_END
   return vec;
 }
 
@@ -350,21 +348,19 @@ std::vector<T> smearing_APE(const std::vector<T> &array, double alpha_APE) {
   SPACE_ITER_START
   link.go(x, y, z, t);
   for (int i = 0; i < 3; i++) {
-    link.move_dir(i);
-    vec[PLACE4_LINK_DIR] = (1 - alpha_APE) * array[PLACE4_LINK_DIR];
+    vec[link.place + i] = (1 - alpha_APE) * array[link.place + i];
     for (int d = 0; d < 3; d++) {
       if (d != i) {
-        vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR] +
-                               (alpha_APE / 6.) * staples_first(array, link, d);
+        vec[link.place + i] = vec[link.place + i] +
+                              (alpha_APE / 6.) * staples_first(array, link, d);
       }
     }
-    vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+    vec[link.place + i] = vec[link.place + i].proj();
   }
   SPACE_ITER_END
-  link.move_dir(3);
   SPACE_ITER_START
   link.go(x, y, z, t);
-  vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+  vec[link.place + 3] = array[link.place + 3];
   SPACE_ITER_END
   return vec;
 }

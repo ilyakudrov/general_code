@@ -2,7 +2,6 @@
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/result.h"
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
@@ -23,8 +22,8 @@ int main(int argc, char *argv[]) {
   double alpha_APE = 0.5;
   double stout_rho = 0.15;
 
-  std::vector<std::vector<su2>> smearing_first(9, std::vector<su2>(1));
-  std::vector<std::vector<su2>> smearing_second(6, std::vector<su2>(1));
+  std::vector<std::vector<su2>> smearing_first;
+  std::vector<std::vector<su2>> smearing_second;
 
   link1 link(x_size, y_size, z_size, t_size);
   link1 link_double(x_size, y_size, z_size, t_size);
@@ -32,10 +31,10 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  std::string path_su2 = "../../confs/su2_dynam/32^4/CON_32^3x32_001.LAT";
+  std::string path_su2 = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
   std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  conf.read_float_fortran(path_su2);
-  conf_abelian.read_float_fortran(path_abelian);
+  conf.read_double_qc2dstag(path_su2);
+  // conf_abelian.read_float(path_abelian, 0);
   double aver[2];
 
   std::cout.precision(10);
@@ -44,10 +43,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  std::map<std::tuple<int, int>, std::vector<su2>> APE_2d_test =
-      smearing_APE_2d(conf.array, alpha_APE);
+  // std::map<std::tuple<int, int>, std::vector<su2>> APE_2d_test =
+  //     smearing_APE_2d(conf.array, alpha_APE);
 
-  smearing_APE_2d_continue(APE_2d_test, alpha_APE);
+  // smearing_APE_2d_continue(APE_2d_test, alpha_APE);
 
   start_time = clock();
 
