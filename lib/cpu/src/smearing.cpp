@@ -265,16 +265,16 @@ std::vector<T> smearing_second(const std::vector<T> &array,
   std::vector<T> vec(data_size / 4);
   link.move_dir(mu);
   SPACE_ITER_START
-  vec[PLACE1_LINK_NODIR] = (1 - alpha2) * *link.get_matrix(array);
+  vec[link.place / 4] = (1 - alpha2) * *link.get_matrix(array);
   for (int i = 0; i < 4; i++) {
     if (i != mu && i != nu) {
-      vec[PLACE1_LINK_NODIR] =
-          vec[PLACE1_LINK_NODIR] +
+      vec[link.place / 4] =
+          vec[link.place / 4] +
           alpha2 / 4. *
               staples_second(smearing_first, link, indexes, i, mu, nu);
     }
   }
-  vec[PLACE1_LINK_NODIR] = vec[PLACE1_LINK_NODIR].proj();
+  vec[link.place / 4] = vec[link.place / 4].proj();
   SPACE_ITER_END
   return vec;
 }
@@ -324,6 +324,7 @@ std::vector<T> smearing_HYP(const std::vector<T> &array,
   std::unordered_map<int, int> indexes;
   make_map_second(indexes);
   std::vector<T> vec(data_size);
+  link.move_dir(3);
   SPACE_ITER_START
   vec[link.place + 3] = (1 - alpha1) * *link.get_matrix(array);
   for (int i = 0; i < 3; i++) {
@@ -348,6 +349,7 @@ std::vector<T> smearing_APE(const std::vector<T> &array, double alpha_APE) {
   SPACE_ITER_START
   link.go(x, y, z, t);
   for (int i = 0; i < 3; i++) {
+    link.move_dir(i);
     vec[link.place + i] = (1 - alpha_APE) * array[link.place + i];
     for (int d = 0; d < 3; d++) {
       if (d != i) {
@@ -373,20 +375,19 @@ std::vector<T> smearing1_APE(const std::vector<T> &array, double alpha_APE) {
   link.go(x, y, z, t);
   for (int i = 0; i < 3; i++) {
     link.move_dir(i);
-    vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+    vec[link.place + i] = array[link.place + i];
     for (int d = 0; d < 3; d++) {
       if (d != i) {
-        vec[PLACE4_LINK_DIR] =
-            vec[PLACE4_LINK_DIR] + alpha_APE * staples_first(array, link, d);
+        vec[link.place + i] =
+            vec[link.place + i] + alpha_APE * staples_first(array, link, d);
       }
     }
-    vec[PLACE4_LINK_DIR] = vec[PLACE4_LINK_DIR].proj();
+    vec[link.place + i] = vec[link.place + i].proj();
   }
   SPACE_ITER_END
-  link.move_dir(3);
   SPACE_ITER_START
   link.go(x, y, z, t);
-  vec[PLACE4_LINK_DIR] = array[PLACE4_LINK_DIR];
+  vec[link.place + 3] = array[link.place + 3];
   SPACE_ITER_END
   return vec;
 }
