@@ -45,14 +45,14 @@ int main(int argc, char *argv[]) {
   // std::string path_conf =
   //     "../../confs/SU3_conf/nt6/steps_330/conf.SP_gaugefixed_0501.ildg";
 
-  conf.read_double_fortran(path_conf);
+  conf.read_double(path_conf, 4);
   // conf.read_double(path_conf);
 
   cout << plaket(conf.array) / 3 << endl;
 
-  // string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
+  string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
 
-  // vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
+  vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
   // link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
   //                    t_size / 2 + 1);
@@ -102,10 +102,10 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // std::vector<double> monopole_angles =
-  //     make_monopole_angles(angles[0], inverse_laplacian);
+  std::vector<double> monopole_angles =
+      make_monopole_angles(angles[0], inverse_laplacian);
 
-  // for (int i = 0; i < 10; i++) {
-  //   cout << monopole_angles[i] << endl;
-  // }
+  for (int i = 0; i < 10; i++) {
+    cout << monopole_angles[i] << endl;
+  }
 }

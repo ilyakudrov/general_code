@@ -451,7 +451,7 @@ wilson_plaket_correlator_electric_x(const std::vector<double> &wilson_loop_tr,
   count = x_size * y_size * z_size * t_size * 36;
   std::map<int, double> result;
   result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
-  for (int i = 1; i <= correlator.size(); i++) {
+  for (int i = 1; i < correlator.size(); i++) {
     result[i] = correlator[i] / count;
   }
   return result;
@@ -563,7 +563,7 @@ wilson_plaket_correlator_magnetic_x(const std::vector<double> &wilson_loop_tr,
   count = x_size * y_size * z_size * t_size * 36;
   std::map<int, double> result;
   result[0] = correlator[0] / (x_size * y_size * z_size * t_size * 9);
-  for (int i = 1; i <= correlator.size(); i++) {
+  for (int i = 1; i < correlator.size(); i++) {
     result[i] = correlator[i] / count;
   }
   return result;
