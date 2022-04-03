@@ -3,6 +3,30 @@
 #include <complex>
 #include <iostream>
 
+struct complex_t {
+  double real;
+  double imag;
+
+  complex_t(const double real1, const double imag1);
+  complex_t();
+};
+
+complex_t operator+(const complex_t &a, const complex_t &b);
+
+complex_t operator-(const complex_t &a, const complex_t &b);
+
+complex_t operator*(const complex_t &a, const complex_t &b);
+
+complex_t operator*(const double &a, const complex_t &b);
+
+complex_t operator*(const complex_t &a, const double &b);
+
+complex_t operator^(const complex_t &a, const complex_t &b);
+
+complex_t operator/(const complex_t &a, const double &b);
+
+std::ostream &operator<<(std::ostream &os, const complex_t &a);
+
 // su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
 class su2 {
 public:
@@ -12,6 +36,8 @@ public:
 
   // calculate trace of the matrix
   double tr();
+
+  double multiply_tr(const su2 *B);
 
   // calculate inverse of the matrix
   su2 inverse();
@@ -55,6 +81,8 @@ public:
   // trace
   double tr();
 
+  double multiply_tr(const abelian *B);
+
   // inverse
   abelian inverse();
   // conjugated
@@ -83,6 +111,8 @@ public:
 
   // calculate trace of the matrix
   double tr();
+
+  double multiply_tr(const su3_full *B);
 
   // calculate inverse of the matrix
   su3_full inverse();
@@ -116,3 +146,48 @@ su3_full operator*(const su3_full &A, const su3_full *B);
 su3_full operator^(const su3_full &A, const su3_full *B);
 
 std::ostream &operator<<(std::ostream &os, const su3_full &A);
+
+// su3 matrix in 3x3 complex matrix representation
+class su3 {
+public:
+  complex_t matrix[3][3];
+  su3(complex_t B[3][3]);
+  su3();
+
+  // calculate trace of the matrix
+  double tr();
+
+  double multiply_tr(const su3 *B);
+
+  // calculate inverse of the matrix
+  su3 inverse();
+
+  // calculate conjugate of the matrix
+  su3 conj() const;
+
+  // gets projection onto su3 group
+  su3 proj();
+
+  // calculates module of vector in sigma matrices representation
+  double module();
+
+  complex_t determinant();
+
+  complex_t unitarity_check();
+};
+
+su3 operator+(const su3 &A, const su3 &B);
+su3 operator-(const su3 &A, const su3 &B);
+su3 operator*(const double &x, const su3 &A);
+su3 operator*(const su3 &A, const double &x);
+
+// matrix multiplication A * B
+su3 operator*(const su3 &A, const su3 &B);
+
+// matrix multiplication A * B
+su3 operator*(const su3 &A, const su3 *B);
+
+// matrix multiplication A * B.conj()
+su3 operator^(const su3 &A, const su3 *B);
+
+std::ostream &operator<<(std::ostream &os, const su3 &A);

@@ -34,34 +34,36 @@ int main(int argc, char *argv[]) {
       "../../confs/qc2dstag/HYP_APE/mu0.05/s0/smeared_0201";
 
   conf_qc2dstag.read_double_qc2dstag(path_qc2dstag);
-  conf_smeared.read_double(path_smeared);
+  conf_smeared.read_double(path_smeared, 0);
 
   std::cout << "schwinger wilson flux tube test" << std::endl;
 
   int R = 10;
   int T = 10;
 
-  start_time = clock();
-  std::vector<su2> plaket_electric =
-      calculate_plaket_schwinger_time(conf_qc2dstag.array);
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "calculate_plaket_schwinger_time time: "
-            << search_time * 1. / CLOCKS_PER_SEC << std::endl;
+  // start_time = clock();
+  // std::vector<su2> plaket_electric =
+  //     calculate_plaket_schwinger_time(conf_qc2dstag.array);
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "calculate_plaket_schwinger_time time: "
+  //           << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
-  start_time = clock();
-  std::map<int, double> schwinger_electric = wilson_plaket_schwinger_electric(
-      conf_qc2dstag.array, plaket_electric, -5, R + 5, T, R);
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "wilson_plaket_schwinger_electric time: "
-            << search_time * 1. / CLOCKS_PER_SEC << std::endl;
+  // start_time = clock();
+  // std::map<int, double> schwinger_electric =
+  // wilson_plaket_schwinger_electric(
+  //     conf_qc2dstag.array, plaket_electric, -5, R + 5, T, R);
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "wilson_plaket_schwinger_electric time: "
+  //           << search_time * 1. / CLOCKS_PER_SEC << std::endl;
 
-  for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
-       ++it) {
-    std::cout << "d = " << it->first << " schwinger_electric = " << it->second
-              << std::endl;
-  }
+  // for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
+  //      ++it) {
+  //   std::cout << "d = " << it->first << " schwinger_electric = " <<
+  //   it->second
+  //             << std::endl;
+  // }
 
   std::cout << "wilson plaket flux tube test" << std::endl;
 

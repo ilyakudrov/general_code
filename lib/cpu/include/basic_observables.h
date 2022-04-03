@@ -57,6 +57,12 @@ wilson_offaxis(const std::vector<T> &array,
                const std::vector<std::vector<int>> directions, double r_min,
                double r_max, int time_min, int time_max);
 
+template <class T>
+std::vector<wilson_result>
+wilson_offaxis_adjoint(const std::vector<T> &array,
+                       const std::vector<std::vector<int>> directions,
+                       double r_min, double r_max, int time_min, int time_max);
+
 std::vector<std::vector<int>>
 generate_permutations(const std::vector<int> &direction);
 
@@ -67,6 +73,12 @@ template <class T>
 double calculate_wilson_loop_offaxis(const std::vector<T> &time_lines, int time,
                                      const std::vector<T> &space_lines,
                                      const std::vector<int> &direction);
+
+template <class T>
+double calculate_wilson_loop_offaxis_adjoint(const std::vector<T> &time_lines,
+                                             int time,
+                                             const std::vector<T> &space_lines,
+                                             const std::vector<int> &direction);
 
 template <class T>
 std::vector<T> wilson_lines_offaxis(const std::vector<T> &array,

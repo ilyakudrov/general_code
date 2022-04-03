@@ -1,6 +1,51 @@
 #include "../include/matrix.h"
 #include <cmath>
 
+complex_t::complex_t(const double real1, const double imag1) {
+  real = real1;
+  imag = imag1;
+}
+
+complex_t::complex_t() {
+  real = 0;
+  imag = 0;
+}
+
+complex_t operator+(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real + b.real, a.imag + b.imag);
+}
+
+complex_t operator-(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real - b.real, a.imag - b.imag);
+}
+
+complex_t operator*(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real * b.real - a.imag * b.imag,
+                   a.real * b.imag + a.imag * b.real);
+}
+
+complex_t operator*(const double &a, const complex_t &b) {
+  return complex_t(a * b.real, a * b.imag);
+}
+
+complex_t operator*(const complex_t &a, const double &b) {
+  return complex_t(a.real * b, a.imag * b);
+}
+
+complex_t operator^(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real * b.real + a.imag * b.imag,
+                   a.imag * b.real - a.real * b.imag);
+}
+
+complex_t operator/(const complex_t &a, const double &b) {
+  return complex_t(a.real / b, a.imag / b);
+}
+
+std::ostream &operator<<(std::ostream &os, const complex_t &a) {
+  os << "(" << a.real << ", " << a.imag << ")";
+  return os;
+}
+
 // su2 methods
 su2::su2() {
   a0 = 1;
@@ -17,6 +62,10 @@ su2::su2(double b0, double b1, double b2, double b3) {
 }
 
 double su2::tr() { return a0; }
+
+double su2::multiply_tr(const su2 *B) {
+  return a0 * B->a0 + a1 * B->a1 + a2 * B->a2 + a3 * B->a3;
+}
 
 su2 su2::inverse() {
   double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
@@ -82,7 +131,11 @@ abelian::abelian(double r1, double phi1) {
   phi = phi1;
 }
 
-double abelian::tr() { return cos(phi); }
+double abelian::tr() { return r * cos(phi); }
+
+double abelian::multiply_tr(const abelian *B) {
+  return r * B->r * cos(phi - B->phi);
+}
 
 abelian abelian::inverse() { return abelian(1 / r, -phi); }
 double abelian::module() { return r; }
@@ -149,11 +202,18 @@ su3_full::su3_full(std::complex<double> B[3][3]) {
 }
 
 double su3_full::tr() {
-  std::complex<double> tmp = 0;
+  return (matrix[0][0].real() + matrix[1][1].real() + matrix[2][2].real()) / 3;
+}
+
+double su3_full::multiply_tr(const su3_full *B) {
+  double trace = 0;
   for (int i = 0; i < 3; i++) {
-    tmp += matrix[i][i];
+    for (int k = 0; k < 3; k++) {
+      trace += real(matrix[i][k]) * real(B->matrix[i][k]) +
+               imag(matrix[i][k]) * imag(B->matrix[i][k]);
+    }
   }
-  return tmp.real() / 3;
+  return trace / 3;
 }
 
 su3_full su3_full::inverse() {
@@ -302,6 +362,194 @@ std::ostream &operator<<(std::ostream &os, const su3_full &A) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       os << A.matrix[i][j];
+    }
+    os << std::endl;
+  }
+  return os;
+}
+
+// su3 methods
+su3::su3() {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j)
+        matrix[i][j] = complex_t(0, 0);
+      else
+        matrix[i][j] = complex_t(1, 0);
+    }
+  }
+}
+
+su3::su3(complex_t B[3][3]) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      matrix[i][j] = B[i][j];
+    }
+  }
+}
+
+double su3::tr() {
+  return (matrix[0][0].real + matrix[1][1].real + matrix[2][2].real) / 3;
+}
+
+double su3::multiply_tr(const su3 *B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int k = 0; k < 3; k++) {
+      trace += matrix[i][k].real * B->matrix[i][k].real +
+               matrix[i][k].imag * B->matrix[i][k].imag;
+    }
+  }
+  return trace / 3;
+}
+
+su3 su3::inverse() {
+  su3 B;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      B.matrix[i][j].real = matrix[j][i].real;
+      B.matrix[i][j].imag = -matrix[j][i].imag;
+    }
+  }
+  return B;
+}
+
+complex_t determinant_part(complex_t B[3][3], int i, int j, int k) {
+  return B[0][i] * (B[1][j] * B[2][k] - B[2][j] * B[1][k]);
+}
+
+double su3::module() {
+  complex_t determinant;
+  determinant = determinant_part(matrix, 0, 1, 2);
+  determinant = determinant + determinant_part(matrix, 1, 0, 2);
+  determinant = determinant + determinant_part(matrix, 2, 0, 1);
+  return determinant.real;
+}
+
+complex_t su3::determinant() {
+  complex_t determinant;
+  determinant = determinant_part(matrix, 0, 1, 2);
+  determinant = determinant - determinant_part(matrix, 1, 0, 2);
+  determinant = determinant - determinant_part(matrix, 2, 0, 1);
+  return determinant;
+}
+
+complex_t su3::unitarity_check() {
+  su3 A = this->conj();
+  A = A * this;
+
+  complex_t diagonal = complex_t(0, 0), non_diagonal = complex_t(0, 0);
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i == j)
+        diagonal = diagonal + A.matrix[i][j];
+      else
+        non_diagonal = non_diagonal + A.matrix[i][j];
+    }
+  }
+  return non_diagonal;
+}
+
+su3 su3::conj() const {
+  su3 B;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      B.matrix[i][j].real = matrix[j][i].real;
+      B.matrix[i][j].imag = -matrix[j][i].imag;
+    }
+  }
+  return B;
+}
+
+su3 su3::proj() { return su3(); }
+
+su3 operator+(const su3 &A, const su3 &B) {
+  su3 C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = A.matrix[i][j] + B.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3 operator-(const su3 &A, const su3 &B) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = A.matrix[i][j] - B.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3 operator*(const double &x, const su3 &A) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+};
+su3 operator*(const su3 &A, const double &x) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+};
+
+su3 operator*(const su3 &A, const su3 &B) {
+  su3 C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = complex_t(0, 0);
+      for (int k = 0; k < 3; k++) {
+        a = a + A.matrix[i][k] * B.matrix[k][j];
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3 operator*(const su3 &A, const su3 *B) {
+  su3 C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = complex_t(0, 0);
+      for (int k = 0; k < 3; k++) {
+        a = a + A.matrix[i][k] * B->matrix[k][j];
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3 operator^(const su3 &A, const su3 *B) {
+  su3 C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = complex_t(0, 0);
+      for (int k = 0; k < 3; k++) {
+        a = a + (A.matrix[i][k] ^ B->matrix[j][k]);
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+std::ostream &operator<<(std::ostream &os, const su3 &A) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      os << "(" << A.matrix[i][j].real << ", " << A.matrix[i][j].imag << ") ";
     }
     os << std::endl;
   }

@@ -209,6 +209,57 @@ template <> void data<su3_full>::read_ildg(std::string &file_name) {
   }
 }
 
+template <> void data<su3>::read_ildg(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+
+  FILE *fp;
+  fp = fopen(file_name.c_str(), "r");
+
+  LimeReader *reader;
+  reader = limeCreateReader(fp);
+
+  int status;
+  char *lime_type;
+  n_uint64_t nbytes;
+  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
+
+    if (status != LIME_SUCCESS) {
+      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
+    }
+
+    lime_type = limeReaderType(reader);
+    nbytes = limeReaderBytes(reader);
+
+    if (strcmp(lime_type, "ildg-binary-data") == 0) {
+
+      std::vector<double> v(nbytes / sizeof(double));
+
+      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
+
+      for (int i = 0; i < nbytes / sizeof(double); i++) {
+        v[i] = reverseValue((char *)&v[i]);
+      }
+
+      if (status != LIME_SUCCESS) {
+        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
+      }
+
+      su3 A;
+      int place;
+      for (int i = 0; i < data_size1; i++) {
+        for (int j = 0; j < 3; j++) {
+          for (int k = 0; k < 3; k++) {
+            place = i * 18 + j * 6 + k * 2;
+            A.matrix[j][k] = complex_t(v[i * 18 + j * 6 + k * 2], v[place + 1]);
+          }
+        }
+        array.push_back(A);
+      }
+    }
+  }
+}
+
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   std::ifstream stream(file_name);
@@ -406,3 +457,4 @@ template <> void data<abelian>::write_double(std::string &file_name) {
 template class data<su2>;
 template class data<abelian>;
 template class data<su3_full>;
+template class data<su3>;

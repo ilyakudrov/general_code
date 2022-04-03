@@ -584,3 +584,6 @@ template double link1::field2(const std::vector<su3_full> &plaket,
                               int D, int dir, int x);
 template double link1::field3(const std::vector<su3_full> &polyakov_loop, int D,
                               int x);
+
+// su3
+template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);

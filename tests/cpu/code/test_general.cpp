@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 48;
+  y_size = 48;
+  z_size = 48;
+  t_size = 48;
 
   std::cout.precision(17);
 
@@ -42,9 +42,19 @@ int main(int argc, char *argv[]) {
   // string conf_path = "../../confs/su2_suzuki/monopoless/"
   //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
   // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
-  string conf_path = "../../confs/su2_suzuki/monopole/CON_MON_MAG_001.LAT";
-  // conf.read_double(conf_path, 8);
-  conf.read_float(conf_path, 8);
+  string conf_path =
+      "../../confs/su2_suzuki/48^4/beta2.7/monopole/CON_MON_MAG_003.LAT";
+  // string conf_path =
+  //     "../../confs/su2_suzuki/48^4/beta2.7/monopoless/CON_OFF_MAG_003.LAT";
+  // string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
+  // conf.read_double(conf_path, 4);
+  // conf.read_double_qc2dstag(conf_path);
+  conf.read_float(conf_path, 4);
+
+  for (int mu = 0; mu < 4; mu++) {
+    // link.move(mu, 1);
+    cout << conf.array[link.place + mu] << endl;
+  }
 
   // plakets and polyakov loop
   start_time = clock();
@@ -87,7 +97,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf.array, directions, 2, 3, 2, 3);
+      wilson_offaxis_adjoint(conf.array, directions, 2, 3, 2, 3);
 
   end_time = clock();
   search_time = end_time - start_time;

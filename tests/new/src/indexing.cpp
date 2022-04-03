@@ -21,6 +21,8 @@
   }                                                                            \
   }
 
+using namespace std;
+
 template <class T>
 double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu, int size1,
                     int size2) {
@@ -34,16 +36,15 @@ double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu, int size1,
   }
   for (int i = 0; i < data_size; i += size2) {
     for (int j = i; j < i + size2 - size1; j++) {
-      plakets[j] = plakets[j] * conf_mu[j + size1].conj();
+      plakets[j] = plakets[j] ^ &conf_mu[j + size1];
     }
     for (int j = i; j < i + size1; j++) {
-      plakets[j + size2 - size1] =
-          plakets[j + size2 - size1] * conf_mu[j].conj();
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j];
     }
   }
   double result = 0;
   for (int i = 0; i < data_size; i++) {
-    result += (plakets[i] * conf_nu[i].conj()).tr();
+    result += (plakets[i] ^ &conf_nu[i]).tr();
   }
 
   return result / data_size;
@@ -73,7 +74,7 @@ double plaket_time_test1(std::vector<std::vector<T>> &separated) {
     }
     for (int mu = 0; mu < 3; mu++) {
       plakets[mu][i + t_size - 1] =
-          separated[mu][i + t_size - 1] * separated[mu][i];
+          separated[3][i + t_size - 1] * separated[mu][i];
     }
   }
   std::vector<int> sizes1 = {t_size, x_size * t_size, y_size * x_size * t_size};
@@ -83,22 +84,308 @@ double plaket_time_test1(std::vector<std::vector<T>> &separated) {
   for (int mu = 0; mu < 3; mu++) {
     for (int i = 0; i < data_size; i += sizes2[mu]) {
       for (int j = i; j < i + sizes2[mu] - sizes1[mu]; j++) {
-        plakets[mu][j] = plakets[mu][j] * separated[mu][j + sizes1[mu]].conj();
+        plakets[mu][j] = plakets[mu][j] ^ &separated[3][j + sizes1[mu]];
       }
       for (int j = i; j < i + sizes1[mu]; j++) {
         plakets[mu][j + sizes2[mu] - sizes1[mu]] =
-            plakets[mu][j + sizes2[mu] - sizes1[mu]] * separated[mu][j].conj();
+            plakets[mu][j + sizes2[mu] - sizes1[mu]] ^ &separated[3][j];
       }
     }
   }
   double result = 0;
   for (int i = 0; i < data_size; i++) {
     for (int mu = 0; mu < 3; mu++) {
-      result += (plakets[mu][i] * separated[mu][i].conj()).tr();
+      result += (plakets[mu][i] ^ &separated[mu][i]).tr();
     }
   }
 
   return result / (3 * data_size);
+}
+
+template <class T>
+double plaket_time_test2(std::vector<std::vector<T>> &separated) {
+  int data_size = x_size * y_size * z_size * t_size;
+  std::vector<std::vector<T>> plakets(3, std::vector<T>(data_size));
+  for (int i = 0; i < data_size; i += t_size) {
+    for (int j = i; j < i + t_size - 1; j++) {
+      for (int mu = 0; mu < 3; mu++) {
+        plakets[mu][j] = separated[3][j] * separated[mu][j + 1];
+      }
+    }
+    for (int mu = 0; mu < 3; mu++) {
+      plakets[mu][i + t_size - 1] =
+          separated[3][i + t_size - 1] * separated[mu][i];
+    }
+  }
+  std::vector<int> sizes1 = {t_size, x_size * t_size, y_size * x_size * t_size};
+  std::vector<int> sizes2 = {x_size * t_size, y_size * x_size * t_size,
+                             y_size * x_size * t_size * z_size};
+
+  for (int i = 0; i < data_size; i += sizes2[0]) {
+    for (int t = i; t < i + sizes2[0] - sizes1[0]; t++) {
+      plakets[0][t] = plakets[0][t] ^ &separated[3][t + sizes1[0]];
+      plakets[1][t] = plakets[1][t] ^ &separated[3][t + sizes1[1]];
+      plakets[2][t] = plakets[2][t] ^ &separated[3][t + sizes1[2]];
+    }
+    for (int t = i + sizes2[0] - sizes1[0]; t < i + sizes2[0]; t++) {
+      plakets[1][t] = plakets[1][t] ^ &separated[3][t + sizes1[1]];
+      plakets[2][t] = plakets[2][t] ^ &separated[3][t + sizes1[2]];
+    }
+    for (int t = i; t < i + sizes1[0]; t++) {
+      plakets[0][t + sizes2[0] - sizes1[0]] =
+          plakets[0][t + sizes2[0] - sizes1[0]] ^ &separated[3][t];
+    }
+  }
+
+  double result = 0;
+  for (int i = 0; i < data_size; i++) {
+    for (int mu = 0; mu < 3; mu++) {
+      result += (plakets[mu][i] ^ &separated[mu][i]).tr();
+    }
+  }
+
+  return result / (3 * data_size);
+}
+
+template <class T>
+double plaket_plane1(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
+                     int size1, int size2) {
+  int data_size = x_size * y_size * z_size * t_size;
+  std::vector<T> plakets(data_size);
+  double result = 0;
+  for (int k = 0; k < data_size; k += size2) {
+    for (int i = k; i < k + size2; i += t_size) {
+      for (int j = i; j < i + t_size - 1; j++) {
+        plakets[j] = conf_mu[j] * conf_nu[j + 1];
+      }
+      plakets[i + t_size - 1] = conf_mu[i + t_size - 1] * conf_nu[i];
+    }
+    for (int j = k; j < k + size2 - size1; j++) {
+      plakets[j] = plakets[j] ^ &conf_mu[j + size1];
+    }
+    for (int j = k; j < k + size1; j++) {
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j];
+    }
+    for (int i = k; i < k + size2; i++) {
+      result += (plakets[i] ^ &conf_nu[i]).tr();
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T>
+double plaket_time_test3(std::vector<std::vector<T>> &separated) {
+
+  double result = 0;
+  result += plaket_plane1(separated[3], separated[0], t_size, x_size * t_size);
+  result += plaket_plane1(separated[3], separated[1], x_size * t_size,
+                          y_size * x_size * t_size);
+  result += plaket_plane1(separated[3], separated[2], y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size);
+  return result / 3;
+}
+
+template <class T>
+double plaket_plane2(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
+                     int size1, int size2) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  std::vector<T> plakets(size2);
+  double result = 0;
+  for (int k = 0; k < data_size; k += size2) {
+    for (int i = 0; i < size2; i += t_size) {
+      for (int j = 0; j < t_size - 1; j++) {
+        plakets[j + i] = conf_mu[j + i + k] * conf_nu[j + i + k + 1];
+      }
+      plakets[i + t_size - 1] = conf_mu[i + k + t_size - 1] * conf_nu[i + k];
+    }
+    for (int j = 0; j < size2 - size1; j++) {
+      plakets[j] = plakets[j] ^ &conf_mu[j + k + size1];
+    }
+    for (int j = 0; j < size1; j++) {
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j + k];
+    }
+    for (int i = 0; i < size2; i++) {
+      result += plakets[i].multiply_tr(&conf_nu[i + k]);
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T>
+double plaket_time_test4(std::vector<std::vector<T>> &separated) {
+
+  double result = 0;
+  result += plaket_plane2(separated[3], separated[0], t_size, x_size * t_size);
+  result += plaket_plane2(separated[3], separated[1], x_size * t_size,
+                          y_size * x_size * t_size);
+  result += plaket_plane2(separated[3], separated[2], y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size);
+  return result / 3;
+}
+
+template <class T> double plaket_time_test5(std::vector<T> &conf) {
+  link1 link(x_size, y_size, z_size, t_size);
+  int data_size = x_size * y_size * z_size * t_size * 4;
+
+  std::vector<T> plakets(x_size * 3);
+  int place;
+
+  double result = 0;
+
+  for (int t = 0; t < t_size; t++) {
+    for (int z = 0; z < z_size; z++) {
+      for (int y = 0; y < y_size; y++) {
+        link.coordinate[1] = y;
+        link.coordinate[2] = z;
+        link.coordinate[3] = t;
+        link.update(1);
+        link.update(2);
+        link.update(3);
+        for (int x = 0; x < x_size; x++) {
+          link.coordinate[0] = x;
+          link.update(0);
+
+          place = link.place;
+          for (int mu = 0; mu < 3; mu++) {
+            link.move(mu, 1);
+            plakets[x * 3 + mu] = conf[place + mu] * conf[link.place + 3];
+            link.move(mu, -1);
+          }
+        }
+        for (int x = 0; x < x_size; x++) {
+          link.coordinate[0] = x;
+          link.update(0);
+
+          place = link.place;
+          link.move(3, 1);
+          for (int mu = 0; mu < 3; mu++) {
+            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ &conf[link.place + mu];
+          }
+          link.move(3, -1);
+        }
+        for (int x = 0; x < x_size; x++) {
+          link.coordinate[0] = x;
+          link.update(0);
+
+          for (int mu = 0; mu < 3; mu++) {
+            result += plakets[x * 3 + mu].multiply_tr(&conf[link.place + 3]);
+          }
+        }
+      }
+    }
+  }
+  return result / (x_size * y_size * z_size * t_size * 3);
+}
+
+template <class T> double plaket_time_test6(std::vector<T> &conf) {
+  link1 link(x_size, y_size, z_size, t_size);
+  int data_size = x_size * y_size * z_size * t_size * 4;
+
+  std::vector<T> plakets(x_size * 3);
+  int place;
+
+  double result = 0;
+
+  for (int mu = 0; mu < 3; mu++) {
+    for (int t = 0; t < t_size; t++) {
+      for (int z = 0; z < z_size; z++) {
+        for (int y = 0; y < y_size; y++) {
+          link.coordinate[1] = y;
+          link.coordinate[2] = z;
+          link.coordinate[3] = t;
+          link.update(1);
+          link.update(2);
+          link.update(3);
+          for (int x = 0; x < x_size; x++) {
+            link.coordinate[0] = x;
+            link.update(0);
+
+            place = link.place;
+            link.move(mu, 1);
+            plakets[x * 3 + mu] = conf[place + mu] * conf[link.place + 3];
+            link.move(mu, -1);
+          }
+          for (int x = 0; x < x_size; x++) {
+            link.coordinate[0] = x;
+            link.update(0);
+
+            place = link.place;
+            link.move(3, 1);
+            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ &conf[link.place + mu];
+            link.move(3, -1);
+          }
+          for (int x = 0; x < x_size; x++) {
+            link.coordinate[0] = x;
+            link.update(0);
+
+            result += plakets[x * 3 + mu].multiply_tr(&conf[link.place + 3]);
+          }
+        }
+      }
+    }
+  }
+  return result / (x_size * y_size * z_size * t_size * 3);
+}
+
+template <class T>
+double plaket_plane3(std::vector<T> &conf, int mu, int nu, int size_mu1,
+                     int size_mu2, int size_nu1, int size_nu2, int step) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  // std::vector<T> plakets(step);
+  std::vector<T> plakets(data_size);
+  double result = 0;
+
+  for (int i = 0; i < data_size; i += size_mu2) {
+    for (int j = i; j < i + size_mu2 - size_mu1; j += step) {
+      for (int k = j; k < j + step; k += 4) {
+        plakets[k] = conf[k + mu] * conf[k + size_mu1 + nu];
+      }
+    }
+    for (int j = i + size_mu2 - size_mu1; j < i + size_mu2; j += step) {
+      for (int k = j; k < j + step; k++) {
+        plakets[k] = conf[k + mu] * conf[k + size_mu1 - size_mu2 + nu];
+      }
+    }
+  }
+
+  for (int i = 0; i < data_size; i += size_nu2) {
+    for (int j = i; j < i + size_nu2 - size_nu1; j += step) {
+      for (int k = j; k < j + step; k += 4) {
+        plakets[k] = plakets[k] ^ &conf[k + size_nu1 + mu];
+      }
+    }
+    for (int j = i + size_nu2 - size_nu1; j < i + size_nu2; j += step) {
+      for (int k = j; k < j + step; k++) {
+        plakets[k] = plakets[k] ^ &conf[k + size_nu1 - size_nu2 + mu];
+      }
+    }
+  }
+
+  for (int i = 0; i < data_size; i += size_nu2) {
+    for (int j = i; j < i + size_nu2 - size_nu1; j += step) {
+      for (int k = j; k < j + step; k += 4) {
+        result += plakets[k].multiply_tr(&conf[k + nu]);
+      }
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T> double plaket_time_test7(std::vector<T> &conf) {
+
+  double result = 0;
+  result += plaket_plane3(conf, 3, 0, 4 * x_size * y_size * z_size,
+                          4 * x_size * y_size * z_size * t_size, 4, 4 * x_size,
+                          4 * x_size);
+  result += plaket_plane3(conf, x_size * t_size, y_size * x_size * t_size);
+  result += plaket_plane3(conf, y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size);
+  return result / 3;
 }
 
 template <class T>
@@ -129,9 +416,24 @@ template double plaket_plane(std::vector<su2> &conf_mu,
 
 template double plaket_time_test(std::vector<std::vector<su2>> &separated);
 template double plaket_time_test1(std::vector<std::vector<su2>> &separated);
+template double plaket_time_test2(std::vector<std::vector<su2>> &separated);
 
 template std::vector<std::vector<su2>> separate_3(std::vector<su2> &conf,
                                                   int mu);
+template double plaket_plane1(std::vector<su2> &conf_mu,
+                              std::vector<su2> &conf_nu, int size1, int size2);
+template double plaket_time_test3(std::vector<std::vector<su2>> &separated);
+
+template double plaket_plane2(std::vector<su2> &conf_mu,
+                              std::vector<su2> &conf_nu, int size1, int size2);
+template double plaket_time_test4(std::vector<std::vector<su2>> &separated);
+template double plaket_time_test5(std::vector<su2> &conf);
+template double plaket_time_test6(std::vector<su2> &conf);
+template double plaket_plane3(std::vector<su2> &conf, int mu, int nu,
+                              int size_mu1, int size_mu2, int size_nu1,
+                              int size_nu2, int step);
+
+template double plaket_time_test7(std::vector<su2> &conf);
 
 // abelian
 
@@ -141,11 +443,31 @@ template double plaket_plane(std::vector<abelian> &conf_mu,
 
 template double plaket_time_test(std::vector<std::vector<abelian>> &separated);
 template double plaket_time_test1(std::vector<std::vector<abelian>> &separated);
+template double plaket_time_test2(std::vector<std::vector<abelian>> &separated);
+
+template double plaket_plane1(std::vector<abelian> &conf_mu,
+                              std::vector<abelian> &conf_nu, int size1,
+                              int size2);
+template double plaket_time_test3(std::vector<std::vector<abelian>> &separated);
+
+template double plaket_plane2(std::vector<abelian> &conf_mu,
+                              std::vector<abelian> &conf_nu, int size1,
+                              int size2);
+template double plaket_time_test4(std::vector<std::vector<abelian>> &separated);
+
+template double plaket_time_test5(std::vector<abelian> &conf);
+template double plaket_time_test6(std::vector<abelian> &conf);
+
+template double plaket_plane3(std::vector<abelian> &conf, int mu, int nu,
+                              int size_mu1, int size_mu2, int size_nu1,
+                              int size_nu2, int step);
+
+template double plaket_time_test7(std::vector<abelian> &conf);
 
 template std::vector<std::vector<abelian>>
 separate_3(std::vector<abelian> &conf, int mu);
 
-// su3
+// su3_full
 template double plaket_plane(std::vector<su3_full> &conf_mu,
                              std::vector<su3_full> &conf_nu, int size1,
                              int size2);
@@ -153,6 +475,57 @@ template double plaket_plane(std::vector<su3_full> &conf_mu,
 template double plaket_time_test(std::vector<std::vector<su3_full>> &separated);
 template double
 plaket_time_test1(std::vector<std::vector<su3_full>> &separated);
+template double
+plaket_time_test2(std::vector<std::vector<su3_full>> &separated);
+
+template double plaket_plane1(std::vector<su3_full> &conf_mu,
+                              std::vector<su3_full> &conf_nu, int size1,
+                              int size2);
+template double
+plaket_time_test3(std::vector<std::vector<su3_full>> &separated);
 
 template std::vector<std::vector<su3_full>>
 separate_3(std::vector<su3_full> &conf, int mu);
+
+template double plaket_plane2(std::vector<su3_full> &conf_mu,
+                              std::vector<su3_full> &conf_nu, int size1,
+                              int size2);
+template double
+plaket_time_test4(std::vector<std::vector<su3_full>> &separated);
+
+template double plaket_time_test5(std::vector<su3_full> &conf);
+template double plaket_time_test6(std::vector<su3_full> &conf);
+
+template double plaket_plane3(std::vector<su3_full> &conf, int mu, int nu,
+                              int size_mu1, int size_mu2, int size_nu1,
+                              int size_nu2, int step);
+
+template double plaket_time_test7(std::vector<su3_full> &conf);
+
+// su3
+template double plaket_plane(std::vector<su3> &conf_mu,
+                             std::vector<su3> &conf_nu, int size1, int size2);
+
+template double plaket_time_test(std::vector<std::vector<su3>> &separated);
+template double plaket_time_test1(std::vector<std::vector<su3>> &separated);
+template double plaket_time_test2(std::vector<std::vector<su3>> &separated);
+
+template double plaket_plane1(std::vector<su3> &conf_mu,
+                              std::vector<su3> &conf_nu, int size1, int size2);
+template double plaket_time_test3(std::vector<std::vector<su3>> &separated);
+
+template std::vector<std::vector<su3>> separate_3(std::vector<su3> &conf,
+                                                  int mu);
+
+template double plaket_plane2(std::vector<su3> &conf_mu,
+                              std::vector<su3> &conf_nu, int size1, int size2);
+template double plaket_time_test4(std::vector<std::vector<su3>> &separated);
+
+template double plaket_time_test5(std::vector<su3> &conf);
+template double plaket_time_test6(std::vector<su3> &conf);
+
+template double plaket_plane3(std::vector<su3> &conf, int mu, int nu,
+                              int size_mu1, int size_mu2, int size_nu1,
+                              int size_nu2, int step);
+
+template double plaket_time_test7(std::vector<su3> &conf);
