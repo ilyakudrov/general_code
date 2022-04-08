@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   link1 link(x_size, y_size, z_size, t_size);
   // data<su2> conf;
   // data<su3_full> conf;
-  data<abelian> conf;
+  data<su2> conf;
   // string conf_path = "../../confs/su2_suzuki/monopoless/"
   //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
   // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";

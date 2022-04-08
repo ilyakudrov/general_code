@@ -314,6 +314,12 @@ void data<abelian>::read_float_convert_abelian(std::string &file_name,
 }
 
 template <>
+void data<su2>::read_float_convert_abelian(std::string &file_name,
+                                           int bites_skip) {
+  std::cout << "wrong type for read_float_convert_abelian" << std::endl;
+}
+
+template <>
 void data<abelian>::read_double_convert_abelian(std::string &file_name,
                                                 int bites_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
@@ -329,6 +335,12 @@ void data<abelian>::read_double_convert_abelian(std::string &file_name,
     array.push_back(abelian(1, atan2(v[i * 4 + 3], v[i * 4 + 0])));
   }
   stream.close();
+}
+
+template <>
+void data<su2>::read_double_convert_abelian(std::string &file_name,
+                                            int bites_skip) {
+  std::cout << "wrong type for read_double_convert_abelian" << std::endl;
 }
 
 template <>
@@ -353,6 +365,12 @@ void data<abelian>::read_double_qc2dstag_convert_abelian(
   }
   SPACE_ITER_END
   stream.close();
+}
+
+template <>
+void data<su2>::read_double_qc2dstag_convert_abelian(std::string &file_name) {
+  std::cout << "wrong type for read_double_qc2dstag_convert_abelian"
+            << std::endl;
 }
 
 template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
