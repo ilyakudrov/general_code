@@ -46,15 +46,16 @@ int main(int argc, char *argv[]) {
   // "../../confs/decomposed/monopoless/qc2dstag/40^4/"
   //                            "mu0.05/s0/conf_monopoless_0201";
 
-  std::vector<double> angles =
-      read_double_qc2dstag_convet_abelian(path_abelian);
+  data<abelian> conf;
+  conf.read_double_convert_abelian(path_abelian, 0);
+  std::vector<double> angles = convert_abelian_to_abelian(conf.array);
   // std::vector<double> angles
   // = read_angles_float_fortran(path_abelian); std::vector<double> angles =
   // read_double_qc2dstag_convet_abelian(path_abelian);
   // std::vector<double> angles = read_angles_double_fortran(path_abelian);
   // std::vector<double> angles =
-  // read_float_fortran_convet_abelian(path_abelian); std::vector<double> angles
-  // = read_double_fortran_convet_abelian(path_abelian);
+  // read_float_fortran_convet_abelian(path_abelian); std::vector<double>
+  // angles = read_double_fortran_convet_abelian(path_abelian);
 
   std::vector<double> J = calculate_current(angles);
   std::vector<loop *> LL = calculate_clusters(J);
@@ -73,20 +74,20 @@ int main(int argc, char *argv[]) {
     lengths[length]++;
     lengths_mu = length_mu(LL[i]);
 
-    for (int j = 0; j < 4; j++) {
-      length_mu_test = lengths_mu[j];
-      while (length_mu_test < 0 || length_mu_test > 31) {
-        if (length_mu_test < 0)
-          length_mu_test += 32;
-        if (length_mu_test > 31)
-          length_mu_test -= 32;
-      }
-      if (length_mu_test != 0)
-        std::cout << "not multiple of 32: " << i << " " << length << " "
-                  << length_mu_test << " " << lengths_mu[0] << " "
-                  << lengths_mu[1] << " " << lengths_mu[2] << " "
-                  << lengths_mu[3] << std::endl;
-    }
+    // for (int j = 0; j < 4; j++) {
+    //   length_mu_test = lengths_mu[j];
+    //   while (length_mu_test < 0 || length_mu_test > 31) {
+    //     if (length_mu_test < 0)
+    //       length_mu_test += 32;
+    //     if (length_mu_test > 31)
+    //       length_mu_test -= 32;
+    //   }
+    //   if (length_mu_test != 0)
+    //     std::cout << "not multiple of 32: " << i << " " << length << " "
+    //               << length_mu_test << " " << lengths_mu[0] << " "
+    //               << lengths_mu[1] << " " << lengths_mu[2] << " "
+    //               << lengths_mu[3] << std::endl;
+    // }
 
     for (int j = 0; j < 4; j++) {
       if (lengths_mu[j] != 0) {

@@ -6,8 +6,6 @@
 #include "../include/c-lime/lime_fixed_types.h"
 #include <cstring>
 
-#define MAX_BYTES 64000
-
 #define PLACE_DATA                                                             \
   (t) * 4 * x_size *y_size *z_size + (z)*4 * x_size *y_size + (y)*4 * x_size + \
       (x)*4 + dir - 1
@@ -297,41 +295,73 @@ void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
 }
 
 template <>
-void data<abelian>::read_float_fortran_convert_abelian(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+void data<abelian>::read_float_convert_abelian(std::string &file_name,
+                                               int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(data_size);
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4 + 2);
-  if (!stream.read((char *)&v[0], (data_size1 * 4 + 2) * sizeof(float)))
-    std::cout << "read_float_fortran_convert_abelian<abelian> error: "
-              << file_name << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)atan2(v[i * 4 + 4], v[i * 4 + 1])));
+  std::vector<float> v(data_size * 4);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
+    std::cout << "read_float_convert_abelian<abelian> error: " << file_name
+              << std::endl;
+  for (int i = 0; i < data_size / 4; i++) {
+    array.push_back(
+        abelian(1, atan2((double)v[i * 4 + 3], (double)v[i * 4 + 0])));
   }
   stream.close();
 }
 
 template <>
-void data<abelian>::read_float_convert_abelian(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+void data<abelian>::read_double_convert_abelian(std::string &file_name,
+                                                int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(data_size);
   std::ifstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], (data_size1 * 4 + 1) * sizeof(float)))
-    std::cout << "read_float_convert_abelian<abelian> error: " << file_name
+  std::vector<double> v(data_size * 4);
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(double)))
+    std::cout << "read_double_convert_abelian<abelian> error: " << file_name
               << std::endl;
-  for (int i = 0; i < data_size1; i++) {
-    array.push_back(abelian(1, (double)atan2(v[i * 4 + 3], v[i * 4 + 0])));
+  for (int i = 0; i < data_size / 4; i++) {
+    array.push_back(abelian(1, atan2(v[i * 4 + 3], v[i * 4 + 0])));
   }
   stream.close();
 }
 
-template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+template <>
+void data<abelian>::read_double_qc2dstag_convert_abelian(
+    std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(data_size);
   std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 4);
-  if (!stream.read((char *)&v[0], data_size1 * 4 * sizeof(double)))
+  std::vector<double> v(data_size * 4);
+  if (!stream.read((char *)&v[0], data_size * 4 * sizeof(double)))
+    std::cout << "read_double_qc2dstag<su2> error: " << file_name << std::endl;
+  int dir;
+  SPACE_ITER_START
+  for (int dir1 = 1; dir1 <= 4; dir1++) {
+    if (dir1 == 4)
+      dir = 1;
+    else
+      dir = dir1 + 1;
+    array.push_back(abelian(
+        1, (double)atan2(v[PLACE_QC2DSTAG + 3], v[PLACE_QC2DSTAG + 0])));
+  }
+  SPACE_ITER_END
+  stream.close();
+}
+
+template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  array.reserve(data_size);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size * 4);
+  if (!stream.read((char *)&v[0], data_size * 4 * sizeof(double)))
     std::cout << "read_double_qc2dstag<su2> error: " << file_name << std::endl;
   su2 A;
   int dir;

@@ -71,25 +71,25 @@ int main(int argc, char *argv[]) {
   std::cout << "plaket new time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket_time_test1(separated)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time_test1(separated)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket1 new time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket1 new time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket_time_test3(separated)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time_test3(separated)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket3 new time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket3 new time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
   start_time = clock();
 
@@ -101,25 +101,25 @@ int main(int argc, char *argv[]) {
   std::cout << "plaket4 new time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket_time_test5(conf.array)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time_test5(conf.array)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket5 new time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket5 new time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket_time_test6(conf.array)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time_test6(conf.array)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket6 new time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket6 new time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
   start_time = clock();
 

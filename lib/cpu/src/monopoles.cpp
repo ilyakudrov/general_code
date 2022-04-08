@@ -102,6 +102,17 @@ std::vector<double> read_double_fortran_convet_abelian(std::string &file_path) {
 }
 
 std::vector<double>
+convert_abelian_to_abelian(std::vector<abelian> &conf_abelian) {
+  std::vector<double> angles(conf_abelian.size());
+
+  for (int i = 0; i < conf_abelian.size(); i++) {
+    angles[i] = conf_abelian[i].phi;
+  }
+
+  return angles;
+}
+
+std::vector<double>
 read_double_qc2dstag_convet_abelian(std::string &file_path) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   std::vector<double> angles;
@@ -167,7 +178,6 @@ calculate_monopole_plaket(std::vector<double> &angles) {
   for (int mu = 0; mu < 4; mu++) {
     link.move_dir(mu);
     for (int nu = mu + 1; nu < 4; nu++) {
-
       SPACE_ITER_START
 
       plakets[count][link.place / 4] = link.monopole_plaket_mu(angles, nu);

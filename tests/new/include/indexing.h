@@ -31,7 +31,8 @@ template <class T> double plaket_time_test6(std::vector<T> &conf);
 
 template <class T>
 double plaket_plane3(std::vector<T> &conf, int mu, int nu, int size_mu1,
-                     int size_mu2, int size_nu1, int size_nu2, int step);
+                     int size_mu2, int size_nu1, int size_nu2, int step_mu,
+                     int step_nu);
 
 template <class T> double plaket_time_test7(std::vector<T> &conf);
 

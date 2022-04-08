@@ -44,8 +44,9 @@ public:
   // writes conf in file, fortran ordering, float
   void write_float_fortran(std::string &file_name);
 
-  void read_float_fortran_convert_abelian(std::string &file_name);
-  void read_float_convert_abelian(std::string &file_name);
+  void read_float_convert_abelian(std::string &file_name, int bites_skip);
+  void read_double_convert_abelian(std::string &file_name, int bites_skip);
+  void read_double_qc2dstag_convert_abelian(std::string &file_name);
 };
 // read conf_num configurations from ml5 file and write them to vector in order
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num);

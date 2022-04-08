@@ -8,6 +8,8 @@ std::vector<double> read_angles_double_fortran(std::string &file_path);
 std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
 std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
 std::vector<double> read_double_qc2dstag_convet_abelian(std::string &file_path);
+std::vector<double>
+convert_abelian_to_abelian(std::vector<abelian> &conf_abelian);
 std::vector<double> read_inverse_laplacian(std::string &file_path);
 
 int find_current(link1 &link, std::vector<double> &J);
