@@ -306,7 +306,7 @@ void data<abelian>::read_float_convert_abelian(std::string &file_name,
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
     std::cout << "read_float_convert_abelian<abelian> error: " << file_name
               << std::endl;
-  for (int i = 0; i < data_size / 4; i++) {
+  for (int i = 0; i < data_size; i++) {
     array.push_back(
         abelian(1, atan2((double)v[i * 4 + 3], (double)v[i * 4 + 0])));
   }
@@ -331,7 +331,7 @@ void data<abelian>::read_double_convert_abelian(std::string &file_name,
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(double)))
     std::cout << "read_double_convert_abelian<abelian> error: " << file_name
               << std::endl;
-  for (int i = 0; i < data_size / 4; i++) {
+  for (int i = 0; i < data_size; i++) {
     array.push_back(abelian(1, atan2(v[i * 4 + 3], v[i * 4 + 0])));
   }
   stream.close();

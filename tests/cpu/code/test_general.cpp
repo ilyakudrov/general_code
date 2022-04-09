@@ -28,30 +28,35 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
   // data<su2> conf;
   // data<su3_full> conf;
-  data<su2> conf;
+  // data<su2> conf;
+  data<abelian> conf;
   // string conf_path = "../../confs/su2_suzuki/monopoless/"
   //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
-  // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
+  string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
   // string conf_path =
   //     "../../confs/su2_suzuki/48^4/beta2.7/monopole/CON_MON_MAG_003.LAT";
   // string conf_path =
   //     "../../confs/su2_suzuki/48^4/beta2.7/monopoless/CON_OFF_MAG_003.LAT";
-  string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
+  // string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
   // conf.read_double(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_float(conf_path, 4);
-  // conf.read_double_convert_abelian(conf_path, 4);
-  conf.read_double_qc2dstag_convert_abelian(conf_path);
+  conf.read_double_convert_abelian(conf_path, 8);
+  for (int i = 0; i < conf.array.size(); i++) {
+    if (conf.array[i].tr() == 0)
+      std::cout << "zero trace " << i << endl;
+  }
+  // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
   // for (int mu = 0; mu < 4; mu++) {
   // link.move(mu, 1);
@@ -99,7 +104,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis_adjoint(conf.array, directions, 2, 3, 2, 3);
+      wilson_offaxis(conf.array, directions, 1, 10, 1, 10);
 
   end_time = clock();
   search_time = end_time - start_time;
