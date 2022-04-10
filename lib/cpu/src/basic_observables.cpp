@@ -799,6 +799,7 @@ double calculate_wilson_loop_offaxis_adjoint(
   T A;
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
+  double trace;
 
   SPACE_ITER_START;
 
@@ -821,13 +822,12 @@ double calculate_wilson_loop_offaxis_adjoint(
 
   A = A * space_lines[link.place / 4].conj();
 
-  result += A.tr();
+  trace = A.tr();
+  result += trace * trace;
 
   SPACE_ITER_END
 
-  return 4 * (result / ((double)DATA_SIZE / 4)) *
-             (result / ((double)DATA_SIZE / 4)) -
-         1;
+  return 4 * result / (x_size * y_size * z_size * t_size) - 1;
 }
 
 // calculate space lines in particular direction on a lattice

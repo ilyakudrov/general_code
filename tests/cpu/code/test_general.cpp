@@ -52,10 +52,6 @@ int main(int argc, char *argv[]) {
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_float(conf_path, 4);
   conf.read_double_convert_abelian(conf_path, 8);
-  for (int i = 0; i < conf.array.size(); i++) {
-    if (conf.array[i].tr() == 0)
-      std::cout << "zero trace " << i << endl;
-  }
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
   // for (int mu = 0; mu < 4; mu++) {
@@ -104,7 +100,7 @@ int main(int argc, char *argv[]) {
   start_time = clock();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf.array, directions, 1, 10, 1, 10);
+      wilson_offaxis(conf.array, directions, 0.9, 4, 1, 4);
 
   end_time = clock();
   search_time = end_time - start_time;
