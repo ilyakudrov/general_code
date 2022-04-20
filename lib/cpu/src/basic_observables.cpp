@@ -75,45 +75,42 @@
 
 template <class T> double plaket_time(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<double> plaket;
-  plaket.reserve(x_size * y_size * z_size * t_size * 3);
+  double plaket = 0;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    plaket.push_back(link.plaket_mu(array, 3).tr());
+    plaket += link.plaket_mu(array, 3).tr();
     SPACE_ITER_END;
   }
-  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
+  return plaket / (x_size * y_size * z_size * t_size * 3);
 }
 
 template <class T> double plaket_space(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<double> plaket;
-  plaket.reserve(x_size * y_size * z_size * t_size * 3);
+  double plaket = 0;
   SPACE_ITER_START;
   for (int mu = 0; mu < 3; mu++) {
     for (int nu = mu + 1; nu < 3; nu++) {
       link.move_dir(nu);
-      plaket.push_back(link.plaket_mu(array, mu).tr());
+      plaket += link.plaket_mu(array, mu).tr();
     }
   }
   SPACE_ITER_END;
-  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
+  return plaket / (x_size * y_size * z_size * t_size * 3);
 }
 
 template <class T> double plaket(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<double> plaket;
-  plaket.reserve(x_size * y_size * z_size * t_size * 6);
+  double plaket = 0;
   SPACE_ITER_START;
   for (int mu = 0; mu < 4; mu++) {
     for (int nu = mu + 1; nu < 4; nu++) {
       link.move_dir(nu);
-      plaket.push_back(link.plaket_mu(array, mu).tr());
+      plaket += link.plaket_mu(array, mu).tr();
     }
   }
   SPACE_ITER_END;
-  return accumulate(plaket.cbegin(), plaket.cend(), 0.0) / plaket.size();
+  return plaket / (x_size * y_size * z_size * t_size * 6);
 }
 
 // fast wilson_loop
@@ -1183,3 +1180,5 @@ wilson_spatial(const std::vector<su3_full> &array,
 
 // su3
 template double plaket_time(const std::vector<su3> &array);
+template double plaket_space(const std::vector<su3> &array);
+template double plaket(const std::vector<su3> &array);

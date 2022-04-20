@@ -10,15 +10,15 @@
 #include <iostream>
 #include <stdio.h>
 
-int x_size = 32;
-int y_size = 32;
-int z_size = 32;
-int t_size = 32;
+int x_size = 24;
+int y_size = 24;
+int z_size = 24;
+int t_size = 24;
 
 int main(int argc, char *argv[]) {
-  double alpha1 = 1;
-  double alpha2 = 1;
-  double alpha3 = 0.5;
+  double alpha1 = 0.75;
+  double alpha2 = 0.6;
+  double alpha3 = 0.3;
   double alpha_APE = 0.5;
   double stout_rho = 0.15;
 
@@ -31,13 +31,14 @@ int main(int argc, char *argv[]) {
   data<su2> smeared;
   data<abelian> conf_abelian;
   data<abelian> conf_abelian_smeared;
-  std::string path_su2 = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
+  std::string path_su2 =
+      "../../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
   std::string path_abelian = "../../confs/su2/time_32/mu0.00/conf_0001.fl";
-  conf.read_double_qc2dstag(path_su2);
+  conf.read_double(path_su2, 8);
   // conf_abelian.read_float(path_abelian, 0);
   double aver[2];
 
-  std::cout.precision(10);
+  std::cout.precision(17);
   su2 A;
   unsigned int start_time;
   unsigned int end_time;
@@ -48,6 +49,15 @@ int main(int argc, char *argv[]) {
 
   // smearing_APE_2d_continue(APE_2d_test, alpha_APE);
 
+  for (int i = 0; i < 4; i++) {
+    std::cout << conf.array[i] << std::endl;
+  }
+
+  std::cout << "plaket: " << 1 - plaket(conf.array) << std::endl;
+  std::cout << "plaket_time: " << 1 - plaket_time(conf.array) << std::endl;
+  std::cout << "plaket_space: " << 1 - plaket_space(conf.array) << std::endl;
+  std::cout << "polyakov_loop: " << polyakov(conf.array) << std::endl;
+
   start_time = clock();
 
   double start;
@@ -57,22 +67,12 @@ int main(int argc, char *argv[]) {
   smearing_second = smearing_second_full(conf.array, smearing_first, alpha2);
   smeared.array = smearing_HYP(conf.array, smearing_second, alpha1);
 
-  for (int i = 0; i < 4; i++) {
-    std::cout << "smearing_HYP test " << smeared.array[i] << std::endl;
-  }
-  std::cout << "right:" << std::endl;
-  std::cout << "-0.110943 0.629543 -0.583767 0.500582" << std::endl;
-  std::cout << "0.318657 -0.218438 -0.415944 0.823245" << std::endl;
-  std::cout << "0.174894 0.667862 0.674797 0.260808" << std::endl;
-  std::cout << "-0.704066 -0.13241 0.453476 -0.530206" << std::endl;
+  std::cout << "plaket: " << 1 - plaket(smeared.array) << std::endl;
+  std::cout << "plaket_time: " << 1 - plaket_time(smeared.array) << std::endl;
+  std::cout << "plaket_space: " << 1 - plaket_space(smeared.array) << std::endl;
+  std::cout << "polyakov_loop: " << polyakov(smeared.array) << std::endl;
 
   smeared.array = smearing_HYP_refresh(conf, alpha1, alpha2, alpha3);
-
-  for (int i = 0; i < 4; i++) {
-    A = smeared.array[i];
-    std::cout << "smearing_HYP_refresh test " << A.a0 << " " << A.a1 << " "
-              << A.a2 << " " << A.a3 << std::endl;
-  }
 
   int T_min = 1, T_max = 3;
   int R_min = 1, R_max = 3;
@@ -99,6 +99,19 @@ int main(int argc, char *argv[]) {
 
   smeared.array = smearing1_APE(conf.array, alpha_APE);
 
+  for (int i = 0; i < 50; i++) {
+    conf.array = smearing1_APE(conf.array, alpha_APE);
+  }
+
+  for (int i = 0; i < 4; i++) {
+    std::cout << conf.array[i] << std::endl;
+  }
+
+  std::cout << "plaket: " << 1 - plaket(conf.array) << std::endl;
+  std::cout << "plaket_time: " << 1 - plaket_time(conf.array) << std::endl;
+  std::cout << "plaket_space: " << 1 - plaket_space(conf.array) << std::endl;
+  std::cout << "polyakov_loop: " << polyakov(conf.array) << std::endl;
+
   start_time = clock();
 
   vec_wilson = wilson(smeared.array, R_min, R_max, T_min, T_max);
@@ -117,29 +130,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  for (int i = 0; i < 4; i++) {
-    A = smeared.array[i];
-    std::cout << "smearing_APE test " << A.a0 << " " << A.a1 << " " << A.a2
-              << " " << A.a3 << std::endl;
-  }
-  std::cout << "right:" << std::endl;
-  std::cout << "-0.0833883 0.641689 -0.604086 0.465147" << std::endl;
-  std::cout << "0.336007 -0.177589 -0.426239 0.820903" << std::endl;
-  std::cout << "0.125318 0.626699 0.730398 0.240963" << std::endl;
-  std::cout << "-0.632818 0.13761 0.745239 0.158818" << std::endl;
+  start_time = clock();
 
   smeared.array = smearing_stout(conf, stout_rho);
-
-  for (int i = 0; i < 4; i++) {
-    A = smeared.array[i];
-    std::cout << "smearing_stout test " << A.a0 << " " << A.a1 << " " << A.a2
-              << " " << A.a3 << std::endl;
-  }
-  std::cout << "right:" << std::endl;
-  std::cout << "-0.0185375 0.684286 -0.660024 0.30948" << std::endl;
-  std::cout << "0.363087 -0.0991993 -0.575234 0.726246" << std::endl;
-  std::cout << "0.172742 0.633665 0.73173 0.182208" << std::endl;
-  std::cout << "-0.816237 -0.0404862 0.571983 -0.0703786" << std::endl;
 
   end_time = clock();
   search_time = end_time - start_time;
