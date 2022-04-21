@@ -513,38 +513,38 @@ double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
   // T plakets;
   double result = 0;
 
-#pragma omp parallel for num_threads(4)
-  for (int i = 0; i < data_size; i++) {
-    plakets[i] = conf_mu[i] * conf_nu[i];
-  }
-
-  // #pragma omp parallel
-  //   for (int k = 0; k < data_size; k += size_nu2) {
-  // #pragma omp for
-  //     for (int i = 0; i < size_nu2; i += size_mu2) {
-  //       for (int j = 0; j < size_mu2 - size_mu1; j++) {
-  //         plakets[j + i] = conf_mu[j + i + k] * conf_nu[j + i + k +
-  //         size_mu1];
-  //       }
-  //       for (int j = 0; j < size_mu1; j++) {
-  //         plakets[j + i + size_mu2 - size_mu1] =
-  //             conf_mu[j + i + k + size_mu2 - size_mu1] * conf_nu[j + i + k];
-  //       }
-  //     }
-  // #pragma omp for
-  //     for (int j = 0; j < size_nu2 - size_nu1; j++) {
-  //       plakets[j] = plakets[j] ^ &conf_mu[j + k + size_nu1];
-  //     }
-  // #pragma omp for
-  //     for (int j = 0; j < size_nu1; j++) {
-  //       plakets[j + size_nu2 - size_nu1] =
-  //           plakets[j + size_nu2 - size_nu1] ^ &conf_mu[j + k];
-  //     }
-  // #pragma omp for
-  //     for (int i = 0; i < size_nu2; i++) {
-  //       result += plakets[i].multiply_tr(&conf_nu[i + k]);
-  //     }
+  // #pragma omp parallel for num_threads(4)
+  //   for (int i = 0; i < data_size; i++) {
+  //     plakets[i] = conf_mu[i] * conf_nu[i];
   //   }
+
+  // #pragma omp parallel num_threads(4)
+  for (int k = 0; k < data_size; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+#pragma omp parallel for
+      for (int j = 0; j < size_mu2 - size_mu1; j++) {
+        plakets[j + i] = conf_mu[j + i + k] * conf_nu[j + i + k + size_mu1];
+      }
+#pragma omp parallel for
+      for (int j = 0; j < size_mu1; j++) {
+        plakets[j + i + size_mu2 - size_mu1] =
+            conf_mu[j + i + k + size_mu2 - size_mu1] * conf_nu[j + i + k];
+      }
+    }
+#pragma omp parallel for
+    for (int j = 0; j < size_nu2 - size_nu1; j++) {
+      plakets[j] = plakets[j] ^ &conf_mu[j + k + size_nu1];
+    }
+#pragma omp parallel for
+    for (int j = 0; j < size_nu1; j++) {
+      plakets[j + size_nu2 - size_nu1] =
+          plakets[j + size_nu2 - size_nu1] ^ &conf_mu[j + k];
+    }
+#pragma omp parallel for
+    for (int i = 0; i < size_nu2; i++) {
+      result += plakets[i].multiply_tr(&conf_nu[i + k]);
+    }
+  }
 
   return result / data_size;
 }
@@ -559,20 +559,18 @@ double plaket_time_test10(std::vector<std::vector<T>> &separated, int step) {
   start_time = omp_get_wtime();
 
   double result = 0;
-  // result += plaket_plane6(separated[3], separated[0], 1, t_size, t_size,
-  //                         x_size * t_size, 1);
-  // result += plaket_plane6(separated[3], separated[1], 1, t_size,
-  //                         x_size * t_size, y_size * x_size * t_size, 1);
-  // result += plaket_plane6(separated[3], separated[2], 1, t_size,
-  //                         y_size * x_size * t_size,
-  //                         y_size * x_size * t_size * z_size, 1);
-  // result += plaket_plane6(separated[0], separated[1], t_size, x_size *
-  // t_size,
-  //                         x_size * t_size, y_size * x_size * t_size, step);
-  // result += plaket_plane6(separated[0], separated[2], t_size, x_size *
-  // t_size,
-  //                         y_size * x_size * t_size,
-  //                         y_size * x_size * t_size * z_size, step);
+  result += plaket_plane6(separated[3], separated[0], 1, t_size, t_size,
+                          x_size * t_size, 1);
+  result += plaket_plane6(separated[3], separated[1], 1, t_size,
+                          x_size * t_size, y_size * x_size * t_size, 1);
+  result += plaket_plane6(separated[3], separated[2], 1, t_size,
+                          y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size, 1);
+  result += plaket_plane6(separated[0], separated[1], t_size, x_size * t_size,
+                          x_size * t_size, y_size * x_size * t_size, step);
+  result += plaket_plane6(separated[0], separated[2], t_size, x_size * t_size,
+                          y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size, step);
   result += plaket_plane6(separated[1], separated[2], x_size * t_size,
                           y_size * x_size * t_size, y_size * x_size * t_size,
                           y_size * x_size * t_size * z_size, step);
