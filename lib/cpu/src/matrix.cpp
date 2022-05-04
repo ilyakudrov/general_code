@@ -37,6 +37,11 @@ complex_t operator^(const complex_t &a, const complex_t &b) {
                    a.imag * b.real - a.real * b.imag);
 }
 
+complex_t operator%(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real * b.real + a.imag * b.imag,
+                   a.real * b.imag - a.imag * b.real);
+}
+
 complex_t operator/(const complex_t &a, const double &b) {
   return complex_t(a.real / b, a.imag / b);
 }
@@ -111,6 +116,12 @@ su2 operator^(const su2 &A, const su2 *B) {
              -A.a0 * B->a2 + B->a0 * A.a2 - A.a1 * B->a3 + A.a3 * B->a1,
              -A.a0 * B->a3 + B->a0 * A.a3 - A.a2 * B->a1 + A.a1 * B->a2);
 };
+su2 operator%(const su2 &A, const su2 *B) {
+  return su2(A.a0 * B->a0 + A.a1 * B->a1 + A.a2 * B->a2 + A.a3 * B->a3,
+             A.a0 * B->a1 - B->a0 * A.a1 - A.a3 * B->a2 + A.a2 * B->a3,
+             A.a0 * B->a2 - B->a0 * A.a2 - A.a1 * B->a3 + A.a3 * B->a1,
+             A.a0 * B->a3 - B->a0 * A.a3 - A.a2 * B->a1 + A.a1 * B->a2);
+};
 
 std::ostream &operator<<(std::ostream &os, const su2 &A) {
   os << "a0 = " << A.a0 << " "
@@ -173,6 +184,9 @@ abelian operator*(const abelian &A, const abelian *B) {
 };
 abelian operator^(const abelian &A, const abelian *B) {
   return abelian(A.r * B->r, A.phi - B->phi);
+};
+abelian operator%(const abelian &A, const abelian *B) {
+  return abelian(A.r * B->r, B->phi - A.phi);
 };
 
 std::ostream &operator<<(std::ostream &os, const abelian &A) {
@@ -351,6 +365,21 @@ su3_full operator^(const su3_full &A, const su3_full *B) {
       a = 0;
       for (int k = 0; k < 3; k++) {
         a += A.matrix[i][k] * std::conj(B->matrix[j][k]);
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3_full operator%(const su3_full &A, const su3_full *B) {
+  su3_full C;
+  std::complex<double> a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = 0;
+      for (int k = 0; k < 3; k++) {
+        a += std::conj(A.matrix[k][i]) * B->matrix[k][j];
       }
       C.matrix[i][j] = a;
     }
@@ -539,6 +568,21 @@ su3 operator^(const su3 &A, const su3 *B) {
       a = complex_t(0, 0);
       for (int k = 0; k < 3; k++) {
         a = a + (A.matrix[i][k] ^ B->matrix[j][k]);
+      }
+      C.matrix[i][j] = a;
+    }
+  }
+  return C;
+};
+
+su3 operator%(const su3 &A, const su3 *B) {
+  su3 C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      a = complex_t(0, 0);
+      for (int k = 0; k < 3; k++) {
+        a = a + (A.matrix[k][i] % B->matrix[k][j]);
       }
       C.matrix[i][j] = a;
     }

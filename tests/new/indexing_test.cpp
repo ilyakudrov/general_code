@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   data<su3> conf;
   // data<abelian> conf;
   // string conf_path = "../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  string conf_path = "../confs/SU3_conf/nt14/conf.0501";
+  string conf_path = "../confs/su3/conf.0501";
   // conf.read_double(conf_path, 8);
   // conf.read_double_qc2dstag(conf_path);
   conf.read_ildg(conf_path);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
   // std::cout << "plaket time: " << search_time * 1. / CLOCKS_PER_SEC
   //           << std::endl;
 
-  std::vector<std::vector<su3>> separated = separate_3(conf.array, 3);
+  std::vector<std::vector<su3>> separated = separate_3(conf.array);
   // std::vector<std::vector<su3_full>> separated = separate_3(conf.array, 3);
   // std::vector<std::vector<su2>> separated = separate_3(conf.array, 3);
 
@@ -133,50 +133,52 @@ int main(int argc, char *argv[]) {
   // std::cout << "plaket7 new time: " << search_time * 1. / CLOCKS_PER_SEC
   //           << std::endl;
 
-  /*start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket_time_test8(separated)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time_test8(separated)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket8 new time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket8 new time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
+  // std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket_full time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket_full time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_space " << plaket_space(conf.array)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_space " << plaket_space(conf.array)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket_space time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket_space time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time_test9 " << plaket_time_test9(separated, 32)
-            << std::endl;
+  // std::cout << "qc2dstag plaket_time_test9 " << plaket_time_test9(separated,
+  // 32)
+  //           << std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket_time_test9 time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;*/
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket_time_test9 time: " << search_time * 1. /
+  // CLOCKS_PER_SEC
+  //           << std::endl;
 
   // start_time = omp_get_wtime();
 
   // std::cout << "qc2dstag plaket_time_test10 "
   //           << plaket_time_test10(separated, 32) << std::endl;
-  std::cout << plaket_time_test10(separated, 32) << std::endl;
+  std::cout << plaket_time_test10(separated, 4) << std::endl;
 
   // end_time = omp_get_wtime();
   // search_time = end_time - start_time;

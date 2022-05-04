@@ -460,14 +460,14 @@ double plaket_plane5(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
             plakets[m] = conf_mu[j + m] * conf_nu[j + m + size_mu1];
           else
             plakets[m] = conf_mu[j + m] * conf_nu[j + m - size_mu2 + size_mu1];
-        }
-        for (int m = 0; m < step; m++) {
+          // }
+          // for (int m = 0; m < step; m++) {
           if (j + m < k + size_nu2 - size_nu1)
             plakets[m] = plakets[m] ^ &conf_mu[j + m + size_nu1];
           else
             plakets[m] = plakets[m] ^ &conf_mu[j + m - size_nu2 + size_nu1];
-        }
-        for (int m = 0; m < step; m++) {
+          // }
+          // for (int m = 0; m < step; m++) {
           result += plakets[m].multiply_tr(&conf_nu[j + m]);
         }
       }
@@ -479,10 +479,6 @@ double plaket_plane5(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
 
 template <class T>
 double plaket_time_test9(std::vector<std::vector<T>> &separated, int step) {
-
-  unsigned int start_time;
-  unsigned int end_time;
-  unsigned int search_time;
 
   double result = 0;
   result += plaket_plane5(separated[3], separated[0], 1, t_size, t_size,
@@ -506,43 +502,27 @@ double plaket_time_test9(std::vector<std::vector<T>> &separated, int step) {
 template <class T>
 double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                      int size_mu1, int size_mu2, int size_nu1, int size_nu2,
-                     int step) {
+                     int thread_num) {
   int data_size = x_size * y_size * z_size * t_size;
 
-  std::vector<T> plakets(size_nu2);
-  // T plakets;
+  T plakets;
   double result = 0;
 
-  // #pragma omp parallel for num_threads(4)
-  //   for (int i = 0; i < data_size; i++) {
-  //     plakets[i] = conf_mu[i] * conf_nu[i];
-  //   }
-
-  // #pragma omp parallel num_threads(4)
+#pragma omp parallel for collapse(3) private(plakets) reduction(+ : result) num_threads(thread_num)
   for (int k = 0; k < data_size; k += size_nu2) {
     for (int i = 0; i < size_nu2; i += size_mu2) {
-#pragma omp parallel for
-      for (int j = 0; j < size_mu2 - size_mu1; j++) {
-        plakets[j + i] = conf_mu[j + i + k] * conf_nu[j + i + k + size_mu1];
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - size_mu1)
+          plakets = conf_mu[i + k + j] * conf_nu[i + k + j + size_mu1];
+        else
+          plakets =
+              conf_mu[i + k + j] * conf_nu[i + k + j - size_mu2 + size_mu1];
+        if (i + j < size_nu2 - size_nu1)
+          plakets = plakets ^ &conf_mu[i + k + j + size_nu1];
+        else
+          plakets = plakets ^ &conf_mu[i + k + j - size_nu2 + size_nu1];
+        result += plakets.multiply_tr(&conf_nu[i + k + j]);
       }
-#pragma omp parallel for
-      for (int j = 0; j < size_mu1; j++) {
-        plakets[j + i + size_mu2 - size_mu1] =
-            conf_mu[j + i + k + size_mu2 - size_mu1] * conf_nu[j + i + k];
-      }
-    }
-#pragma omp parallel for
-    for (int j = 0; j < size_nu2 - size_nu1; j++) {
-      plakets[j] = plakets[j] ^ &conf_mu[j + k + size_nu1];
-    }
-#pragma omp parallel for
-    for (int j = 0; j < size_nu1; j++) {
-      plakets[j + size_nu2 - size_nu1] =
-          plakets[j + size_nu2 - size_nu1] ^ &conf_mu[j + k];
-    }
-#pragma omp parallel for
-    for (int i = 0; i < size_nu2; i++) {
-      result += plakets[i].multiply_tr(&conf_nu[i + k]);
     }
   }
 
@@ -550,7 +530,8 @@ double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
 }
 
 template <class T>
-double plaket_time_test10(std::vector<std::vector<T>> &separated, int step) {
+double plaket_time_test10(std::vector<std::vector<T>> &separated,
+                          int thread_num) {
 
   double start_time;
   double end_time;
@@ -560,30 +541,67 @@ double plaket_time_test10(std::vector<std::vector<T>> &separated, int step) {
 
   double result = 0;
   result += plaket_plane6(separated[3], separated[0], 1, t_size, t_size,
-                          x_size * t_size, 1);
-  result += plaket_plane6(separated[3], separated[1], 1, t_size,
-                          x_size * t_size, y_size * x_size * t_size, 1);
-  result += plaket_plane6(separated[3], separated[2], 1, t_size,
-                          y_size * x_size * t_size,
-                          y_size * x_size * t_size * z_size, 1);
-  result += plaket_plane6(separated[0], separated[1], t_size, x_size * t_size,
-                          x_size * t_size, y_size * x_size * t_size, step);
-  result += plaket_plane6(separated[0], separated[2], t_size, x_size * t_size,
-                          y_size * x_size * t_size,
-                          y_size * x_size * t_size * z_size, step);
-  result += plaket_plane6(separated[1], separated[2], x_size * t_size,
-                          y_size * x_size * t_size, y_size * x_size * t_size,
-                          y_size * x_size * t_size * z_size, step);
+                          x_size * t_size, thread_num);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "plaket_time_test10 time: " << search_time << std::endl;
+  std::cout << "plaket_time_test10 time 1: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+
+  result +=
+      plaket_plane6(separated[3], separated[1], 1, t_size, x_size * t_size,
+                    y_size * x_size * t_size, thread_num);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket_time_test10 time 2: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+
+  result += plaket_plane6(separated[3], separated[2], 1, t_size,
+                          y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size, thread_num);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket_time_test10 time 3: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+
+  result +=
+      plaket_plane6(separated[0], separated[1], t_size, x_size * t_size,
+                    x_size * t_size, y_size * x_size * t_size, thread_num);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket_time_test10 time 4: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+
+  result += plaket_plane6(separated[0], separated[2], t_size, x_size * t_size,
+                          y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size, thread_num);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket_time_test10 time 5: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+
+  result += plaket_plane6(separated[1], separated[2], x_size * t_size,
+                          y_size * x_size * t_size, y_size * x_size * t_size,
+                          y_size * x_size * t_size * z_size, thread_num);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket_time_test10 time 6: " << search_time << std::endl;
 
   return result / 6;
 }
 
 template <class T>
-std::vector<std::vector<T>> separate_3(std::vector<T> &conf, int mu) {
+std::vector<std::vector<T>> separate_3(std::vector<T> &conf) {
   int data_size = x_size * y_size * z_size * t_size;
   std::vector<std::vector<T>> result(4, std::vector<T>(data_size));
 
@@ -612,8 +630,7 @@ template double plaket_time_test(std::vector<std::vector<su2>> &separated);
 template double plaket_time_test1(std::vector<std::vector<su2>> &separated);
 template double plaket_time_test2(std::vector<std::vector<su2>> &separated);
 
-template std::vector<std::vector<su2>> separate_3(std::vector<su2> &conf,
-                                                  int mu);
+template std::vector<std::vector<su2>> separate_3(std::vector<su2> &conf);
 template double plaket_plane1(std::vector<su2> &conf_mu,
                               std::vector<su2> &conf_nu, int size1, int size2);
 template double plaket_time_test3(std::vector<std::vector<su2>> &separated);
@@ -644,7 +661,7 @@ template double plaket_time_test9(std::vector<std::vector<su2>> &separated,
 template double plaket_plane6(std::vector<su2> &conf_mu,
                               std::vector<su2> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,
-                              int step);
+                              int thread_num);
 template double plaket_time_test10(std::vector<std::vector<su2>> &separated,
                                    int step);
 
@@ -692,12 +709,12 @@ template double plaket_time_test9(std::vector<std::vector<abelian>> &separated,
 template double plaket_plane6(std::vector<abelian> &conf_mu,
                               std::vector<abelian> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,
-                              int step);
+                              int thread_num);
 template double plaket_time_test10(std::vector<std::vector<abelian>> &separated,
                                    int step);
 
 template std::vector<std::vector<abelian>>
-separate_3(std::vector<abelian> &conf, int mu);
+separate_3(std::vector<abelian> &conf);
 
 // su3_full
 template double plaket_plane(std::vector<su3_full> &conf_mu,
@@ -717,7 +734,7 @@ template double
 plaket_time_test3(std::vector<std::vector<su3_full>> &separated);
 
 template std::vector<std::vector<su3_full>>
-separate_3(std::vector<su3_full> &conf, int mu);
+separate_3(std::vector<su3_full> &conf);
 
 template double plaket_plane2(std::vector<su3_full> &conf_mu,
                               std::vector<su3_full> &conf_nu, int size1,
@@ -750,7 +767,7 @@ template double plaket_time_test9(std::vector<std::vector<su3_full>> &separated,
 template double plaket_plane6(std::vector<su3_full> &conf_mu,
                               std::vector<su3_full> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,
-                              int step);
+                              int thread_num);
 template double
 plaket_time_test10(std::vector<std::vector<su3_full>> &separated, int step);
 
@@ -766,8 +783,7 @@ template double plaket_plane1(std::vector<su3> &conf_mu,
                               std::vector<su3> &conf_nu, int size1, int size2);
 template double plaket_time_test3(std::vector<std::vector<su3>> &separated);
 
-template std::vector<std::vector<su3>> separate_3(std::vector<su3> &conf,
-                                                  int mu);
+template std::vector<std::vector<su3>> separate_3(std::vector<su3> &conf);
 
 template double plaket_plane2(std::vector<su3> &conf_mu,
                               std::vector<su3> &conf_nu, int size1, int size2);
@@ -797,6 +813,6 @@ template double plaket_time_test9(std::vector<std::vector<su3>> &separated,
 template double plaket_plane6(std::vector<su3> &conf_mu,
                               std::vector<su3> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,
-                              int step);
+                              int thread_num);
 template double plaket_time_test10(std::vector<std::vector<su3>> &separated,
                                    int step);

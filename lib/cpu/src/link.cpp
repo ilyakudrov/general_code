@@ -586,4 +586,28 @@ template double link1::field3(const std::vector<su3_full> &polyakov_loop, int D,
                               int x);
 
 // su3
+template const su3 *link1::get_matrix(const std::vector<su3> &vec);
 template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);
+template su3 link1::plaket_schwinger_average(const std::vector<su3> &array,
+                                             int mu);
+template su3 link1::schwinger_line(const std::vector<su3> &array, int d,
+                                   int dir, int x);
+template su3 link1::polyakov_loop(const std::vector<su3> &array);
+template su3 link1::wilson_loop(const std::vector<su3> &array, int r, int t);
+template su3 link1::wilson_loop_schwinger(const std::vector<su3> &array, int r,
+                                          int t);
+template su3 link1::wilson_line(const std::vector<su3> &array, int length);
+template su3 link1::wilson_line_single(const std::vector<su3> &array,
+                                       int length);
+template su3 link1::wilson_line_offaxis(const std::vector<su3> &array,
+                                        const std::vector<int> &pattern);
+template double
+link1::field1(const std::vector<std::vector<su3>> &schwinger_line,
+              const std::vector<su3> &plaket,
+              const std::vector<su3> &polyakov_loop, int d, int D, int dir,
+              int x);
+template double link1::field2(const std::vector<su3> &plaket,
+                              const std::vector<su3> &polyakov_loop, int d,
+                              int D, int dir, int x);
+template double link1::field3(const std::vector<su3> &polyakov_loop, int D,
+                              int x);

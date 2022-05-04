@@ -23,6 +23,8 @@ complex_t operator*(const complex_t &a, const double &b);
 
 complex_t operator^(const complex_t &a, const complex_t &b);
 
+complex_t operator%(const complex_t &a, const complex_t &b);
+
 complex_t operator/(const complex_t &a, const double &b);
 
 std::ostream &operator<<(std::ostream &os, const complex_t &a);
@@ -69,6 +71,9 @@ su2 operator*(const su2 &A, const su2 *B);
 // matrix multiplication A * B.conj()
 su2 operator^(const su2 &A, const su2 *B);
 
+// matrix multiplication A.conj() * B
+su2 operator%(const su2 &A, const su2 *B);
+
 std::ostream &operator<<(std::ostream &os, const su2 &A);
 
 // abelian variable (module * exp(i * phi))
@@ -99,6 +104,7 @@ abelian operator*(const abelian &A, const double &x);
 abelian operator*(const abelian &A, const abelian &B);
 abelian operator*(const abelian &A, const abelian *B);
 abelian operator^(const abelian &A, const abelian *B);
+abelian operator%(const abelian &A, const abelian *B);
 
 std::ostream &operator<<(std::ostream &os, const abelian &A);
 
@@ -145,6 +151,9 @@ su3_full operator*(const su3_full &A, const su3_full *B);
 // matrix multiplication A * B.conj()
 su3_full operator^(const su3_full &A, const su3_full *B);
 
+// matrix multiplication A.conj() * B
+su3_full operator%(const su3_full &A, const su3_full *B);
+
 std::ostream &operator<<(std::ostream &os, const su3_full &A);
 
 // su3 matrix in 3x3 complex matrix representation
@@ -189,5 +198,8 @@ su3 operator*(const su3 &A, const su3 *B);
 
 // matrix multiplication A * B.conj()
 su3 operator^(const su3 &A, const su3 *B);
+
+// matrix multiplication A.conj() * B
+su3 operator%(const su3 &A, const su3 *B);
 
 std::ostream &operator<<(std::ostream &os, const su3 &A);

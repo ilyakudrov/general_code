@@ -52,9 +52,9 @@ double plaket_time_test9(std::vector<std::vector<T>> &separated, int step);
 template <class T>
 double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                      int size_mu1, int size_mu2, int size_nu1, int size_nu2,
-                     int step);
+                     int thread_num);
 template <class T>
-double plaket_time_test10(std::vector<std::vector<T>> &separated, int step);
+double plaket_time_test10(std::vector<std::vector<T>> &separated,
+                          int thread_num);
 
-template <class T>
-std::vector<std::vector<T>> separate_3(std::vector<T> &conf, int mu);
+template <class T> std::vector<std::vector<T>> separate_3(std::vector<T> &conf);

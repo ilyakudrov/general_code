@@ -13,6 +13,8 @@ indexing_test: indexing_test.cpp src/indexing.cpp $(OBJFILES) $(C_LIME)
 	$(GCC) $(FLAGS) $^ -o indexing_test
 wilson_loop_indexing_test: wilson_loop_indexing_test.cpp src/wilson_loop_indexing.cpp $(OBJFILES) $(C_LIME)
 	$(GCC) $(FLAGS) $^ -o wilson_loop_indexing_test
+smearing_indexing_test: smearing_indexing_test.cpp src/smearing_indexing.cpp $(OBJFILES) $(C_LIME)
+	$(GCC) $(FLAGS) $^ -o smearing_indexing_test
 $(OBJFILES): $(OBJ_PATH)/%.o: $(SRC_PATH)/%.cpp
 	$(GCC) $(FLAGS) -c $< -o $@
 
