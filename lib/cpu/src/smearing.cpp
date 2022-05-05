@@ -54,26 +54,20 @@ T staples_first(const std::vector<T> &vec, link1 &link, int eta) {
   T A;
   T B;
   int dir = link.direction;
-  link.move_dir(eta);
-  A = *link.get_matrix(vec);
+  A = vec[link.place + eta];
   link.move(eta, 1);
-  link.move_dir(dir);
-  A = A * link.get_matrix(vec);
+  A = A * vec[link.place + dir];
   link.move(dir, 1);
   link.move(eta, -1);
-  link.move_dir(eta);
-  A = A ^ link.get_matrix(vec);
+  A = A ^ vec[link.place + eta];
   link.move(dir, -1);
   link.move(eta, -1);
-  B = link.get_matrix(vec)->conj();
-  link.move_dir(dir);
-  B = B * link.get_matrix(vec);
+  B = vec[link.place + eta].conj();
+  B = B * vec[link.place + dir];
   link.move(dir, 1);
-  link.move_dir(eta);
-  B = B * link.get_matrix(vec);
+  B = B * vec[link.place + eta];
   link.move(eta, 1);
   link.move(dir, -1);
-  link.move_dir(dir);
   return (A + B);
 }
 
@@ -190,7 +184,7 @@ std::vector<T> smearing_first(const std::vector<T> &array, double alpha3,
   std::vector<T> vec(data_size / 4);
   link.move_dir(mu);
   SPACE_ITER_START
-  vec[PLACE1_LINK_NODIR] = (1 - alpha3) * *link.get_matrix(array);
+  vec[PLACE1_LINK_NODIR] = (1 - alpha3) * array[link.place + mu];
   for (int i = 0; i < 4; i++) {
     if (i != mu && i != nu && i != rho) {
       vec[PLACE1_LINK_NODIR] =
@@ -265,7 +259,7 @@ std::vector<T> smearing_second(const std::vector<T> &array,
   std::vector<T> vec(data_size / 4);
   link.move_dir(mu);
   SPACE_ITER_START
-  vec[link.place / 4] = (1 - alpha2) * *link.get_matrix(array);
+  vec[link.place / 4] = (1 - alpha2) * array[link.place + mu];
   for (int i = 0; i < 4; i++) {
     if (i != mu && i != nu) {
       vec[link.place / 4] =
@@ -326,7 +320,7 @@ std::vector<T> smearing_HYP(const std::vector<T> &array,
   std::vector<T> vec(data_size);
   link.move_dir(3);
   SPACE_ITER_START
-  vec[link.place + 3] = (1 - alpha1) * *link.get_matrix(array);
+  vec[link.place + 3] = (1 - alpha1) * array[link.place + 3];
   for (int i = 0; i < 3; i++) {
     vec[link.place + 3] =
         vec[link.place + 3] +
@@ -517,7 +511,7 @@ T staples_2d_continue(std::vector<T> &array1, std::vector<T> &array2,
   A = A * array1[link.place / 4];
   link.move(i, 1);
   link.move(j, -1);
-  A = A ^ &array2[link.place / 4];
+  A = A ^ array2[link.place / 4];
   link.move(i, -1);
   link.move(j, -1);
   B = array2[link.place / 4].conj();
@@ -533,7 +527,7 @@ template <class T>
 T smearing_first_refresh(const std::vector<T> &vec, link1 &link, int nu,
                          int rho, double alpha3) {
   T A;
-  A = (1 - alpha3) * *link.get_matrix(vec);
+  A = (1 - alpha3) * vec[link.place + link.direction];
   for (int d = 0; d < 4; d++) {
     if (d != nu && d != rho && d != link.direction) {
       A = A + alpha3 / 2. * staples_first(vec, link, d);
@@ -547,7 +541,7 @@ template <class T>
 T smearing_second_refresh(const std::vector<T> &vec, link1 &link, int nu,
                           double alpha2, double alpha3) {
   T A;
-  A = (1 - alpha2) * *link.get_matrix(vec);
+  A = (1 - alpha2) * vec[link.place + link.direction];
   for (int d = 0; d < 4; d++) {
     if (d != nu && d != link.direction) {
       A = A + alpha2 / 4. * staples_second_refresh(vec, link, d, nu, alpha3);
@@ -566,7 +560,7 @@ std::vector<T> smearing_HYP_refresh(data<T> &conf, double alpha1, double alpha2,
   T A;
   link.move_dir(3);
   SPACE_ITER_START
-  A = (1 - alpha1) * *link.get_matrix(vec);
+  A = (1 - alpha1) * vec[link.place + 3];
   for (int d = 0; d < 3; d++) {
     A = A + alpha1 / 6. * staples_third_refresh(vec, link, d, alpha2, alpha3);
   }

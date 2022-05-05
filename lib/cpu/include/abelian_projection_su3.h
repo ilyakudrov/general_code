@@ -5,4 +5,4 @@
 
 using namespace std;
 
-vector<vector<double>> make_angles_SU3(vector<su3_full> &conf);
+vector<vector<double>> make_angles_SU3(vector<su3> &conf);

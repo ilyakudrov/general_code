@@ -322,7 +322,7 @@ std::vector<T> wilson_line_increase(const std::vector<T> &array,
   std::vector<T> lines_new(DATA_SIZE / 4);
   SPACE_ITER_START;
   link.move(mu, length);
-  lines_new[PLACE1_NODIR] = lines[PLACE1_NODIR] * link.get_matrix(array);
+  lines_new[PLACE1_NODIR] = lines[PLACE1_NODIR] * array[link.place + mu];
   SPACE_ITER_END;
   return lines_new;
 }

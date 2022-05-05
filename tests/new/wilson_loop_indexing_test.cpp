@@ -23,7 +23,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 14;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -43,11 +43,11 @@ int main(int argc, char *argv[]) {
   // data<su2> conf;
   data<MATRIX_TYPE> conf;
   // data<abelian> conf;
-  // string conf_path = "../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  string conf_path = "../confs/su3/conf.0501";
+  string conf_path = "../confs/su2/CONF0201";
+  // string conf_path = "../confs/su3/conf.0501";
   // conf.read_double(conf_path, 8);
-  // conf.read_double_qc2dstag(conf_path);
-  conf.read_ildg(conf_path);
+  conf.read_double_qc2dstag(conf_path);
+  // conf.read_ildg(conf_path);
 
   int wilson_line_length = 10;
   int wilson_lines_direction = 3;
@@ -205,6 +205,6 @@ int main(int argc, char *argv[]) {
       separated_unchanged[3], length_T, link.multiplier[3] / 4,
       link.multiplier[3] / 4 * link.lattice_size[3]);
 
-  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 1)
+  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
             << std::endl;
 }

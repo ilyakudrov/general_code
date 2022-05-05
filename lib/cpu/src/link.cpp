@@ -106,23 +106,19 @@ void link1::go_update(int x, int y, int z, int t) {
   update(3);
 }
 
-template <class T> const T *link1::get_matrix(const std::vector<T> &array) {
-  return &array[place + direction];
-}
-
 template <class T> T link1::plaket_mu(const std::vector<T> &array, int mu) {
   int dir = direction;
-  T A = *get_matrix(array);
+  T A = array[place + direction];
   move(dir, 1);
   move_dir(mu);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
   move_dir(dir);
   move(dir, -1);
   move(mu, 1);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move_dir(mu);
   move(mu, -1);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move_dir(dir);
   return A;
 }
@@ -131,56 +127,56 @@ template <class T>
 T link1::plaket_schwinger_average(const std::vector<T> &array, int mu) {
   int dir = direction;
   T result;
-  T A = *get_matrix(array);
+  T A = array[place + direction];
   move(dir, 1);
   move_dir(mu);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
   move_dir(dir);
   move(dir, -1);
   move(mu, 1);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move_dir(mu);
   move(mu, -1);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
 
   result = A;
 
-  A = *get_matrix(array);
+  A = array[place + direction];
   move(mu, 1);
   move(dir, -1);
   move_dir(dir);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move(mu, -1);
   move_dir(mu);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move_dir(dir);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
 
   result = result + A;
 
-  A = get_matrix(array)->conj();
+  A = array[place + direction].conj();
   move(mu, -1);
   move_dir(mu);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
   move_dir(dir);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
   move(dir, 1);
   move(mu, 1);
   move_dir(mu);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
 
   result = result + A;
 
-  A = get_matrix(array)->conj();
+  A = array[place + direction].conj();
   move_dir(dir);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
   move(dir, 1);
   move_dir(mu);
-  A = A * get_matrix(array);
+  A = A * array[place + direction];
   move(mu, 1);
   move(dir, -1);
   move_dir(dir);
-  A = A ^ get_matrix(array);
+  A = A ^ array[place + direction];
 
   result = result + A;
 
@@ -193,12 +189,12 @@ T link1::schwinger_line(const std::vector<T> &array, int d, int dir, int x) {
   int dir1 = direction;
   T A;
   for (int i = 0; i < d; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(dir1, 1);
   }
   move_dir(dir);
   for (int i = 0; i < x; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(dir, 1);
   }
   move_dir(dir1);
@@ -210,7 +206,7 @@ T link1::schwinger_line(const std::vector<T> &array, int d, int dir, int x) {
 template <class T> T link1::polyakov_loop(const std::vector<T> &array) {
   T A;
   for (int i = 0; i < lattice_size[3]; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(direction, 1);
   }
   return A;
@@ -221,23 +217,23 @@ T link1::wilson_loop(const std::vector<T> &array, int r, int t) {
   int dir = direction;
   T A;
   for (int i = 0; i < r; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(dir, 1);
   }
   move_dir(3);
   for (int i = 0; i < t; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(3, 1);
   }
   move_dir(dir);
   for (int i = 0; i < r; i++) {
     move(dir, -1);
-    A = A ^ get_matrix(array);
+    A = A ^ array[place + direction];
   }
   move_dir(3);
   for (int i = 0; i < t; i++) {
     move(3, -1);
-    A = A ^ get_matrix(array);
+    A = A ^ array[place + direction];
   }
   move_dir(dir);
   return A;
@@ -273,29 +269,29 @@ T link1::wilson_loop_schwinger(const std::vector<T> &array, int r, int t) {
   T A;
   move_dir(3);
   for (int i = 0; i < t / 2; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(3, 1);
   }
   move_dir(dir);
   for (int i = 0; i < r; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(dir, 1);
   }
   move_dir(3);
   move(3, -1);
   for (int i = 0; i < t - 1; i++) {
-    A = A ^ get_matrix(array);
+    A = A ^ array[place + direction];
     move(3, -1);
   }
   move_dir(dir);
   move(dir, -1);
   for (int i = 0; i < r - 1; i++) {
-    A = A ^ get_matrix(array);
+    A = A ^ array[place + direction];
     move(dir, -1);
   }
   move_dir(3);
   for (int i = 0; i < t / 2; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(3, 1);
   }
   move_dir(dir);
@@ -307,7 +303,7 @@ T link1::wilson_line(const std::vector<T> &array, int length) {
   int dir = direction;
   T A;
   for (int i = 0; i < length; i++) {
-    A = A * get_matrix(array);
+    A = A * array[place + direction];
     move(dir, 1);
   }
   return A;
@@ -338,14 +334,14 @@ T link1::wilson_line_offaxis(const std::vector<T> &array,
 
     // if positive direction
     if (pattern[i] > 0) {
-      A = A * get_matrix(array);
+      A = A * array[place + direction];
       move(abs(pattern[i]) - 1, 1);
     }
 
     // if negative direction
     else if (pattern[i] < 0) {
       move(abs(pattern[i]) - 1, -1);
-      A = A ^ get_matrix(array);
+      A = A ^ array[place + direction];
     } else {
       std::cout << "wilson_line_offaxis pattern direction error " << pattern[i]
                 << std::endl;
@@ -501,7 +497,6 @@ void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
 // specializations
 
 // su2
-template const su2 *link1::get_matrix(const std::vector<su2> &vec);
 template su2 link1::plaket_mu(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_schwinger_average(const std::vector<su2> &array,
                                              int mu);
@@ -528,7 +523,6 @@ template double link1::field3(const std::vector<su2> &polyakov_loop, int D,
                               int x);
 
 // abelian
-template const abelian *link1::get_matrix(const std::vector<abelian> &vec);
 template abelian link1::plaket_mu(const std::vector<abelian> &array, int mu);
 template abelian
 link1::plaket_schwinger_average(const std::vector<abelian> &array, int mu);
@@ -557,7 +551,6 @@ template double link1::field3(const std::vector<abelian> &polyakov_loop, int D,
                               int x);
 
 // su3
-template const su3 *link1::get_matrix(const std::vector<su3> &vec);
 template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_schwinger_average(const std::vector<su3> &array,
                                              int mu);

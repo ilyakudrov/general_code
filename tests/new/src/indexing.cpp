@@ -37,15 +37,15 @@ double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu, int size1,
   }
   for (int i = 0; i < data_size; i += size2) {
     for (int j = i; j < i + size2 - size1; j++) {
-      plakets[j] = plakets[j] ^ &conf_mu[j + size1];
+      plakets[j] = plakets[j] ^ conf_mu[j + size1];
     }
     for (int j = i; j < i + size1; j++) {
-      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j];
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ conf_mu[j];
     }
   }
   double result = 0;
   for (int i = 0; i < data_size; i++) {
-    result += (plakets[i] ^ &conf_nu[i]).tr();
+    result += (plakets[i] ^ conf_nu[i]).tr();
   }
 
   return result / data_size;
@@ -85,18 +85,18 @@ double plaket_time_test1(std::vector<std::vector<T>> &separated) {
   for (int mu = 0; mu < 3; mu++) {
     for (int i = 0; i < data_size; i += sizes2[mu]) {
       for (int j = i; j < i + sizes2[mu] - sizes1[mu]; j++) {
-        plakets[mu][j] = plakets[mu][j] ^ &separated[3][j + sizes1[mu]];
+        plakets[mu][j] = plakets[mu][j] ^ separated[3][j + sizes1[mu]];
       }
       for (int j = i; j < i + sizes1[mu]; j++) {
         plakets[mu][j + sizes2[mu] - sizes1[mu]] =
-            plakets[mu][j + sizes2[mu] - sizes1[mu]] ^ &separated[3][j];
+            plakets[mu][j + sizes2[mu] - sizes1[mu]] ^ separated[3][j];
       }
     }
   }
   double result = 0;
   for (int i = 0; i < data_size; i++) {
     for (int mu = 0; mu < 3; mu++) {
-      result += (plakets[mu][i] ^ &separated[mu][i]).tr();
+      result += (plakets[mu][i] ^ separated[mu][i]).tr();
     }
   }
 
@@ -124,24 +124,24 @@ double plaket_time_test2(std::vector<std::vector<T>> &separated) {
 
   for (int i = 0; i < data_size; i += sizes2[0]) {
     for (int t = i; t < i + sizes2[0] - sizes1[0]; t++) {
-      plakets[0][t] = plakets[0][t] ^ &separated[3][t + sizes1[0]];
-      plakets[1][t] = plakets[1][t] ^ &separated[3][t + sizes1[1]];
-      plakets[2][t] = plakets[2][t] ^ &separated[3][t + sizes1[2]];
+      plakets[0][t] = plakets[0][t] ^ separated[3][t + sizes1[0]];
+      plakets[1][t] = plakets[1][t] ^ separated[3][t + sizes1[1]];
+      plakets[2][t] = plakets[2][t] ^ separated[3][t + sizes1[2]];
     }
     for (int t = i + sizes2[0] - sizes1[0]; t < i + sizes2[0]; t++) {
-      plakets[1][t] = plakets[1][t] ^ &separated[3][t + sizes1[1]];
-      plakets[2][t] = plakets[2][t] ^ &separated[3][t + sizes1[2]];
+      plakets[1][t] = plakets[1][t] ^ separated[3][t + sizes1[1]];
+      plakets[2][t] = plakets[2][t] ^ separated[3][t + sizes1[2]];
     }
     for (int t = i; t < i + sizes1[0]; t++) {
       plakets[0][t + sizes2[0] - sizes1[0]] =
-          plakets[0][t + sizes2[0] - sizes1[0]] ^ &separated[3][t];
+          plakets[0][t + sizes2[0] - sizes1[0]] ^ separated[3][t];
     }
   }
 
   double result = 0;
   for (int i = 0; i < data_size; i++) {
     for (int mu = 0; mu < 3; mu++) {
-      result += (plakets[mu][i] ^ &separated[mu][i]).tr();
+      result += (plakets[mu][i] ^ separated[mu][i]).tr();
     }
   }
 
@@ -162,13 +162,13 @@ double plaket_plane1(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
       plakets[i + t_size - 1] = conf_mu[i + t_size - 1] * conf_nu[i];
     }
     for (int j = k; j < k + size2 - size1; j++) {
-      plakets[j] = plakets[j] ^ &conf_mu[j + size1];
+      plakets[j] = plakets[j] ^ conf_mu[j + size1];
     }
     for (int j = k; j < k + size1; j++) {
-      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j];
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ conf_mu[j];
     }
     for (int i = k; i < k + size2; i++) {
-      result += (plakets[i] ^ &conf_nu[i]).tr();
+      result += (plakets[i] ^ conf_nu[i]).tr();
     }
   }
 
@@ -203,13 +203,13 @@ double plaket_plane2(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
       plakets[i + t_size - 1] = conf_mu[i + k + t_size - 1] * conf_nu[i + k];
     }
     for (int j = 0; j < size2 - size1; j++) {
-      plakets[j] = plakets[j] ^ &conf_mu[j + k + size1];
+      plakets[j] = plakets[j] ^ conf_mu[j + k + size1];
     }
     for (int j = 0; j < size1; j++) {
-      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ &conf_mu[j + k];
+      plakets[j + size2 - size1] = plakets[j + size2 - size1] ^ conf_mu[j + k];
     }
     for (int i = 0; i < size2; i++) {
-      result += plakets[i].multiply_tr(&conf_nu[i + k]);
+      result += plakets[i].multiply_tr(conf_nu[i + k]);
     }
   }
 
@@ -264,7 +264,7 @@ template <class T> double plaket_time_test5(std::vector<T> &conf) {
           place = link.place;
           link.move(3, 1);
           for (int mu = 0; mu < 3; mu++) {
-            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ &conf[link.place + mu];
+            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ conf[link.place + mu];
           }
           link.move(3, -1);
         }
@@ -273,7 +273,7 @@ template <class T> double plaket_time_test5(std::vector<T> &conf) {
           link.update(0);
 
           for (int mu = 0; mu < 3; mu++) {
-            result += plakets[x * 3 + mu].multiply_tr(&conf[link.place + 3]);
+            result += plakets[x * 3 + mu].multiply_tr(conf[link.place + 3]);
           }
         }
       }
@@ -316,14 +316,14 @@ template <class T> double plaket_time_test6(std::vector<T> &conf) {
 
             place = link.place;
             link.move(3, 1);
-            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ &conf[link.place + mu];
+            plakets[x * 3 + mu] = plakets[x * 3 + mu] ^ conf[link.place + mu];
             link.move(3, -1);
           }
           for (int x = 0; x < x_size; x++) {
             link.coordinate[0] = x;
             link.update(0);
 
-            result += plakets[x * 3 + mu].multiply_tr(&conf[link.place + 3]);
+            result += plakets[x * 3 + mu].multiply_tr(conf[link.place + 3]);
           }
         }
       }
@@ -354,15 +354,15 @@ double plaket_plane3(std::vector<T> &conf, int mu, int nu, int size_mu1,
     }
 
     for (int j = 0; j < size_mu2 - size_mu1; ++j) {
-      plakets[j] = plakets[j] ^ &conf[4 * (j + i + size_mu1) + nu];
+      plakets[j] = plakets[j] ^ conf[4 * (j + i + size_mu1) + nu];
     }
     for (int j = 0; j < size_mu1; ++j) {
       plakets[j + size_mu2 - size_mu1] =
-          plakets[j + size_mu2 - size_mu1] ^ &conf[4 * (j + i) + nu];
+          plakets[j + size_mu2 - size_mu1] ^ conf[4 * (j + i) + nu];
     }
 
     for (int j = 0; j < size_mu2; ++j) {
-      result += plakets[j].multiply_tr(&conf[4 * (j + i) + mu]);
+      result += plakets[j].multiply_tr(conf[4 * (j + i) + mu]);
     }
   }
 
@@ -402,14 +402,14 @@ double plaket_plane4(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
       }
     }
     for (int j = 0; j < size_nu2 - size_nu1; j++) {
-      plakets[j] = plakets[j] ^ &conf_mu[j + k + size_nu1];
+      plakets[j] = plakets[j] ^ conf_mu[j + k + size_nu1];
     }
     for (int j = 0; j < size_nu1; j++) {
       plakets[j + size_nu2 - size_nu1] =
-          plakets[j + size_nu2 - size_nu1] ^ &conf_mu[j + k];
+          plakets[j + size_nu2 - size_nu1] ^ conf_mu[j + k];
     }
     for (int i = 0; i < size_nu2; i++) {
-      result += plakets[i].multiply_tr(&conf_nu[i + k]);
+      result += plakets[i].multiply_tr(conf_nu[i + k]);
     }
   }
 
@@ -463,12 +463,12 @@ double plaket_plane5(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
           // }
           // for (int m = 0; m < step; m++) {
           if (j + m < k + size_nu2 - size_nu1)
-            plakets[m] = plakets[m] ^ &conf_mu[j + m + size_nu1];
+            plakets[m] = plakets[m] ^ conf_mu[j + m + size_nu1];
           else
-            plakets[m] = plakets[m] ^ &conf_mu[j + m - size_nu2 + size_nu1];
+            plakets[m] = plakets[m] ^ conf_mu[j + m - size_nu2 + size_nu1];
           // }
           // for (int m = 0; m < step; m++) {
-          result += plakets[m].multiply_tr(&conf_nu[j + m]);
+          result += plakets[m].multiply_tr(conf_nu[j + m]);
         }
       }
     }
@@ -518,10 +518,10 @@ double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
           plakets =
               conf_mu[i + k + j] * conf_nu[i + k + j - size_mu2 + size_mu1];
         if (i + j < size_nu2 - size_nu1)
-          plakets = plakets ^ &conf_mu[i + k + j + size_nu1];
+          plakets = plakets ^ conf_mu[i + k + j + size_nu1];
         else
-          plakets = plakets ^ &conf_mu[i + k + j - size_nu2 + size_nu1];
-        result += plakets.multiply_tr(&conf_nu[i + k + j]);
+          plakets = plakets ^ conf_mu[i + k + j - size_nu2 + size_nu1];
+        result += plakets.multiply_tr(conf_nu[i + k + j]);
       }
     }
   }

@@ -104,13 +104,13 @@ std::vector<T> wilson_lines_test2(std::vector<T> separated, int length,
     }
     wilson_lines[i] = A;
     for (int j = i + 1; j < i + step - length + 1; j++) {
-      A = separated[j - 1] % &A;
+      A = separated[j - 1] % A;
       A = A * separated[j + length - 1];
       wilson_lines[j] = A;
     }
 
     for (int j = i + step - length + 1; j < i + step; j++) {
-      A = separated[j - 1] % &A;
+      A = separated[j - 1] % A;
       A = A * separated[j - step + length - 1];
       wilson_lines[j] = A;
     }
@@ -176,14 +176,14 @@ std::vector<T> wilson_lines_test3(std::vector<T> separated, int length,
       wilson_lines[k] = A;
       for (int j = k + size1; j < k + size2 - (length - 1) * size1;
            j += size1) {
-        A = separated[j - size1] % &A;
+        A = separated[j - size1] % A;
         A = A * separated[j + (length - 1) * size1];
         wilson_lines[j] = A;
       }
 
       for (int j = k + size2 - (length - 1) * size1; j < k + size2;
            j += size1) {
-        A = separated[j - size1] % &A;
+        A = separated[j - size1] % A;
         A = A * separated[j - size2 + (length - 1) * size1];
         wilson_lines[j] = A;
       }
@@ -215,13 +215,12 @@ double wilson_plane_test1(std::vector<T> &wilson_lines_mu,
               wilson_lines_mu[i + k + j] *
               wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
         if (i + j < size_nu2 - length_nu * size_nu1)
-          plakets =
-              plakets ^ &wilson_lines_mu[i + k + j + length_nu * size_nu1];
+          plakets = plakets ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
         else
           plakets =
               plakets ^
-              &wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
-        result += plakets.multiply_tr(&wilson_lines_nu[i + k + j]);
+              wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+        result += plakets.multiply_tr(wilson_lines_nu[i + k + j]);
       }
     }
   }

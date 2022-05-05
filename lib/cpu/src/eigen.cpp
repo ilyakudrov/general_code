@@ -50,7 +50,7 @@ std::vector<su2> make_matrix_staggered(const std::vector<su2> &conf,
       border_sign = -1;
 
     matrix[place_matrix + mu * 2] =
-        exp(mu_q * delta_4) / 2 * border_sign * sign * (*link.get_matrix(conf));
+        exp(mu_q * delta_4) / 2 * border_sign * sign * conf[link.place + mu];
 
     // negative direction
     border_sign = 1;
@@ -61,7 +61,7 @@ std::vector<su2> make_matrix_staggered(const std::vector<su2> &conf,
 
     matrix[place_matrix + mu * 2 + 1] = -exp(-mu_q * delta_4) / 2 *
                                         border_sign * sign *
-                                        (*link.get_matrix(conf)).conj();
+                                        (conf[link.place + mu]).conj();
 
     link.move(mu, 1);
   }

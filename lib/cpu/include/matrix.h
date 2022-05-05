@@ -39,7 +39,7 @@ public:
   // calculate trace of the matrix
   double tr();
 
-  double multiply_tr(const su2 *B);
+  double multiply_tr(const su2 &B);
 
   // calculate inverse of the matrix
   su2 inverse();
@@ -65,14 +65,11 @@ su2 operator*(const su2 &A, const double &x);
 // matrix multiplication A * B
 su2 operator*(const su2 &A, const su2 &B);
 
-// matrix multiplication A * B
-su2 operator*(const su2 &A, const su2 *B);
-
 // matrix multiplication A * B.conj()
-su2 operator^(const su2 &A, const su2 *B);
+su2 operator^(const su2 &A, const su2 &B);
 
 // matrix multiplication A.conj() * B
-su2 operator%(const su2 &A, const su2 *B);
+su2 operator%(const su2 &A, const su2 &B);
 
 std::ostream &operator<<(std::ostream &os, const su2 &A);
 
@@ -86,7 +83,7 @@ public:
   // trace
   double tr();
 
-  double multiply_tr(const abelian *B);
+  double multiply_tr(const abelian &B);
 
   // inverse
   abelian inverse();
@@ -102,9 +99,8 @@ abelian operator*(const double &x, const abelian &A);
 abelian operator*(const abelian &A, const double &x);
 
 abelian operator*(const abelian &A, const abelian &B);
-abelian operator*(const abelian &A, const abelian *B);
-abelian operator^(const abelian &A, const abelian *B);
-abelian operator%(const abelian &A, const abelian *B);
+abelian operator^(const abelian &A, const abelian &B);
+abelian operator%(const abelian &A, const abelian &B);
 
 std::ostream &operator<<(std::ostream &os, const abelian &A);
 
@@ -118,7 +114,7 @@ public:
   // calculate trace of the matrix
   double tr();
 
-  double multiply_tr(const su3 *B);
+  double multiply_tr(const su3 &B);
 
   // calculate inverse of the matrix
   su3 inverse();
@@ -145,13 +141,10 @@ su3 operator*(const su3 &A, const double &x);
 // matrix multiplication A * B
 su3 operator*(const su3 &A, const su3 &B);
 
-// matrix multiplication A * B
-su3 operator*(const su3 &A, const su3 *B);
-
 // matrix multiplication A * B.conj()
-su3 operator^(const su3 &A, const su3 *B);
+su3 operator^(const su3 &A, const su3 &B);
 
 // matrix multiplication A.conj() * B
-su3 operator%(const su3 &A, const su3 *B);
+su3 operator%(const su3 &A, const su3 &B);
 
 std::ostream &operator<<(std::ostream &os, const su3 &A);

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<vector<double>> make_angles_SU3(vector<su3_full> &conf) {
+vector<vector<double>> make_angles_SU3(vector<su3> &conf) {
 
   vector<vector<double>> angles(3, vector<double>(conf.size()));
 
@@ -17,7 +17,7 @@ vector<vector<double>> make_angles_SU3(vector<su3_full> &conf) {
 
     for (int j = 0; j < 3; j++) {
       angle_tmp[j] =
-          atan2(conf[i].matrix[j][j].imag(), conf[i].matrix[j][j].real());
+          atan2(conf[i].matrix[j][j].imag, conf[i].matrix[j][j].real);
       sum += angle_tmp[j];
     }
 

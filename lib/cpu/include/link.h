@@ -60,11 +60,6 @@ public:
   // go and update
   void go_update(int x, int y, int z, int t);
 
-  // gets matrix on current link, only gets matrices in positive directions
-  // in order to get conjugated matrix use .conj() or ^ operator in matrix
-  // returns pointer for better performance
-  template <class T> const T *get_matrix(const std::vector<T> &array);
-
   // calculates plaket matrix in current direction and mu plane
   // only positive directions make sense
   template <class T> T plaket_mu(const std::vector<T> &array, int mu);

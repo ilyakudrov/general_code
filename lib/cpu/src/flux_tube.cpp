@@ -210,7 +210,7 @@ wilson_plaket_schwinger_electric(const std::vector<T> &array,
       if (d < 0) {
 
         link.move(dir, d);
-        A = (A ^ &schwinger_lines[link.place * 3 / 4 + dir]);
+        A = (A ^ schwinger_lines[link.place * 3 / 4 + dir]);
         A = A * plaket[link.place / 4];
         A = A * schwinger_lines[link.place * 3 / 4 + dir];
         result[d] += A.tr();
@@ -222,7 +222,7 @@ wilson_plaket_schwinger_electric(const std::vector<T> &array,
         link.move(dir, d);
         A = A * plaket[link.place / 4];
         link.move(dir, -d);
-        A = A ^ &schwinger_lines[link.place * 3 / 4 + dir];
+        A = A ^ schwinger_lines[link.place * 3 / 4 + dir];
         result[d] += A.tr();
 
       } else {
