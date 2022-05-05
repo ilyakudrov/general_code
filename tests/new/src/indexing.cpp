@@ -716,61 +716,6 @@ template double plaket_time_test10(std::vector<std::vector<abelian>> &separated,
 template std::vector<std::vector<abelian>>
 separate_3(std::vector<abelian> &conf);
 
-// su3_full
-template double plaket_plane(std::vector<su3_full> &conf_mu,
-                             std::vector<su3_full> &conf_nu, int size1,
-                             int size2);
-
-template double plaket_time_test(std::vector<std::vector<su3_full>> &separated);
-template double
-plaket_time_test1(std::vector<std::vector<su3_full>> &separated);
-template double
-plaket_time_test2(std::vector<std::vector<su3_full>> &separated);
-
-template double plaket_plane1(std::vector<su3_full> &conf_mu,
-                              std::vector<su3_full> &conf_nu, int size1,
-                              int size2);
-template double
-plaket_time_test3(std::vector<std::vector<su3_full>> &separated);
-
-template std::vector<std::vector<su3_full>>
-separate_3(std::vector<su3_full> &conf);
-
-template double plaket_plane2(std::vector<su3_full> &conf_mu,
-                              std::vector<su3_full> &conf_nu, int size1,
-                              int size2);
-template double
-plaket_time_test4(std::vector<std::vector<su3_full>> &separated);
-
-template double plaket_time_test5(std::vector<su3_full> &conf);
-template double plaket_time_test6(std::vector<su3_full> &conf);
-
-template double plaket_plane3(std::vector<su3_full> &conf, int mu, int nu,
-                              int size_mu1, int size_mu2, int size_nu1,
-                              int size_nu2);
-
-template double plaket_time_test7(std::vector<su3_full> &conf);
-
-template double plaket_plane4(std::vector<su3_full> &conf_mu,
-                              std::vector<su3_full> &conf_nu, int size_mu1,
-                              int size_mu2, int size_nu1, int size_nu2);
-template double
-plaket_time_test8(std::vector<std::vector<su3_full>> &separated);
-
-template double plaket_plane5(std::vector<su3_full> &conf_mu,
-                              std::vector<su3_full> &conf_nu, int size_mu1,
-                              int size_mu2, int size_nu1, int size_nu2,
-                              int step);
-template double plaket_time_test9(std::vector<std::vector<su3_full>> &separated,
-                                  int step);
-
-template double plaket_plane6(std::vector<su3_full> &conf_mu,
-                              std::vector<su3_full> &conf_nu, int size_mu1,
-                              int size_mu2, int size_nu1, int size_nu2,
-                              int thread_num);
-template double
-plaket_time_test10(std::vector<std::vector<su3_full>> &separated, int step);
-
 // su3
 template double plaket_plane(std::vector<su3> &conf_mu,
                              std::vector<su3> &conf_nu, int size1, int size2);

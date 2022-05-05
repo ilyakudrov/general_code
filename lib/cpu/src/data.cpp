@@ -106,44 +106,6 @@ void data<su2>::read_double(std::string &file_name, int bites_skip) {
   stream.close();
 }
 
-template <>
-void data<su3_full>::read_double(std::string &file_name, int bites_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.resize(data_size1);
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 18);
-
-  stream.ignore(bites_skip);
-  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
-    std::cout << "data<su3_full>::read_double_fortran error: " << file_name
-              << std::endl;
-
-  long int index = 0;
-
-  link1 link(x_size, y_size, z_size, t_size);
-  for (int mu = 0; mu < 4; mu++) {
-    for (int j = 0; j < 3; j++) {
-      for (int k = 0; k < 3; k++) {
-        for (int t = 0; t < t_size; t++) {
-          for (int z = 0; z < z_size; z++) {
-            for (int y = 0; y < y_size; y++) {
-              for (int x = 0; x < x_size; x++) {
-                link.go_update(x, y, z, t);
-
-                array[link.place + mu].matrix[k][j] =
-                    std::complex<double>(v[index], v[index + 1]);
-
-                index += 2;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  stream.close();
-}
-
 double reverseValue(const char *data) {
   double result;
 
@@ -153,58 +115,6 @@ double reverseValue(const char *data) {
     dest[i] = data[sizeof(double) - i - 1];
   }
   return result;
-}
-
-template <> void data<su3_full>::read_ildg(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-
-  FILE *fp;
-  fp = fopen(file_name.c_str(), "r");
-
-  LimeReader *reader;
-  reader = limeCreateReader(fp);
-
-  int status;
-  char *lime_type;
-  n_uint64_t nbytes;
-  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
-
-    if (status != LIME_SUCCESS) {
-      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-    }
-
-    lime_type = limeReaderType(reader);
-    nbytes = limeReaderBytes(reader);
-
-    if (strcmp(lime_type, "ildg-binary-data") == 0) {
-
-      std::vector<double> v(nbytes / sizeof(double));
-
-      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
-
-      for (int i = 0; i < nbytes / sizeof(double); i++) {
-        v[i] = reverseValue((char *)&v[i]);
-      }
-
-      if (status != LIME_SUCCESS) {
-        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-      }
-
-      su3_full A;
-      std::complex<double> tmp;
-      for (int i = 0; i < data_size1; i++) {
-        for (int j = 0; j < 3; j++) {
-          for (int k = 0; k < 3; k++) {
-            tmp.real(v[i * 18 + j * 6 + k * 2]);
-            tmp.imag(v[i * 18 + j * 6 + k * 2 + 1]);
-            A.matrix[j][k] = tmp;
-          }
-        }
-        array.push_back(A);
-      }
-    }
-  }
 }
 
 template <> void data<su3>::read_ildg(std::string &file_name) {
@@ -458,38 +368,6 @@ template <> void data<su2>::write_double(std::string &file_name) {
   stream.close();
 }
 
-template <> void data<su3_full>::write_double(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::ofstream stream(file_name);
-  std::vector<double> v;
-  v.reserve(18 * data_size1);
-  link1 link(x_size, y_size, z_size, t_size);
-  for (int mu = 0; mu < 4; mu++) {
-    for (int j = 0; j < 3; j++) {
-      for (int k = 0; k < 3; k++) {
-        for (int t = 0; t < t_size; t++) {
-          for (int z = 0; z < z_size; z++) {
-            for (int y = 0; y < y_size; y++) {
-              for (int x = 0; x < x_size; x++) {
-                link.go(x, y, z, t);
-                link.update(0);
-                link.update(1);
-                link.update(2);
-                link.update(3);
-                v.push_back((double)real(array[link.place + mu].matrix[k][j]));
-                v.push_back((double)imag(array[link.place + mu].matrix[k][j]));
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  if (!stream.write((char *)&v[0], (18 * data_size1) * sizeof(double)))
-    std::cout << "write_double<su3_full> error: " << file_name << std::endl;
-  stream.close();
-}
-
 template <> void data<abelian>::write_double(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   std::ofstream stream(file_name);
@@ -504,5 +382,4 @@ template <> void data<abelian>::write_double(std::string &file_name) {
 
 template class data<su2>;
 template class data<abelian>;
-template class data<su3_full>;
 template class data<su3>;

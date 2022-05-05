@@ -341,38 +341,6 @@ template double
 wilson_loop_test_time(std::vector<std::vector<su2>> &wilson_lines, int length_R,
                       int length_T, int thread_num);
 
-// su3_full
-template std::vector<std::vector<su3_full>>
-separate_wilson(std::vector<su3_full> &conf);
-
-template std::vector<su3_full>
-wilson_lines_test1(std::vector<su3_full> separated, int length, int step);
-
-template std::vector<su3_full>
-wilson_lines_test2(std::vector<su3_full> separated, int length, int step);
-
-template std::vector<su3_full>
-wilson_lines_increase_test(std::vector<su3_full> separated,
-                           std::vector<su3_full> wilson_lines_old, int length,
-                           int step);
-
-template std::vector<std::vector<su3_full>>
-separate_wilson_unchanged(std::vector<su3_full> &conf);
-
-template std::vector<su3_full>
-wilson_lines_test3(std::vector<su3_full> separated, int length, int size1,
-                   int size2);
-
-template double wilson_plane_test1(std::vector<su3_full> &wilson_lines_mu,
-                                   std::vector<su3_full> &wilson_lines_nu,
-                                   int size_mu1, int size_mu2, int size_nu1,
-                                   int size_nu2, int length_mu, int length_nu,
-                                   int thread_num);
-
-template double
-wilson_loop_test_time(std::vector<std::vector<su3_full>> &wilson_lines,
-                      int length_R, int length_T, int thread_num);
-
 // su3
 template std::vector<std::vector<su3>> separate_wilson(std::vector<su3> &conf);
 

@@ -41,7 +41,6 @@ int main(int argc, char *argv[]) {
 
   link1 link(x_size, y_size, z_size, t_size);
   // data<su2> conf;
-  // data<su3_full> conf;
   data<MATRIX_TYPE> conf;
   // data<abelian> conf;
   // string conf_path = "../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
@@ -206,6 +205,6 @@ int main(int argc, char *argv[]) {
       separated_unchanged[3], length_T, link.multiplier[3] / 4,
       link.multiplier[3] / 4 * link.lattice_size[3]);
 
-  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
+  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 1)
             << std::endl;
 }
