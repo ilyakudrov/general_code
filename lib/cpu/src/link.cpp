@@ -111,14 +111,14 @@ template <class T> T link1::plaket_mu(const std::vector<T> &array, int mu) {
   T A = array[place + direction];
   move(dir, 1);
   move_dir(mu);
-  A = A * array[place + direction];
+  A = A * array[place + mu];
   move_dir(dir);
   move(dir, -1);
   move(mu, 1);
-  A = A ^ array[place + direction];
+  A = A ^ array[place + dir];
   move_dir(mu);
   move(mu, -1);
-  A = A ^ array[place + direction];
+  A = A ^ array[place + mu];
   move_dir(dir);
   return A;
 }

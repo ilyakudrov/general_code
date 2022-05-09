@@ -11,6 +11,10 @@ complex_t::complex_t() {
   imag = 0;
 }
 
+complex_t complex_t::mult_by_imag(double x) {
+  return complex_t(-imag * x, real * x);
+}
+
 complex_t operator+(const complex_t &a, const complex_t &b) {
   return complex_t(a.real + b.real, a.imag + b.imag);
 }
@@ -279,7 +283,29 @@ su3 su3::conj() const {
   return B;
 }
 
-su3 su3::proj() { return su3(); }
+su3 su3::mult_by_imag(double x) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = matrix[i][j].mult_by_imag(x);
+    }
+  }
+  return C;
+}
+
+su3 su3::proj() {
+  su3 A = *this;
+  A = (1. / sqrt((A ^ A).tr() / 3)) * A;
+  complex_t x;
+  for (int i = 0; i < 4; i++) {
+    A = (3. / 2) * A - (1. / 2) * (A * (A % A));
+    // A = A - A.mult_by_imag(A.determinant().imag / 3);
+    x = complex_t(1, -A.determinant().imag / 3);
+    A = A * x;
+  }
+
+  return A;
+}
 
 su3 operator+(const su3 &A, const su3 &B) {
   su3 C;
@@ -310,6 +336,24 @@ su3 operator*(const double &x, const su3 &A) {
   return C;
 }
 su3 operator*(const su3 &A, const double &x) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+}
+su3 operator*(const complex_t &x, const su3 &A) {
+  su3 C;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      C.matrix[i][j] = x * A.matrix[i][j];
+    }
+  }
+  return C;
+}
+su3 operator*(const su3 &A, const complex_t &x) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {

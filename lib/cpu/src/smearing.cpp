@@ -53,21 +53,50 @@ template <class T>
 T staples_first(const std::vector<T> &vec, link1 &link, int eta) {
   T A;
   T B;
+  bool if_coordinate = link.coordinate[0] == 1 && link.coordinate[1] == 0 &&
+                       link.coordinate[2] == 0 && link.coordinate[3] == 0 &&
+                       link.direction == 1 && eta == 0;
   int dir = link.direction;
   A = vec[link.place + eta];
+  if (if_coordinate) {
+    std::cout << "staples_first test A1 " << vec[link.place + eta] << std::endl;
+  }
   link.move(eta, 1);
   A = A * vec[link.place + dir];
+  if (if_coordinate) {
+    std::cout << "staples_first test A2 " << vec[link.place + dir] << std::endl;
+  }
   link.move(dir, 1);
   link.move(eta, -1);
   A = A ^ vec[link.place + eta];
+  if (if_coordinate) {
+    std::cout << "staples_first test A3 " << vec[link.place + eta] << std::endl;
+  }
   link.move(dir, -1);
   link.move(eta, -1);
   B = vec[link.place + eta].conj();
+  if (if_coordinate) {
+    std::cout << "staples_first test A4 " << vec[link.place + eta] << std::endl;
+  }
   B = B * vec[link.place + dir];
+  if (if_coordinate) {
+    std::cout << "staples_first test A5 " << vec[link.place + dir] << std::endl;
+  }
   link.move(dir, 1);
   B = B * vec[link.place + eta];
+  if (if_coordinate) {
+    std::cout << "staples_first test A6 " << vec[link.place + eta] << std::endl;
+  }
   link.move(eta, 1);
   link.move(dir, -1);
+
+  if (if_coordinate) {
+    std::cout << "staples_first test A " << A << std::endl;
+  }
+  if (if_coordinate) {
+    std::cout << "staples_first test B " << B << std::endl;
+  }
+
   return (A + B);
 }
 
@@ -765,4 +794,63 @@ smearing_HYP_refresh(data<abelian> &conf, double alpha1, double alpha2,
                      double alpha3); // refresh link every step
 template std::vector<abelian>
 smearing_APE_refresh(data<abelian> &conf,
+                     double alpha_APE); // refresh link every step
+
+// su3
+template su3 staples_first(const std::vector<su3> &vec, link1 &link, int eta);
+template su3 staples_second(const std::vector<std::vector<su3>> &smearing_first,
+                            link1 &link, std::unordered_map<int, int> &indexes,
+                            int rho, int mu, int nu);
+template su3
+staples_second_refresh(const std::vector<su3> &vec, link1 &link, int eta,
+                       int nu,
+                       double alpha3); // staples for refreshing
+                                       // algorythm(refresh link every step)
+template su3 staples_third(const std::vector<std::vector<su3>> &smearing_second,
+                           link1 &link, std::unordered_map<int, int> indexes,
+                           int nu, int mu);
+template su3 staples_third_refresh(const std::vector<su3> &vec, link1 &link,
+                                   int eta, double alpha2, double alpha3);
+template std::vector<su3> smearing_first(const std::vector<su3> &array,
+                                         double alpha3, int mu, int nu,
+                                         int rho);
+template std::vector<std::vector<su3>>
+smearing_first_full(const std::vector<su3> &array, double alpha3);
+template std::vector<su3>
+smearing_second(const std::vector<su3> &array,
+                std::vector<std::vector<su3>> &smearing_first, double alpha2,
+                int mu, int nu);
+template std::vector<std::vector<su3>>
+smearing_second_full(const std::vector<su3> &array,
+                     std::vector<std::vector<su3>> &smearing_first,
+                     double alpha2);
+template std::vector<su3>
+smearing_HYP(const std::vector<su3> &array,
+             std::vector<std::vector<su3>> &smearing_second, double alpha1);
+template std::vector<su3> smearing_APE(const std::vector<su3> &array,
+                                       double alpha_APE);
+template std::vector<su3> smearing1_APE(const std::vector<su3> &array,
+                                        double alpha_APE);
+template std::map<std::tuple<int, int>, std::vector<su3>>
+smearing_APE_2d(const std::vector<su3> &array, double alpha_APE);
+template void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<su3>> &smeared,
+    double alpha_APE);
+template void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<su3>> &smeared, int mu,
+    double alpha_APE);
+template su3 staples_2d_continue(std::vector<su3> &array1,
+                                 std::vector<su3> &array2, link1 &link, int i,
+                                 int j);
+template su3 smearing_first_refresh(const std::vector<su3> &vec, link1 &link,
+                                    int nu, int rho,
+                                    double alpha3); // refresh link every step
+template su3 smearing_second_refresh(const std::vector<su3> &vec, link1 &link,
+                                     int nu, double alpha2,
+                                     double alpha3); // refresh link every step
+template std::vector<su3>
+smearing_HYP_refresh(data<su3> &conf, double alpha1, double alpha2,
+                     double alpha3); // refresh link every step
+template std::vector<su3>
+smearing_APE_refresh(data<su3> &conf,
                      double alpha_APE); // refresh link every step

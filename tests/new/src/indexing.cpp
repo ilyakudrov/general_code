@@ -517,7 +517,7 @@ double plaket_plane6(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
         else
           plakets =
               conf_mu[i + k + j] * conf_nu[i + k + j - size_mu2 + size_mu1];
-        if (i + j < size_nu2 - size_nu1)
+        if (i < size_nu2 - size_nu1)
           plakets = plakets ^ conf_mu[i + k + j + size_nu1];
         else
           plakets = plakets ^ conf_mu[i + k + j - size_nu2 + size_nu1];

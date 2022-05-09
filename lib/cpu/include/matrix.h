@@ -9,6 +9,8 @@ struct complex_t {
 
   complex_t(const double real1, const double imag1);
   complex_t();
+
+  complex_t mult_by_imag(double x);
 };
 
 complex_t operator+(const complex_t &a, const complex_t &b);
@@ -122,6 +124,8 @@ public:
   // calculate conjugate of the matrix
   su3 conj() const;
 
+  su3 mult_by_imag(double x);
+
   // gets projection onto su3 group
   su3 proj();
 
@@ -137,6 +141,9 @@ su3 operator+(const su3 &A, const su3 &B);
 su3 operator-(const su3 &A, const su3 &B);
 su3 operator*(const double &x, const su3 &A);
 su3 operator*(const su3 &A, const double &x);
+
+su3 operator*(const complex_t &x, const su3 &A);
+su3 operator*(const su3 &A, const complex_t &x);
 
 // matrix multiplication A * B
 su3 operator*(const su3 &A, const su3 &B);
