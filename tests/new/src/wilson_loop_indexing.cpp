@@ -169,22 +169,22 @@ std::vector<T> wilson_lines_test3(std::vector<T> separated, int length,
 
   for (int i = 0; i < data_size; i += size2) {
     for (int k = i; k < i + size1; k++) {
-      A = T();
-      for (int j = k; j < k + length * size1; j += size1) {
+      A = separated[k];
+      for (int j = k + size1; j < k + length * size1; j += size1) {
         A = A * separated[j];
       }
       wilson_lines[k] = A;
       for (int j = k + size1; j < k + size2 - (length - 1) * size1;
            j += size1) {
-        A = separated[j - size1] % A;
         A = A * separated[j + (length - 1) * size1];
+        A = separated[j - size1] % A;
         wilson_lines[j] = A;
       }
 
       for (int j = k + size2 - (length - 1) * size1; j < k + size2;
            j += size1) {
-        A = separated[j - size1] % A;
         A = A * separated[j - size2 + (length - 1) * size1];
+        A = separated[j - size1] % A;
         wilson_lines[j] = A;
       }
     }
@@ -200,27 +200,26 @@ double wilson_plane_test1(std::vector<T> &wilson_lines_mu,
                           int length_mu, int length_nu, int thread_num) {
   int data_size = x_size * y_size * z_size * t_size;
 
-  T plakets;
+  T loops;
   double result = 0;
 
-#pragma omp parallel for collapse(3) private(plakets) reduction(+ : result) num_threads(thread_num)
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result) num_threads(thread_num)
   for (int k = 0; k < data_size; k += size_nu2) {
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
         if (j < size_mu2 - length_mu * size_mu1)
-          plakets = wilson_lines_mu[i + k + j] *
-                    wilson_lines_nu[i + k + j + length_mu * size_mu1];
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
         else
-          plakets =
-              wilson_lines_mu[i + k + j] *
-              wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
         if (i + j < size_nu2 - length_nu * size_nu1)
-          plakets = plakets ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
+          loops = loops ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
         else
-          plakets =
-              plakets ^
-              wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
-        result += plakets.multiply_tr(wilson_lines_nu[i + k + j]);
+          loops = loops ^
+                  wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+
+        result += loops.multiply_tr(wilson_lines_nu[i + k + j]);
       }
     }
   }

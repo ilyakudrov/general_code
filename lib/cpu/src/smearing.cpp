@@ -53,49 +53,21 @@ template <class T>
 T staples_first(const std::vector<T> &vec, link1 &link, int eta) {
   T A;
   T B;
-  bool if_coordinate = link.coordinate[0] == 1 && link.coordinate[1] == 0 &&
-                       link.coordinate[2] == 0 && link.coordinate[3] == 0 &&
-                       link.direction == 1 && eta == 0;
   int dir = link.direction;
   A = vec[link.place + eta];
-  if (if_coordinate) {
-    std::cout << "staples_first test A1 " << vec[link.place + eta] << std::endl;
-  }
   link.move(eta, 1);
   A = A * vec[link.place + dir];
-  if (if_coordinate) {
-    std::cout << "staples_first test A2 " << vec[link.place + dir] << std::endl;
-  }
   link.move(dir, 1);
   link.move(eta, -1);
   A = A ^ vec[link.place + eta];
-  if (if_coordinate) {
-    std::cout << "staples_first test A3 " << vec[link.place + eta] << std::endl;
-  }
   link.move(dir, -1);
   link.move(eta, -1);
   B = vec[link.place + eta].conj();
-  if (if_coordinate) {
-    std::cout << "staples_first test A4 " << vec[link.place + eta] << std::endl;
-  }
   B = B * vec[link.place + dir];
-  if (if_coordinate) {
-    std::cout << "staples_first test A5 " << vec[link.place + dir] << std::endl;
-  }
   link.move(dir, 1);
   B = B * vec[link.place + eta];
-  if (if_coordinate) {
-    std::cout << "staples_first test A6 " << vec[link.place + eta] << std::endl;
-  }
   link.move(eta, 1);
   link.move(dir, -1);
-
-  if (if_coordinate) {
-    std::cout << "staples_first test A " << A << std::endl;
-  }
-  if (if_coordinate) {
-    std::cout << "staples_first test B " << B << std::endl;
-  }
 
   return (A + B);
 }

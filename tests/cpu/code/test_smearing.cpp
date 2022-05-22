@@ -44,12 +44,17 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
+  std::vector<double> vec_wilson;
+
+  int T_min = 1, T_max = 3;
+  int R_min = 1, R_max = 3;
+
   // std::map<std::tuple<int, int>, std::vector<su2>> APE_2d_test =
   //     smearing_APE_2d(conf.array, alpha_APE);
 
   // smearing_APE_2d_continue(APE_2d_test, alpha_APE);
 
-  for (int i = 0; i < 4; i++) {
+  /*for (int i = 0; i < 4; i++) {
     std::cout << conf.array[i] << std::endl;
   }
 
@@ -74,10 +79,10 @@ int main(int argc, char *argv[]) {
 
   smeared.array = smearing_HYP_refresh(conf, alpha1, alpha2, alpha3);
 
-  int T_min = 1, T_max = 3;
-  int R_min = 1, R_max = 3;
-
-  std::vector<double> vec_wilson;
+  T_min = 1;
+  T_max = 3;
+  R_min = 1;
+  R_max = 3;
 
   start_time = clock();
 
@@ -95,22 +100,24 @@ int main(int argc, char *argv[]) {
                        2
                 << std::endl;
     }
-  }
+  }*/
 
   smeared.array = smearing1_APE(conf.array, alpha_APE);
 
-  for (int i = 0; i < 50; i++) {
-    conf.array = smearing1_APE(conf.array, alpha_APE);
-  }
+  // for (int i = 0; i < 50; i++) {
+  //   conf.array = smearing1_APE(conf.array, alpha_APE);
+  // }
 
-  for (int i = 0; i < 4; i++) {
-    std::cout << conf.array[i] << std::endl;
-  }
+  // for (int i = 0; i < 4; i++) {
+  //   std::cout << conf.array[i] << std::endl;
+  // }
 
-  std::cout << "plaket: " << 1 - plaket(conf.array) << std::endl;
-  std::cout << "plaket_time: " << 1 - plaket_time(conf.array) << std::endl;
-  std::cout << "plaket_space: " << 1 - plaket_space(conf.array) << std::endl;
-  std::cout << "polyakov_loop: " << polyakov(conf.array) << std::endl;
+  std::cout << "plaket after : " << 1 - plaket(smeared.array) << std::endl;
+  std::cout << "plaket_time after : " << 1 - plaket_time(smeared.array)
+            << std::endl;
+  std::cout << "plaket_space after : " << 1 - plaket_space(smeared.array)
+            << std::endl;
+  std::cout << "polyakov_loop after : " << polyakov(smeared.array) << std::endl;
 
   start_time = clock();
 

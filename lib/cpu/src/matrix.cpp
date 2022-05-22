@@ -57,7 +57,7 @@ std::ostream &operator<<(std::ostream &os, const complex_t &a) {
 
 // su2 methods
 su2::su2() {
-  a0 = 1;
+  a0 = 1.;
   a1 = 0;
   a2 = 0;
   a3 = 0;
@@ -83,9 +83,8 @@ su2 su2::inverse() {
 double su2::module() { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
 su2 su2::conj() const { return su2(a0, -a1, -a2, -a3); }
 su2 su2::proj() {
-  double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
-  return su2(a0 / powf(rho, 0.5), a1 / powf(rho, 0.5), a2 / powf(rho, 0.5),
-             a3 / powf(rho, 0.5));
+  double rho = sqrt(a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3);
+  return su2(a0 / rho, a1 / rho, a2 / rho, a3 / rho);
 }
 su2 su2::sigma3_mult() const { return su2(a0, -a1, -a2, a3); }
 
@@ -197,7 +196,7 @@ su3::su3() {
       if (i != j)
         matrix[i][j] = complex_t(0, 0);
       else
-        matrix[i][j] = complex_t(1, 0);
+        matrix[i][j] = complex_t(1., 0);
     }
   }
 }

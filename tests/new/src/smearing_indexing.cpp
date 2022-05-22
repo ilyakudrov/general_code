@@ -152,14 +152,6 @@ void smearing_plane_major_test1(std::vector<T> &smeared,
         else
           bracket =
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
-        if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 && j == 1) {
-          std::cout << "smearing_plane_major A1 " << conf_nu[i + k + j]
-                    << std::endl;
-        }
-        if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 && j == 1) {
-          std::cout << "smearing_plane_major A2 "
-                    << conf_mu[i + k + j + size_nu1] << std::endl;
-        }
         if (i < size_mu2 - size_mu1)
           smeared[i + k + j] =
               smeared[i + k + j] +
@@ -168,40 +160,15 @@ void smearing_plane_major_test1(std::vector<T> &smeared,
           smeared[i + k + j] =
               smeared[i + k + j] +
               alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
-        if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 && j == 1) {
-          std::cout << "smearing_plane_major A3 "
-                    << conf_nu[i + k + j + size_mu1] << std::endl;
-        }
-
-        if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 && j == 1) {
-          std::cout << "smearing_plane_major bracket A "
-                    << (bracket ^ conf_nu[i + k + j + size_mu1]) << std::endl;
-        }
 
         if (j >= size_nu1) {
           bracket =
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
-          if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 &&
-              j == 1) {
-            std::cout << "smearing_plane_major A4 "
-                      << conf_nu[i + k + j - size_nu1] << std::endl;
-          }
-          if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 &&
-              j == 1) {
-            std::cout << "smearing_plane_major A5 "
-                      << conf_mu[i + k + j - size_nu1] << std::endl;
-          }
           if (i < size_mu2 - size_mu1) {
             smeared[i + k + j] =
                 smeared[i + k + j] +
                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
 
-            if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 &&
-                j == 1) {
-              std::cout << "smearing_plane_major A6 "
-                        << conf_nu[i + k + j + size_mu1 - size_nu1]
-                        << std::endl;
-            }
           } else
             smeared[i + k + j] =
                 smeared[i + k + j] +
@@ -220,12 +187,6 @@ void smearing_plane_major_test1(std::vector<T> &smeared,
                 smeared[i + k + j] +
                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
                                            size_mu2 + size_mu1]);
-        }
-        if (size_mu1 == x_size && size_nu1 == 1 && k == 0 && i == 0 && j == 1) {
-          std::cout << "smearing_plane_major bracket B "
-                    << (bracket *
-                        conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1])
-                    << std::endl;
         }
       }
     }
