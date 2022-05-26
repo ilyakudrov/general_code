@@ -84,3 +84,35 @@ su2 stout_omega(data<su2> &conf, link1 &link, double rho);
 
 void make_map_first(std::unordered_map<int, int> &indexes);
 void make_map_second(std::unordered_map<int, int> &indexes);
+
+template <class T>
+std::vector<std::vector<T>> separate_smearing(std::vector<T> &conf);
+
+template <class T>
+void smearing_plane_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
+                          std::vector<T> &conf_nu, int size_mu1, int size_mu2,
+                          int size_nu1, int size_nu2, double alpha);
+
+template <class T>
+void smearing_plane_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
+                          std::vector<T> &conf_nu, int size_mu1, int size_mu2,
+                          int size_nu1, int size_nu2, double alpha);
+
+template <class T>
+void smearing_APE_new(std::vector<std::vector<T>> &conf, double alpha);
+
+template <class T>
+void smearing_plane_HYP_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
+                              std::vector<T> &conf_nu, int size_mu1,
+                              int size_mu2, int size_nu1, int size_nu2,
+                              double alpha, double divisor);
+
+template <class T>
+void smearing_plane_HYP_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
+                              std::vector<T> &conf_nu, int size_mu1,
+                              int size_mu2, int size_nu1, int size_nu2,
+                              double alpha, double divisor);
+
+template <class T>
+void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
+                      double alpha2, double alpha3);

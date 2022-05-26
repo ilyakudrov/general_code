@@ -23,7 +23,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 14;
 
   std::cout.precision(17);
 
@@ -44,14 +44,14 @@ int main(int argc, char *argv[]) {
   data<MATRIX_TYPE> conf;
   // data<abelian> conf;
   // string conf_path = "../confs/qc2dstag/40^4/mu0.00/CONF0201";
-  string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
-  // string conf_path = "../confs/su3/conf.0501";
-  conf.read_double(conf_path, 8);
+  // string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
+  string conf_path = "../confs/SU3_conf/nt14/conf.0501";
+  // conf.read_double(conf_path, 8);
   // conf.read_double_qc2dstag(conf_path);
-  // conf.read_ildg(conf_path);
+  conf.read_ildg(conf_path);
 
-  int wilson_line_length = 10;
-  int wilson_lines_direction = 3;
+  // int wilson_line_length = 10;
+  // int wilson_lines_direction = 3;
 
   // start_time = clock();
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
   //           << std::endl;
 
   int T_min = 10, T_max = 10;
-  int R_min = 10, R_max = 10;
+  int R_min = 32, R_max = 32;
 
   std::vector<double> vec_wilson;
   start_time = clock();
@@ -193,8 +193,8 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<MATRIX_TYPE>> separated_unchanged =
       separate_wilson_unchanged(conf.array);
 
-  int length_R = 1;
-  int length_T = 1;
+  int length_R = 32;
+  int length_T = 10;
 
   std::vector<std::vector<MATRIX_TYPE>> wilson_lines(4);
   for (int i = 0; i < 3; i++) {

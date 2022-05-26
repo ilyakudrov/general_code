@@ -297,10 +297,11 @@ su3 su3::proj() {
   A = (1. / sqrt((A ^ A).tr() / 3)) * A;
   complex_t x;
   for (int i = 0; i < 4; i++) {
-    A = (3. / 2) * A - (1. / 2) * (A * (A % A));
-    // A = A - A.mult_by_imag(A.determinant().imag / 3);
-    x = complex_t(1, -A.determinant().imag / 3);
-    A = A * x;
+    A = 1.5 * A - 0.5 * ((A ^ A) * A);
+    // A = A * (complex_t(1, 0) - (1. / 3) * (A.determinant() - complex_t(1,
+    // 0)));
+    x = complex_t(1, -(A).determinant().imag / 3);
+    // A = A * x;
   }
 
   return A;

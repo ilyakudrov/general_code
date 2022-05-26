@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
   // data<abelian> conf;
   // string conf_path = "../confs/qc2dstag/40^4/mu0.00/CONF0201";
   string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
-  // string conf_path = "../confs/su3/conf.0501";
+  // string conf_path = "../confs/SU3_conf/nt14/conf.0501";
   conf.read_double(conf_path, 8);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
   std::cout << "polyakov loop before smearing " << polyakov(conf.array)
             << std::endl;
 
-  int T_min = 1, T_max = 1;
-  int R_min = 1, R_max = 1;
+  int T_min = 2, T_max = 2;
+  int R_min = 2, R_max = 2;
 
   std::vector<double> vec_wilson =
       wilson(conf.array, R_min, R_max, T_min, T_max);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
   end_time = clock();
   search_time = end_time - start_time;
-  std::cout << "wilson_lines time: " << search_time * 1. / CLOCKS_PER_SEC
+  std::cout << "smearing old time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
 
   // for (int i = 0; i < 16; i++) {
@@ -99,17 +99,16 @@ int main(int argc, char *argv[]) {
   std::cout << "wilson_loops after smearing:" << std::endl;
   for (int T = T_min; T <= T_max; T++) {
     for (int R = R_min; R <= R_max; R++) {
-      std::cout
-          << "T = " << T << " R = " << R << " "
-          << 1 - vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)]
-          << std::endl;
+      std::cout << "T = " << T << " R = " << R << " "
+                << vec_wilson[(R - R_min) + (T - T_min) * (R_max - R_min + 1)]
+                << std::endl;
     }
   }
 
-  std::cout << "plaket after smearing " << 1 - plaket(conf1.array) << std::endl;
-  std::cout << "plaket time after smearing " << 1 - plaket_time(conf1.array)
+  std::cout << "plaket after smearing " << plaket(conf1.array) << std::endl;
+  std::cout << "plaket time after smearing " << plaket_time(conf1.array)
             << std::endl;
-  std::cout << "plaket space after smearing " << 1 - plaket_space(conf1.array)
+  std::cout << "plaket space after smearing " << plaket_space(conf1.array)
             << std::endl;
   std::cout << "polyakov loop after smearing " << polyakov(conf1.array)
             << std::endl;
@@ -119,42 +118,7 @@ int main(int argc, char *argv[]) {
 
   smearing_APE_test1(conf_separated, alpha_APE);
 
-  // for (int mu = 0; mu < 4; mu++) {
-  //   for (int i = 0; i < 4; i++) {
-  //     std::cout << "conf_separated, mu = " << i << " " <<
-  //     conf_separated[i][mu]
-  //               << std::endl;
-  //   }
-  // }
-
-  /*double test_difference = 0;
-  double test_difference_max = 0;
-  double test_difference_sum = 0;
-  for (int i = 0; i < conf_separated[0].size(); i++) {
-    // for (int i = 0; i < 100; i++) {
-    for (int mu = 0; mu < 4; mu++) {
-      test_difference =
-          sqrt((conf_separated[mu][i] - conf1.array[i * 4 + mu]).module());
-      // (conf_separated[mu][i] - conf1.array[i * 4 + mu]).a0;
-      test_difference_sum += test_difference;
-      if (test_difference_max < test_difference)
-        test_difference_max = test_difference;
-      // std::cout << test_difference << std::endl;
-      // if (test_difference > 1e-12)
-      //   std::cout << "difference if too big " << test_difference <<
-      //   std::endl;
-    }
-  }
-  std::cout << "difference max = " << test_difference_max << std::endl;
-  std::cout << "difference sum = " << test_difference_sum << std::endl;
-  std::cout << "difference aver = "
-            << test_difference_sum / (conf_separated[0].size() * 4)
-            << std::endl;*/
-
-  // std::vector<std::vector<MATRIX_TYPE>> separated_unchanged =
-  //     separate_wilson_unchanged(conf1.array);
-
-  cout << "plaket test " << 1 - plaket(conf1.array) << endl;
+  cout << "plaket test " << plaket(conf1.array) << endl;
 
   int length_R = 1;
   int length_T = 1;
@@ -169,6 +133,46 @@ int main(int argc, char *argv[]) {
       wilson_lines_test3(conf_separated[3], length_T, link.multiplier[3] / 4,
                          link.multiplier[3] / 4 * link.lattice_size[3]);
 
-  std::cout << 1 - wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
+  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
+            << std::endl;
+
+  double alpha1 = 0.75, alpha2 = 0.6, alpha3 = 0.3;
+
+  std::vector<std::vector<su2>> smearing_first;
+  std::vector<std::vector<su2>> smearing_second;
+
+  start_time = clock();
+
+  smearing_first = smearing_first_full(conf.array, alpha3);
+  smearing_second = smearing_second_full(conf.array, smearing_first, alpha2);
+  conf1.array = smearing_HYP(conf.array, smearing_second, alpha1);
+
+  end_time = clock();
+  search_time = end_time - start_time;
+  std::cout << "smearing HYP old time: " << search_time * 1. / CLOCKS_PER_SEC
+            << std::endl;
+
+  std::cout << "plaket after HYP smearing " << plaket(conf1.array) << std::endl;
+  std::cout << "plaket time after HYP smearing " << plaket_time(conf1.array)
+            << std::endl;
+  std::cout << "plaket space after HYP smearing " << plaket_space(conf1.array)
+            << std::endl;
+  std::cout << "polyakov loop after HYP smearing " << polyakov(conf1.array)
+            << std::endl;
+
+  conf_separated = separate_smearing_unchanged(conf.array);
+
+  smearing_HYP_test1(conf_separated, alpha1, alpha2, alpha3);
+
+  for (int i = 0; i < 3; i++) {
+    wilson_lines[i] =
+        wilson_lines_test3(conf_separated[i], length_R, link.multiplier[i] / 4,
+                           link.multiplier[i + 1] / 4);
+  }
+  wilson_lines[3] =
+      wilson_lines_test3(conf_separated[3], length_T, link.multiplier[3] / 4,
+                         link.multiplier[3] / 4 * link.lattice_size[3]);
+
+  std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
             << std::endl;
 }

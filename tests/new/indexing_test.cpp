@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   data<su3> conf;
   // data<abelian> conf;
   // string conf_path = "../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  string conf_path = "../confs/qc2dstag/40^4/mu0.00/conf.0501";
+  string conf_path = "../confs/SU3_conf/nt14/conf.0501";
   // conf.read_double(conf_path, 8);
   // conf.read_double_qc2dstag(conf_path);
   conf.read_ildg(conf_path);
