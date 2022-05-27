@@ -23,19 +23,19 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  unsigned int start_time;
-  unsigned int end_time;
-  unsigned int search_time;
+  double start_time;
+  double end_time;
+  double search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 14;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -43,12 +43,12 @@ int main(int argc, char *argv[]) {
   // data<su2> conf;
   data<MATRIX_TYPE> conf;
   // data<abelian> conf;
-  // string conf_path = "../confs/qc2dstag/40^4/mu0.00/CONF0201";
+  string conf_path = "../confs/qc2dstag/40^4/mu0.00/CONF0201";
   // string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
-  string conf_path = "../confs/SU3_conf/nt14/conf.0501";
+  // string conf_path = "../confs/SU3_conf/nt14/conf.0501";
   // conf.read_double(conf_path, 8);
-  // conf.read_double_qc2dstag(conf_path);
-  conf.read_ildg(conf_path);
+  conf.read_double_qc2dstag(conf_path);
+  // conf.read_ildg(conf_path);
 
   // int wilson_line_length = 10;
   // int wilson_lines_direction = 3;
@@ -169,18 +169,18 @@ int main(int argc, char *argv[]) {
   //                              B.tr(); })
   //           << std::endl;
 
-  int T_min = 10, T_max = 10;
-  int R_min = 32, R_max = 32;
+  int T_min = 1, T_max = 20;
+  int R_min = 1, R_max = 20;
 
   std::vector<double> vec_wilson;
-  start_time = clock();
+  start_time = omp_get_wtime();
 
   vec_wilson = wilson(conf.array, R_min, R_max, T_min, T_max);
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "on-axis wilson time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  std::cout << "on-axis wilson time: " << search_time << std::endl;
+
   std::cout << "wilson_loops:" << std::endl;
   for (int T = T_min; T <= T_max; T++) {
     for (int R = R_min; R <= R_max; R++) {
@@ -208,4 +208,18 @@ int main(int argc, char *argv[]) {
 
   std::cout << wilson_loop_test_time(wilson_lines, length_R, length_T, 4)
             << std::endl;
+
+  start_time = omp_get_wtime();
+
+  std::map<std::tuple<int, int>, double> wilson_loops_new =
+      wilson_parallel(separated_unchanged, R_min, R_max, T_min, T_max);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "wilson_parallel time: " << search_time << std::endl;
+
+  for (auto it = wilson_loops_new.begin(); it != wilson_loops_new.end(); it++) {
+    cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
+         << ", wilson loop new = " << it->second << endl;
+  }
 }

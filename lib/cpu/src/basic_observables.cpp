@@ -71,7 +71,9 @@
 #include "../include/basic_observables.h"
 #include "../include/flux_tube.h"
 #include "../include/link.h"
+
 #include <numeric>
+#include <omp.h>
 
 template <class T> double plaket_time(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
@@ -902,7 +904,7 @@ std::vector<std::vector<int>> generate_directions(int length_max) {
   return directions;
 }
 
-// chaecks if two directions are the same
+// checks if two directions are the same
 bool is_direction_same(const std::vector<int> &direction1,
                        const std::vector<int> &direction2) {
   return (direction1[0] * direction2[1] == direction1[1] * direction2[0] &&
@@ -1027,6 +1029,149 @@ double MAG_functional_su2(const std::vector<su2> &array) {
   return result / (2 * DATA_SIZE);
 }
 
+template <class T>
+std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf) {
+  int data_size = x_size * y_size * z_size * t_size;
+  std::vector<std::vector<T>> result(4, std::vector<T>(data_size));
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  for (int mu = 0; mu < 4; ++mu) {
+
+    SPACE_ITER_START
+
+    result[mu][link.place / 4] = conf[link.place + mu];
+
+    SPACE_ITER_END
+  }
+
+  return result;
+}
+
+template <class T>
+std::vector<T> wilson_lines(std::vector<T> separated, int length, int size1,
+                            int size2) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  std::vector<T> wilson_lines(data_size);
+  T A;
+
+#pragma omp parallel for private(A)
+  for (int i = 0; i < data_size; i += size2) {
+    for (int k = i; k < i + size1; k++) {
+      A = separated[k];
+      for (int j = k + size1; j < k + length * size1; j += size1) {
+        A = A * separated[j];
+      }
+      wilson_lines[k] = A;
+      for (int j = k + size1; j < k + size2 - (length - 1) * size1;
+           j += size1) {
+        A = separated[j - size1] % A;
+        A = A * separated[j + (length - 1) * size1];
+        wilson_lines[j] = A;
+      }
+
+      for (int j = k + size2 - (length - 1) * size1; j < k + size2;
+           j += size1) {
+        A = separated[j - size1] % A;
+        A = A * separated[j - size2 + (length - 1) * size1];
+        wilson_lines[j] = A;
+      }
+    }
+  }
+
+  return wilson_lines;
+}
+
+template <class T>
+double wilson_plane(std::vector<T> &wilson_lines_mu,
+                    std::vector<T> &wilson_lines_nu, int size_mu1, int size_mu2,
+                    int size_nu1, int size_nu2, int length_mu, int length_nu) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  T loops;
+  double result = 0;
+
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
+  for (int k = 0; k < data_size; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - length_mu * size_mu1)
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
+        else
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
+        if (i + j < size_nu2 - length_nu * size_nu1)
+          loops = loops ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
+        else
+          loops = loops ^
+                  wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+
+        result += loops.multiply_tr(wilson_lines_nu[i + k + j]);
+      }
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T>
+double wilson_loop_test_time(std::vector<std::vector<T>> &wilson_lines,
+                             int length_R, int length_T) {
+
+  double result = 0;
+  result += wilson_plane(wilson_lines[0], wilson_lines[3], 1, x_size,
+                         x_size * y_size * z_size,
+                         x_size * y_size * z_size * t_size, length_R, length_T);
+
+  result += wilson_plane(wilson_lines[1], wilson_lines[3], x_size,
+                         x_size * y_size, x_size * y_size * z_size,
+                         x_size * y_size * z_size * t_size, length_R, length_T);
+
+  result += wilson_plane(wilson_lines[2], wilson_lines[3], x_size * y_size,
+                         x_size * y_size * z_size, x_size * y_size * z_size,
+                         x_size * y_size * z_size * t_size, length_R, length_T);
+
+  return result / 3;
+}
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
+                int time_min, int time_max) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  std::map<std::tuple<int, int>, double> wilson_loops;
+
+  std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
+  std::vector<T> space_lines;
+  for (int t = time_min; t <= time_max; t++) {
+    time_lines[t - time_min] = wilson_lines(conf[3], t, steps[3], steps[4]);
+  }
+  T A;
+  for (int r = r_min; r <= r_max; r++) {
+    for (int mu = 0; mu < 3; mu++) {
+      space_lines = wilson_lines(conf[mu], r, steps[mu], steps[mu + 1]);
+      for (int t = time_min; t <= time_max; t++) {
+
+        wilson_loops[std::tuple<int, int>(t, r)] +=
+            wilson_plane(space_lines, time_lines[t - time_min], steps[mu],
+                         steps[mu + 1], steps[3], steps[4], r, t);
+      }
+    }
+  }
+
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    it->second = it->second / 3;
+  }
+
+  return wilson_loops;
+}
+
 // su2
 template double plaket_time(const std::vector<su2> &array);
 template double plaket_space(const std::vector<su2> &array);
@@ -1073,6 +1218,24 @@ template std::map<std::tuple<int, int>, double>
 wilson_spatial(const std::vector<su2> &array,
                std::map<std::tuple<int, int>, std::vector<su2>> smeared,
                int time_min, int time_max, int r_min, int r_max);
+
+template std::vector<std::vector<su2>> separate_wilson(std::vector<su2> &conf);
+
+template std::vector<su2> wilson_lines(std::vector<su2> separated, int length,
+                                       int size1, int size2);
+
+template double wilson_plane(std::vector<su2> &wilson_lines_mu,
+                             std::vector<su2> &wilson_lines_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2,
+                             int length_mu, int length_nu);
+
+template double
+wilson_loop_test_time(std::vector<std::vector<su2>> &wilson_lines, int length_R,
+                      int length_T);
+
+template std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<su2>> conf, int r_min, int r_max,
+                int time_min, int time_max);
 
 // abelian
 template double plaket_time(const std::vector<abelian> &array);
@@ -1127,6 +1290,25 @@ wilson_spatial(const std::vector<abelian> &array,
                std::map<std::tuple<int, int>, std::vector<abelian>> smeared,
                int time_min, int time_max, int r_min, int r_max);
 
+template std::vector<std::vector<abelian>>
+separate_wilson(std::vector<abelian> &conf);
+
+template std::vector<abelian> wilson_lines(std::vector<abelian> separated,
+                                           int length, int size1, int size2);
+
+template double wilson_plane(std::vector<abelian> &wilson_lines_mu,
+                             std::vector<abelian> &wilson_lines_nu,
+                             int size_mu1, int size_mu2, int size_nu1,
+                             int size_nu2, int length_mu, int length_nu);
+
+template double
+wilson_loop_test_time(std::vector<std::vector<abelian>> &wilson_lines,
+                      int length_R, int length_T);
+
+template std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<abelian>> conf, int r_min, int r_max,
+                int time_min, int time_max);
+
 // su3
 template double plaket_time(const std::vector<su3> &array);
 template double plaket_space(const std::vector<su3> &array);
@@ -1172,3 +1354,21 @@ template std::map<std::tuple<int, int>, double>
 wilson_spatial(const std::vector<su3> &array,
                std::map<std::tuple<int, int>, std::vector<su3>> smeared,
                int time_min, int time_max, int r_min, int r_max);
+
+template std::vector<std::vector<su3>> separate_wilson(std::vector<su3> &conf);
+
+template std::vector<su3> wilson_lines(std::vector<su3> separated, int length,
+                                       int size1, int size2);
+
+template double wilson_plane(std::vector<su3> &wilson_lines_mu,
+                             std::vector<su3> &wilson_lines_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2,
+                             int length_mu, int length_nu);
+
+template double
+wilson_loop_test_time(std::vector<std::vector<su3>> &wilson_lines, int length_R,
+                      int length_T);
+
+template std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<su3>> conf, int r_min, int r_max,
+                int time_min, int time_max);

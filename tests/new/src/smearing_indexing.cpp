@@ -522,6 +522,8 @@ void smearing_HYP_test1(std::vector<std::vector<T>> &conf, double alpha1,
     }
   }
 
+  // third step
+
   std::vector<T> smeared = conf[3];
 
   std::for_each(smeared.begin(), smeared.end(),

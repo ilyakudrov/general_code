@@ -178,7 +178,6 @@ std::vector<T> wilson_lines_test3(std::vector<T> separated, int length,
            j += size1) {
         A = separated[j - size1] % A;
         A = A * separated[j + (length - 1) * size1];
-        // A = separated[j - size1] % A;
         wilson_lines[j] = A;
       }
 
@@ -186,7 +185,6 @@ std::vector<T> wilson_lines_test3(std::vector<T> separated, int length,
            j += size1) {
         A = separated[j - size1] % A;
         A = A * separated[j - size2 + (length - 1) * size1];
-        // A = separated[j - size1] % A;
         wilson_lines[j] = A;
       }
     }

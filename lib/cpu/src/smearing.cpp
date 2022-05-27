@@ -943,7 +943,7 @@ void smearing_plane_HYP_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
   }
 }
 
-std::map<std::tuple<int, int, int>, int> make_map_HYP1() {
+std::map<std::tuple<int, int, int>, int> indices_map_HYP1() {
   std::map<std::tuple<int, int, int>, int> indices_map;
   int index_counter = 0;
   for (int nu = 0; nu < 2; nu++) {
@@ -967,7 +967,7 @@ std::map<std::tuple<int, int, int>, int> make_map_HYP1() {
   return indices_map;
 }
 
-std::map<std::tuple<int, int>, int> make_map_HYP2() {
+std::map<std::tuple<int, int>, int> indices_map_HYP2() {
   std::map<std::tuple<int, int>, int> indices_map;
   int index_counter = 0;
   for (int nu = 0; nu < 3; nu++) {
@@ -991,7 +991,7 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
 
-  std::map<std::tuple<int, int, int>, int> indices_map1 = make_map_HYP1();
+  std::map<std::tuple<int, int, int>, int> indices_map1 = indices_map_HYP1();
   std::vector<std::vector<T>> links1(9);
 
   // first step
@@ -1065,7 +1065,7 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
   // second_step
 
   std::vector<std::vector<T>> links2(6);
-  std::map<std::tuple<int, int>, int> indices_map2 = make_map_HYP2();
+  std::map<std::tuple<int, int>, int> indices_map2 = indices_map_HYP2();
 
   links2[0] = conf[3];
   std::for_each(links2[0].begin(), links2[0].end(),

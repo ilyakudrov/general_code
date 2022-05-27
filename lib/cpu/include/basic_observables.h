@@ -115,3 +115,24 @@ std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
                                                int D_min, int D_max);
 
 double MAG_functional_su2(const std::vector<su2> &array);
+
+template <class T>
+std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf);
+
+template <class T>
+std::vector<T> wilson_lines(std::vector<T> separated, int length, int size1,
+                            int size2);
+
+template <class T>
+double wilson_plane(std::vector<T> &wilson_lines_mu,
+                    std::vector<T> &wilson_lines_nu, int size_mu1, int size_mu2,
+                    int size_nu1, int size_nu2, int length_mu, int length_nu);
+
+template <class T>
+double wilson_loop_test_time(std::vector<std::vector<T>> &wilson_lines,
+                             int length_R, int length_T);
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
+                int time_min, int time_max);

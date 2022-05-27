@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
   std::cout << "polyakov loop before smearing " << polyakov(conf.array)
             << std::endl;
 
-  int T_min = 2, T_max = 2;
-  int R_min = 2, R_max = 2;
+  int T_min = 1, T_max = 5;
+  int R_min = 1, R_max = 5;
 
   std::vector<double> vec_wilson =
       wilson(conf.array, R_min, R_max, T_min, T_max);
