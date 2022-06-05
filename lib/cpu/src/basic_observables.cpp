@@ -1039,7 +1039,7 @@ double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
   T loops;
   double result = 0;
 
-#pragma omp parallel for collapse(3) private(loops) reduction(+ : result) num_threads(1)
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
   for (int k = 0; k < data_size1; k += size_nu2) {
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
