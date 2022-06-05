@@ -54,6 +54,7 @@
   }
 
 #include "../include/flux_tube.h"
+#include "../include/basic_observables.h"
 #include "../include/link.h"
 
 template <class T>
@@ -365,10 +366,12 @@ wilson_plaket_correlator_electric(const std::vector<double> &wilson_loop_tr,
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<double> correlator(d_max - d_min + 1, 0.0);
   double a;
+  bool if_test = false;
   for (int dir = 0; dir < 3; dir++) {
     SPACE_ITER_START
     a = wilson_loop_tr[link.place / 4 * 3 + dir];
     link.move(3, time / 2);
+    if_test = false;
     link.move(dir, d_min);
     for (int d = d_min; d <= d_max; d++) {
       if (x_trans == 0) {
@@ -569,6 +572,387 @@ wilson_plaket_correlator_magnetic_x(const std::vector<double> &wilson_loop_tr,
   return result;
 }
 
+template <class T>
+std::vector<double>
+wilson_plane_tr(std::vector<T> &wilson_lines_mu,
+                std::vector<T> &wilson_lines_nu, int size_mu1, int size_mu2,
+                int size_nu1, int size_nu2, int length_mu, int length_nu) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<double> wilson_loops_tr(x_size * y_size * z_size * t_size, 0.0);
+
+  T loops;
+
+#pragma omp parallel for collapse(3) private(loops)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - length_mu * size_mu1)
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
+        else
+          loops = wilson_lines_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
+        if (i + j < size_nu2 - length_nu * size_nu1)
+          loops = loops ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
+        else
+          loops = loops ^
+                  wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+
+        if (k + i + length_nu / 2 * size_nu1 >= size_nu2)
+          wilson_loops_tr[i + k + j + length_nu / 2 * size_nu1 - size_nu2] =
+              loops.multiply_tr(wilson_lines_nu[i + k + j]);
+        else
+          wilson_loops_tr[i + k + j + length_nu / 2 * size_nu1] =
+              loops.multiply_tr(wilson_lines_nu[i + k + j]);
+      }
+    }
+  }
+
+  return wilson_loops_tr;
+}
+
+template <class T>
+std::vector<double> plaket_plane_tr(std::vector<T> &conf_mu,
+                                    std::vector<T> &conf_nu, int size_mu1,
+                                    int size_mu2, int size_nu1, int size_nu2) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<double> wilson_loops_tr(x_size * y_size * z_size * t_size);
+
+  T loops;
+
+  // #pragma omp parallel for collapse(3) private(loops) num_threads(1)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - size_mu1)
+          loops = conf_mu[i + k + j] * conf_nu[i + k + j + size_mu1];
+        else
+          loops = conf_mu[i + k + j] * conf_nu[i + k + j - size_mu2 + size_mu1];
+        if (i + j < size_nu2 - size_nu1)
+          loops = loops ^ conf_mu[i + k + j + size_nu1];
+        else
+          loops = loops ^ conf_mu[i + k + j - size_nu2 + size_nu1];
+
+        wilson_loops_tr[i + k + j] = loops.multiply_tr(conf_nu[i + k + j]);
+      }
+    }
+  }
+
+  return wilson_loops_tr;
+}
+
+void plaket_plane_aver(std::vector<double> &plaket_aver_tr,
+                       std::vector<double> &plaket_tr, int size_mu1,
+                       int size_mu2, int size_nu1, int size_nu2) {
+
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  // #pragma omp parallel for collapse(3) num_threads(1)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+
+        if (i >= size_nu1) {
+          plaket_aver_tr[i + k + j] +=
+              plaket_tr[i + k + j] + plaket_tr[i + k + j - size_nu1];
+
+          if (j >= size_mu1) {
+            plaket_aver_tr[i + k + j] +=
+                plaket_tr[i + k + j - size_mu1] +
+                plaket_tr[i + k + j - size_mu1 - size_nu1];
+          }
+
+          else {
+            plaket_aver_tr[i + k + j] +=
+                plaket_tr[i + k + j + size_mu2 - size_mu1] +
+                plaket_tr[i + k + j + size_mu2 - size_mu1 - size_nu1];
+          }
+        } else {
+          plaket_aver_tr[i + k + j] +=
+              plaket_tr[i + k + j] + plaket_tr[i + k + j + size_nu2 - size_nu1];
+
+          if (j >= size_mu1) {
+            plaket_aver_tr[i + k + j] +=
+                plaket_tr[i + k + j - size_mu1] +
+                plaket_tr[i + k + j - size_mu1 + size_nu2 - size_nu1];
+          } else {
+            plaket_aver_tr[i + k + j] +=
+                plaket_tr[i + k + j + size_mu2 - size_mu1] +
+                plaket_tr[i + k + j + size_mu2 - size_mu1 + size_nu2 -
+                          size_nu1];
+          }
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+std::vector<double> plaket_aver_tr_time(std::vector<std::vector<T>> conf) {
+
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  std::vector<double> plaket_result(data_size1, 0.0);
+  std::vector<double> plaket_plane;
+
+  for (int mu = 0; mu < 3; mu++) {
+
+    plaket_plane = plaket_plane_tr(conf[mu], conf[3], steps[mu], steps[mu + 1],
+                                   steps[3], steps[4]);
+
+    plaket_plane_aver(plaket_result, plaket_plane, steps[mu], steps[mu + 1],
+                      steps[3], steps[4]);
+  }
+
+  for (auto it = plaket_result.begin(); it != plaket_result.end(); it++) {
+    *it = *it / 12;
+  }
+
+  return plaket_result;
+}
+
+template <class T>
+std::vector<double> plaket_aver_tr_space(std::vector<std::vector<T>> conf) {
+
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  std::vector<double> plaket_result(data_size1, 0.0);
+  std::vector<double> plaket_plane;
+
+  for (int mu = 0; mu < 3; mu++) {
+    for (int nu = mu + 1; nu < 3; nu++) {
+
+      plaket_plane = plaket_plane_tr(conf[mu], conf[nu], steps[mu],
+                                     steps[mu + 1], steps[nu], steps[nu + 1]);
+
+      plaket_plane_aver(plaket_result, plaket_plane, steps[mu], steps[mu + 1],
+                        steps[nu], steps[nu + 1]);
+    }
+  }
+
+  for (auto it = plaket_result.begin(); it != plaket_result.end(); it++) {
+    *it = *it / 12;
+  }
+
+  return plaket_result;
+}
+
+void wilson_plaket_correlator_plane_longitudinal(
+    std::vector<double> &correlator, const std::vector<double> &wilson_loop_tr,
+    const std::vector<double> &plaket_tr, int size_mu1, int size_mu2,
+    int x_trans, int d_min, int d_max) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  for (int i = 0; i < data_size1; i += size_mu2) {
+    for (int j = 0; j < size_mu2; j++) {
+      for (int d = d_min; d <= d_max; d++) {
+        if (j + d * size_mu1 < 0) {
+          correlator[d - d_min] += wilson_loop_tr[i + j] *
+                                   plaket_tr[i + j + d * size_mu1 + size_mu2];
+        } else if (j + d * size_mu1 < size_mu2) {
+          correlator[d - d_min] +=
+              wilson_loop_tr[i + j] * plaket_tr[i + j + d * size_mu1];
+        } else {
+          correlator[d - d_min] += wilson_loop_tr[i + j] *
+                                   plaket_tr[i + j + d * size_mu1 - size_mu2];
+        }
+      }
+    }
+  }
+}
+
+void wilson_plaket_correlator_plane_transversal(
+    std::vector<double> &correlator, const std::vector<double> &wilson_loop_tr,
+    const std::vector<double> &plaket_tr, int size_mu1, int size_mu2,
+    int size_nu1, int size_nu2, int d, int x_trans_min, int x_trans_max) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  int mu_shift;
+  int nu_shift;
+
+  if (size_mu2 < size_nu2) {
+
+    // #pragma omp parallel for collapse(3) private(mu_shift, nu_shift)
+    // num_threads(4)
+    for (int i = 0; i < data_size1; i += size_nu2) {
+      for (int j = 0; j < size_nu2; j += size_mu2) {
+        for (int k = 0; k < size_mu2; k++) {
+
+          if (k + d * size_mu1 < 0)
+            mu_shift = d * size_mu1 + size_mu2;
+          else if (k + d * size_mu1 < size_mu2)
+            mu_shift = d * size_mu1;
+          else
+            mu_shift = d * size_mu1 - size_mu2;
+
+          for (int x = x_trans_min; x <= x_trans_max; x++) {
+
+            if (j + x * size_nu1 < 0)
+              nu_shift = x * size_nu1 + size_nu2;
+            else if (j + x * size_nu1 < size_nu2)
+              nu_shift = x * size_nu1;
+            else
+              nu_shift = x * size_nu1 - size_nu2;
+
+            correlator[x - x_trans_min] +=
+                wilson_loop_tr[i + j + k] *
+                plaket_tr[i + j + k + nu_shift + mu_shift];
+          }
+        }
+      }
+    }
+
+  } else {
+
+    // #pragma omp parallel for collapse(3) private(mu_shift, nu_shift)
+    // num_threads(4)
+    for (int i = 0; i < data_size1; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j += size_nu2) {
+        for (int k = 0; k < size_nu2; k++) {
+
+          if (j + d * size_mu1 < 0)
+            mu_shift = d * size_mu1 + size_mu2;
+          else if (j + d * size_mu1 < size_mu2)
+            mu_shift = d * size_mu1;
+          else
+            mu_shift = d * size_mu1 - size_mu2;
+
+          for (int x = x_trans_min; x <= x_trans_max; x++) {
+
+            if (k + x * size_nu1 < 0)
+              nu_shift = x * size_nu1 + size_nu2;
+            else if (k + x * size_nu1 < size_nu2)
+              nu_shift = x * size_nu1;
+            else
+              nu_shift = x * size_nu1 - size_nu2;
+
+            correlator[x - x_trans_min] +=
+                wilson_loop_tr[i + j + k] *
+                plaket_tr[i + j + k + nu_shift + mu_shift];
+          }
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
+                         int T_max, int R_min, int R_max, int main_coordinate,
+                         int transverse_coordinate, std::string field,
+                         std::string direction) {
+
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  std::map<std::tuple<int, int, int>, double> flux_tube;
+
+  std::vector<double> plaket_tr;
+
+  if (field.compare("electric") == 0)
+
+    plaket_tr = plaket_aver_tr_time(conf);
+
+  else if (field.compare("magnetic") == 0)
+
+    plaket_tr = plaket_aver_tr_space(conf);
+
+  else
+    std::cout << "wrong field type" << std::endl;
+
+  std::map<int, std::vector<T>> time_lines;
+  std::vector<T> space_lines;
+
+  for (int t = T_min; t <= T_max; t += 2) {
+    time_lines[t] = wilson_lines(conf[3], t, steps[3], steps[4]);
+  }
+
+  std::vector<double> wilson_tr;
+
+  for (int t = T_min; t <= T_max; t += 2) {
+    for (int r = R_min; r <= R_max; r += 2) {
+
+      int main_coordinate_min, main_coordinate_max;
+
+      if (direction.compare("longitudinal") == 0) {
+        main_coordinate_min = -main_coordinate;
+        main_coordinate_max = r + main_coordinate;
+      } else if (direction.compare("transversal") == 0) {
+        main_coordinate_min = -main_coordinate;
+        main_coordinate_max = main_coordinate;
+      } else {
+        std::cout << "wrong direction" << std::endl;
+        exit(1);
+      }
+
+      std::vector<double> correlator(
+          main_coordinate_max - main_coordinate_min + 1, 0.0);
+
+      for (int mu = 0; mu < 3; mu++) {
+
+        space_lines = wilson_lines(conf[mu], r, steps[mu], steps[mu + 1]);
+
+        wilson_tr = wilson_plane_tr(space_lines, time_lines[t], steps[mu],
+                                    steps[mu + 1], steps[3], steps[4], r, t);
+
+        if (direction.compare("longitudinal") == 0) {
+          wilson_plaket_correlator_plane_longitudinal(
+              correlator, wilson_tr, plaket_tr, steps[mu], steps[mu + 1],
+              transverse_coordinate, main_coordinate_min, main_coordinate_max);
+        } else if (direction.compare("transversal") == 0) {
+          for (int nu = 0; nu < 3; nu++) {
+            if (mu != nu) {
+              wilson_plaket_correlator_plane_transversal(
+                  correlator, wilson_tr, plaket_tr, steps[mu], steps[mu + 1],
+                  steps[nu], steps[nu + 1], transverse_coordinate,
+                  main_coordinate_min, main_coordinate_max);
+            }
+          }
+        }
+      }
+
+      int norm;
+      if (direction.compare("longitudinal") == 0)
+        norm = 3;
+
+      else if (direction.compare("transversal") == 0)
+        norm = 6;
+
+      if (direction.compare("longitudinal") == 0) {
+        for (int D = main_coordinate_min; D <= main_coordinate_max; D++) {
+          flux_tube[std::tuple<int, int, int>(t, r, D)] =
+              correlator[D - main_coordinate_min] / data_size1 / norm;
+        }
+      }
+
+      else if (direction.compare("transversal") == 0) {
+        for (int D = 0; D <= main_coordinate_max; D++) {
+          flux_tube[std::tuple<int, int, int>(t, r, D)] =
+              (correlator[D - main_coordinate_min] +
+               correlator[-D - main_coordinate_min]) /
+              data_size1 / norm / 2;
+        }
+      }
+    }
+  }
+
+  return flux_tube;
+}
+
 // su2
 
 template std::map<int, double>
@@ -594,6 +978,28 @@ template std::vector<su2> calculate_wilson_loop(const std::vector<su2> &array,
 template std::vector<double>
 calculate_wilson_loop_tr(const std::vector<su2> &array, int r, int time);
 
+template std::vector<double> wilson_plane_tr(std::vector<su2> &wilson_lines_mu,
+                                             std::vector<su2> &wilson_lines_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2,
+                                             int length_mu, int length_nu);
+
+template std::vector<double> plaket_plane_tr(std::vector<su2> &conf_mu,
+                                             std::vector<su2> &conf_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2);
+
+template std::vector<double>
+plaket_aver_tr_time(std::vector<std::vector<su2>> conf);
+template std::vector<double>
+plaket_aver_tr_space(std::vector<std::vector<su2>> conf);
+
+template std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<std::vector<su2>> &conf, int T_min,
+                         int T_max, int R_min, int R_max, int main_coordinate,
+                         int transverse_coordinate, std::string field,
+                         std::string direction);
+
 // abelian
 
 template std::map<int, double>
@@ -618,3 +1024,72 @@ template std::vector<abelian>
 calculate_wilson_loop(const std::vector<abelian> &array, int r, int time);
 template std::vector<double>
 calculate_wilson_loop_tr(const std::vector<abelian> &array, int r, int time);
+
+template std::vector<double>
+wilson_plane_tr(std::vector<abelian> &wilson_lines_mu,
+                std::vector<abelian> &wilson_lines_nu, int size_mu1,
+                int size_mu2, int size_nu1, int size_nu2, int length_mu,
+                int length_nu);
+
+template std::vector<double> plaket_plane_tr(std::vector<abelian> &conf_mu,
+                                             std::vector<abelian> &conf_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2);
+
+template std::vector<double>
+plaket_aver_tr_time(std::vector<std::vector<abelian>> conf);
+template std::vector<double>
+plaket_aver_tr_space(std::vector<std::vector<abelian>> conf);
+
+template std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<std::vector<abelian>> &conf, int T_min,
+                         int T_max, int R_min, int R_max, int main_coordinate,
+                         int transverse_coordinate, std::string field,
+                         std::string direction);
+
+// su3
+
+template std::map<int, double>
+wilson_plaket_schwinger_electric(const std::vector<su3> &array,
+                                 const std::vector<su3> &plaket, int d_min,
+                                 int d_max, int t, int r);
+template std::vector<su3>
+calculate_plaket_schwinger_time(const std::vector<su3> &array);
+template std::vector<std::vector<su3>>
+calculate_plaket_schwinger_space(const std::vector<su3> &array);
+template std::vector<su3>
+calculate_schwinger_lines_short(const std::vector<su3> &array, int d);
+template std::vector<std::vector<su3>>
+calculate_schwinger_line(const std::vector<su3> &array, int d, int x_trans);
+template std::vector<double>
+calculate_plaket_time_tr(const std::vector<su3> &array);
+template std::vector<double>
+calculate_plaket_space_tr(const std::vector<su3> &array);
+template std::vector<su3>
+calculate_polyakov_loop(const std::vector<su3> &array);
+template std::vector<su3> calculate_wilson_loop(const std::vector<su3> &array,
+                                                int r, int time);
+template std::vector<double>
+calculate_wilson_loop_tr(const std::vector<su3> &array, int r, int time);
+
+template std::vector<double> wilson_plane_tr(std::vector<su3> &wilson_lines_mu,
+                                             std::vector<su3> &wilson_lines_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2,
+                                             int length_mu, int length_nu);
+
+template std::vector<double> plaket_plane_tr(std::vector<su3> &conf_mu,
+                                             std::vector<su3> &conf_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2);
+
+template std::vector<double>
+plaket_aver_tr_time(std::vector<std::vector<su3>> conf);
+template std::vector<double>
+plaket_aver_tr_space(std::vector<std::vector<su3>> conf);
+
+template std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<std::vector<su3>> &conf, int T_min,
+                         int T_max, int R_min, int R_max, int main_coordinate,
+                         int transverse_coordinate, std::string field,
+                         std::string direction);

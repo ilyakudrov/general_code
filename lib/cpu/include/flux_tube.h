@@ -58,3 +58,41 @@ std::map<int, double>
 wilson_plaket_correlator_magnetic_x(const std::vector<double> &wilson_loop_tr,
                                     const std::vector<double> &plaket_tr, int r,
                                     int time, int x_trans_max, int d);
+
+template <class T>
+std::vector<double> wilson_plane_tr(std::vector<T> &wilson_lines_mu,
+                                    std::vector<T> &wilson_lines_nu,
+                                    int size_mu1, int size_mu2, int size_nu1,
+                                    int size_nu2, int length_mu, int length_nu);
+
+template <class T>
+std::vector<double> plaket_plane_tr(std::vector<T> &conf_mu,
+                                    std::vector<T> &conf_nu, int size_mu1,
+                                    int size_mu2, int size_nu1, int size_nu2);
+
+void plaket_plane_aver(std::vector<double> &plaket_aver_tr,
+                       std::vector<double> &plaket_tr, int size_mu1,
+                       int size_mu2, int size_nu1, int size_nu2);
+
+template <class T>
+std::vector<double> plaket_aver_tr_time(std::vector<std::vector<T>> conf);
+
+template <class T>
+std::vector<double> plaket_aver_tr_space(std::vector<std::vector<T>> conf);
+
+void wilson_plaket_correlator_plane_longitudinal(
+    std::vector<double> &correlator, const std::vector<double> &wilson_loop_tr,
+    const std::vector<double> &plaket_tr, int size_mu1, int size_mu2,
+    int x_trans, int d_min, int d_max);
+
+void wilson_plaket_correlator_plane_transversal(
+    std::vector<double> &correlator, const std::vector<double> &wilson_loop_tr,
+    const std::vector<double> &plaket_tr, int size_mu1, int size_mu2,
+    int size_nu1, int size_nu2, int d, int x_trans_min, int x_trans_max);
+
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
+                         int T_max, int R_min, int R_max, int main_coordinate,
+                         int transverse_coordinate, std::string field,
+                         std::string direction);

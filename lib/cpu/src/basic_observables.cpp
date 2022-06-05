@@ -1030,6 +1030,94 @@ double MAG_functional_su2(const std::vector<su2> &array) {
 }
 
 template <class T>
+double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
+                    int size_mu1, int size_mu2, int size_nu1, int size_nu2) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  std::vector<double> wilson_loops_tr(x_size * y_size * z_size * t_size);
+
+  T loops;
+  double result = 0;
+
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result) num_threads(1)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - size_mu1)
+          loops = conf_mu[i + k + j] * conf_nu[i + k + j + size_mu1];
+        else
+          loops = conf_mu[i + k + j] * conf_nu[i + k + j - size_mu2 + size_mu1];
+        if (i + j < size_nu2 - size_nu1)
+          loops = loops ^ conf_mu[i + k + j + size_nu1];
+        else
+          loops = loops ^ conf_mu[i + k + j - size_nu2 + size_nu1];
+
+        result += loops.multiply_tr(conf_nu[i + k + j]);
+      }
+    }
+  }
+
+  return result / data_size1;
+}
+
+template <class T>
+double plaket_time_parallel(std::vector<std::vector<T>> conf) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  double plaket_time = 0;
+
+  for (int mu = 0; mu < 3; mu++) {
+
+    plaket_time += plaket_plane(conf[mu], conf[3], steps[mu], steps[mu + 1],
+                                steps[3], steps[4]);
+  }
+
+  return plaket_time / 3;
+}
+
+template <class T>
+double plaket_space_parallel(std::vector<std::vector<T>> conf) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  double plaket_space = 0;
+
+  for (int mu = 0; mu < 3; mu++) {
+    for (int nu = mu + 1; nu < 3; nu++) {
+
+      plaket_space += plaket_plane(conf[mu], conf[nu], steps[mu], steps[mu + 1],
+                                   steps[nu], steps[nu + 1]);
+    }
+  }
+
+  return plaket_space / 3;
+}
+
+template <class T> double plaket_parallel(std::vector<std::vector<T>> conf) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  double plaket = 0;
+
+  for (int mu = 0; mu < 3; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+
+      plaket += plaket_plane(conf[mu], conf[nu], steps[mu], steps[mu + 1],
+                             steps[nu], steps[nu + 1]);
+    }
+  }
+
+  return plaket / 6;
+}
+
+template <class T>
 std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf) {
   int data_size = x_size * y_size * z_size * t_size;
   std::vector<std::vector<T>> result(4, std::vector<T>(data_size));
@@ -1056,7 +1144,7 @@ std::vector<T> wilson_lines(std::vector<T> separated, int length, int size1,
   std::vector<T> wilson_lines(data_size);
   T A;
 
-#pragma omp parallel for private(A)
+  // #pragma omp parallel for collapse(2) private(A)
   for (int i = 0; i < data_size; i += size2) {
     for (int k = i; k < i + size1; k++) {
       A = separated[k];
@@ -1237,6 +1325,16 @@ template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<su2>> conf, int r_min, int r_max,
                 int time_min, int time_max);
 
+template double plaket_plane(std::vector<su2> &conf_mu,
+                             std::vector<su2> &conf_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2);
+
+template double plaket_time_parallel(std::vector<std::vector<su2>> conf);
+
+template double plaket_space_parallel(std::vector<std::vector<su2>> conf);
+
+template double plaket_parallel(std::vector<std::vector<su2>> conf);
+
 // abelian
 template double plaket_time(const std::vector<abelian> &array);
 template double plaket_space(const std::vector<abelian> &array);
@@ -1309,6 +1407,16 @@ template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<abelian>> conf, int r_min, int r_max,
                 int time_min, int time_max);
 
+template double plaket_plane(std::vector<abelian> &conf_mu,
+                             std::vector<abelian> &conf_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2);
+
+template double plaket_time_parallel(std::vector<std::vector<abelian>> conf);
+
+template double plaket_space_parallel(std::vector<std::vector<abelian>> conf);
+
+template double plaket_parallel(std::vector<std::vector<abelian>> conf);
+
 // su3
 template double plaket_time(const std::vector<su3> &array);
 template double plaket_space(const std::vector<su3> &array);
@@ -1372,3 +1480,13 @@ wilson_loop_test_time(std::vector<std::vector<su3>> &wilson_lines, int length_R,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<su3>> conf, int r_min, int r_max,
                 int time_min, int time_max);
+
+template double plaket_plane(std::vector<su3> &conf_mu,
+                             std::vector<su3> &conf_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2);
+
+template double plaket_time_parallel(std::vector<std::vector<su3>> conf);
+
+template double plaket_space_parallel(std::vector<std::vector<su3>> conf);
+
+template double plaket_parallel(std::vector<std::vector<su3>> conf);
