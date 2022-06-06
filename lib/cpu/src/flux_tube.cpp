@@ -848,10 +848,10 @@ void wilson_plaket_correlator_plane_transversal(
 
 template <class T>
 std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<T>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
-                         int transverse_coordinate, std::string field,
-                         std::string direction) {
+                         int transverse_coordinate, std::string direction) {
 
   int data_size1 = x_size * y_size * z_size * t_size;
 
@@ -861,24 +861,11 @@ wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
 
   std::map<std::tuple<int, int, int>, double> flux_tube;
 
-  std::vector<double> plaket_tr;
-
-  if (field.compare("electric") == 0)
-
-    plaket_tr = plaket_aver_tr_time(conf);
-
-  else if (field.compare("magnetic") == 0)
-
-    plaket_tr = plaket_aver_tr_space(conf);
-
-  else
-    std::cout << "wrong field type" << std::endl;
-
   std::map<int, std::vector<T>> time_lines;
   std::vector<T> space_lines;
 
   for (int t = T_min; t <= T_max; t += 2) {
-    time_lines[t] = wilson_lines(conf[3], t, steps[3], steps[4]);
+    time_lines[t] = wilson_lines(conf_wilson[3], t, steps[3], steps[4]);
   }
 
   std::vector<double> wilson_tr;
@@ -904,7 +891,8 @@ wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
 
       for (int mu = 0; mu < 3; mu++) {
 
-        space_lines = wilson_lines(conf[mu], r, steps[mu], steps[mu + 1]);
+        space_lines =
+            wilson_lines(conf_wilson[mu], r, steps[mu], steps[mu + 1]);
 
         wilson_tr = wilson_plane_tr(space_lines, time_lines[t], steps[mu],
                                     steps[mu + 1], steps[3], steps[4], r, t);
@@ -933,9 +921,11 @@ wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
         norm = 6;
 
       if (direction.compare("longitudinal") == 0) {
-        for (int D = main_coordinate_min; D <= main_coordinate_max; D++) {
+        for (int D = 0; D <= r / 2 + main_coordinate; D++) {
           flux_tube[std::tuple<int, int, int>(t, r, D)] =
-              correlator[D - main_coordinate_min] / data_size1 / norm;
+              (correlator[D + main_coordinate + r / 2] +
+               correlator[-D + main_coordinate + r / 2]) /
+              data_size1 / norm / 2;
         }
       }
 
@@ -995,10 +985,10 @@ template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<su2>> conf);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<std::vector<su2>> &conf, int T_min,
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<su2>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
-                         int transverse_coordinate, std::string field,
-                         std::string direction);
+                         int transverse_coordinate, std::string direction);
 
 // abelian
 
@@ -1042,9 +1032,10 @@ template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<abelian>> conf);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<std::vector<abelian>> &conf, int T_min,
-                         int T_max, int R_min, int R_max, int main_coordinate,
-                         int transverse_coordinate, std::string field,
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<abelian>> &conf_wilson,
+                         int T_min, int T_max, int R_min, int R_max,
+                         int main_coordinate, int transverse_coordinate,
                          std::string direction);
 
 // su3
@@ -1089,7 +1080,7 @@ template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<su3>> conf);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<std::vector<su3>> &conf, int T_min,
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<su3>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
-                         int transverse_coordinate, std::string field,
-                         std::string direction);
+                         int transverse_coordinate, std::string direction);

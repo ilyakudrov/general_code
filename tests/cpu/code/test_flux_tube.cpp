@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   //             << std::endl;
   // }
 
-  /*std::cout << "wilson plaket flux tube test" << std::endl;
+  std::cout << "wilson plaket flux tube test" << std::endl;
 
   R = 4;
   T = 4;
@@ -144,21 +144,26 @@ int main(int argc, char *argv[]) {
   for (auto it = magnetic_trans.begin(); it != magnetic_trans.end(); ++it) {
     std::cout << "transversal magnetic R = " << R << " T = " << T << " d "
               << it->first << " " << it->second << std::endl;
-  }*/
+  }
 
   std::vector<std::vector<MATRIX_TYPE>> separated_unchanged =
       separate_wilson(conf_qc2dstag.array);
 
-  int T_min = 4, T_max = 20;
-  int R_min = 4, R_max = 20;
+  int T_min = 4, T_max = 4;
+  int R_min = 4, R_max = 4;
 
   std::map<std::tuple<int, int, int>, double> flux_tube_new;
+
+  std::vector<double> plaket_time_tr = plaket_aver_tr_time(separated_unchanged);
+
+  std::vector<double> plaket_space_tr =
+      plaket_aver_tr_space(separated_unchanged);
 
   start_time = omp_get_wtime();
 
   flux_tube_new =
-      wilson_plaket_correlator(separated_unchanged, T_min, T_max, R_min, R_max,
-                               5, 0, "electric", "longitudinal");
+      wilson_plaket_correlator(plaket_time_tr, separated_unchanged, T_min,
+                               T_max, R_min, R_max, 5, 0, "longitudinal");
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -173,11 +178,11 @@ int main(int argc, char *argv[]) {
               << std::endl;
   }
 
-  /*start_time = omp_get_wtime();
+  start_time = omp_get_wtime();
 
   flux_tube_new =
-      wilson_plaket_correlator(separated_unchanged, T_min, T_max, R_min, R_max,
-                               5, 0, "magnetic", "longitudinal");
+      wilson_plaket_correlator(plaket_space_tr, separated_unchanged, T_min,
+                               T_max, R_min, R_max, 5, 0, "longitudinal");
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -195,8 +200,8 @@ int main(int argc, char *argv[]) {
   start_time = omp_get_wtime();
 
   flux_tube_new =
-      wilson_plaket_correlator(separated_unchanged, T_min, T_max, R_min, R_max,
-                               5, R / 2, "electric", "transversal");
+      wilson_plaket_correlator(plaket_time_tr, separated_unchanged, T_min,
+                               T_max, R_min, R_max, 5, R / 2, "transversal");
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -214,8 +219,8 @@ int main(int argc, char *argv[]) {
   start_time = omp_get_wtime();
 
   flux_tube_new =
-      wilson_plaket_correlator(separated_unchanged, T_min, T_max, R_min, R_max,
-                               5, R / 2, "magnetic", "transversal");
+      wilson_plaket_correlator(plaket_space_tr, separated_unchanged, T_min,
+                               T_max, R_min, R_max, 5, R / 2, "transversal");
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -228,46 +233,48 @@ int main(int argc, char *argv[]) {
               << ", d = " << std::get<2>(it->first)
               << ", transversal magnetic flux_tube = " << it->second
               << std::endl;
-  }*/
+  }
 
-  std::vector<int> steps = {1, x_size, x_size * y_size,
-                            x_size * y_size * z_size,
-                            x_size * y_size * z_size * t_size};
+  // std::vector<int> steps = {1, x_size, x_size * y_size,
+  //                           x_size * y_size * z_size,
+  //                           x_size * y_size * z_size * t_size};
 
-  std::vector<double> wilson_tr;
-  std::vector<MATRIX_TYPE> space_lines;
-  std::vector<MATRIX_TYPE> time_lines;
+  // std::vector<double> wilson_tr;
+  // std::vector<MATRIX_TYPE> space_lines;
+  // std::vector<MATRIX_TYPE> time_lines;
 
-  std::vector<std::vector<MATRIX_TYPE>> separated_unchanged1 =
-      separate_wilson(conf_qc2dstag.array);
+  // std::vector<std::vector<MATRIX_TYPE>> separated_unchanged1 =
+  //     separate_wilson(conf_qc2dstag.array);
 
-  std::vector<double> plaket_tr = plaket_aver_tr_time(separated_unchanged1);
+  // std::vector<double> plaket_tr = plaket_aver_tr_time(separated_unchanged1);
+
+  // // start_time = omp_get_wtime();
+
+  // space_lines = wilson_lines(separated_unchanged1[0], 10, steps[0],
+  // steps[1]); time_lines = wilson_lines(separated_unchanged1[3], 10, steps[3],
+  // steps[4]);
+
+  // // end_time = omp_get_wtime();
+  // // search_time = end_time - start_time;
+  // // std::cout << "test time: " << search_time << std::endl;
+
+  // wilson_tr = wilson_plane_tr(space_lines, time_lines, steps[0], steps[1],
+  //                             steps[3], steps[4], 10, 10);
+
+  // int main_coordinate_min = -5;
+  // int main_coordinate_max = 15;
+
+  // std::vector<double> correlator(main_coordinate_max - main_coordinate_min +
+  // 1,
+  //                                0.0);
 
   // start_time = omp_get_wtime();
 
-  space_lines = wilson_lines(separated_unchanged1[0], 10, steps[0], steps[1]);
-  time_lines = wilson_lines(separated_unchanged1[3], 10, steps[3], steps[4]);
+  // wilson_plaket_correlator_plane_longitudinal(
+  //     correlator, wilson_tr, plaket_tr, steps[0], steps[1], 0,
+  //     main_coordinate_min, main_coordinate_max);
 
   // end_time = omp_get_wtime();
   // search_time = end_time - start_time;
   // std::cout << "test time: " << search_time << std::endl;
-
-  wilson_tr = wilson_plane_tr(space_lines, time_lines, steps[0], steps[1],
-                              steps[3], steps[4], 10, 10);
-
-  int main_coordinate_min = -5;
-  int main_coordinate_max = 15;
-
-  std::vector<double> correlator(main_coordinate_max - main_coordinate_min + 1,
-                                 0.0);
-
-  start_time = omp_get_wtime();
-
-  wilson_plaket_correlator_plane_longitudinal(
-      correlator, wilson_tr, plaket_tr, steps[0], steps[1], 0,
-      main_coordinate_min, main_coordinate_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "test time: " << search_time << std::endl;
 }

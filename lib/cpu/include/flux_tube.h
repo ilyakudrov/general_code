@@ -92,7 +92,7 @@ void wilson_plaket_correlator_plane_transversal(
 
 template <class T>
 std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<std::vector<T>> &conf, int T_min,
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<T>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
-                         int transverse_coordinate, std::string field,
-                         std::string direction);
+                         int transverse_coordinate, std::string direction);
