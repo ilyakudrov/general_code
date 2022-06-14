@@ -18,16 +18,18 @@ vector<vector<double>> make_angles_SU3(vector<su3> &conf) {
     for (int j = 0; j < 3; j++) {
       angle_tmp[j] =
           atan2(conf[i].matrix[j][j].imag, conf[i].matrix[j][j].real);
+      if (i == 0)
+        std::cout << angle_tmp[j] << std::endl;
       sum += angle_tmp[j];
     }
 
-    // while (sum >= M_PI) {
-    //   sum -= 2 * M_PI;
-    // }
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
 
-    // while (sum < -M_PI) {
-    //   sum += 2 * M_PI;
-    // }
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
 
     for (int j = 0; j < 3; j++) {
       angles[j][i] = angle_tmp[j] - sum / 3;

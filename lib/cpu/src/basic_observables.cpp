@@ -1026,7 +1026,7 @@ double MAG_functional_su2(const std::vector<su2> &array) {
   for (int i = 0; i < DATA_SIZE; i++) {
     result += (array[i].sigma3_mult() * array[i].conj()).tr();
   }
-  return result / (2 * DATA_SIZE);
+  return result / (DATA_SIZE);
 }
 
 template <class T>

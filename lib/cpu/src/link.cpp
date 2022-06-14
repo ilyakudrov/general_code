@@ -106,6 +106,20 @@ void link1::go_update(int x, int y, int z, int t) {
   update(3);
 }
 
+const spin *link1::get_spin(const std::vector<spin> &vec) {
+  return &vec[place / 4];
+}
+
+const spin *link1::get_consecutive_spin(const std::vector<spin> &vec, int mu) {
+  int coordinate_new = coordinate[mu] + 1;
+  coordinate_new = coordinate_new % lattice_size[mu];
+  return &vec[(place + (coordinate_new - coordinate[mu]) * multiplier[mu]) / 4];
+}
+
+template <class T> const T *link1::get_matrix(const std::vector<T> &array) {
+  return &array[place + direction];
+}
+
 template <class T> T link1::plaket_mu(const std::vector<T> &array, int mu) {
   int dir = direction;
   T A = array[place + direction];
@@ -522,6 +536,8 @@ template double link1::field2(const std::vector<su2> &plaket,
 template double link1::field3(const std::vector<su2> &polyakov_loop, int D,
                               int x);
 
+template const su2 *link1::get_matrix(const std::vector<su2> &array);
+
 // abelian
 template abelian link1::plaket_mu(const std::vector<abelian> &array, int mu);
 template abelian
@@ -550,6 +566,8 @@ template double link1::field2(const std::vector<abelian> &plaket,
 template double link1::field3(const std::vector<abelian> &polyakov_loop, int D,
                               int x);
 
+template const abelian *link1::get_matrix(const std::vector<abelian> &array);
+
 // su3
 template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_schwinger_average(const std::vector<su3> &array,
@@ -575,3 +593,5 @@ template double link1::field2(const std::vector<su3> &plaket,
                               int D, int dir, int x);
 template double link1::field3(const std::vector<su3> &polyakov_loop, int D,
                               int x);
+
+template const su3 *link1::get_matrix(const std::vector<su3> &array);

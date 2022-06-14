@@ -417,3 +417,208 @@ std::ostream &operator<<(std::ostream &os, const su3 &A) {
   }
   return os;
 }
+
+spin::spin() {
+  a1 = (double)0.0;
+  a2 = (double)0.0;
+  a3 = (double)1.0;
+}
+spin::spin(su2 U) {
+  a1 = 2 * (U.a0 * U.a2 + U.a3 * U.a1);
+  a2 = 2 * (U.a3 * U.a2 + U.a0 * U.a1);
+  a3 = 1. - 2 * (U.a2 * U.a2 + U.a1 * U.a1);
+}
+spin::spin(double a1, double a2, double a3) : a1(a1), a2(a2), a3(a3) {}
+
+double spin::norm() { return sqrt(a1 * a1 + a2 * a2 + a3 * a3); }
+
+void spin::normalize() {
+  double norm = sqrt(a1 * a1 + a2 * a2 + a3 * a3);
+  a1 = a1 / norm;
+  a2 = a2 / norm;
+  a3 = a3 / norm;
+}
+
+// Function reflect spin vector through arbitrary spin vector
+// it's more convenient to just change the spin variable
+double spin::reflect(spin &V) {
+  double tmp1 = (V.a1 * V.a1 - V.a2 * V.a2 - V.a3 * V.a3) * a1 +
+                2 * V.a1 * (V.a2 * a2 + V.a3 * a3);
+
+  double tmp2 = (-V.a1 * V.a1 + V.a2 * V.a2 - V.a3 * V.a3) * a2 +
+                2 * V.a2 * (V.a1 * a1 + V.a3 * a3);
+
+  double tmp3 = (-V.a1 * V.a1 - V.a2 * V.a2 + V.a3 * V.a3) * a3 +
+                2 * V.a3 * (V.a1 * a1 + V.a2 * a2);
+
+  double norm2 = V.norm() * V.norm();
+
+  double b1 = tmp1 / norm2;
+  double b2 = tmp2 / norm2;
+  double b3 = tmp3 / norm2;
+
+  double c = b1 * a1 + b2 * a2 + b3 * a3;
+
+  a1 = tmp1 / norm2;
+  a2 = tmp2 / norm2;
+  a3 = tmp3 / norm2;
+
+  return 1 - c;
+}
+
+void spin::reflect_fast(spin &V) {
+  double tmp1 = (V.a1 * V.a1 - V.a2 * V.a2 - V.a3 * V.a3) * a1 +
+                2 * V.a1 * (V.a2 * a2 + V.a3 * a3);
+
+  double tmp2 = (-V.a1 * V.a1 + V.a2 * V.a2 - V.a3 * V.a3) * a2 +
+                2 * V.a2 * (V.a1 * a1 + V.a3 * a3);
+
+  double tmp3 = (-V.a1 * V.a1 - V.a2 * V.a2 + V.a3 * V.a3) * a3 +
+                2 * V.a3 * (V.a1 * a1 + V.a2 * a2);
+
+  double norm2 = V.norm() * V.norm();
+
+  a1 = tmp1 / norm2;
+  a2 = tmp2 / norm2;
+  a3 = tmp3 / norm2;
+}
+
+double spin::parallel(spin &V) {
+  double vNorm = V.norm();
+
+  double b1 = V.a1 / vNorm;
+  double b2 = V.a2 / vNorm;
+  double b3 = V.a3 / vNorm;
+
+  double c = b1 * a1 + b2 * a2 + b3 * a3;
+
+  a1 = b1;
+  a2 = b2;
+  a3 = b3;
+
+  return 1 - c;
+}
+
+void spin::parallel_fast(spin &V) {
+  double vNorm = V.norm();
+
+  a1 = V.a1 / vNorm;
+  a2 = V.a2 / vNorm;
+  a3 = V.a3 / vNorm;
+}
+
+bool spin::IsUnit() { return (this->norm() - 1.) > 1e-6 ? false : true; }
+
+// vector which spin variable is multiplied on
+// it's contribution from single neighbour site in one direction
+spin spin::contribution(const su2 &A) const {
+  double q1 = A.a1 * A.a1;
+  double q2 = A.a2 * A.a2;
+  double q3 = A.a3 * A.a3;
+  double q12 = 2. * A.a1 * A.a2;
+  double q13 = 2. * A.a1 * A.a3;
+  double q23 = 2. * A.a2 * A.a3;
+  double q01 = 2. * A.a0 * A.a1;
+  double q02 = 2. * A.a0 * A.a2;
+  double q03 = 2. * A.a0 * A.a3;
+  double A5 = A.a0 * A.a0 - q1 - q2 - q3;
+
+  // matrix A(i, j) = tr(sigma(i) * U * sigma(j) * U.conj) is multiplied by
+  // spin b variable from the right (A * b)
+  return spin(a1 * (A5 + 2 * q1) + a2 * (q12 + q03) + a3 * (q13 - q02),
+              a1 * (q12 - q03) + a2 * (A5 + 2 * q2) + a3 * (q23 + q01),
+              a1 * (q13 + q02) + a2 * (q23 - q01) + a3 * (A5 + 2 * q3));
+}
+
+// supposed to be used for spin variable on current lattice cite
+spin spin::contribution_conj(const su2 &A) const {
+  double q1 = A.a1 * A.a1;
+  double q2 = A.a2 * A.a2;
+  double q3 = A.a3 * A.a3;
+  double q12 = 2. * A.a1 * A.a2;
+  double q13 = 2. * A.a1 * A.a3;
+  double q23 = 2. * A.a2 * A.a3;
+  double q01 = 2. * A.a0 * A.a1;
+  double q02 = 2. * A.a0 * A.a2;
+  double q03 = 2. * A.a0 * A.a3;
+  double A5 = A.a0 * A.a0 - q1 - q2 - q3;
+
+  // matrix A(i, j) = tr(sigma(i) * U * sigma(j) * U.conj) is multiplied by
+  //  spin b variable from the left (b * A)
+  return spin(a1 * (A5 + 2 * q1) + a2 * (q12 - q03) + a3 * (q13 + q02),
+              a1 * (q12 + q03) + a2 * (A5 + 2 * q2) + a3 * (q23 - q01),
+              a1 * (q13 - q02) + a2 * (q23 + q01) + a3 * (A5 + 2 * q3));
+}
+
+void spin::contribution1(const su2 &A, const spin &b) {
+  double q1 = A.a1 * A.a1;
+  double q2 = A.a2 * A.a2;
+  double q3 = A.a3 * A.a3;
+  double q12 = A.a1 * A.a2;
+  double q13 = A.a1 * A.a3;
+  double q23 = A.a2 * A.a3;
+  double q01 = A.a0 * A.a1;
+  double q02 = A.a0 * A.a2;
+  double q03 = A.a0 * A.a3;
+  double A5 = A.a0 * A.a0 - q1 - q2 - q3;
+
+  a1 += b.a1 * (A5 + 2 * q1) + 2 * b.a2 * (q12 + q03) + 2 * b.a3 * (q13 - q02);
+  a2 += 2 * b.a1 * (q12 - q03) + b.a2 * (A5 + 2 * q2) + 2 * b.a3 * (q23 + q01);
+  a3 += 2 * b.a1 * (q13 + q02) + 2 * b.a2 * (q23 - q01) + b.a3 * (A5 + 2 * q3);
+}
+
+void spin::contribution1_conj(const su2 &A, const spin &b) {
+  double q1 = A.a1 * A.a1;
+  double q2 = A.a2 * A.a2;
+  double q3 = A.a3 * A.a3;
+  double q12 = A.a1 * A.a2;
+  double q13 = A.a1 * A.a3;
+  double q23 = A.a2 * A.a3;
+  double q01 = A.a0 * A.a1;
+  double q02 = A.a0 * A.a2;
+  double q03 = A.a0 * A.a3;
+  double A5 = A.a0 * A.a0 - q1 - q2 - q3;
+
+  a1 += b.a1 * (A5 + 2 * q1) + 2 * b.a2 * (q12 - q03) + 2 * b.a3 * (q13 + q02);
+  a2 += 2 * b.a1 * (q12 + q03) + b.a2 * (A5 + 2 * q2) + 2 * b.a3 * (q23 - q01);
+  a3 += 2 * b.a1 * (q13 - q02) + 2 * b.a2 * (q23 + q01) + b.a3 * (A5 + 2 * q3);
+}
+
+// Calculation have been done for specific element of gauge matrix G with g_3 =
+// 0 Here:
+//      | g_0 + I g_1    g_2 + I g_3 |
+// G =  |                            |
+//      |-g_2 + I g_3    g_0 - I g_1 |
+//
+// spinVector = (a, b, c) = (a1, a2, a3)
+//
+// g_0 = - a/sqrt(2-2*c)
+// g_1 = - b/sqrt(2-2*c)
+// g_2 = - sqrt(2-2*c) / 2
+// g_3 = 0
+su2 spin::GetGaugeMatrix() {
+  double sq = sqrt(2. - 2 * a3);
+  return su2(-a1 / sq, 0., -sq / 2., -a2 / sq);
+}
+spin operator*(const double &x, const spin &A) {
+  return spin(A.a1 * x, A.a2 * x, A.a3 * x);
+}
+spin operator*(const spin &A, const double &x) {
+  return spin(A.a1 * x, A.a2 * x, A.a3 * x);
+}
+spin operator+(const spin &A, const spin &B) {
+  return spin(A.a1 + B.a1, A.a2 + B.a2, A.a3 + B.a3);
+}
+spin operator-(const spin &A, const spin &B) {
+  return spin(A.a1 - B.a1, A.a2 - B.a2, A.a3 - B.a3);
+}
+double operator*(const spin &A, const spin &B) {
+  return A.a1 * B.a1 + A.a2 * B.a2 + A.a3 * B.a3;
+}
+
+std::ostream &operator<<(std::ostream &os, const spin &A) {
+  os << "a1 = " << A.a1 << " "
+     << "a2 = " << A.a2 << " "
+     << "a3 = " << A.a3 << " ";
+  return os;
+}

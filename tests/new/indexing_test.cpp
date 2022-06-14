@@ -49,14 +49,15 @@ int main(int argc, char *argv[]) {
   conf.read_ildg(conf_path);
 
   // plakets and polyakov loop
-  start_time = clock();
+  // start_time = clock();
 
-  std::cout << "qc2dstag plaket_time " << plaket(conf.array) << std::endl;
+  // std::cout << "qc2dstag plaket_time " << plaket_time(conf.array) <<
+  // std::endl;
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "plaket time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket time: " << search_time * 1. / CLOCKS_PER_SEC
+  //           << std::endl;
 
   std::vector<std::vector<su3>> separated = separate_3(conf.array);
   // std::vector<std::vector<su3_full>> separated = separate_3(conf.array, 3);
@@ -177,7 +178,7 @@ int main(int argc, char *argv[]) {
 
   // std::cout << "qc2dstag plaket_time_test10 "
   //           << plaket_time_test10(separated, 32) << std::endl;
-  std::cout << plaket_time_test10(separated, 4) << std::endl;
+  std::cout << plaket_time_test10(separated, 1) << std::endl;
 
   // end_time = omp_get_wtime();
   // search_time = end_time - start_time;

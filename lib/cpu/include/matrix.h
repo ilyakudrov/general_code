@@ -155,3 +155,43 @@ su3 operator^(const su3 &A, const su3 &B);
 su3 operator%(const su3 &A, const su3 &B);
 
 std::ostream &operator<<(std::ostream &os, const su3 &A);
+
+// 3D vector realisation for spin model.
+class spin {
+public:
+  double a1, a2, a3;
+
+  spin(double a1, double a2, double a3);
+  spin(su2 U);
+  spin();
+
+  double norm();
+  // set norm equal to unity
+  void normalize();
+  // reflect spin-vector through the V-vector axis
+  double reflect(spin &V);
+  // reflect without difference calculation
+  void reflect_fast(spin &V);
+  // rorate spin-vector to the same direction as V-vector
+  double parallel(spin &V);
+  // parallel without difference calculation
+  void parallel_fast(spin &V);
+  // check identity matrix
+  bool IsUnit();
+  // contribution from neighbour site
+  spin contribution(const su2 &A) const;
+  // contribution from neighbour site in negative direction (conjugated matrix)
+  spin contribution_conj(const su2 &A) const;
+  void contribution1(const su2 &A, const spin &b);
+  void contribution1_conj(const su2 &A, const spin &b);
+  // calculation of gauge matrix G from spin vector.
+  su2 GetGaugeMatrix();
+};
+
+spin operator+(const spin &A, const spin &B);
+spin operator-(const spin &A, const spin &B);
+spin operator*(const double &x, const spin &A);
+spin operator*(const spin &A, const double &x);
+double operator*(const spin &A, const spin &B);
+
+std::ostream &operator<<(std::ostream &os, const spin &A);

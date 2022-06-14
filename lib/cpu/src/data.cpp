@@ -106,6 +106,44 @@ void data<su2>::read_double(std::string &file_name, int bites_skip) {
   stream.close();
 }
 
+template <>
+void data<su3>::read_double(std::string &file_name, int bites_skip) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.resize(data_size1);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size1 * 18);
+
+  stream.ignore(bites_skip);
+  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+    std::cout << "data<su3_full>::read_double_fortran error: " << file_name
+              << std::endl;
+
+  long int index = 0;
+
+  link1 link(x_size, y_size, z_size, t_size);
+  for (int mu = 0; mu < 4; mu++) {
+    for (int j = 0; j < 3; j++) {
+      for (int k = 0; k < 3; k++) {
+        for (int t = 0; t < t_size; t++) {
+          for (int z = 0; z < z_size; z++) {
+            for (int y = 0; y < y_size; y++) {
+              for (int x = 0; x < x_size; x++) {
+                link.go_update(x, y, z, t);
+
+                array[link.place + mu].matrix[k][j] =
+                    complex_t(v[index], v[index + 1]);
+
+                index += 2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  stream.close();
+}
+
 double reverseValue(const char *data) {
   double result;
 

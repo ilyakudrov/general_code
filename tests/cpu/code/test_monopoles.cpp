@@ -21,10 +21,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 32;
+  y_size = 32;
+  z_size = 32;
+  t_size = 32;
 
   std::cout.precision(17);
 
@@ -33,8 +33,11 @@ int main(int argc, char *argv[]) {
   // std::string path_abelian =
   // "../../confs/abelian/mu0.00/CON_32^3x32_0001.LAT"; string path_abelian =
   // "../../confs/mon_wl/mu0.00/CON_MON_MAG_031.LAT";
+  // std::string path_abelian =
+  //     "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
   std::string path_abelian =
-      "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
+      "../../confs/su2_suzuki/32^4/beta2.6/CON_fxd_MAG_001.LAT";
+
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
   // std::string path_abelian =
@@ -47,7 +50,7 @@ int main(int argc, char *argv[]) {
   //                            "mu0.05/s0/conf_monopoless_0201";
 
   data<abelian> conf;
-  conf.read_double_convert_abelian(path_abelian, 0);
+  conf.read_double_convert_abelian(path_abelian, 8);
   std::vector<double> angles = convert_abelian_to_abelian(conf.array);
   // std::vector<double> angles
   // = read_angles_float_fortran(path_abelian); std::vector<double> angles =

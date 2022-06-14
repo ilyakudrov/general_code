@@ -29,30 +29,31 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 6;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
   // data<su2> conf;
-  data<su3_full> conf;
+  data<su3> conf;
   // data<abelian> conf;
   // std::string path_conf = "../../confs/SU3_conf/16^4/bqcd_mag.01001.lat";
-  std::string path_conf = "../../confs/SU3_conf/16^4/su3_mag_u1.01001.lat";
-  // std::string path_conf =
-  //     "../../confs/SU3_conf/nt6/steps_330/conf.SP_gaugefixed_0501.ildg";
+  // std::string path_conf = "../../confs/SU3_conf/16^4/su3_mag_u1.01001.lat";
+  std::string path_conf =
+      "../../confs/SU3_conf/nt6/steps_330/conf.SP_gaugefixed_0501.ildg";
 
-  conf.read_double(path_conf, 4);
+  // conf.read_double(path_conf, 4);
   // conf.read_double(path_conf);
+  conf.read_ildg(path_conf);
 
-  cout << plaket(conf.array) / 3 << endl;
+  cout << plaket(conf.array) << endl;
 
-  string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
+  // string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
 
-  vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
+  // vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
   // link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
   //                    t_size / 2 + 1);
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
   vector<vector<double>> angles = make_angles_SU3(conf.array);
 
   for (int i = 0; i < 10; i++) {
-    cout << angles[0][i] + angles[1][i] + angles[2][i] << endl;
+    cout << angles[0][i] << " " << angles[1][i] << " " << angles[2][i] << endl;
   }
 
   for (int color = 0; color < 3; color++) {
@@ -87,25 +88,58 @@ int main(int argc, char *argv[]) {
     int length;
 
     std::map<int, int> lengths;
-    std::map<int, int> windings;
+    std::map<int, int> wrappings;
+    std::map<int, int> wrapped;
     std::vector<int> lengths_mu;
     int length_mu_test;
 
+    int total_length = 0;
+
     for (int i = 0; i < LL.size(); i++) {
       length = cluster_length(LL[i]);
+      total_length += length;
       lengths[length]++;
       lengths_mu = length_mu(LL[i]);
+
+      for (int j = 0; j < 4; j++) {
+        if (lengths_mu[j] != 0) {
+          wrappings[abs(lengths_mu[j])]++;
+        }
+      }
+
+      for (int j = 0; j < 4; j++) {
+        if (lengths_mu[j] != 0) {
+          wrapped[length]++;
+          break;
+        }
+      }
     }
+
+    cout << "total length " << total_length << endl;
+
+    cout << "lengths: " << endl;
 
     for (auto it = lengths.cbegin(); it != lengths.cend(); ++it) {
       std::cout << it->first << " " << it->second << "\n";
     }
+
+    cout << "wrapped: " << endl;
+
+    for (auto it = wrapped.cbegin(); it != wrapped.cend(); ++it) {
+      std::cout << it->first << " " << it->second << "\n";
+    }
+
+    cout << "wrappings: " << endl;
+
+    for (auto it = wrappings.cbegin(); it != wrappings.cend(); ++it) {
+      std::cout << it->first << " " << it->second << "\n";
+    }
   }
 
-  std::vector<double> monopole_angles =
-      make_monopole_angles(angles[0], inverse_laplacian);
+  // std::vector<double> monopole_angles =
+  //     make_monopole_angles(angles[0], inverse_laplacian);
 
-  for (int i = 0; i < 10; i++) {
-    cout << monopole_angles[i] << endl;
-  }
+  // for (int i = 0; i < 10; i++) {
+  //   cout << monopole_angles[i] << endl;
+  // }
 }

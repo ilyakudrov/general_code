@@ -60,6 +60,12 @@ public:
   // go and update
   void go_update(int x, int y, int z, int t);
 
+  const spin *get_spin(const std::vector<spin> &vec);
+
+  const spin *get_consecutive_spin(const std::vector<spin> &vec, int mu);
+
+  template <class T> const T *get_matrix(const std::vector<T> &array);
+
   // calculates plaket matrix in current direction and mu plane
   // only positive directions make sense
   template <class T> T plaket_mu(const std::vector<T> &array, int mu);
