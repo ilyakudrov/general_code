@@ -1021,14 +1021,6 @@ std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
   return polyakov_loop_correlator;
 }
 
-double MAG_functional_su2(const std::vector<su2> &array) {
-  double result = 0;
-  for (int i = 0; i < DATA_SIZE; i++) {
-    result += (array[i].sigma3_mult() * array[i].conj()).tr();
-  }
-  return result / (DATA_SIZE);
-}
-
 template <class T>
 double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                     int size_mu1, int size_mu2, int size_nu1, int size_nu2) {

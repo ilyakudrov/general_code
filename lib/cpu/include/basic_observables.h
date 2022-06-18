@@ -114,8 +114,6 @@ template <class T>
 std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
                                                int D_min, int D_max);
 
-double MAG_functional_su2(const std::vector<su2> &array);
-
 template <class T>
 double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                     int size_mu1, int size_mu2, int size_nu1, int size_nu2);
