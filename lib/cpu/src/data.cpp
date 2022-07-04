@@ -347,6 +347,42 @@ template <> void data<su2>::read_double_qc2dstag(std::string &file_name) {
   stream.close();
 }
 
+template <> void data<su3>::read_double_qc2dstag(std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  array.reserve(data_size);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size * 18);
+  if (!stream.read((char *)&v[0], data_size * 18 * sizeof(double)))
+    std::cout << "read_double_qc2dstag<su3> error: " << file_name << std::endl;
+  su3 A;
+  int dir;
+  int place;
+  SPACE_ITER_START
+  for (int dir1 = 1; dir1 <= 4; dir1++) {
+    if (dir1 == 4)
+      dir = 1;
+    else
+      dir = dir1 + 1;
+
+    int place =
+        ((dir - 1) * x_size * y_size * z_size * t_size +
+         t * x_size * y_size * z_size + z * x_size * y_size + y * x_size + x) *
+        18;
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+
+        A.matrix[i][j].real = v[place + (i * 3 + j) * 2];
+        A.matrix[i][j].imag = v[place + (i * 3 + j) * 2 + 1];
+      }
+    }
+    array.push_back(A);
+  }
+  SPACE_ITER_END
+  stream.close();
+}
+
 template <> void data<abelian>::read_double_qc2dstag(std::string &file_name) {
   std::cout << "there's no reason for implementation" << std::endl;
 }

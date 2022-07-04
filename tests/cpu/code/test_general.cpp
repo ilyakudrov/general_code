@@ -21,7 +21,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -30,15 +30,15 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   std::cout.precision(17);
 
   link1 link(x_size, y_size, z_size, t_size);
-  data<su2> conf;
+  data<MATRIX_TYPE> conf;
   // data<su3_full> conf;
   // data<su2> conf;
   // data<abelian> conf;
@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
   //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
   // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
   // string conf_path = "../../confs/su3/conf.0501";
-  string conf_path = "../../confs/qc2dstag/mu0.05/s0/CONF0201";
+  // string conf_path = "../../confs/qc2dstag/mu0.05/s0/CONF0201";
+  string conf_path = "../../confs/SU3_conf/gluodynamics/test/CONF0001";
   // string conf_path =
   //     "../../confs/su2_suzuki/48^4/beta2.7/monopole/CON_MON_MAG_003.LAT";
   // string conf_path =

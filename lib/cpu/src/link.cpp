@@ -445,6 +445,29 @@ double link1::monopole_plaket_mu(std::vector<double> &angles, int mu) {
   return angle;
 }
 
+int link1::monopole_plaket_singular_mu(std::vector<double> &angles, int mu) {
+  int singular = 0;
+  double angle = angles[place + direction];
+  move(direction, 1);
+  angle += angles[place + mu];
+  move(direction, -1);
+  move(mu, 1);
+  angle -= angles[place + direction];
+  move(mu, -1);
+  angle -= angles[place + mu];
+  while ((angle > Pi) || (angle < -Pi)) {
+    if (angle > Pi) {
+      angle = angle - 2 * Pi;
+      singular++;
+    }
+    if (angle < -Pi) {
+      angle = angle + 2 * Pi;
+      singular--;
+    }
+  }
+  return singular;
+}
+
 void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
                         double *J, std::vector<double> &angles) {
   double j0, j1, j2, j3;

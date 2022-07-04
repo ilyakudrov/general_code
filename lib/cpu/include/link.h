@@ -121,6 +121,7 @@ public:
 
   // monopoles
   double monopole_plaket_mu(std::vector<double> &angles, int mu);
+  int monopole_plaket_singular_mu(std::vector<double> &angles, int mu);
   int current_test(double *J);
   void get_current(std::vector<std::vector<double>> &monopole_plaket, double *J,
                    std::vector<double> &angles);

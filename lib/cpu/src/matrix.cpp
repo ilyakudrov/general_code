@@ -11,6 +11,10 @@ complex_t::complex_t() {
   imag = 0;
 }
 
+double complex_t::module() { return sqrt(real * real + imag * imag); }
+
+double complex_t::angle() { return atan2(imag, real); }
+
 complex_t complex_t::mult_by_imag(double x) {
   return complex_t(-imag * x, real * x);
 }
@@ -44,6 +48,11 @@ complex_t operator^(const complex_t &a, const complex_t &b) {
 complex_t operator%(const complex_t &a, const complex_t &b) {
   return complex_t(a.real * b.real + a.imag * b.imag,
                    a.real * b.imag - a.imag * b.real);
+}
+
+complex_t operator&(const complex_t &a, const complex_t &b) {
+  return complex_t(a.real * b.real - a.imag * b.imag,
+                   -a.imag * b.real - a.real * b.imag);
 }
 
 complex_t operator/(const complex_t &a, const double &b) {

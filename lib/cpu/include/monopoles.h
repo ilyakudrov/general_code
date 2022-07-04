@@ -10,7 +10,12 @@ std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
 std::vector<double> read_double_qc2dstag_convet_abelian(std::string &file_path);
 std::vector<double>
 convert_abelian_to_abelian(std::vector<abelian> &conf_abelian);
-std::vector<double> read_inverse_laplacian(std::string &file_path);
+
+std::vector<std::vector<double>>
+calculate_monopole_plaket(std::vector<double> &angles);
+
+std::vector<std::vector<int>>
+calculate_monopole_plaket_singular(std::vector<double> &angles);
 
 int find_current(link1 &link, std::vector<double> &J);
 
@@ -20,9 +25,6 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
 void find_cluster(loop *ll, std::vector<double> &J);
 
 std::vector<loop *> calculate_clusters(std::vector<double> &J);
-
-std::vector<double> make_monopole_angles(std::vector<double> &angles,
-                                         std::vector<double> &laplace);
 
 std::vector<double> calculate_current(std::vector<double> &angles);
 

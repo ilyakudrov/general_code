@@ -10,6 +10,10 @@ struct complex_t {
   complex_t(const double real1, const double imag1);
   complex_t();
 
+  double module();
+
+  double angle();
+
   complex_t mult_by_imag(double x);
 };
 
@@ -26,6 +30,8 @@ complex_t operator*(const complex_t &a, const double &b);
 complex_t operator^(const complex_t &a, const complex_t &b);
 
 complex_t operator%(const complex_t &a, const complex_t &b);
+
+complex_t operator&(const complex_t &a, const complex_t &b);
 
 complex_t operator/(const complex_t &a, const double &b);
 

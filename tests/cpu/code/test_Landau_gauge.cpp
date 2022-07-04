@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   //   start_time = clock();
-  //   cout << "qc2dstag plaket " << plaket(conf.array) << endl;
+  cout << "qc2dstag plaket " << plaket(conf.array) << endl;
   //   cout << "qc2dstag plaket_time " << plaket_time(conf.array) << endl;
   //   cout << "qc2dstag plaket_space " << plaket_space(conf.array) << endl;
   //   cout << "qc2dstag polyakov " << polyakov(conf.array) << endl;
@@ -66,8 +66,8 @@ int main(int argc, char *argv[]) {
   cout << "initial Landau functional abelian: "
        << functional_Landau(angles_conf) << endl;
 
-  double temperature_start = 5;
-  double temperature_end = 0.009;
+  double temperature_start = 2.5;
+  double temperature_end = 0.01;
   double temperature_step = 0.01;
 
   int thermalization_steps = 20;
@@ -85,27 +85,27 @@ int main(int argc, char *argv[]) {
   std::cout << "heat bath step time: "
             << (double)search_time / n / CLOCKS_PER_SEC << std::endl;
 
-  // thermalize(angles_gauge, angles_conf, temperature_start,
-  //            thermalization_steps);
+  thermalize(angles_gauge, angles_conf, temperature_start,
+             thermalization_steps);
 
-  // vector<SA_data> SA_data =
-  //     simulated_annealing_test(angles_gauge, angles_conf, temperature_start,
-  //                              temperature_end, temperature_step);
+  vector<SA_data> SA_data =
+      simulated_annealing_test(angles_gauge, angles_conf, temperature_start,
+                               temperature_end, temperature_step);
 
-  // for (int i = 0; i < 10; i++) {
-  //   relaxation_step(angles_gauge, angles_conf);
-  // }
+  for (int i = 0; i < 10; i++) {
+    relaxation_step(angles_gauge, angles_conf);
+  }
 
-  // std::ofstream stream_SA;
-  // stream_SA.precision(17);
-  // stream_SA.open("SA_test");
-  // stream_SA << "#temperature,functional" << std::endl;
+  std::ofstream stream_SA;
+  stream_SA.precision(17);
+  stream_SA.open("SA_test");
+  stream_SA << "#temperature,functional" << std::endl;
 
-  // for (auto i : SA_data) {
-  //   stream_SA << i.temperature << "," << i.functional << std::endl;
-  // }
+  for (auto i : SA_data) {
+    stream_SA << i.temperature << "," << i.functional << std::endl;
+  }
 
-  // stream_SA.close();
+  stream_SA.close();
 
   cout << "final Landau functional: "
        << functional_Landau(angles_conf, angles_gauge) << endl;

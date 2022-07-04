@@ -25,7 +25,7 @@ y_size=40
 z_size=40
 t_size=40
 
-/home/ilya/soft/lattice/general_code/mag_su2/mag_fixation -path_conf ${path_conf} -conf_format ${conf_format} -conf_format ${conf_format}\
+/home/ilya/soft/lattice/general_code/mag_su2/mag_fixation -path_conf ${path_conf} -conf_format ${conf_format}\
  -path_spins_output ${path_spins_output} -path_conf_output ${path_conf_output} -path_previous ${path_previous} -path_functional_output ${path_functional_output}\
  -T_step ${T_step} -T_init ${T_init} -T_final ${T_final} -OR_steps ${OR_steps} -thermalization_steps ${thermalization_steps}\
  -tolerance_maximal ${tolerance_maximal} -tolerance_average ${tolerance_average} -tolerance_digits ${tolerance_digits} -gauge_copies ${gauge_copies} -is_new_trial ${is_new_trial}\
