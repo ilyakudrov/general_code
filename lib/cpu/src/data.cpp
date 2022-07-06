@@ -131,30 +131,6 @@ void data<su2>::read_double(std::string &file_name, int bites_skip) {
 
 template <>
 void data<su3>::read_double(std::string &file_name, int bites_skip) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  std::ifstream stream(file_name);
-  std::vector<double> v(data_size * 18);
-  stream.ignore(bites_skip);
-  if (!stream.read((char *)&v[0], (data_size * 18) * sizeof(double)))
-    std::cout << "read_float<su3> error: " << file_name << std::endl;
-  su3 A;
-  for (int i = 0; i < data_size; i++) {
-
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-
-        A.matrix[i][j].real = v[i * 18 + (i * 3 + j) * 2];
-        A.matrix[i][j].imag = v[i * 18 + (i * 3 + j) * 2 + 1];
-      }
-    }
-    array.push_back(A);
-  }
-  stream.close();
-}
-
-template <>
-void data<su3>::read_double(std::string &file_name, int bites_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.resize(data_size1);
   std::ifstream stream(file_name);
