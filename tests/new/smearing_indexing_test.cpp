@@ -34,10 +34,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -47,11 +47,11 @@ int main(int argc, char *argv[]) {
   data<MATRIX_TYPE> conf;
   data<MATRIX_TYPE> conf1;
   // data<abelian> conf;
-  // string conf_path = "../confs/qc2dstag/40^4/mu0.00/CONF0201";
-  string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
+  string conf_path = "../confs/su2/CONF0201";
+  // string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
   // string conf_path = "../confs/SU3_conf/nt14/conf.0501";
-  conf.read_double(conf_path, 8);
-  // conf.read_double_qc2dstag(conf_path);
+  // conf.read_double(conf_path, 8);
+  conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
 
   double alpha_APE = 0.5;
