@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   // data<abelian> conf;
   // std::string path_conf = "../../confs/SU3_conf/16^4/bqcd_mag.01001.lat";
   // std::string path_conf = "../../confs/SU3_conf/16^4/su3_mag_u1.01001.lat";
-  std::string path_conf = "../../confs/abelian/Landau_U1/conf_Landau_U1";
+  std::string path_conf = "../../confs/su2/Landau_U1/conf_Landau_U1";
   // std::string path_conf =
   //     "../../confs/SU3_conf/nt6/steps_330/conf.SP_gaugefixed_0501.ildg";
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   // cout << plaket(conf.array) << endl;
 
   // string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
-  string laplacian_path = "../../confs/inverse_laplacian/ALPHA40x40_d.LAT";
+  string laplacian_path = "../../confs/su2/inverse_laplacian/ALPHA40x40_d.LAT";
 
   vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
@@ -149,26 +149,24 @@ int main(int argc, char *argv[]) {
   //     cout << monopole_angles[i] << endl;
   //   }
 
-  //   std::vector<std::vector<int>> monopole_plaket =
-  //       calculate_monopole_plaket_singular(angles);
+  std::vector<std::vector<int>> monopole_plaket =
+      calculate_monopole_plaket_singular(angles);
 
-  //   start_time = clock();
+  start_time = clock();
 
-  //   for (int i = 0; i < x_size; i++) {
-  //     link.go_update(i, 0, 0, 0);
-  //     for (int mu = 0; mu < 4; mu++) {
-  //       cout << "get_monopole_angle "
-  //            << get_monopole_angle(monopole_plaket, link, inverse_laplacian,
-  //            mu)
-  //            << endl;
-  //     }
-  //   }
+  for (int i = 0; i < 1; i++) {
+    link.go_update(i, 0, 0, 0);
+    for (int mu = 0; mu < 4; mu++) {
+      cout << "get_monopole_angle "
+           << get_monopole_angle(monopole_plaket, link, inverse_laplacian, mu)
+           << endl;
+    }
+  }
 
-  //   end_time = clock();
-  //   search_time = end_time - start_time;
-  //   std::cout << "get_monopole_angle time: " << search_time * 1. /
-  //   CLOCKS_PER_SEC
-  //             << std::endl;
+  end_time = clock();
+  search_time = end_time - start_time;
+  std::cout << "get_monopole_angle time: " << search_time * 1. / CLOCKS_PER_SEC
+            << std::endl;
 
   start_time = clock();
 

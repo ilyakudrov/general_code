@@ -2,6 +2,7 @@
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
+#include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/smearing.h"
 
@@ -21,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -30,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
@@ -47,23 +48,22 @@ int main(int argc, char *argv[]) {
   // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
   // string conf_path = "../../confs/su3/conf.0501";
   // string conf_path = "../../confs/qc2dstag/mu0.05/s0/CONF0201";
-  string conf_path = "../../confs/SU3_conf/gluodynamics/test/CONF0001";
+  // string conf_path = "../../confs/SU3_conf/gluodynamics/test/CONF0001";
+  string conf_path =
+      "../../confs/su2/su2_suzuki/24^4/beta2.4/mag/CON_fxd_MAG_001.LAT";
   // string conf_path =
   //     "../../confs/su2_suzuki/48^4/beta2.7/monopole/CON_MON_MAG_003.LAT";
   // string conf_path =
   //     "../../confs/su2_suzuki/48^4/beta2.7/monopoless/CON_OFF_MAG_003.LAT";
   // string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
-  // conf.read_double(conf_path, 4);
-  conf.read_double_qc2dstag(conf_path);
+  conf.read_double(conf_path, 8);
+  // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
-  // for (int mu = 0; mu < 4; mu++) {
-  // link.move(mu, 1);
-  //   cout << conf.array[link.place + mu] << endl;
-  // }
+  cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
 
   // plakets and polyakov loop
   start_time = clock();
