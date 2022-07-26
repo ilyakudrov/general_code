@@ -204,7 +204,12 @@ int main(int argc, char **argv) {
 
       gauge_tranformation_spins(conf_su2.array, spins);
 
+      cout << "final functional is " << MAG_functional_su2(conf_su2.array)
+           << endl;
+
       conf_su2.write_double(path_conf_output);
+
+      break;
     } else {
 
       start_time = clock();
