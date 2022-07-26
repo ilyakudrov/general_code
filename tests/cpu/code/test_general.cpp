@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -43,27 +43,35 @@ int main(int argc, char *argv[]) {
   // data<su3_full> conf;
   // data<su2> conf;
   // data<abelian> conf;
-  // string conf_path = "../../confs/su2_suzuki/monopoless/"
-  //                    "HYP0_alpha=1_1_0.5_APE100_alpha=0.5/conf_0001";
-  // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
-  // string conf_path = "../../confs/su3/conf.0501";
-  // string conf_path = "../../confs/qc2dstag/mu0.05/s0/CONF0201";
-  // string conf_path = "../../confs/SU3_conf/gluodynamics/test/CONF0001";
-  string conf_path =
-      "../../confs/su2/su2_suzuki/24^4/beta2.4/mag/CON_fxd_MAG_001.LAT";
+  //     "../../confs/su2/su2_suzuki/24^4/beta2.4/mag/CON_fxd_MAG_001.LAT";
+  // string conf_path = "../../confs/decomposed/test/monopoless";
+  string conf_path = "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
+                     "s0/conf_monopoless_0201";
+  // string conf_path = "../../confs/decomposed/test/monopole";
   // string conf_path =
-  //     "../../confs/su2_suzuki/48^4/beta2.7/monopole/CON_MON_MAG_003.LAT";
-  // string conf_path =
-  //     "../../confs/su2_suzuki/48^4/beta2.7/monopoless/CON_OFF_MAG_003.LAT";
-  // string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
-  conf.read_double(conf_path, 8);
+  // "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
+  //                    "conf_monopole_0201";
+  // string conf_path = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
+  conf.read_double(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
-  cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
+  // cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
+
+  for (int i = 0; i < 10; i++) {
+    std::cout << atan2(conf.array[i].a3, conf.array[i].a0) << std::endl;
+  }
+
+  double test = 0;
+
+  for (int i = 0; i < conf.array.size(); i++) {
+    test += conf.array[i].tr();
+  }
+
+  std::cout << "test = " << test << std::endl;
 
   // plakets and polyakov loop
   start_time = clock();

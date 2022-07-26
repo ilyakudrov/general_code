@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   // data<abelian> conf;
   // std::string path_conf = "../../confs/SU3_conf/16^4/bqcd_mag.01001.lat";
   // std::string path_conf = "../../confs/SU3_conf/16^4/su3_mag_u1.01001.lat";
-  std::string path_conf = "../../confs/su2/Landau_U1/conf_Landau_U1";
+  std::string path_conf = "../../confs/Landau_U1/conf_Landau_U1";
   // std::string path_conf =
   //     "../../confs/SU3_conf/nt6/steps_330/conf.SP_gaugefixed_0501.ildg";
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   // cout << plaket(conf.array) << endl;
 
   // string laplacian_path = "../../confs/inverse_laplacian/ALPHA16x16_d.LAT";
-  string laplacian_path = "../../confs/su2/inverse_laplacian/ALPHA40x40_d.LAT";
+  string laplacian_path = "../../confs/inverse_laplacian/ALPHA40x40_d.LAT";
 
   vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
@@ -149,36 +149,143 @@ int main(int argc, char *argv[]) {
   //     cout << monopole_angles[i] << endl;
   //   }
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(angles);
+  // std::vector<std::vector<int>> monopole_plaket =
+  //     calculate_monopole_plaket_singular(angles);
 
-  start_time = clock();
+  // start_time = clock();
 
-  for (int i = 0; i < 1; i++) {
-    link.go_update(i, 0, 0, 0);
-    for (int mu = 0; mu < 4; mu++) {
-      cout << "get_monopole_angle "
-           << get_monopole_angle(monopole_plaket, link, inverse_laplacian, mu)
-           << endl;
-    }
+  // for (int i = 0; i < 40; i++) {
+  //   link.go_update(i, 0, 0, 0);
+  //   // for (int mu = 0; mu < 4; mu++) {
+  //   cout << "get_monopole_angle "
+  //        << get_monopole_angle(monopole_plaket, link, inverse_laplacian, 0)
+  //        << endl;
+  //   // }
+  // }
+
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "get_monopole_angle time: " << search_time * 1. /
+  // CLOCKS_PER_SEC
+  //           << std::endl;
+
+  // start_time = clock();
+
+  // std::vector<double> conf_monopole =
+  //     make_monopole_angles4(angles, inverse_laplacian);
+
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // std::cout << "make_monopole_angles4 time: "
+  //           << search_time * 1. / CLOCKS_PER_SEC << std::endl;
+
+  // for (int i = 0; i < 40; i++) {
+  //   cout << "make_monopole_angles1 " << conf_photon[i * 4] << endl;
+  // }
+
+  // string output_monopole = "../../confs/decomposed/test/monopole";
+  // write_double_angles(output_monopole, conf_monopole);
+
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::string path_monopole_test = "../../confs/decomposed/test/monopole";
+  // std::string path_monopole_test =
+  //     "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
+  //     "conf_monopole_0201";
+  std::vector<double> conf_monopole = read_double_angles(path_monopole_test, 0);
+
+  // for (int i = 0; i < 10; i++) {
+  //   cout << "test angles " << conf_monopole[i] << " " << angles[i] << " "
+  //        << angles[i] - conf_monopole[i] << endl;
+  // }
+
+  data<abelian> conf_abelian_test;
+  conf_abelian_test.read_double(path_monopole_test, 0);
+
+  // for (int i = 0; i < 10; i++) {
+  //   cout << conf_monopole[i] << endl;
+  // }
+
+  // for (int i = 0; i < conf_monopole.size(); i++) {
+  //   conf_abelian_test.array.push_back(abelian(1, conf_monopole[i]));
+  // }
+
+  cout << plaket(conf_abelian_test.array) << endl;
+
+  data<su2> conf_monopoless1;
+  string path_monopoless =
+      "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
+      "s0/conf_monopoless_0201";
+  conf_monopoless1.read_double(path_monopoless, 4);
+
+  std::vector<su2> conf_initial_su2 =
+      get_initial_su2(conf_monopoless1.array, conf_monopole);
+
+  cout << "plaket initial su2 " << plaket(conf_initial_su2) << endl;
+
+  string path_su2 =
+      "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
+  data<su2> conf_su2;
+  conf_su2.read_double(path_su2, 0);
+
+  string path_gauge_Landau = "../../confs/Landau_U1/conf_gauge_Landau";
+  std::vector<double> gauge_Landau = read_gauge_Landau(path_gauge_Landau, 4);
+  apply_gauge_Landau(conf_su2.array, gauge_Landau);
+
+  cout << "conf_initial_su2 " << conf_initial_su2[0] << endl;
+
+  double functional_test = 0;
+  for (int i = 0; i < conf_initial_su2.size(); i++) {
+    functional_test += cos(atan2(conf_su2.array[i].a3, conf_su2.array[i].a0));
+    // functional_test += conf_su2.array[i].a0 /
+    //                    sqrt(conf_su2.array[i].a0 * conf_su2.array[i].a0 +
+    //                         conf_su2.array[i].a3 * conf_su2.array[i].a3);
+    // functional_test +=
+    //     cos(atan2(conf_initial_su2[i].a3, conf_initial_su2[i].a0));
+    // functional_test += conf_initial_su2[i].a0 /
+    //                    sqrt(conf_initial_su2[i].a0 * conf_initial_su2[i].a0 +
+    //                         conf_initial_su2[i].a3 * conf_initial_su2[i].a3);
+    // functional_test +=
+    //     cos(atan2(conf_monopoless1.array[i].a3, conf_monopoless1.array[i].a0)
+    //     -
+    //         conf_monopole[i]);
   }
+  functional_test = functional_test / conf_initial_su2.size();
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "get_monopole_angle time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  cout << "functional initial su2 " << functional_test << endl;
 
-  start_time = clock();
+  cout << "angle compare first " << angles[0] << " "
+       << atan2(conf_su2.array[0].a3, conf_su2.array[0].a0) << " "
+       << gauge_Landau[0] << " " << gauge_Landau[1] << endl;
 
-  std::vector<double> conf_photon =
-      make_monopole_angles1(angles, inverse_laplacian);
+  // for (int i = 0; i < conf_monopole.size(); i++) {
+  //   conf_monopole[i] = angles[i] - conf_monopole[i];
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  std::cout << "make_monopole_angles1 time: "
-            << search_time * 1. / CLOCKS_PER_SEC << std::endl;
+  //   if (isnan(conf_monopole[i]))
+  //     cout << i << endl;
 
-  for (int i = 0; i < 40; i++) {
-    cout << "make_monopole_angles1 " << conf_photon[i] << endl;
-  }
+  //   while (conf_monopole[i] > M_PI || conf_monopole[i] <= -M_PI) {
+  //     if (conf_monopole[i] > M_PI) {
+  //       conf_monopole[i] -= 2 * M_PI;
+  //     }
+  //     if (conf_monopole[i] <= -M_PI) {
+  //       conf_monopole[i] += 2 * M_PI;
+  //     }
+  //   }
+  // }
+
+  inverse_laplacian.clear();
+  inverse_laplacian.shrink_to_fit();
+
+  data<su2> conf_monopoless;
+  conf_monopoless.array = get_monopoless(conf_su2.array, conf_monopole);
+
+  // for (int i = 0; i < 10; i++) {
+  //   cout << conf_monopoless.array[i] << endl;
+  // }
+
+  cout << plaket(conf_monopoless.array) << endl;
+
+  string output_monopoless = "../../confs/decomposed/test/monopoless";
+  conf_monopoless.write_double(output_monopoless);
 }

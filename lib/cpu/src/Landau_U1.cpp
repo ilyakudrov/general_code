@@ -68,10 +68,26 @@ std::vector<complex_t> convert_to_complex(std::vector<su2> conf_su2) {
   return conf_complex;
 }
 
+std::vector<double>
+convert_complex_to_angles(std::vector<complex_t> conf_complex) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<double> conf_angles;
+  conf_complex.reserve(data_size);
+
+  double module;
+
+  for (int i = 0; i < data_size; i++) {
+    conf_angles.push_back(atan2(conf_complex[i].imag, conf_complex[i].real));
+  }
+
+  return conf_angles;
+}
+
 std::vector<double> generate_gauge_angles_uniform() {
 
-  // unsigned seed = time(NULL);
-  unsigned seed = 123;
+  unsigned seed = time(NULL);
+  // unsigned seed = 123;
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
@@ -91,8 +107,8 @@ std::vector<double> generate_gauge_angles_uniform() {
 
 std::vector<abelian> generate_gauge_abelian_uniform() {
 
-  // unsigned seed = time(NULL);
-  unsigned seed = 123;
+  unsigned seed = time(NULL);
+  // unsigned seed = 123;
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
@@ -113,8 +129,8 @@ std::vector<abelian> generate_gauge_abelian_uniform() {
 
 std::vector<complex_t> generate_gauge_complex_uniform() {
 
-  // unsigned seed = time(NULL);
-  unsigned seed = 123;
+  unsigned seed = time(NULL);
+  // unsigned seed = 123;
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
@@ -137,8 +153,8 @@ std::vector<complex_t> generate_gauge_complex_uniform() {
 }
 
 std::vector<double> generate_random_numbers1(int vector_size) {
-  // unsigned seed = time(NULL);
-  unsigned seed = 123;
+  unsigned seed = time(NULL);
+  // unsigned seed = 123;
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
@@ -402,6 +418,14 @@ double Landau_functional_abelian(std::vector<abelian> &conf_abelian) {
     result += conf_abelian[i].tr();
   }
   return result / conf_abelian.size();
+}
+
+double Landau_functional_complex(std::vector<complex_t> &conf_complex) {
+  double result = 0;
+  for (int i = 0; i < conf_complex.size(); i++) {
+    result += conf_complex[i].real;
+  }
+  return result / conf_complex.size();
 }
 
 void gauge_tranformation_abelian(std::vector<abelian> &gauge_abelian,
@@ -967,7 +991,7 @@ void heat_bath_update_test3(std::vector<double> &gauge_angles,
 }
 
 void heat_bath(complex_t &g, complex_t &K, double temperature,
-               double &random_numbers) {
+               double *random_numbers) {
   double temp_factor;
   long double temp_exponent;
   spin spin_new;
@@ -979,13 +1003,19 @@ void heat_bath(complex_t &g, complex_t &K, double temperature,
     temp_exponent = exp(temp_factor);
 
     // generation of random variable with distribution p ~ exp(ax)
-    x = log(random_numbers * (temp_exponent - 1 / temp_exponent) +
+    x = log(random_numbers[0] * (temp_exponent - 1 / temp_exponent) +
             1 / temp_exponent) /
         temp_factor;
   } else
-    x = log(random_numbers) / temp_factor + 1;
+    x = log(random_numbers[0]) / temp_factor + 1;
 
-  double angle_new = acos(x) - atan2(K.imag, K.real);
+  double angle_new;
+
+  if (random_numbers[1] > 0)
+    angle_new = acos(x) - atan2(K.imag, K.real);
+  else
+    angle_new = -acos(x) - atan2(K.imag, K.real);
+
   g = complex_t(cos(angle_new), sin(angle_new));
 }
 
@@ -1081,7 +1111,8 @@ void heat_bath_update(std::vector<complex_t> &gauge_complex,
   std::vector<double> random_numbers;
 
   // generate random numbers for heat bath
-  random_numbers = generate_random_numbers1(x_size * y_size * z_size * t_size);
+  random_numbers =
+      generate_random_numbers1(2 * x_size * y_size * z_size * t_size);
 
   std::vector<int> shift = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
@@ -1099,7 +1130,7 @@ void heat_bath_update(std::vector<complex_t> &gauge_complex,
                                 position, shift);
 
           heat_bath(gauge_complex[position], A, temperature,
-                    random_numbers[position]);
+                    &random_numbers[2 * position]);
 
           position++;
         }
@@ -1209,7 +1240,7 @@ void make_simulated_annealing(std::vector<complex_t> &gauge_complex,
     heat_bath_update(gauge_complex, conf_complex, T);
 
     for (int i = 0; i < OR_steps; i++) {
-      heat_bath_update(gauge_complex, conf_complex, T);
+      overrelaxation_update(gauge_complex, conf_complex);
     }
 
     T -= T_step;
@@ -1241,4 +1272,49 @@ void make_maximization_final(std::vector<complex_t> &gauge_complex,
     }
 
   } while (!is_converged);
+}
+
+// int get_dirac_plaket_number(std::vector<complex_t> &gauge_complex,
+//                             std::vector<complex_t> &conf_complex) {
+//   int data_size = x_size * y_size * z_size * t_size;
+//   std::vector<std::vector<int>> singular(6, std::vector<int>(data_size));
+//   link1 link(x_size, y_size, z_size, t_size);
+
+//   int number = 0;
+
+//   SPACE_ITER_START
+//   for (int mu = 0; mu < 4; mu++) {
+//     link.move_dir(mu);
+//     for (int nu = mu + 1; nu < 4; nu++) {
+
+//       if (link.monopole_plaket_singular_mu(angles, nu) != 0)
+//         number++;
+//     }
+//   }
+//   SPACE_ITER_END
+//   return number;
+// }
+
+void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
+                        std::vector<complex_t> &conf_complex) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  complex_t complex_tmp;
+
+  SPACE_ITER_START
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    complex_tmp = gauge_complex[link.place / 4] * conf_complex[link.place + mu];
+
+    link.move(mu, 1);
+
+    complex_tmp = complex_tmp ^ gauge_complex[link.place / 4];
+
+    link.move(mu, -1);
+
+    conf_complex[link.place + mu] = complex_tmp;
+  }
+
+  SPACE_ITER_END
 }

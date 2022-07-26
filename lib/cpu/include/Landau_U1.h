@@ -10,6 +10,9 @@ std::vector<abelian> convert_to_abelian(std::vector<su2> conf_su2);
 
 std::vector<complex_t> convert_to_complex(std::vector<su2> conf_su2);
 
+std::vector<double>
+convert_complex_to_angles(std::vector<complex_t> conf_complex);
+
 std::vector<double> generate_gauge_angles_uniform();
 
 std::vector<abelian> generate_gauge_abelian_uniform();
@@ -47,6 +50,8 @@ double Landau_functional_gauge_complex(std::vector<complex_t> &gauge_complex,
 double Landau_functional(std::vector<su2> &conf);
 
 double Landau_functional_abelian(std::vector<abelian> &conf_abelian);
+
+double Landau_functional_complex(std::vector<complex_t> &conf_complex);
 
 void gauge_tranformation_abelian(std::vector<abelian> &gauge_abelian,
                                  std::vector<abelian> &conf_abelian);
@@ -98,7 +103,7 @@ void heat_bath_update_test3(std::vector<double> &gauge_angles,
                             double temperature);
 
 void heat_bath(complex_t &g, complex_t &K, double temperature,
-               double &random_numbers);
+               double *random_numbers);
 
 complex_t contribution_site(std::vector<complex_t> &gauge_complex,
                             std::vector<complex_t> &conf_complex, int x, int y,
@@ -124,3 +129,6 @@ void make_maximization_final(std::vector<complex_t> &gauge_complex,
                              std::vector<complex_t> &conf_complex, int OR_steps,
                              double tolerance_maximal,
                              double tolerance_average);
+
+void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
+                        std::vector<complex_t> &conf_complex);

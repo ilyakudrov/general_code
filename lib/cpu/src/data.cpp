@@ -102,6 +102,7 @@ void data<abelian>::read_double(std::string &file_name, int bites_skip) {
   stream.ignore(bites_skip);
   if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
     std::cout << "read_double<abelian> error: " << file_name << std::endl;
+
   for (int i = 0; i < data_size; i++) {
     array.push_back(abelian(1, (double)v[i]));
   }

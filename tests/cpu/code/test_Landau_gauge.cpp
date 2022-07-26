@@ -39,7 +39,8 @@ int main(int argc, char *argv[]) {
   data<su2> conf;
   // data<su3_full> conf;
   // data<abelian> conf;
-  string conf_path = "../../confs/qc2dstag/40^4/mag/mu0.00/conf_abelian_0201";
+  string conf_path =
+      "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
   // string conf_path = "../../confs/su2_suzuki/monopoless/CON_OFF_MAG_001.LAT";
   // string conf_path = "../../confs/su2_suzuki/monopole/CON_MON_MAG_001.LAT";
   // conf.read_double(conf_path, 8);
