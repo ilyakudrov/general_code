@@ -8,6 +8,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <tuple>
 #include <vector>
 
@@ -41,11 +42,11 @@ int main(int argc, char *argv[]) {
   std::vector<complex_t> gauge_complex;
   std::vector<complex_t> conf_complex;
 
-  double T_init = 6;
-  double T_final = 0.4;
-  double T_step = 0.4;
-  int OR_steps = 6;
-  int thermalization_steps = 50;
+  double T_init = 4;
+  double T_final = 0.2;
+  double T_step = 0.2;
+  int OR_steps = 4;
+  int thermalization_steps = 30;
   int tolerance_digits = 7;
   double tolerance_maximal = 1e-5;
   double tolerance_average = 1e-7;
@@ -160,7 +161,7 @@ int main(int argc, char *argv[]) {
        << Landau_functional_gauge_complex(gauge_complex, conf_complex) <<
   endl;*/
 
-  /*conf_angles = convert_to_angles(conf.array);
+  conf_angles = convert_to_angles(conf.array);
 
   std::vector<std::vector<int>> monopole_plaket =
       calculate_monopole_plaket_singular(conf_angles);
@@ -179,15 +180,16 @@ int main(int argc, char *argv[]) {
   gauge_complex = generate_gauge_complex_uniform();
   conf_complex = convert_to_complex(conf.array);
 
-  start_time = clock();
+  //   start_time = clock();
 
-  make_simulated_annealing(gauge_complex, conf_complex, T_init, T_final, T_step,
-                           OR_steps, thermalization_steps);
+  //   make_simulated_annealing(gauge_complex, conf_complex, T_init, T_final,
+  //   T_step,
+  //                            OR_steps, thermalization_steps);
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  cout << "simulated_annealing time: " << search_time * 1. / CLOCKS_PER_SEC
-       << endl;
+  //   end_time = clock();
+  //   search_time = end_time - start_time;
+  //   cout << "simulated_annealing time: " << search_time * 1. / CLOCKS_PER_SEC
+  //        << endl;
 
   start_time = clock();
 
@@ -202,10 +204,28 @@ int main(int argc, char *argv[]) {
   cout << "make_maximization_final time: " << search_time * 1. / CLOCKS_PER_SEC
        << endl;
 
+  normalize_complex(gauge_complex);
+
+  double unitarity_test_aver = 0;
+  double unitarity_test_max = 0;
+  double tmp = 0;
+
+  for (int i = 0; i < gauge_complex.size(); i++) {
+    tmp = 1 - sqrt(gauge_complex[i].imag * gauge_complex[i].imag +
+                   gauge_complex[i].real * gauge_complex[i].real);
+    if (tmp > unitarity_test_max) {
+      unitarity_test_max = tmp;
+    }
+    unitarity_test_aver += tmp;
+  }
+  unitarity_test_aver = unitarity_test_aver / gauge_complex.size();
+  cout << "unitarity deviation aver = " << unitarity_test_aver
+       << ", max = " << unitarity_test_max << endl;
+
   cout << "final functional "
        << Landau_functional_gauge_complex(gauge_complex, conf_complex) << endl;
 
-  apply_gauge_Landau(gauge_complex, conf_complex);
+  apply_gauge_Landau_complex(gauge_complex, conf_complex);
 
   cout << "final after applying gauge "
        << Landau_functional_complex(conf_complex) << endl;
@@ -229,11 +249,11 @@ int main(int argc, char *argv[]) {
   for (int mu = 0; mu < 4; mu++) {
     cout << "monopole difference number " << mu << " "
          << monopole_difference[mu].size() << endl;
-  }*/
+  }
 
   // thermalization digram test
 
-  string path_out = "thermalization_Landau_U1";
+  /*string path_out = "thermalization_Landau_U1";
 
   ofstream stream;
   stream.open(path_out);
@@ -254,21 +274,33 @@ int main(int argc, char *argv[]) {
 
   while (T > T_final) {
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 10; i++) {
 
       heat_bath_update(gauge_complex, conf_complex, T);
 
       for (int i = 0; i < OR_steps; i++) {
-        heat_bath_update(gauge_complex, conf_complex, T);
+        overrelaxation_update(gauge_complex, conf_complex);
       }
-
-      functional_Landau_U1[tuple<int, double>(step, T)] =
-          Landau_functional_gauge_complex(gauge_complex, conf_complex);
-
-      step++;
     }
 
-    T -= T_step;
+    for (int i = 0; i < 30; i++) {
+
+      heat_bath_update(gauge_complex, conf_complex, T);
+
+      for (int i = 0; i < OR_steps; i++) {
+        overrelaxation_update(gauge_complex, conf_complex);
+      }
+
+      functional_Landau_U1[tuple<int, double>(i, T)] =
+          Landau_functional_gauge_complex(gauge_complex, conf_complex);
+
+      //  step++;
+    }
+
+    if (T > 2)
+      T -= T_step;
+    else
+      T -= T_step / 2;
   }
 
   end_time = clock();
@@ -288,16 +320,18 @@ int main(int argc, char *argv[]) {
 
   stream.close();
 
-  start_time = clock();
+  //   start_time = clock();
 
-  make_maximization_final(gauge_complex, conf_complex, OR_steps,
-                          tolerance_maximal, tolerance_average);
+  //   make_maximization_final(gauge_complex, conf_complex, OR_steps,
+  //                           tolerance_maximal, tolerance_average);
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  cout << "make_maximization_final time: " << search_time * 1. / CLOCKS_PER_SEC
-       << endl;
+  //   end_time = clock();
+  //   search_time = end_time - start_time;
+  //   cout << "make_maximization_final time: " << search_time * 1. /
+  //   CLOCKS_PER_SEC
+  //        << endl;
 
-  cout << "final functional "
-       << Landau_functional_gauge_complex(gauge_complex, conf_complex) << endl;
+  //   cout << "final functional "
+  //        << Landau_functional_gauge_complex(gauge_complex, conf_complex) <<
+  //        endl;*/
 }

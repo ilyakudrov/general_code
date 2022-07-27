@@ -2,7 +2,6 @@
 path_conf="/home/ilya/soft/lattice/general_code/tests/confs/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
 conf_format="double"
 bytes_skip=8
-# path_previous
 path_conf_output="/home/ilya/soft/lattice/general_code/tests/confs/MA_gauge/su2_suzuki/conf_gaugefixed/24^4/beta2.4/conf_gaugefixed_0001"
 path_spins_output="/home/ilya/soft/lattice/general_code/mag_su2/test/spins"
 path_previous="/home/ilya/soft/lattice/general_code/tests/confs/MA_gauge/su2_suzuki/spins/24^4/beta2.4/spins_0001"

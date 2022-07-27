@@ -35,6 +35,8 @@ void heat_bath_update_test1(std::vector<abelian> &gauge_abelian,
 
 void normalize_abelian(std::vector<abelian> &abelian);
 
+void normalize_complex(std::vector<complex_t> &gauge_complex);
+
 double Landau_functional_gauge_abelian(std::vector<abelian> &gauge_abelian,
                                        std::vector<abelian> &conf_abelian);
 
@@ -130,5 +132,8 @@ void make_maximization_final(std::vector<complex_t> &gauge_complex,
                              double tolerance_maximal,
                              double tolerance_average);
 
+void apply_gauge_Landau_complex(std::vector<complex_t> &gauge_complex,
+                                std::vector<complex_t> &conf_complex);
+
 void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
-                        std::vector<complex_t> &conf_complex);
+                        std::vector<su2> &conf_su2);

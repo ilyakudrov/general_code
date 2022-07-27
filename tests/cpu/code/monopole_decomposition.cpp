@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
   // start_time = clock();
 
   // std::vector<double> conf_monopole =
-  //     make_monopole_angles4(angles, inverse_laplacian);
+  //     make_monopole_angles(angles, inverse_laplacian);
 
   // end_time = clock();
   // search_time = end_time - start_time;

@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE abelian
 
 using namespace std;
 
@@ -45,12 +45,19 @@ int main(int argc, char *argv[]) {
   // data<abelian> conf;
   //     "../../confs/su2/su2_suzuki/24^4/beta2.4/mag/CON_fxd_MAG_001.LAT";
   // string conf_path = "../../confs/decomposed/test/monopoless";
-  string conf_path = "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
-                     "s0/conf_monopoless_0201";
-  // string conf_path = "../../confs/decomposed/test/monopole";
   // string conf_path =
-  // "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
-  //                    "conf_monopole_0201";
+  // "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
+  //                    "s0/conf_monopoless_0201";
+  // string conf_path = "../../confs/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT";
+  // string conf_path = "../../confs/MA_gauge/su2_suzuki/conf_gaugefixed/24^4/"
+  //                    "beta2.4/conf_gaugefixed_0001";
+  // string conf_path =
+  // "../../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
+  // string conf_path = "/home/ilya/soft/lattice/general_code/"
+  //                    "monopole_decomposition_su2/test/result/conf_monopole";
+  // string conf_path = "../../confs/decomposed/test/monopole";
+  string conf_path = "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
+                     "conf_monopole_0201";
   // string conf_path = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
   conf.read_double(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
@@ -60,18 +67,6 @@ int main(int argc, char *argv[]) {
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
   // cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
-
-  for (int i = 0; i < 10; i++) {
-    std::cout << atan2(conf.array[i].a3, conf.array[i].a0) << std::endl;
-  }
-
-  double test = 0;
-
-  for (int i = 0; i < conf.array.size(); i++) {
-    test += conf.array[i].tr();
-  }
-
-  std::cout << "test = " << test << std::endl;
 
   // plakets and polyakov loop
   start_time = clock();
@@ -84,6 +79,8 @@ int main(int argc, char *argv[]) {
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time * 1. / CLOCKS_PER_SEC
             << std::endl;
+
+  // cout << "MAG functional " << MAG_functional_su2(conf.array) << endl;
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_wilson(conf.array);

@@ -312,6 +312,15 @@ void normalize_abelian(std::vector<abelian> &abelian) {
   }
 }
 
+void normalize_complex(std::vector<complex_t> &gauge_complex) {
+  double norm;
+  for (int i = 0; i < gauge_complex.size(); i++) {
+    norm = sqrt(gauge_complex[i].real * gauge_complex[i].real +
+                gauge_complex[i].imag * gauge_complex[i].imag);
+    gauge_complex[i] = gauge_complex[i] / norm;
+  }
+}
+
 double Landau_functional_gauge_abelian(std::vector<abelian> &gauge_abelian,
                                        std::vector<abelian> &conf_abelian) {
   link1 link(x_size, y_size, z_size, t_size);
@@ -1244,11 +1253,6 @@ void make_simulated_annealing(std::vector<complex_t> &gauge_complex,
     }
 
     T -= T_step;
-
-    // if (T <= 1.4 && T >= 0.8)
-    //   T -= T_step / 4;
-    // else
-    //   T -= T_step;
   }
 }
 
@@ -1295,11 +1299,12 @@ void make_maximization_final(std::vector<complex_t> &gauge_complex,
 //   return number;
 // }
 
-void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
-                        std::vector<complex_t> &conf_complex) {
+void apply_gauge_Landau_complex(std::vector<complex_t> &gauge_complex,
+                                std::vector<complex_t> &conf_complex) {
   link1 link(x_size, y_size, z_size, t_size);
 
   complex_t complex_tmp;
+  double norm;
 
   SPACE_ITER_START
 
@@ -1314,6 +1319,34 @@ void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
     link.move(mu, -1);
 
     conf_complex[link.place + mu] = complex_tmp;
+  }
+
+  SPACE_ITER_END
+}
+
+void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
+                        std::vector<su2> &conf_su2) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  su2 A;
+
+  SPACE_ITER_START
+
+  A = su2(gauge_complex[link.place / 4].real, 0, 0,
+          gauge_complex[link.place / 4].imag);
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    conf_su2[link.place + mu] = A * conf_su2[link.place + mu];
+  }
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    link.move(mu, -1);
+
+    conf_su2[link.place + mu] = conf_su2[link.place + mu] ^ A;
+
+    link.move(mu, 1);
   }
 
   SPACE_ITER_END
