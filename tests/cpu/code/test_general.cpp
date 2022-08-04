@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE abelian
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
@@ -54,13 +54,18 @@ int main(int argc, char *argv[]) {
   // string conf_path =
   // "../../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
   // string conf_path = "/home/ilya/soft/lattice/general_code/"
-  //                    "monopole_decomposition_su2/test/result/conf_monopole";
-  // string conf_path = "../../confs/decomposed/test/monopole";
-  string conf_path = "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
-                     "conf_monopole_0201";
+  //                    "monopole_decomposition_su2/test/result/conf_monopole1";
+  // string conf_path = "../../confs/decomposed/test/monopole1";
+  // string conf_path = "../../confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/"
+  //                    "CONFDP_gaugefixed_0001";
+  string conf_path = "/home/ilya/soft/source/culgt/src/gaugefixing/apps/"
+                     "test_Landau/result/conf_Landau_gaugefixed_0001";
+  // string conf_path =
+  // "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
+  //                    "conf_monopole_0201";
   // string conf_path = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  conf.read_double(conf_path, 4);
-  // conf.read_double_qc2dstag(conf_path);
+  // conf.read_double(conf_path, 0);
+  conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);

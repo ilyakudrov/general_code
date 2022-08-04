@@ -37,9 +37,13 @@ int main(int argc, char *argv[]) {
   //     "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
   // std::string path_abelian =
   //     "../../confs/su2_suzuki/32^4/beta2.6/CON_fxd_MAG_001.LAT";
+  // std::string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/monopole_decomposition_su2/test/"
+  //     "result/conf_monopoless";
   std::string path_abelian =
-      "/home/ilya/soft/lattice/general_code/monopole_decomposition_su2/test/"
-      "result/conf_monopoless";
+      "/home/ilya/soft/lattice/general_code/"
+      "monopole_decomposition_su2/test/result/conf_monopole1";
+  ;
 
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
@@ -54,8 +58,8 @@ int main(int argc, char *argv[]) {
 
   data<abelian> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
-  // conf.read_double(path_abelian, 0);
-  conf.read_double_convert_abelian(path_abelian, 0);
+  conf.read_double(path_abelian, 0);
+  // conf.read_double_convert_abelian(path_abelian, 0);
   std::vector<double> angles = convert_abelian_to_abelian(conf.array);
   // std::vector<double> angles
   // = read_angles_float_fortran(path_abelian); std::vector<double> angles =
