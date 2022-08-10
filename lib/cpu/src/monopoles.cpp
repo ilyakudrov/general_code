@@ -191,10 +191,6 @@ std::vector<double> calculate_current(std::vector<double> &angles) {
   std::vector<std::vector<double>> monopole_plaket =
       calculate_monopole_plaket(angles);
 
-  for (int i = 0; i < 6; i++) {
-    std::cout << "monopole_plaket " << monopole_plaket[i][0] << std::endl;
-  }
-
   SPACE_ITER_START
 
   link.get_current(monopole_plaket, &J[link.place], angles);
