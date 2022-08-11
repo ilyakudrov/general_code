@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -40,34 +40,25 @@ int main(int argc, char *argv[]) {
 
   link1 link(x_size, y_size, z_size, t_size);
   data<MATRIX_TYPE> conf;
-  // data<su3_full> conf;
-  // data<su2> conf;
-  // data<abelian> conf;
-  //     "../../confs/su2/su2_suzuki/24^4/beta2.4/mag/CON_fxd_MAG_001.LAT";
   // string conf_path = "../../confs/decomposed/test/monopoless";
   // string conf_path =
   // "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
   //                    "s0/conf_monopoless_0201";
-  // string conf_path = "../../confs/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT";
-  // string conf_path = "../../confs/MA_gauge/su2_suzuki/conf_gaugefixed/24^4/"
-  //                    "beta2.4/conf_gaugefixed_0001";
+  // string conf_path = "../../confs/su2/mag/su2_suzuki/24^4/beta2.4/conf_0001";
   // string conf_path =
-  // "../../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
-  // string conf_path = "/home/ilya/soft/lattice/general_code/"
-  //                    "monopole_decomposition_su2/test/result/conf_monopole1";
-  // string conf_path = "../../confs/decomposed/test/monopole1";
-  // string conf_path = "../../confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/"
-  //                    "CONFDP_gaugefixed_0001";
-  string conf_path = "/home/ilya/soft/source/culgt/src/gaugefixing/apps/"
-                     "test_Landau/result/conf_Landau_gaugefixed_0001";
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
+  string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
+                     "monopoless_24^4";
   // string conf_path =
-  // "../../confs/decomposed/monopole/qc2dstag/40^4/mu0.05/s0/"
-  //                    "conf_monopole_0201";
-  // string conf_path = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
-  // conf.read_double(conf_path, 0);
-  conf.read_double_qc2dstag(conf_path);
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
+  // string conf_path =
+  //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
+  // string conf_path =
+  //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
+  conf.read_double(conf_path, 0);
+  // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
-  // conf.read_float(conf_path, 4);
+  // conf.read_float(conf_path, 8);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
@@ -89,6 +80,8 @@ int main(int argc, char *argv[]) {
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_wilson(conf.array);
+  // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
+  // separate_3(conf.array);
 
   cout << "plaket parallel " << plaket_parallel(conf_separated) << endl;
   cout << "plaket time parallel " << plaket_time_parallel(conf_separated)

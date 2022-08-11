@@ -21,10 +21,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
@@ -40,10 +40,21 @@ int main(int argc, char *argv[]) {
   // std::string path_abelian =
   //     "/home/ilya/soft/lattice/general_code/monopole_decomposition_su2/test/"
   //     "result/conf_monopoless";
-  std::string path_abelian =
-      "/home/ilya/soft/lattice/general_code/"
-      "monopole_decomposition_su2/test/result/conf_monopole1";
-  ;
+  // std::string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/"
+  //     "monopole_decomposition_su2/test/result/conf_monopole1";
+  // std::string path_abelian =
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
+  // std::string path_abelian = "/home/ilya/soft/lattice/general_code/apps/"
+  //                            "monopole_decomposition_su2/test/result/monopole";
+  // std::string path_abelian =
+  //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
+  // std::string path_abelian =
+  //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
+  std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
+                             "result/monopoless_24^4";
+  // std::string path_abelian =
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
 
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
@@ -57,8 +68,9 @@ int main(int argc, char *argv[]) {
   //                            "mu0.05/s0/conf_monopoless_0201";
 
   data<abelian> conf;
-  // conf.read_double_convert_abelian(path_abelian, 8);
-  conf.read_double(path_abelian, 0);
+  conf.read_double_convert_abelian(path_abelian, 0);
+  // conf.read_double(path_abelian, 0);
+  // conf.read_float(path_abelian, 8);
   // conf.read_double_convert_abelian(path_abelian, 0);
   std::vector<double> angles = convert_abelian_to_abelian(conf.array);
   // std::vector<double> angles
@@ -106,15 +118,6 @@ int main(int argc, char *argv[]) {
         std::cout << "winding occured " << std::endl;
         windings[abs(lengths_mu[j])]++;
       }
-    }
-
-    if (length == 34) {
-      std::cout << "length: " << length
-                << " ;variation: " << cluster_variation(LL[i]) / length
-                << std::endl;
-
-      std::cout << "length: " << length
-                << " ;number of sites: " << site_number(LL[i]) << std::endl;
     }
   }
 

@@ -73,6 +73,17 @@ std::vector<su2> get_monopoless(std::vector<su2> &conf_su2,
   return conf_monopoless;
 }
 
+void get_monopoless_optimized(std::vector<su2> &conf_su2,
+                              std::vector<double> &angles_monopole) {
+  su2 A;
+
+  for (int i = 0; i < conf_su2.size(); i++) {
+    A = su2(cos(angles_monopole[i]), 0, 0, sin(angles_monopole[i]));
+
+    conf_su2[i] = conf_su2[i] * A;
+  }
+}
+
 std::vector<su2> get_initial_su2(std::vector<su2> &conf_monopoless,
                                  std::vector<double> &angles_monopole) {
   int data_size = 4 * x_size * y_size * z_size * t_size;

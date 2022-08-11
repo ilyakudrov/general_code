@@ -30,14 +30,14 @@ int t_size;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  unsigned int start_time;
-  unsigned int end_time;
-  unsigned int search_time;
+  double start_time;
+  double end_time;
+  double search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 48;
+  y_size = 48;
+  z_size = 48;
+  t_size = 48;
 
   std::cout.precision(17);
 
@@ -47,11 +47,12 @@ int main(int argc, char *argv[]) {
   data<MATRIX_TYPE> conf;
   data<MATRIX_TYPE> conf1;
   // data<abelian> conf;
-  string conf_path = "../confs/su2/CONF0201";
+  string conf_path = "../confs/su2/su2_suzuki/48^4/beta2.8/CON_fxd_MAG_035.LAT";
+  // string conf_path = "../confs/su2/CONF0201";
   // string conf_path = "../confs/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
   // string conf_path = "../confs/SU3_conf/nt14/conf.0501";
-  // conf.read_double(conf_path, 8);
-  conf.read_double_qc2dstag(conf_path);
+  conf.read_double(conf_path, 4);
+  // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
 
   double alpha_APE = 0.5;
@@ -79,14 +80,13 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  start_time = clock();
+  start_time = omp_get_wtime();
 
   conf1.array = smearing1_APE(conf.array, alpha_APE);
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "smearing old time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  std::cout << "smearing old time: " << search_time << std::endl;
 
   // for (int i = 0; i < 16; i++) {
   //   std::cout << "conf.array after smearing, i = " << i << " " <<
@@ -141,16 +141,15 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<su2>> smearing_first;
   std::vector<std::vector<su2>> smearing_second;
 
-  start_time = clock();
+  start_time = omp_get_wtime();
 
   smearing_first = smearing_first_full(conf.array, alpha3);
   smearing_second = smearing_second_full(conf.array, smearing_first, alpha2);
   conf1.array = smearing_HYP(conf.array, smearing_second, alpha1);
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "smearing HYP old time: " << search_time * 1. / CLOCKS_PER_SEC
-            << std::endl;
+  std::cout << "smearing HYP old time: " << search_time << std::endl;
 
   std::cout << "plaket after HYP smearing " << plaket(conf1.array) << std::endl;
   std::cout << "plaket time after HYP smearing " << plaket_time(conf1.array)
@@ -162,7 +161,13 @@ int main(int argc, char *argv[]) {
 
   conf_separated = separate_smearing_unchanged(conf.array);
 
+  start_time = omp_get_wtime();
+
   smearing_HYP_test1(conf_separated, alpha1, alpha2, alpha3);
+
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "smearing_HYP_test1 time: " << search_time << std::endl;
 
   for (int i = 0; i < 3; i++) {
     wilson_lines[i] =

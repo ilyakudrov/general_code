@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
   data<MATRIX_PLAKET> conf_plaket;
 
   vector<double> plaket_time_tr;
+  double plaket_unsmeared;
 
   if (flux_enabled) {
     if (string(conf_format_plaket) == "float") {
@@ -149,7 +150,9 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
-    cout << "plaket plaket unsmeared " << plaket(conf_plaket.array) << endl;
+    plaket_unsmeared = plaket(conf_plaket.array);
+
+    cout << "plaket plaket unsmeared " << plaket_unsmeared << endl;
 
     vector<vector<MATRIX_PLAKET>> conf_separated_plaket =
         separate_wilson(conf_plaket.array);

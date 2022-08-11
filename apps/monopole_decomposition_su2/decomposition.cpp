@@ -134,8 +134,12 @@ int main(int argc, char **argv) {
 
   start_time = clock();
 
+  cout << "decomposition started" << endl;
+
   vector<double> monopole_angles =
       make_monopole_angles(conf_angles_U1, inverse_laplacian);
+
+  cout << "decomposition ended" << endl;
 
   end_time = clock();
   search_time = end_time - start_time;
@@ -144,8 +148,7 @@ int main(int argc, char **argv) {
 
   write_double_angles(path_conf_monopole, monopole_angles);
 
-  data<su2> conf_monopoless;
-  conf_monopoless.array = get_monopoless(conf_su2.array, monopole_angles);
+  get_monopoless_optimized(conf_su2.array, monopole_angles);
 
-  conf_monopoless.write_double(path_conf_monopoless);
+  conf_su2.write_double(path_conf_monopoless);
 }

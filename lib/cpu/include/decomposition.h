@@ -13,6 +13,9 @@ std::vector<double> merge_angles(std::vector<std::vector<double>> &angles);
 std::vector<su2> get_monopoless(std::vector<su2> &conf_su2,
                                 std::vector<double> &angles_monopole);
 
+void get_monopoless_optimized(std::vector<su2> &conf_su2,
+                              std::vector<double> &angles_monopole);
+
 std::vector<su2> get_initial_su2(std::vector<su2> &conf_monopoless,
                                  std::vector<double> &angles_monopole);
 
