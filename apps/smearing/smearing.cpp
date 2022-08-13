@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
     smearing_time = 0;
     observables_time = 0;
 
-    for (int APE_step = 0; APE_step < APE_steps; APE_step++) {
+    for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
 
       start_time = omp_get_wtime();
 
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
               wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
 
           for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-            stream_wilson << APE_step + 1 << "," << get<0>(it->first) << ","
+            stream_wilson << APE_step << "," << get<0>(it->first) << ","
                           << get<1>(it->first) << "," << it->second << endl;
           }
         }

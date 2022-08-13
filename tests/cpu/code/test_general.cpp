@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE abelian
 
 using namespace std;
 
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 48;
+  y_size = 48;
+  z_size = 48;
+  t_size = 48;
 
   std::cout.precision(17);
 
@@ -47,14 +47,20 @@ int main(int argc, char *argv[]) {
   // string conf_path = "../../confs/su2/mag/su2_suzuki/24^4/beta2.4/conf_0001";
   // string conf_path =
   //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
-  string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
-                     "monopoless_24^4";
+  // string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
+  //                    "monopoless_24^4";
   // string conf_path =
   //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
+  // string conf_path =
+  //     "../../confs/su2/monopoless/su2_suzuki/24^4/beta2.4/conf_monopoless_0001";
+  // string conf_path =
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
   // string conf_path =
   //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
   // string conf_path =
   //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
+  string conf_path =
+      "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
   conf.read_double(conf_path, 0);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);

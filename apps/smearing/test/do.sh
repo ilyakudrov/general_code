@@ -1,7 +1,8 @@
 #!/bin/bash
-conf_format_wilson=float
-conf_path_wilson="../../../tests/confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT"
-bytes_skip_wilson=8
+conf_format_wilson=double
+# conf_path_wilson="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
+conf_path_wilson="../../../tests/confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001"
+bytes_skip_wilson=0
 wilson_type="abelian"
 conf_format_plaket=double
 conf_path_plaket="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
@@ -12,7 +13,7 @@ HYP_alpha3=0.3
 APE_alpha=0.5
 APE_enabled=1
 HYP_enabled=1
-APE_steps=10
+APE_steps=16
 calculation_step_APE=2
 calculation_APE_start=6
 HYP_steps=1

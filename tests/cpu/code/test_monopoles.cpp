@@ -51,10 +51,14 @@ int main(int argc, char *argv[]) {
   //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
   // std::string path_abelian =
   //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
-  std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
-                             "result/monopoless_24^4";
+  // std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
+  //                            "result/monopoless_24^4";
   // std::string path_abelian =
   //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
+  // std::string path_abelian =
+  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
+  std::string path_abelian =
+      "../../confs/su2/monopoless/su2_suzuki/24^4/beta2.4/conf_monopoless_0001";
 
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
