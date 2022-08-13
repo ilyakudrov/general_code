@@ -8,6 +8,8 @@ std::vector<double> read_double_angles(std::string &file_name, int bites_skip);
 
 void write_double_angles(std::string &file_name, std::vector<double> &angles);
 
+void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2);
+
 std::vector<double> merge_angles(std::vector<std::vector<double>> &angles);
 
 std::vector<su2> get_monopoless(std::vector<su2> &conf_su2,

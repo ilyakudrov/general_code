@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE abelian
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -59,8 +59,10 @@ int main(int argc, char *argv[]) {
   //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
   // string conf_path =
   //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
-  string conf_path =
-      "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
+  // string conf_path =
+  //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
+  string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
+                     "monopoless_48^4_test";
   conf.read_double(conf_path, 0);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
@@ -69,6 +71,10 @@ int main(int argc, char *argv[]) {
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
   // cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
+
+  for (int i = 0; i < 4; i++) {
+    cout << conf.array[i] << endl;
+  }
 
   // plakets and polyakov loop
   start_time = clock();

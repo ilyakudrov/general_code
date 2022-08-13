@@ -150,5 +150,5 @@ int main(int argc, char **argv) {
 
   get_monopoless_optimized(conf_su2.array, monopole_angles);
 
-  conf_su2.write_double(path_conf_monopoless);
+  write_double_su2(path_conf_monopoless, conf_su2.array);
 }

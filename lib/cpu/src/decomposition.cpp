@@ -41,6 +41,14 @@ void write_double_angles(std::string &file_name, std::vector<double> &angles) {
     std::cout << "write_double<abelian> error: " << file_name << std::endl;
 }
 
+void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ofstream stream(file_name);
+  if (!stream.write((char *)&conf_su2[0], data_size * 4 * sizeof(double)))
+    std::cout << "write_double_su2 error: " << file_name << std::endl;
+  stream.close();
+}
+
 std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
   int data_size = x_size * y_size * z_size * t_size;
 
