@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 48;
-  y_size = 48;
-  z_size = 48;
-  t_size = 48;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
@@ -61,20 +61,18 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
   // string conf_path =
   //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
-  string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
-                     "monopoless_48^4_test";
-  conf.read_double(conf_path, 0);
-  // conf.read_double_qc2dstag(conf_path);
+  // string conf_path =
+  //     "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
+  string conf_path = "../../confs/su3/Landau_U1/gluodynamics/24^4/beta6.0/"
+                     "conf_Landau_gaugefixed_0001";
+  // conf.read_double(conf_path, 0);
+  conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 8);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
   // cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
-
-  for (int i = 0; i < 4; i++) {
-    cout << conf.array[i] << endl;
-  }
 
   // plakets and polyakov loop
   start_time = clock();

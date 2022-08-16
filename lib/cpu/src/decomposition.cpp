@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <math.h>
+#include <omp.h>
 
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
@@ -509,11 +510,10 @@ make_monopole_angles3(std::vector<double> &angles,
   return angles_decomposed;
 }
 
-void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
-                        std::vector<std::vector<int>> &monopole_coordinate,
+void decomposition_step(int monopole_difference,
+                        std::vector<int> &monopole_coordinate,
                         std::vector<double> &laplace,
-                        std::vector<std::vector<double>> &angles_decomposed,
-                        int i, int mu) {
+                        std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
   std::vector<int> laplace_shift = {
@@ -528,19 +528,19 @@ void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
 
   for (int t = 0; t < t_size; t++) {
 
-    laplace_coordinate[3] = abs(t - monopole_coordinate[mu][i * 4 + 3]);
+    laplace_coordinate[3] = abs(t - monopole_coordinate[3]);
     if (laplace_coordinate[3] > t_size / 2)
       laplace_coordinate[3] = t_size - laplace_coordinate[3];
 
     for (int z = 0; z < z_size; z++) {
 
-      laplace_coordinate[2] = abs(z - monopole_coordinate[mu][i * 4 + 2]);
+      laplace_coordinate[2] = abs(z - monopole_coordinate[2]);
       if (laplace_coordinate[2] > z_size / 2)
         laplace_coordinate[2] = z_size - laplace_coordinate[2];
 
       for (int y = 0; y < y_size; y++) {
 
-        laplace_coordinate[1] = abs(y - monopole_coordinate[mu][i * 4 + 1]);
+        laplace_coordinate[1] = abs(y - monopole_coordinate[1]);
         if (laplace_coordinate[1] > y_size / 2)
           laplace_coordinate[1] = y_size - laplace_coordinate[1];
 
@@ -548,54 +548,53 @@ void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
                         laplace_coordinate[2] * laplace_shift[2] +
                         laplace_coordinate[1] * laplace_shift[1];
 
-        if (monopole_coordinate[mu][i * 4] > x_size / 2) {
+        if (monopole_coordinate[0] > x_size / 2) {
 
-          for (int j = x_size - monopole_coordinate[mu][i * 4]; j <= x_size / 2;
-               j++) {
+          for (int j = x_size - monopole_coordinate[0]; j <= x_size / 2; j++) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
 
           for (int j = x_size / 2 - 1; j > 0; j--) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
 
-          for (int j = 0; j < x_size - monopole_coordinate[mu][i * 4]; j++) {
+          for (int j = 0; j < x_size - monopole_coordinate[0]; j++) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
         } else {
 
-          for (int j = monopole_coordinate[mu][i * 4]; j >= 0; j--) {
+          for (int j = monopole_coordinate[0]; j >= 0; j--) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
 
           for (int j = 1; j < x_size / 2; j++) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
 
-          for (int j = x_size / 2; j > monopole_coordinate[mu][i * 4]; j--) {
+          for (int j = x_size / 2; j > monopole_coordinate[0]; j--) {
 
-            angles_decomposed[mu][angles_place] +=
-                laplace[laplace_place + j] * monopole_difference[mu][i];
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
 
             angles_place++;
           }
@@ -629,22 +628,514 @@ std::vector<double> make_monopole_angles(std::vector<double> &angles,
   std::vector<std::vector<double>> angles_decomposed(
       4, std::vector<double>(data_size));
 
-  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
-                                   z_size / 2 + 1, t_size / 2 + 1};
-
-  double monopole_angle = 0;
-  int angle_tmp;
-
-  std::vector<int> laplace_coordinate(4);
-  int laplace_place;
-  int angles_place;
+  std::vector<int> coordinate(4);
 
   for (int mu = 0; mu < 4; mu++) {
 
     for (int i = 0; i < monopole_difference[mu].size(); i++) {
 
-      decomposition_step(monopole_difference, monopole_coordinate, laplace,
-                         angles_decomposed, i, mu);
+      coordinate = {monopole_coordinate[mu][4 * i],
+                    monopole_coordinate[mu][4 * i + 1],
+                    monopole_coordinate[mu][4 * i + 2],
+                    monopole_coordinate[mu][4 * i + 3]};
+
+      decomposition_step(monopole_difference[mu][i], coordinate, laplace,
+                         angles_decomposed[mu]);
+    }
+  }
+
+  for (int mu = 0; mu < 4; mu++) {
+    for (int i = 0; i < angles_decomposed[mu].size(); i++) {
+      angles_decomposed[mu][i] = -2 * M_PI * angles_decomposed[mu][i];
+    }
+  }
+  return merge_angles(angles_decomposed);
+}
+
+void decomposition_step_parallel(int monopole_difference,
+                                 std::vector<int> &monopole_coordinate,
+                                 std::vector<double> &laplace,
+                                 std::vector<double> &angles_decomposed) {
+  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
+                                   z_size / 2 + 1, t_size / 2 + 1};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {x_size, y_size * x_size,
+                                   z_size * y_size * x_size};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2) firstprivate(                             \
+    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
+    angles_shift, x_size, monopole_difference, monopole_coordinate)
+  for (int t = 0; t < t_size; t++) {
+
+    for (int z = 0; z < z_size; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > t_size / 2)
+        laplace_coordinate[2] = t_size - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > z_size / 2)
+        laplace_coordinate[1] = z_size - laplace_coordinate[1];
+
+      for (int y = 0; y < y_size; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > y_size / 2)
+          laplace_coordinate[0] = y_size - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        if (monopole_coordinate[0] > x_size / 2) {
+
+          for (int j = x_size - monopole_coordinate[0]; j <= x_size / 2; j++) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2 - 1; j > 0; j--) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+
+          for (int j = 0; j < x_size - monopole_coordinate[0]; j++) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+        } else {
+
+          for (int j = monopole_coordinate[0]; j >= 0; j--) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+
+          for (int j = 1; j < x_size / 2; j++) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2; j > monopole_coordinate[0]; j--) {
+
+            angles_decomposed[angles_place] +=
+                laplace[laplace_place + j] * monopole_difference;
+
+            angles_place++;
+          }
+        }
+      }
+    }
+  }
+}
+
+void decomposition_step_parallel3_simple_positive(
+    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    std::vector<double> &angles_decomposed) {
+  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
+                                   z_size / 2 + 1, t_size / 2 + 1};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {x_size, y_size * x_size,
+                                   z_size * y_size * x_size};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2)                                           \
+    firstprivate(angles_place, laplace_place, laplace_coordinate,              \
+                 laplace_shift, angles_shift, x_size, monopole_coordinate)
+  for (int t = 0; t < t_size; t++) {
+
+    for (int z = 0; z < z_size; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > t_size / 2)
+        laplace_coordinate[2] = t_size - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > z_size / 2)
+        laplace_coordinate[1] = z_size - laplace_coordinate[1];
+
+      for (int y = 0; y < y_size; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > y_size / 2)
+          laplace_coordinate[0] = y_size - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        if (monopole_coordinate[0] > x_size / 2) {
+
+          for (int j = x_size - monopole_coordinate[0]; j <= x_size / 2; j++) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2 - 1; j > 0; j--) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = 0; j < x_size - monopole_coordinate[0]; j++) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+        } else {
+
+          for (int j = monopole_coordinate[0]; j >= 0; j--) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = 1; j < x_size / 2; j++) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2; j > monopole_coordinate[0]; j--) {
+
+            angles_decomposed[angles_place] += laplace[laplace_place + j];
+
+            angles_place++;
+          }
+        }
+      }
+    }
+  }
+}
+
+void decomposition_step_parallel3_simple_negative(
+    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    std::vector<double> &angles_decomposed) {
+  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
+                                   z_size / 2 + 1, t_size / 2 + 1};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {x_size, y_size * x_size,
+                                   z_size * y_size * x_size};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2)                                           \
+    firstprivate(angles_place, laplace_place, laplace_coordinate,              \
+                 laplace_shift, angles_shift, x_size, monopole_coordinate)
+  for (int t = 0; t < t_size; t++) {
+
+    for (int z = 0; z < z_size; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > t_size / 2)
+        laplace_coordinate[2] = t_size - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > z_size / 2)
+        laplace_coordinate[1] = z_size - laplace_coordinate[1];
+
+      for (int y = 0; y < y_size; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > y_size / 2)
+          laplace_coordinate[0] = y_size - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        if (monopole_coordinate[0] > x_size / 2) {
+
+          for (int j = x_size - monopole_coordinate[0]; j <= x_size / 2; j++) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2 - 1; j > 0; j--) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = 0; j < x_size - monopole_coordinate[0]; j++) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+        } else {
+
+          for (int j = monopole_coordinate[0]; j >= 0; j--) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = 1; j < x_size / 2; j++) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+
+          for (int j = x_size / 2; j > monopole_coordinate[0]; j--) {
+
+            angles_decomposed[angles_place] -= laplace[laplace_place + j];
+
+            angles_place++;
+          }
+        }
+      }
+    }
+  }
+}
+
+void decomposition_step_parallel1(int monopole_difference,
+                                  std::vector<int> &monopole_coordinate,
+                                  std::vector<double> &laplace,
+                                  std::vector<double> &angles_decomposed) {
+  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
+                                   z_size / 2 + 1, t_size / 2 + 1};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {x_size, y_size * x_size,
+                                   z_size * y_size * x_size};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2) firstprivate(                             \
+    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
+    angles_shift, x_size, monopole_difference, monopole_coordinate)
+  for (int t = 0; t < t_size; t++) {
+
+    for (int z = 0; z < z_size; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > t_size / 2)
+        laplace_coordinate[2] = t_size - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > z_size / 2)
+        laplace_coordinate[1] = z_size - laplace_coordinate[1];
+
+      for (int y = 0; y < y_size; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > y_size / 2)
+          laplace_coordinate[0] = y_size - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        for (int j = x_size - monopole_coordinate[0]; j <= x_size / 2; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = x_size / 2 - 1; j > 0; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = 0; j < x_size - monopole_coordinate[0]; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+      }
+    }
+  }
+}
+
+void decomposition_step_parallel2(int monopole_difference,
+                                  std::vector<int> &monopole_coordinate,
+                                  std::vector<double> &laplace,
+                                  std::vector<double> &angles_decomposed) {
+  std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
+                                   z_size / 2 + 1, t_size / 2 + 1};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {x_size, y_size * x_size,
+                                   z_size * y_size * x_size};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2) firstprivate(                             \
+    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
+    angles_shift, x_size, monopole_difference, monopole_coordinate)
+  for (int t = 0; t < t_size; t++) {
+
+    for (int z = 0; z < z_size; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > t_size / 2)
+        laplace_coordinate[2] = t_size - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > z_size / 2)
+        laplace_coordinate[1] = z_size - laplace_coordinate[1];
+
+      for (int y = 0; y < y_size; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > y_size / 2)
+          laplace_coordinate[0] = y_size - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        for (int j = monopole_coordinate[0]; j >= 0; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = 1; j < x_size / 2; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = x_size / 2; j > monopole_coordinate[0]; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+      }
+    }
+  }
+}
+
+std::vector<double>
+make_monopole_angles_parallel(std::vector<double> &angles,
+                              std::vector<double> &laplace) {
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  int data_size = x_size * y_size * z_size * t_size;
+
+  std::vector<std::vector<int>> monopole_plaket =
+      calculate_monopole_plaket_singular(angles);
+
+  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
+
+  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
+                                     monopole_coordinate);
+
+  for (int mu = 0; mu < monopole_plaket.size(); mu++) {
+    monopole_plaket[mu].clear();
+    monopole_plaket[mu].shrink_to_fit();
+  }
+
+  std::vector<std::vector<double>> angles_decomposed(
+      4, std::vector<double>(data_size));
+
+  std::vector<int> coordinate(4);
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    for (int i = 0; i < monopole_difference[mu].size(); i++) {
+
+      coordinate = {monopole_coordinate[mu][4 * i],
+                    monopole_coordinate[mu][4 * i + 1],
+                    monopole_coordinate[mu][4 * i + 2],
+                    monopole_coordinate[mu][4 * i + 3]};
+
+      if (monopole_coordinate[mu][i * 4] > x_size / 2) {
+
+        decomposition_step_parallel1(monopole_difference[mu][i], coordinate,
+                                     laplace, angles_decomposed[mu]);
+      } else {
+        decomposition_step_parallel2(monopole_difference[mu][i], coordinate,
+                                     laplace, angles_decomposed[mu]);
+      }
     }
   }
 

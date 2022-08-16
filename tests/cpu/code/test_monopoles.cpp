@@ -65,8 +65,8 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/CON_MON_MAG_035.LAT";
   // std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
   //                            "result/monopoless_48^4_test";
-  std::string path_abelian = "../../confs/su2/monopoless/su2_suzuki/"
-                             "48^4/beta2.8/CON_OFF_MAG_035.LAT";
+  std::string path_abelian =
+      "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
 
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   //                            "mu0.05/s0/conf_monopoless_0201";
 
   data<abelian> conf;
-  conf.read_double_convert_abelian(path_abelian, 4);
+  conf.read_double_convert_abelian(path_abelian, 0);
   // conf.read_double(path_abelian, 0);
   // conf.read_float(path_abelian, 8);
   // conf.read_double_convert_abelian(path_abelian, 0);

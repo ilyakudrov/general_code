@@ -19,6 +19,8 @@ std::vector<abelian> generate_gauge_abelian_uniform();
 
 std::vector<complex_t> generate_gauge_complex_uniform();
 
+std::vector<complex_t> generate_gauge_complex_unity();
+
 std::vector<double> generate_random_numbers(int vector_size);
 
 void heat_bath_test1(abelian &g, abelian &K, double temperature,

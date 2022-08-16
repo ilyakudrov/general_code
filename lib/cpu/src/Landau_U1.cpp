@@ -91,12 +91,12 @@ std::vector<double> generate_gauge_angles_uniform() {
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
-  int data_szie = x_size * y_size * z_size * t_size;
+  int data_size = x_size * y_size * z_size * t_size;
 
   std::vector<double> gauge_abelian;
-  gauge_abelian.reserve(data_szie);
+  gauge_abelian.reserve(data_size);
 
-  for (int i = 0; i < data_szie; i++) {
+  for (int i = 0; i < data_size; i++) {
 
     gauge_abelian.push_back(
         (2 * (double)random_generator() / random_generator.max() - 1) * M_PI);
@@ -112,12 +112,12 @@ std::vector<abelian> generate_gauge_abelian_uniform() {
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
-  int data_szie = x_size * y_size * z_size * t_size;
+  int data_size = x_size * y_size * z_size * t_size;
 
   std::vector<abelian> gauge_abelian;
-  gauge_abelian.reserve(data_szie);
+  gauge_abelian.reserve(data_size);
 
-  for (int i = 0; i < data_szie; i++) {
+  for (int i = 0; i < data_size; i++) {
 
     gauge_abelian.push_back(abelian(
         1,
@@ -134,19 +134,33 @@ std::vector<complex_t> generate_gauge_complex_uniform() {
 
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
 
-  int data_szie = x_size * y_size * z_size * t_size;
+  int data_size = x_size * y_size * z_size * t_size;
 
   std::vector<complex_t> gauge_complex;
-  gauge_complex.reserve(data_szie);
+  gauge_complex.reserve(data_size);
 
   double angle_tmp;
 
-  for (int i = 0; i < data_szie; i++) {
+  for (int i = 0; i < data_size; i++) {
 
     angle_tmp =
         (2 * (double)random_generator() / random_generator.max() - 1) * M_PI;
 
     gauge_complex.push_back(complex_t(cos(angle_tmp), sin(angle_tmp)));
+  }
+
+  return gauge_complex;
+}
+
+std::vector<complex_t> generate_gauge_complex_unity() {
+
+  int data_size = x_size * y_size * z_size * t_size;
+
+  std::vector<complex_t> gauge_complex;
+  gauge_complex.reserve(data_size);
+
+  for (int i = 0; i < data_size; i++) {
+    gauge_complex.push_back(complex_t(1, 0));
   }
 
   return gauge_complex;
