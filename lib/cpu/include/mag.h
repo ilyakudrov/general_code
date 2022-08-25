@@ -78,3 +78,5 @@ void make_maximization_final(std::vector<su2> &conf_su2,
                              std::vector<spin> &spins, int OR_steps,
                              double tolerance_maximal,
                              double tolerance_average);
+
+double mag_functional_su3(std::vector<su3> &conf_su3);

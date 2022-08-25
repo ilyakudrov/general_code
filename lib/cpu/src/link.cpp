@@ -554,6 +554,67 @@ void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
   J[3] = j3 / 2 / Pi;
 }
 
+void link1::get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
+                                 int *J, std::vector<double> &angles) {
+  link1 linkx(*this);
+  linkx.move(0, 1);
+  link1 linky(*this);
+  linky.move(1, 1);
+  link1 linkz(*this);
+  linkz.move(2, 1);
+  link1 linkt(*this);
+  linkt.move(3, 1);
+
+  move(3, 1);
+  linkx.move(3, 1);
+  linky.move(3, 1);
+  linkz.move(3, 1);
+  J[3] =
+      -(monopole_plaket[3][linkx.place / 4] - monopole_plaket[3][place / 4] -
+        (monopole_plaket[1][linky.place / 4] - monopole_plaket[1][place / 4]) +
+        monopole_plaket[0][linkz.place / 4] - monopole_plaket[0][place / 4]);
+  move(3, -1);
+  linkx.move(3, -1);
+  linky.move(3, -1);
+  linkz.move(3, -1);
+  move(0, 1);
+  linkt.move(0, 1);
+  linky.move(0, 1);
+  linkz.move(0, 1);
+  J[0] =
+      -(-(monopole_plaket[3][linkt.place / 4] - monopole_plaket[3][place / 4]) -
+        (monopole_plaket[5][linky.place / 4] - monopole_plaket[5][place / 4]) +
+        monopole_plaket[4][linkz.place / 4] - monopole_plaket[4][place / 4]);
+  move(0, -1);
+  linkt.move(0, -1);
+  linky.move(0, -1);
+  linkz.move(0, -1);
+  move(1, 1);
+  linkt.move(1, 1);
+  linkx.move(1, 1);
+  linkz.move(1, 1);
+  J[1] =
+      -(monopole_plaket[1][linkt.place / 4] - monopole_plaket[1][place / 4] +
+        monopole_plaket[5][linkx.place / 4] - monopole_plaket[5][place / 4] -
+        (monopole_plaket[2][linkz.place / 4] - monopole_plaket[2][place / 4]));
+  move(1, -1);
+  linkt.move(1, -1);
+  linkx.move(1, -1);
+  linkz.move(1, -1);
+  move(2, 1);
+  linkt.move(2, 1);
+  linkx.move(2, 1);
+  linky.move(2, 1);
+  J[2] =
+      -(-(monopole_plaket[0][linkt.place / 4] - monopole_plaket[0][place / 4]) -
+        (monopole_plaket[4][linkx.place / 4] - monopole_plaket[4][place / 4]) +
+        monopole_plaket[2][linky.place / 4] - monopole_plaket[2][place / 4]);
+  move(2, -1);
+  linkt.move(2, -1);
+  linkx.move(2, -1);
+  linky.move(2, -1);
+}
+
 // specializations
 
 // su2

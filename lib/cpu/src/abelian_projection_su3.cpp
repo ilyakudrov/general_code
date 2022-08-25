@@ -21,13 +21,13 @@ vector<vector<double>> make_angles_SU3(vector<su3> &conf) {
       sum += angle_tmp[j];
     }
 
-    // while (sum >= M_PI) {
-    //   sum -= 2 * M_PI;
-    // }
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
 
-    // while (sum < -M_PI) {
-    //   sum += 2 * M_PI;
-    // }
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
 
     for (int j = 0; j < 3; j++) {
       angles[j][i] = angle_tmp[j] - sum / 3;

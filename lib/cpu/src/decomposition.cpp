@@ -42,12 +42,37 @@ void write_double_angles(std::string &file_name, std::vector<double> &angles) {
     std::cout << "write_double<abelian> error: " << file_name << std::endl;
 }
 
+void write_double_angles_su3(std::string &file_name,
+                             std::vector<double> &angles) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::ofstream stream(file_name);
+  if (!stream.write((char *)&angles[0], (data_size) * sizeof(double)))
+    std::cout << "write_double<abelian> error: " << file_name << std::endl;
+}
+
 void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   std::ofstream stream(file_name);
   if (!stream.write((char *)&conf_su2[0], data_size * 4 * sizeof(double)))
     std::cout << "write_double_su2 error: " << file_name << std::endl;
   stream.close();
+}
+
+std::vector<std::vector<double>> get_angles_su3(std::vector<su3> &conf_su3) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<std::vector<double>> angles =
+      std::vector<std::vector<double>>(3, std::vector<double>(data_size));
+
+  for (int i = 0; i < data_size; i++) {
+    for (int c = 0; c < 3; c++) {
+      angles[c][i] =
+          atan2(conf_su3[i].matrix[c][c].imag, conf_su3[i].matrix[c][c].real);
+    }
+  }
+
+  return angles;
 }
 
 std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
@@ -619,6 +644,10 @@ std::vector<double> make_monopole_angles(std::vector<double> &angles,
 
   monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
                                      monopole_coordinate);
+
+  for (int i = 0; i < 4; i++) {
+    std::cout << monopole_difference[i].size() << std::endl;
+  }
 
   for (int mu = 0; mu < monopole_plaket.size(); mu++) {
     monopole_plaket[mu].clear();

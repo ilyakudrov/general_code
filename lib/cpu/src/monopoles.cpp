@@ -200,7 +200,25 @@ std::vector<double> calculate_current(std::vector<double> &angles) {
   return J;
 }
 
-int find_current(link1 &link, std::vector<double> &J) {
+std::vector<int> calculate_current_singular(std::vector<double> &angles) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<int> J(data_size);
+
+  std::vector<std::vector<int>> monopole_plaket_singular =
+      calculate_monopole_plaket_singular(angles);
+
+  SPACE_ITER_START
+
+  link.get_current_singular(monopole_plaket_singular, &J[link.place], angles);
+
+  SPACE_ITER_END
+
+  return J;
+}
+
+template <class T> int find_current(link1 &link, std::vector<T> &J) {
   for (int mu = 0; mu < 4; mu++) {
     if ((J[link.place + mu] > 0.3) || (J[link.place + mu] < -0.3))
       return mu + 1;
@@ -215,8 +233,9 @@ int find_current(link1 &link, std::vector<double> &J) {
 }
 
 // find all directions with current and add loops with that neighbours
+template <class T>
 std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
-                               std::vector<double> &J) {
+                               std::vector<T> &J) {
   // std::vector for new sites with current
   std::vector<loop *> neighbours_new;
   loop *loop_tmp;
@@ -261,7 +280,7 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
 }
 
 // find cluster which has site ll
-void find_cluster(loop *ll, std::vector<double> &J) {
+template <class T> void find_cluster(loop *ll, std::vector<T> &J) {
   std::vector<loop *> neighbours = {ll};
 
   // while find_path finds new sites with current
@@ -272,7 +291,7 @@ void find_cluster(loop *ll, std::vector<double> &J) {
 }
 
 // find all clusters on a lattice not using recurrence
-std::vector<loop *> calculate_clusters(std::vector<double> &J) {
+template <class T> std::vector<loop *> calculate_clusters(std::vector<T> &J) {
   int dir1;
 
   std::vector<loop *> LL;
@@ -299,7 +318,6 @@ std::vector<loop *> calculate_clusters(std::vector<double> &J) {
 }
 
 // functions for obtaining information about clusters for testing
-
 void print_currents(loop *ll) {
   std::cout << ll->coordinate[0] << " " << ll->coordinate[1] << " "
             << ll->coordinate[2] << " " << ll->coordinate[3] << std::endl;
@@ -435,3 +453,15 @@ void site_number_recurrent(loop *loop, int &link_number,
     link_number++;
   }
 }
+
+template int find_current(link1 &link, std::vector<double> &J);
+template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
+                                        std::vector<double> &J);
+template void find_cluster(loop *ll, std::vector<double> &J);
+template std::vector<loop *> calculate_clusters(std::vector<double> &J);
+
+template int find_current(link1 &link, std::vector<int> &J);
+template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
+                                        std::vector<int> &J);
+template void find_cluster(loop *ll, std::vector<int> &J);
+template std::vector<loop *> calculate_clusters(std::vector<int> &J);

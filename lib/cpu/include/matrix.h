@@ -14,6 +14,8 @@ struct complex_t {
 
   double angle();
 
+  complex_t negative();
+
   complex_t mult_by_imag(double x);
 };
 
@@ -134,6 +136,12 @@ public:
 
   // gets projection onto su3 group
   su3 proj();
+
+  // muliply from left and right by lambda3
+  su3 lambda3_mult();
+
+  // muliply from left and right by lambda8
+  su3 lambda8_mult();
 
   // calculates module of vector in sigma matrices representation
   double module();

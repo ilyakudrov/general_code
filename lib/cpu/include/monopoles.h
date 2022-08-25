@@ -17,16 +17,19 @@ calculate_monopole_plaket(std::vector<double> &angles);
 std::vector<std::vector<int>>
 calculate_monopole_plaket_singular(std::vector<double> &angles);
 
-int find_current(link1 &link, std::vector<double> &J);
+template <class T> int find_current(link1 &link, std::vector<T> &J);
 
+template <class T>
 std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
-                               std::vector<double> &J);
+                               std::vector<T> &J);
 
-void find_cluster(loop *ll, std::vector<double> &J);
+template <class T> void find_cluster(loop *ll, std::vector<T> &J);
 
-std::vector<loop *> calculate_clusters(std::vector<double> &J);
+template <class T> std::vector<loop *> calculate_clusters(std::vector<T> &J);
 
 std::vector<double> calculate_current(std::vector<double> &angles);
+
+std::vector<int> calculate_current_singular(std::vector<double> &angles);
 
 // functions for obtaining information about clusters for testing
 

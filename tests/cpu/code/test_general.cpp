@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 36;
+  y_size = 36;
+  z_size = 36;
+  t_size = 36;
 
   std::cout.precision(17);
 
@@ -63,8 +63,15 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
   // string conf_path =
   //     "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
-  string conf_path = "../../confs/su3/Landau_U1/gluodynamics/24^4/beta6.0/"
-                     "conf_Landau_gaugefixed_0001";
+  // string conf_path = "../../confs/su3/Landau_U1/gluodynamics/24^4/beta6.0/"
+  //                    "conf_Landau_gaugefixed_0001";
+  // string conf_path = "../../confs/su3/gluodynamics/32^4/beta6.2/CONF0001";
+  // string conf_path =
+  //     "../../confs/su3/mag/gluodynamics/32^4/beta6.2/CONFDP_gaugefixed_0001";
+  // string conf_path =
+  // "../../confs/su3/Landau_U1xU1/gluodynamics/32^4/beta6.2/"
+  //                    "conf_Landau_gaugefixed_0001";
+  string conf_path = "../../confs/su3/gluodynamics/36^4/beta6.3/CONF0001";
   // conf.read_double(conf_path, 0);
   conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);

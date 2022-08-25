@@ -1,3 +1,4 @@
+#include "../../../lib/cpu/include/Landau_U1.h"
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/link.h"
@@ -11,6 +12,8 @@
 #include <map>
 #include <vector>
 
+using namespace std;
+
 int x_size;
 int y_size;
 int z_size;
@@ -21,14 +24,12 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 48;
-  y_size = 48;
-  z_size = 48;
-  t_size = 48;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
-
-  int data_size = 4 * x_size * y_size * z_size * t_size;
 
   // std::string path_abelian =
   // "../../confs/abelian/mu0.00/CON_32^3x32_0001.LAT"; string path_abelian =
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
   // std::string path_abelian =
   //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
+  std::string path_abelian =
+      "../../confs/su2/mag/su2_suzuki/24^4/beta2.4/conf_0001";
   // std::string path_abelian =
   //     "../../confs/su2/monopoless/su2_suzuki/24^4/beta2.4/conf_monopoless_0001";
   // std::string path_abelian =
@@ -65,8 +68,8 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/CON_MON_MAG_035.LAT";
   // std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
   //                            "result/monopoless_48^4_test";
-  std::string path_abelian =
-      "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
+  // std::string path_abelian =
+  //     "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
 
   // string path_abelian =
   //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
@@ -81,10 +84,11 @@ int main(int argc, char *argv[]) {
   //                            "mu0.05/s0/conf_monopoless_0201";
 
   data<abelian> conf;
-  conf.read_double_convert_abelian(path_abelian, 0);
+  // data<su2> conf;
+  // conf.read_double_convert_abelian(path_abelian, 0);
   // conf.read_double(path_abelian, 0);
   // conf.read_float(path_abelian, 8);
-  // conf.read_double_convert_abelian(path_abelian, 0);
+  conf.read_double_convert_abelian(path_abelian, 0);
   std::vector<double> angles = convert_abelian_to_abelian(conf.array);
   // std::vector<double> angles
   // = read_angles_float_fortran(path_abelian); std::vector<double> angles =
@@ -94,7 +98,9 @@ int main(int argc, char *argv[]) {
   // read_float_fortran_convet_abelian(path_abelian); std::vector<double>
   // angles = read_double_fortran_convet_abelian(path_abelian);
 
-  std::vector<double> J = calculate_current(angles);
+  // std::vector<double> J = calculate_current(angles);
+  std::vector<int> J = calculate_current_singular(angles);
+
   std::vector<loop *> LL = calculate_clusters(J);
 
   std::cout << "number of clusters " << LL.size() << std::endl;

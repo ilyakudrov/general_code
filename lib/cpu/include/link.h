@@ -125,6 +125,9 @@ public:
   int current_test(double *J);
   void get_current(std::vector<std::vector<double>> &monopole_plaket, double *J,
                    std::vector<double> &angles);
+
+  void get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
+                            int *J, std::vector<double> &angles);
 };
 
 std::ostream &operator<<(std::ostream &os, const link1 &link);

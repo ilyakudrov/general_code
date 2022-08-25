@@ -3,6 +3,7 @@
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/loop.h"
+#include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/monopoles.h"
 
@@ -24,27 +25,74 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 36;
-  y_size = 36;
-  z_size = 36;
-  t_size = 36;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 6;
 
   cout.precision(17);
 
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
-  string path_abelian =
-      "../../confs/su3/mag/36^4/beta6.3/CONFDP_gaugefixed_0001";
+  // string path_abelian = "../../confs/su3/gluodynamics/36^4/beta6.3/"
+  //                       "CONF0001";
+  // string path_abelian = "../../confs/su3/mag/gluodynamics/36^4/beta6.3/"
+  //                       "CONFDP_gaugefixed_0001";
+  // string path_abelian =
+  //     "../../confs/su3/Landau_U1xU1/gluodynamics/32^4/beta6.2/"
+  //     "conf_Landau_gaugefixed_0001";
+
+  // string path_abelian =
+  //     "../../confs/su3/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
+  string path_abelian = "../../confs/su3/140MeV/nt6/conf.0501";
 
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
-  conf.read_double_qc2dstag(path_abelian);
+  // conf.read_double_qc2dstag(path_abelian);
+  conf.read_ildg(path_abelian);
   // conf.read_double_convert_abelian(path_abelian, 0);
   vector<vector<double>> angles = make_angles_SU3(conf.array);
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  su3 lambda3;
+  lambda3.matrix[0][0] = complex_t(1, 0);
+  lambda3.matrix[1][1] = complex_t(-1, 0);
+  lambda3.matrix[2][2] = complex_t(0, 0);
+
+  cout << "lambda3" << endl;
+  cout << lambda3 << endl;
+
+  su3 lambda8;
+  lambda8.matrix[0][0] = complex_t(1. / sqrt(3), 0);
+  lambda8.matrix[1][1] = complex_t(1. / sqrt(3), 0);
+  lambda8.matrix[2][2] = complex_t(-2. / sqrt(3), 0);
+
+  cout << "lambda8" << endl;
+  cout << lambda8 << endl;
+
+  cout << "unity check1 " << conf.array[0] * conf.array[0].conj() << endl;
+  cout << "unity check2 " << (conf.array[0] ^ conf.array[0]) << endl;
+
+  double sum = 0;
+  for (int i = 0; i < 3; i++) {
+    sum += conf.array[0].matrix[i][i].real * conf.array[0].matrix[i][i].real +
+           conf.array[0].matrix[i][i].imag * conf.array[0].matrix[i][i].imag;
+  }
+  cout << "sum of diag squares " << sum << endl;
+
+  cout << "lambda sum tr "
+       << (lambda3 * conf.array[0] * lambda3 * conf.array[0].conj()).tr() +
+              (lambda8 * conf.array[0] * lambda8 * conf.array[0].conj()).tr()
+       << endl;
+  // cout << "mult " << (lambda8 * conf.array[0]) * lambda8 << endl;
+
+  cout << "mag_su3 functional " << mag_functional_su3(conf.array) << endl;
 
   for (int color = 0; color < angles.size(); color++) {
 
     vector<double> J = calculate_current(angles[color]);
+    // vector<int> J = calculate_current_singular(angles[color]);
     vector<loop *> LL = calculate_clusters(J);
 
     cout << "color = " << color << endl;

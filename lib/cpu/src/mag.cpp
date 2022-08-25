@@ -789,3 +789,17 @@ void make_maximization_final(std::vector<su2> &conf_su2,
 
   } while (!is_converged);
 }
+
+double mag_functional_su3(std::vector<su3> &conf_su3) {
+  double functional = 0;
+  for (int i = 0; i < conf_su3.size(); i++) {
+    // functional += (conf_su3[i].lambda3_mult() ^ conf_su3[i]).tr() +
+    //               (conf_su3[i].lambda8_mult() ^ conf_su3[i]).tr();
+    for (int j = 0; j < 3; j++) {
+      functional +=
+          conf_su3[i].matrix[j][j].real * conf_su3[i].matrix[j][j].real +
+          conf_su3[i].matrix[j][j].imag * conf_su3[i].matrix[j][j].imag;
+    }
+  }
+  return functional / (x_size * y_size * z_size * t_size * 3 * 4);
+}

@@ -15,6 +15,8 @@ double complex_t::module() { return sqrt(real * real + imag * imag); }
 
 double complex_t::angle() { return atan2(imag, real); }
 
+complex_t complex_t::negative() { return complex_t(-real, -imag); }
+
 complex_t complex_t::mult_by_imag(double x) {
   return complex_t(-imag * x, real * x);
 }
@@ -314,6 +316,39 @@ su3 su3::proj() {
   }
 
   return A;
+}
+
+su3 su3::lambda3_mult() {
+
+  su3 A;
+
+  A.matrix[0][0] = matrix[0][0];
+  A.matrix[0][1] = matrix[0][1].negative();
+  A.matrix[1][0] = matrix[1][0].negative();
+  A.matrix[1][1] = matrix[1][1];
+
+  A.matrix[2][2] = complex_t(0, 0);
+
+  return su3(A);
+}
+
+su3 su3::lambda8_mult() {
+
+  su3 A(matrix);
+
+  A.matrix[0][0] = A.matrix[0][0] / 3;
+  A.matrix[0][1] = A.matrix[0][1] / 3;
+  A.matrix[1][0] = A.matrix[1][0] / 3;
+  A.matrix[1][1] = A.matrix[1][1] / 3;
+
+  A.matrix[0][2] = A.matrix[0][2] * (-2. / 3);
+  A.matrix[1][2] = A.matrix[1][2] * (-2. / 3);
+  A.matrix[2][0] = A.matrix[2][0] * (-2. / 3);
+  A.matrix[2][1] = A.matrix[2][1] * (-2. / 3);
+
+  A.matrix[2][2] = A.matrix[2][2] * (4. / 3);
+
+  return su3(A);
 }
 
 su3 operator+(const su3 &A, const su3 &B) {
