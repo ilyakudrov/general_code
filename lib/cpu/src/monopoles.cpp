@@ -366,7 +366,6 @@ void cluster_sites(loop *ll) {
 
 std::vector<int> length_mu(loop *ll) {
   std::vector<int> lengths_mu = {0, 0, 0, 0};
-  link1 link(x_size, y_size, z_size, t_size);
 
   length_mu_recurrent(ll, lengths_mu);
 
@@ -384,6 +383,33 @@ void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu) {
     } while (difference == 0);
     mu--;
     lengths_mu[mu] += ll->charge[i];
+  }
+}
+
+std::vector<int> currents_directions(loop *ll) {
+  // [0] is spatial, [1] is temporal
+  std::vector<int> directions = {0, 0};
+
+  currents_directions_recurrent(ll, directions);
+
+  return directions;
+}
+
+void currents_directions_recurrent(loop *ll, std::vector<int> &directions) {
+  for (int i = 0; i < ll->link.size(); i++) {
+    currents_directions_recurrent(ll->link[i], directions);
+    int mu = 0;
+    int difference;
+    do {
+      difference = ll->link[i]->coordinate[mu] - ll->coordinate[mu];
+      mu++;
+    } while (difference == 0);
+    mu--;
+    if (mu == 3) {
+      directions[1] += abs(ll->charge[i]);
+    } else {
+      directions[0] += abs(ll->charge[i]);
+    }
   }
 }
 

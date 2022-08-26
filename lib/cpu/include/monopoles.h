@@ -49,6 +49,10 @@ std::vector<int> length_mu(loop *ll);
 
 void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu);
 
+std::vector<int> currents_directions(loop *ll);
+
+void currents_directions_recurrent(loop *ll, std::vector<int> &directions);
+
 double cluster_variation(loop *loop);
 
 void cluster_variation_recurrent(loop *loop, double &variation,
