@@ -2,7 +2,9 @@
 #include "../../lib/cpu/include/abelian_projection_su3.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/decomposition.h"
+#include "../../lib/cpu/include/loop.h"
 #include "../../lib/cpu/include/matrix.h"
+#include "../../lib/cpu/include/monopoles.h"
 
 #include <chrono>
 #include <fstream>
@@ -94,20 +96,10 @@ int main(int argc, char **argv) {
 
   cout.precision(17);
 
-  // std::vector<std::vector<double>> angles_su3 =
-  // get_angles_su3(conf_su3.array);
   std::vector<std::vector<double>> angles_su3 = make_angles_SU3(conf_su3.array);
 
   vector<double> inverse_laplacian =
       read_inverse_laplacian(path_inverse_laplacian);
-
-  double cos_sum = 0;
-  for (int i = 0; i < angles_su3[0].size(); i++) {
-    cos_sum += cos(angles_su3[0][i]);
-  }
-  cos_sum = cos_sum / angles_su3[0].size();
-
-  cout << "cos sum = " << cos_sum << endl;
 
   vector<vector<double>> angles_monopoole(3);
 
@@ -128,31 +120,9 @@ int main(int argc, char **argv) {
   search_time = end_time - start_time;
   std::cout << "decomposition time: " << search_time << std::endl;
 
-  cos_sum = 0;
-  for (int i = 0; i < angles_monopoole[0].size(); i++) {
-    cos_sum += cos(angles_monopoole[0][i]);
-  }
-  cos_sum = cos_sum / angles_monopoole[0].size();
+  write_double_angles_su3(path_conf_monopole, angles_monopoole);
 
-  cout << "cos sum = " << cos_sum << endl;
+  get_monopoless_optimized_su3(conf_su3.array, angles_monopoole);
 
-  // start_time = clock();
-
-  // cout << "decomposition started" << endl;
-
-  // vector<double> monopole_angles =
-  //     make_monopole_angles(conf_angles_U1, inverse_laplacian);
-
-  // cout << "decomposition ended" << endl;
-
-  // end_time = clock();
-  // search_time = end_time - start_time;
-  // cout << "make_monopole_angles time: " << search_time * 1. / CLOCKS_PER_SEC
-  //      << endl;
-
-  // write_double_angles(path_conf_monopole, monopole_angles);
-
-  // get_monopoless_optimized(conf_su3.array, monopole_angles);
-
-  // write_double_su2(path_conf_monopoless, conf_su3.array);
+  write_double_su3(path_conf_monopoless, conf_su3.array);
 }

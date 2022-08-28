@@ -3,13 +3,11 @@
 #include <cmath>
 #include <vector>
 
-using namespace std;
+std::vector<std::vector<double>> make_angles_SU3(std::vector<su3> &conf) {
 
-vector<vector<double>> make_angles_SU3(vector<su3> &conf) {
+  std::vector<std::vector<double>> angles(3, std::vector<double>(conf.size()));
 
-  vector<vector<double>> angles(3, vector<double>(conf.size()));
-
-  vector<double> angle_tmp(3);
+  std::vector<double> angle_tmp(3);
 
   for (int i = 0; i < conf.size(); i++) {
 
@@ -35,4 +33,30 @@ vector<vector<double>> make_angles_SU3(vector<su3> &conf) {
   }
 
   return angles;
+}
+
+void angles_project(std::vector<std::vector<double>> &angles) {
+
+  std::vector<double> angle_tmp(3);
+
+  for (int i = 0; i < angles[0].size(); i++) {
+
+    double sum = 0;
+
+    for (int j = 0; j < 3; j++) {
+      sum += angles[j][i];
+    }
+
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
+
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
+
+    for (int j = 0; j < 3; j++) {
+      angles[j][i] -= sum / 3;
+    }
+  }
 }

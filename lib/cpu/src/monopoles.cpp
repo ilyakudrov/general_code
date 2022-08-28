@@ -75,7 +75,7 @@ std::vector<double> read_float_fortran_convet_abelian(std::string &file_path) {
   std::ifstream stream(file_path);
   std::vector<float> v(data_size1 * 4 + 1);
   if (!stream.read((char *)&v[0], (data_size1 * 4 + 1) * sizeof(float)))
-    std::cout << "read_float_convert_abelian<abelian> error: " << file_path
+    std::cout << "read_float_fortran_convet_abelian error: " << file_path
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
     angles.push_back((double)atan2(v[i * 4 + 4], v[i * 4 + 1]));
@@ -92,10 +92,31 @@ std::vector<double> read_double_fortran_convet_abelian(std::string &file_path) {
   std::vector<double> v(data_size1 * 4);
   stream.ignore(4);
   if (!stream.read((char *)&v[0], (data_size1 * 4) * sizeof(double)))
-    std::cout << "read_float_convert_abelian<abelian> error: " << file_path
+    std::cout << "read_double_fortran_convet_abelian error: " << file_path
               << std::endl;
   for (int i = 0; i < data_size1; i++) {
     angles.push_back((double)atan2(v[i * 4 + 3], v[i * 4]));
+  }
+  stream.close();
+  return angles;
+}
+
+std::vector<std::vector<double>>
+read_double_su3_convet_angles(std::string &file_path) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::vector<std::vector<double>> angles(3, std::vector<double>(data_size));
+
+  std::ifstream stream(file_path);
+  std::vector<double> v(data_size * 18);
+
+  if (!stream.read((char *)&v[0], (data_size * 18) * sizeof(double)))
+    std::cout << "read_double_su3_convet_angles error: " << file_path
+              << std::endl;
+
+  for (int j = 0; j < data_size; j++) {
+    for (int i = 0; i < 3; i++) {
+      angles[i][j] = atan2(v[j * 18 + i * 8 + 1], v[j * 18 + i * 8]);
+    }
   }
   stream.close();
   return angles;

@@ -1,6 +1,7 @@
 #include "../../../lib/cpu/include/abelian_projection_su3.h"
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
+#include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/loop.h"
 #include "../../../lib/cpu/include/mag.h"
@@ -25,10 +26,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 36;
-  y_size = 36;
-  z_size = 36;
-  t_size = 36;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   cout.precision(17);
 
@@ -36,8 +37,8 @@ int main(int argc, char *argv[]) {
 
   // string path_abelian = "../../confs/su3/gluodynamics/36^4/beta6.3/"
   //                       "CONF0001";
-  string path_abelian = "../../confs/su3/mag/gluodynamics/36^4/beta6.3/"
-                        "CONFDP_gaugefixed_0001";
+  // string path_abelian = "../../confs/su3/mag/gluodynamics/36^4/beta6.3/"
+  //                       "CONFDP_gaugefixed_0001";
   // string path_abelian =
   //     "../../confs/su3/Landau_U1xU1/gluodynamics/32^4/beta6.2/"
   //     "conf_Landau_gaugefixed_0001";
@@ -46,12 +47,30 @@ int main(int argc, char *argv[]) {
   //     "../../confs/su3/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
   // string path_abelian = "../../confs/su3/140MeV/nt6/conf.0501";
 
+  // string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopole_24_0001";
+  string path_abelian =
+      "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+      "test/result/conf_monopoless_24_0001";
+
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
-  conf.read_double_qc2dstag(path_abelian);
+  // conf.read_double_qc2dstag(path_abelian);
+  // conf.read_double(path_abelian, 0);
   // conf.read_ildg(path_abelian);
   // conf.read_double_convert_abelian(path_abelian, 0);
-  vector<vector<double>> angles = make_angles_SU3(conf.array);
+  // vector<vector<double>> angles = conf.array;
+  // vector<vector<double>> angles = make_angles_SU3(conf.array);
+  // vector<vector<double>> angles = read_double_angles_su3(path_abelian);
+  // angles_project(angles);
+  vector<vector<double>> angles = read_double_su3_convet_angles(path_abelian);
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      cout << angles[i][j] << endl;
+    }
+  }
 
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -88,9 +107,9 @@ int main(int argc, char *argv[]) {
   //      << endl;
   // cout << "mult " << (lambda8 * conf.array[0]) * lambda8 << endl;
 
-  cout << "mag_su3 functional " << mag_functional_su3(conf.array) << endl;
+  // cout << "mag_su3 functional " << mag_functional_su3(conf.array) << endl;
 
-  for (int color = 0; color < angles.size(); color++) {
+  for (int color = 0; color < 3; color++) {
 
     vector<double> J = calculate_current(angles[color]);
     // vector<int> J = calculate_current_singular(angles[color]);
@@ -116,9 +135,6 @@ int main(int argc, char *argv[]) {
       lengths_mu = length_mu(LL[i]);
 
       currents = currents_directions(LL[i]);
-
-      cout << "length " << length << " currents " << currents[0] << " "
-           << currents[1] << endl;
 
       space_length += currents[0];
       time_length += currents[1];
@@ -168,6 +184,7 @@ int main(int argc, char *argv[]) {
       cout << it->first << " " << it->second << "\n";
     }
 
-    cout << "length ratio " << 1. * space_length / time_length << endl;
+    cout << "length ratio " << 1. * space_length / time_length / 3 << endl;
+    cout << endl;
   }
 }

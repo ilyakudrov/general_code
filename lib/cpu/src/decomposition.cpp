@@ -30,7 +30,7 @@ std::vector<double> read_double_angles(std::string &file_name, int bites_skip) {
   std::ifstream stream(file_name);
   stream.ignore(bites_skip);
   if (!stream.read((char *)&angles[0], (data_size) * sizeof(double)))
-    std::cout << "read_double<abelian> error: " << file_name << std::endl;
+    std::cout << "read_double_angles error: " << file_name << std::endl;
   return angles;
 }
 
@@ -39,16 +39,32 @@ void write_double_angles(std::string &file_name, std::vector<double> &angles) {
 
   std::ofstream stream(file_name);
   if (!stream.write((char *)&angles[0], (data_size) * sizeof(double)))
-    std::cout << "write_double<abelian> error: " << file_name << std::endl;
+    std::cout << "write_double_angles error: " << file_name << std::endl;
+}
+
+std::vector<std::vector<double>>
+read_double_angles_su3(std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<std::vector<double>> angles(3, std::vector<double>(data_size));
+
+  std::ifstream stream(file_name);
+  for (int i = 0; i < 3; i++) {
+    if (!stream.read((char *)&angles[i][0], (data_size) * sizeof(double)))
+      std::cout << "read_double_angles_su3 error: " << file_name << std::endl;
+  }
+  return angles;
 }
 
 void write_double_angles_su3(std::string &file_name,
-                             std::vector<double> &angles) {
+                             std::vector<std::vector<double>> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ofstream stream(file_name);
-  if (!stream.write((char *)&angles[0], (data_size) * sizeof(double)))
-    std::cout << "write_double<abelian> error: " << file_name << std::endl;
+  for (int i = 0; i < 3; i++) {
+    if (!stream.write((char *)&angles[i][0], (data_size) * sizeof(double)))
+      std::cout << "write_double_angles_su3 error: " << file_name << std::endl;
+  }
 }
 
 void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
@@ -56,6 +72,14 @@ void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
   std::ofstream stream(file_name);
   if (!stream.write((char *)&conf_su2[0], data_size * 4 * sizeof(double)))
     std::cout << "write_double_su2 error: " << file_name << std::endl;
+  stream.close();
+}
+
+void write_double_su3(std::string &file_name, std::vector<su3> &conf_su3) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ofstream stream(file_name);
+  if (!stream.write((char *)&conf_su3[0], data_size * 18 * sizeof(double)))
+    std::cout << "write_double_su3 error: " << file_name << std::endl;
   stream.close();
 }
 
@@ -115,6 +139,24 @@ void get_monopoless_optimized(std::vector<su2> &conf_su2,
     A = su2(cos(angles_monopole[i]), 0, 0, sin(angles_monopole[i]));
 
     conf_su2[i] = conf_su2[i] * A;
+  }
+}
+
+void get_monopoless_optimized_su3(
+    std::vector<su3> &conf_su3,
+    std::vector<std::vector<double>> &angles_monopole) {
+  su3 A;
+
+  double module;
+
+  for (int i = 0; i < conf_su3.size(); i++) {
+    A = su3();
+    for (int j = 0; j < 3; j++) {
+      A.matrix[j][j] =
+          complex_t(cos(angles_monopole[j][i]), sin(angles_monopole[j][i]));
+    }
+
+    conf_su3[i] = conf_su3[i] * A;
   }
 }
 
@@ -644,10 +686,6 @@ std::vector<double> make_monopole_angles(std::vector<double> &angles,
 
   monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
                                      monopole_coordinate);
-
-  for (int i = 0; i < 4; i++) {
-    std::cout << monopole_difference[i].size() << std::endl;
-  }
 
   for (int mu = 0; mu < monopole_plaket.size(); mu++) {
     monopole_plaket[mu].clear();
