@@ -174,10 +174,6 @@ int main(int argc, char **argv) {
 
     double asymmetry = (space_currents / 3. - time_currents) /
                        (space_currents / 3. + time_currents);
-    cout << "test " << space_currents / 3. << endl;
-    cout << "test " << time_currents << endl;
-    cout << "test " << space_currents / 3. - time_currents << endl;
-    cout << "test " << space_currents / 3. + time_currents << endl;
 
     output_stream_monopoles << color + 1 << "," << asymmetry << endl;
   }
