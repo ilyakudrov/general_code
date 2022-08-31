@@ -50,9 +50,13 @@ int main(int argc, char *argv[]) {
   // string path_abelian =
   //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
   //     "test/result/conf_monopole_24_0001";
-  string path_abelian =
-      "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-      "test/result/conf_monopoless_24_0001";
+  // string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopoless_24_0001";
+  // string path_abelian = "../../confs/decomposed/monopole/gluodynamics/24^4/"
+  //                       "beta6.0/conf_monopole_0001";
+  string path_abelian = "../../confs/decomposed/monopoless/gluodynamics/24^4/"
+                        "beta6.0/conf_monopoless_0001";
 
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
@@ -66,11 +70,11 @@ int main(int argc, char *argv[]) {
   // angles_project(angles);
   vector<vector<double>> angles = read_double_su3_convet_angles(path_abelian);
 
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      cout << angles[i][j] << endl;
-    }
-  }
+  // for (int i = 0; i < 3; i++) {
+  //   for (int j = 0; j < 3; j++) {
+  //     cout << angles[i][j] << endl;
+  //   }
+  // }
 
   link1 link(x_size, y_size, z_size, t_size);
 

@@ -25,7 +25,8 @@ int main(int argc, char **argv) {
   string path_conf;
   string conf_format;
   int bytes_skip = 0;
-  string path_output_clusters;
+  string path_output_clusters_unwrapped;
+  string path_output_clusters_wrapped;
   string path_output_windings;
   string path_output_monopoles;
 
@@ -35,8 +36,10 @@ int main(int argc, char **argv) {
       conf_format = argv[++i];
     } else if (string(argv[i]) == "-path_conf") {
       path_conf = argv[++i];
-    } else if (string(argv[i]) == "-path_output_clusters") {
-      path_output_clusters = argv[++i];
+    } else if (string(argv[i]) == "-path_output_clusters_unwrapped") {
+      path_output_clusters_unwrapped = argv[++i];
+    } else if (string(argv[i]) == "-path_output_clusters_wrapped") {
+      path_output_clusters_wrapped = argv[++i];
     } else if (string(argv[i]) == "-path_output_windings") {
       path_output_windings = argv[++i];
     } else if (string(argv[i]) == "-path_output_monopoles") {
@@ -59,7 +62,10 @@ int main(int argc, char **argv) {
   cout << "conf_format " << conf_format << endl;
   cout << "bytes_skip " << bytes_skip << endl;
 
-  cout << "path_output_clusters " << path_output_clusters << endl;
+  cout << "path_output_clusters_unwrapped " << path_output_clusters_unwrapped
+       << endl;
+  cout << "path_output_clusters_wrapped " << path_output_clusters_wrapped
+       << endl;
   cout << "path_output_windings " << path_output_windings << endl;
   cout << "path_output_monopoles " << path_output_monopoles << endl;
 
@@ -89,13 +95,17 @@ int main(int argc, char **argv) {
   vector<vector<double>> angles = make_angles_SU3(conf_su3.array);
   conf_su3.array.erase(conf_su3.array.begin(), conf_su3.array.end());
 
-  std::ofstream output_stream_clusters(path_output_clusters);
+  std::ofstream output_stream_clusters_unwrapped(
+      path_output_clusters_unwrapped);
+  std::ofstream output_stream_clusters_wrapped(path_output_clusters_wrapped);
   std::ofstream output_stream_windings(path_output_windings);
   std::ofstream output_stream_monopoles(path_output_monopoles);
 
-  output_stream_clusters << "color,length,number" << endl;
-  output_stream_windings << "color,length,number,type" << endl;
-  output_stream_monopoles << "" << endl;
+  output_stream_clusters_unwrapped << "color,length,number" << endl;
+  output_stream_clusters_wrapped << "color,length,number" << endl;
+  output_stream_windings << "color,winding_number,cluster_number,direction"
+                         << endl;
+  output_stream_monopoles << "color,asymmetry" << endl;
 
   for (int color = 0; color < angles.size(); color++) {
 
@@ -104,46 +114,76 @@ int main(int argc, char **argv) {
 
     int length;
 
-    map<int, int> lengths;
+    map<int, int> lengths_unwrapped;
+    map<int, int> lengths_wrapped;
     map<int, int> space_windings;
     map<int, int> time_windings;
     vector<int> lengths_mu;
     int length_mu_test;
     vector<int> currents;
 
+    int space_currents = 0;
+    int time_currents = 0;
+
     for (int i = 0; i < LL.size(); i++) {
       length = cluster_length(LL[i]);
-      lengths[length]++;
       lengths_mu = length_mu(LL[i]);
+
+      currents = currents_directions(LL[i]);
+
+      space_currents += currents[0];
+      time_currents += currents[1];
 
       for (int j = 0; j < 3; j++) {
         if (lengths_mu[j] != 0) {
-          space_windings[abs(lengths_mu[j])]++;
+          space_windings[abs(lengths_mu[j]) / x_size]++;
         }
       }
 
       if (lengths_mu[3] != 0) {
-        time_windings[abs(lengths_mu[3])]++;
+        time_windings[abs(lengths_mu[3]) / t_size]++;
       }
+
+      if (lengths_mu[3] == 0)
+        lengths_unwrapped[length]++;
+      else if (lengths_mu[3] != 0)
+        lengths_wrapped[length]++;
     }
 
-    for (auto it = lengths.cbegin(); it != lengths.cend(); ++it) {
-      output_stream_clusters << color + 1 << "," << it->first << ","
-                             << it->second << endl;
+    for (auto it = lengths_unwrapped.cbegin(); it != lengths_unwrapped.cend();
+         ++it) {
+      output_stream_clusters_unwrapped << color + 1 << "," << it->first << ","
+                                       << it->second << endl;
     }
 
-    for (auto it = space_windings.begin(); it != space_windings.end(); ++it) {
-      output_stream_windings << color + 1 << "," << it->first << " "
-                             << it->second << ",space" << endl;
+    for (auto it = lengths_wrapped.cbegin(); it != lengths_wrapped.cend();
+         ++it) {
+      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
+                                     << it->second << endl;
     }
 
     for (auto it = time_windings.begin(); it != time_windings.end(); ++it) {
-      output_stream_windings << color + 1 << "," << it->first << " "
+      output_stream_windings << color + 1 << "," << it->first << ","
                              << it->second << ",time" << endl;
     }
+
+    for (auto it = space_windings.begin(); it != space_windings.end(); ++it) {
+      output_stream_windings << color + 1 << "," << it->first << ","
+                             << it->second << ",space" << endl;
+    }
+
+    double asymmetry = (space_currents / 3. - time_currents) /
+                       (space_currents / 3. + time_currents);
+    cout << "test " << space_currents / 3. << endl;
+    cout << "test " << time_currents << endl;
+    cout << "test " << space_currents / 3. - time_currents << endl;
+    cout << "test " << space_currents / 3. + time_currents << endl;
+
+    output_stream_monopoles << color + 1 << "," << asymmetry << endl;
   }
 
-  output_stream_clusters.close();
+  output_stream_clusters_unwrapped.close();
+  output_stream_clusters_wrapped.close();
   output_stream_windings.close();
   output_stream_monopoles.close();
 }
