@@ -12,11 +12,29 @@ struct complex_t {
 
   double module();
 
+  double norm2();
+
   double angle();
+
+  complex_t conj();
 
   complex_t negative();
 
   complex_t mult_by_imag(double x);
+
+  complex_t sqrt_complex();
+
+  complex_t &operator+=(const complex_t &a);
+
+  complex_t &operator-=(const complex_t &a);
+
+  complex_t &operator*=(const complex_t &a);
+
+  complex_t &operator*=(const double &a);
+
+  complex_t &operator/=(const complex_t &a);
+
+  complex_t &operator/=(const double &a);
 };
 
 complex_t operator+(const complex_t &a, const complex_t &b);
@@ -36,6 +54,8 @@ complex_t operator%(const complex_t &a, const complex_t &b);
 complex_t operator&(const complex_t &a, const complex_t &b);
 
 complex_t operator/(const complex_t &a, const double &b);
+
+complex_t operator/(const complex_t &a, const complex_t &b);
 
 std::ostream &operator<<(std::ostream &os, const complex_t &a);
 
@@ -65,6 +85,8 @@ public:
 
   // left and right multiplication of the matrix on sigma[3] matrix
   su2 sigma3_mult() const;
+
+  su2 &operator+=(const su2 &A);
 };
 
 su2 operator+(const su2 &A, const su2 &B);

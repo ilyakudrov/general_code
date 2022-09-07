@@ -1,12 +1,15 @@
 #!/bin/bash
-conf_format_wilson=double
+conf_format_wilson="double_qc2dstag"
 # conf_path_wilson="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
-conf_path_wilson="../../../tests/confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001"
+# conf_path_wilson="../../../tests/confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001"
+conf_path_wilson="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
 bytes_skip_wilson=0
-wilson_type="abelian"
-conf_format_plaket=double
-conf_path_plaket="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
-bytes_skip_plaket=8
+wilson_type="su3"
+conf_format_plaket="double_qc2dstag"
+# conf_path_plaket="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
+conf_path_plaket="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
+bytes_skip_plaket=0
+plaket_type="su3"
 HYP_alpha1=0.75
 HYP_alpha2=0.6
 HYP_alpha3=0.3
@@ -36,4 +39,4 @@ parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_p
     -T_min ${T_min} -T_max ${T_max} -R_min ${R_min} -R_max ${R_max} -calculation_step_APE ${calculation_step_APE}\
     -calculation_APE_start ${calculation_APE_start}"
 
-../smearing_${wilson_type}_su2_test ${parameters}
+../smearing_${wilson_type}_${plaket_type}_test ${parameters}
