@@ -1482,3 +1482,88 @@ template double plaket_time_parallel(std::vector<std::vector<su3>> conf);
 template double plaket_space_parallel(std::vector<std::vector<su3>> conf);
 
 template double plaket_parallel(std::vector<std::vector<su3>> conf);
+
+// su3_abelian
+template double plaket_time(const std::vector<su3_abelian> &array);
+template double plaket_space(const std::vector<su3_abelian> &array);
+template double plaket(const std::vector<su3_abelian> &array);
+template std::vector<double> wilson(const std::vector<su3_abelian> &array,
+                                    int r_min, int r_max, int time_min,
+                                    int time_max);
+template std::vector<su3_abelian>
+wilson_lines(const std::vector<su3_abelian> &array, int mu, int length);
+template std::vector<su3_abelian>
+wilson_line_increase(const std::vector<su3_abelian> &array,
+                     const std::vector<su3_abelian> &lines, int mu, int length);
+template std::vector<wilson_result>
+wilson_offaxis(const std::vector<su3_abelian> &array,
+               const std::vector<std::vector<int>> directions, double r_min,
+               double r_max, int time_min, int time_max);
+template std::vector<wilson_result>
+wilson_offaxis_adjoint(const std::vector<su3_abelian> &array,
+                       const std::vector<std::vector<int>> directions,
+                       double r_min, double r_max, int time_min, int time_max);
+template double
+calculate_wilson_loop_offaxis(const std::vector<su3_abelian> &time_lines,
+                              int time,
+                              const std::vector<su3_abelian> &space_lines,
+                              const std::vector<int> &direction);
+template double calculate_wilson_loop_offaxis_adjoint(
+    const std::vector<su3_abelian> &time_lines, int time,
+    const std::vector<su3_abelian> &space_lines,
+    const std::vector<int> &direction);
+template std::vector<su3_abelian>
+wilson_lines_offaxis(const std::vector<su3_abelian> &array,
+                     const std::vector<int> pattern);
+template std::vector<su3_abelian>
+wilson_lines_offaxis_increase(const std::vector<su3_abelian> &array,
+                              const std::vector<su3_abelian> &lines1,
+                              const std::vector<int> pattern,
+                              const std::vector<int> direction);
+template double polyakov(const std::vector<su3_abelian> &array);
+template std::vector<double>
+calculate_polyakov_loops(const std::vector<su3_abelian> &array);
+template std::map<int, double>
+polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_min,
+                         int D_max);
+template std::vector<su3_abelian>
+wilson_lines_single(const std::vector<su3_abelian> &array, int length);
+template double wilson_loop_single_size(std::vector<su3_abelian> lines1,
+                                        std::vector<su3_abelian> lines2, int mu,
+                                        int nu, int r1, int r2);
+template std::map<std::tuple<int, int>, double>
+wilson_spatial(const std::vector<su3_abelian> &array,
+               std::map<std::tuple<int, int>, std::vector<su3_abelian>> smeared,
+               int time_min, int time_max, int r_min, int r_max);
+
+template std::vector<std::vector<su3_abelian>>
+separate_wilson(std::vector<su3_abelian> &conf);
+
+template std::vector<su3_abelian>
+wilson_lines(std::vector<su3_abelian> separated, int length, int size1,
+             int size2);
+
+template double wilson_plane(std::vector<su3_abelian> &wilson_lines_mu,
+                             std::vector<su3_abelian> &wilson_lines_nu,
+                             int size_mu1, int size_mu2, int size_nu1,
+                             int size_nu2, int length_mu, int length_nu);
+
+template double
+wilson_loop_test_time(std::vector<std::vector<su3_abelian>> &wilson_lines,
+                      int length_R, int length_T);
+
+template std::map<std::tuple<int, int>, double>
+wilson_parallel(std::vector<std::vector<su3_abelian>> conf, int r_min,
+                int r_max, int time_min, int time_max);
+
+template double plaket_plane(std::vector<su3_abelian> &conf_mu,
+                             std::vector<su3_abelian> &conf_nu, int size_mu1,
+                             int size_mu2, int size_nu1, int size_nu2);
+
+template double
+plaket_time_parallel(std::vector<std::vector<su3_abelian>> conf);
+
+template double
+plaket_space_parallel(std::vector<std::vector<su3_abelian>> conf);
+
+template double plaket_parallel(std::vector<std::vector<su3_abelian>> conf);

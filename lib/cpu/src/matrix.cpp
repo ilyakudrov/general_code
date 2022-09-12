@@ -797,6 +797,159 @@ std::ostream &operator<<(std::ostream &os, const su3 &A) {
   return os;
 }
 
+// su3_abelian methods
+su3_abelian::su3_abelian(complex_t B[3]) {
+  for (int i = 0; i < 3; i++) {
+    matrix[i] = B[i];
+  }
+}
+
+su3_abelian::su3_abelian() {
+  for (int i = 0; i < 3; i++) {
+    matrix[i] = complex_t(1, 0);
+  }
+}
+
+double su3_abelian::tr() {
+  return (matrix[0].real + matrix[1].real + matrix[2].real) / 3;
+}
+
+double su3_abelian::multiply_tr(const su3_abelian &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    trace +=
+        matrix[i].real * B.matrix[i].real + matrix[i].imag * B.matrix[i].imag;
+  }
+  return trace / 3;
+}
+
+su3_abelian su3_abelian::inverse() {
+  su3_abelian B;
+  for (int i = 0; i < 3; i++) {
+    B.matrix[i].real = matrix[i].real;
+    B.matrix[i].imag = -matrix[i].imag;
+  }
+  return B;
+}
+
+double su3_abelian::module() {
+  complex_t tmp = matrix[0] * matrix[1];
+  return tmp.real * matrix[2].real - tmp.imag * matrix[2].imag;
+}
+
+complex_t su3_abelian::determinant() {
+  return matrix[0] * matrix[1] * matrix[2];
+}
+
+su3_abelian su3_abelian::conj() const {
+  su3_abelian B;
+  for (int i = 0; i < 3; i++) {
+    B.matrix[i].real = matrix[i].real;
+    B.matrix[i].imag = -matrix[i].imag;
+  }
+  return B;
+}
+
+su3_abelian su3_abelian::mult_by_imag(double x) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = matrix[i].mult_by_imag(x);
+  }
+  return C;
+}
+
+su3_abelian su3_abelian::proj() {
+  su3_abelian A;
+  for (int i = 0; i < 3; i++) {
+    A.matrix[i] = matrix[i] / matrix[i].module();
+  }
+
+  return A;
+}
+
+su3_abelian operator+(const su3_abelian &A, const su3_abelian &B) {
+  su3_abelian C;
+  complex_t a;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i] + B.matrix[i];
+  }
+  return C;
+}
+su3_abelian operator-(const su3_abelian &A, const su3_abelian &B) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i] - B.matrix[i];
+  }
+  return C;
+}
+su3_abelian operator*(const double &x, const su3_abelian &A) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = x * A.matrix[i];
+  }
+  return C;
+}
+su3_abelian operator*(const su3_abelian &A, const double &x) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = x * A.matrix[i];
+  }
+  return C;
+}
+su3_abelian operator*(const complex_t &x, const su3_abelian &A) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = x * A.matrix[i];
+  }
+  return C;
+}
+su3_abelian operator*(const su3_abelian &A, const complex_t &x) {
+  su3_abelian C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = x * A.matrix[i];
+  }
+  return C;
+}
+
+su3_abelian operator*(const su3_abelian &A, const su3_abelian &B) {
+  su3_abelian C;
+
+  C.matrix[0] = A.matrix[0] * B.matrix[0];
+  C.matrix[1] = A.matrix[1] * B.matrix[1];
+  C.matrix[2] = A.matrix[2] * B.matrix[2];
+
+  return C;
+}
+
+su3_abelian operator^(const su3_abelian &A, const su3_abelian &B) {
+  su3_abelian C;
+
+  C.matrix[0] = A.matrix[0] ^ B.matrix[0];
+  C.matrix[1] = A.matrix[1] ^ B.matrix[1];
+  C.matrix[2] = A.matrix[2] ^ B.matrix[2];
+
+  return C;
+}
+
+su3_abelian operator%(const su3_abelian &A, const su3_abelian &B) {
+  su3_abelian C;
+
+  C.matrix[0] = A.matrix[0] % B.matrix[0];
+  C.matrix[1] = A.matrix[1] % B.matrix[1];
+  C.matrix[2] = A.matrix[2] % B.matrix[2];
+
+  return C;
+}
+
+std::ostream &operator<<(std::ostream &os, const su3_abelian &A) {
+  for (int i = 0; i < 3; i++) {
+    os << "(" << A.matrix[i].real << ", " << A.matrix[i].imag << ") ";
+  }
+  os << std::endl;
+  return os;
+}
+
+// spin methods
 spin::spin() {
   a1 = (double)0.0;
   a2 = (double)0.0;

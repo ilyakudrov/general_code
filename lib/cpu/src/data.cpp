@@ -94,6 +94,25 @@ template <> void data<su3>::read_float(std::string &file_name, int bites_skip) {
 }
 
 template <>
+void data<su3_abelian>::read_float(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::ifstream stream(file_name);
+  std::vector<float> v(data_size * 4);
+
+  array.resize(data_size);
+
+  for (int i = 0; i < 3; i++) {
+    if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
+      std::cout << "read_float<su3_abelian> error: " << file_name << std::endl;
+
+    for (int j = 0; j < data_size; j++) {
+      array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
+    }
+  }
+}
+
+template <>
 void data<abelian>::read_double(std::string &file_name, int bites_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
@@ -166,6 +185,25 @@ void data<su3>::read_double(std::string &file_name, int bites_skip) {
     }
   }
   stream.close();
+}
+
+template <>
+void data<su3_abelian>::read_double(std::string &file_name, int bites_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size * 4);
+
+  array.resize(data_size);
+
+  for (int i = 0; i < 3; i++) {
+    if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
+      std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
+
+    for (int j = 0; j < data_size; j++) {
+      array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
+    }
+  }
 }
 
 double reverseValue(const char *data) {
@@ -408,7 +446,14 @@ template <> void data<su3>::read_double_qc2dstag(std::string &file_name) {
 }
 
 template <> void data<abelian>::read_double_qc2dstag(std::string &file_name) {
-  std::cout << "there's no reason for implementation" << std::endl;
+  std::cout << "there's no implementation implementation for abelian"
+            << std::endl;
+}
+
+template <>
+void data<su3_abelian>::read_double_qc2dstag(std::string &file_name) {
+  std::cout << "there's no implementation implementation for su3_abelian"
+            << std::endl;
 }
 
 template <> void data<su2>::write_float(std::string &file_name) {
@@ -481,3 +526,4 @@ template <> void data<abelian>::write_double(std::string &file_name) {
 template class data<su2>;
 template class data<abelian>;
 template class data<su3>;
+template class data<su3_abelian>;

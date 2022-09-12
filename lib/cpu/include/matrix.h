@@ -192,6 +192,62 @@ su3 operator%(const su3 &A, const su3 &B);
 
 std::ostream &operator<<(std::ostream &os, const su3 &A);
 
+// diagonal su3 matrix
+class su3_abelian {
+public:
+  complex_t matrix[3];
+  su3_abelian(complex_t B[3]);
+  su3_abelian();
+
+  // calculate trace of the matrix
+  double tr();
+
+  double multiply_tr(const su3_abelian &B);
+
+  // calculate inverse of the matrix
+  su3_abelian inverse();
+
+  // calculate conjugate of the matrix
+  su3_abelian conj() const;
+
+  su3_abelian mult_by_imag(double x);
+
+  // gets projection onto su3 group
+  su3_abelian proj();
+
+  // muliply from left and right by lambda3
+  su3_abelian lambda3_mult();
+
+  // muliply from left and right by lambda8
+  su3_abelian lambda8_mult();
+
+  // calculates module of vector in sigma matrices representation
+  double module();
+
+  complex_t determinant();
+
+  complex_t unitarity_check();
+};
+
+su3_abelian operator+(const su3_abelian &A, const su3_abelian &B);
+su3_abelian operator-(const su3_abelian &A, const su3_abelian &B);
+su3_abelian operator*(const double &x, const su3_abelian &A);
+su3_abelian operator*(const su3_abelian &A, const double &x);
+
+su3_abelian operator*(const complex_t &x, const su3_abelian &A);
+su3_abelian operator*(const su3_abelian &A, const complex_t &x);
+
+// matrix multiplication A * B
+su3_abelian operator*(const su3_abelian &A, const su3_abelian &B);
+
+// matrix multiplication A * B.conj()
+su3_abelian operator^(const su3_abelian &A, const su3_abelian &B);
+
+// matrix multiplication A.conj() * B
+su3_abelian operator%(const su3_abelian &A, const su3_abelian &B);
+
+std::ostream &operator<<(std::ostream &os, const su3_abelian &A);
+
 // 3D vector realisation for spin model.
 class spin {
 public:

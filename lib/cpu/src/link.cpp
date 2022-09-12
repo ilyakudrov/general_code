@@ -702,3 +702,39 @@ template double link1::field3(const std::vector<su3> &polyakov_loop, int D,
                               int x);
 
 template const su3 *link1::get_matrix(const std::vector<su3> &array);
+
+// su3_abelian
+template su3_abelian link1::plaket_mu(const std::vector<su3_abelian> &array,
+                                      int mu);
+template su3_abelian
+link1::plaket_schwinger_average(const std::vector<su3_abelian> &array, int mu);
+template su3_abelian
+link1::schwinger_line(const std::vector<su3_abelian> &array, int d, int dir,
+                      int x);
+template su3_abelian
+link1::polyakov_loop(const std::vector<su3_abelian> &array);
+template su3_abelian link1::wilson_loop(const std::vector<su3_abelian> &array,
+                                        int r, int t);
+template su3_abelian
+link1::wilson_loop_schwinger(const std::vector<su3_abelian> &array, int r,
+                             int t);
+template su3_abelian link1::wilson_line(const std::vector<su3_abelian> &array,
+                                        int length);
+template su3_abelian
+link1::wilson_line_single(const std::vector<su3_abelian> &array, int length);
+template su3_abelian
+link1::wilson_line_offaxis(const std::vector<su3_abelian> &array,
+                           const std::vector<int> &pattern);
+template double
+link1::field1(const std::vector<std::vector<su3_abelian>> &schwinger_line,
+              const std::vector<su3_abelian> &plaket,
+              const std::vector<su3_abelian> &polyakov_loop, int d, int D,
+              int dir, int x);
+template double link1::field2(const std::vector<su3_abelian> &plaket,
+                              const std::vector<su3_abelian> &polyakov_loop,
+                              int d, int D, int dir, int x);
+template double link1::field3(const std::vector<su3_abelian> &polyakov_loop,
+                              int D, int x);
+
+template const su3_abelian *
+link1::get_matrix(const std::vector<su3_abelian> &array);

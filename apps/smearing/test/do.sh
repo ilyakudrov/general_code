@@ -1,11 +1,11 @@
 #!/bin/bash
-conf_format_wilson="double_qc2dstag"
-# conf_path_wilson="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
-# conf_path_wilson="../../../tests/confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001"
-conf_path_wilson="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
+conf_format_wilson="double"
+# conf_path_wilson="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
+# conf_path_wilson="../../../tests/confs/decomposed/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001"
+conf_path_wilson="../../../tests/confs/decomposed/monopole/gluodynamics/24^4/beta6.0/conf_monopole_0001"
 bytes_skip_wilson=0
-wilson_type="su3"
-conf_format_plaket="double_qc2dstag"
+wilson_type="su3_abelian"
+conf_format_plaket="double"
 # conf_path_plaket="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
 conf_path_plaket="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
 bytes_skip_plaket=0

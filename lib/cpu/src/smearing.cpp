@@ -1422,3 +1422,104 @@ template void smearing_plane_HYP_major(std::vector<su3> &smeared,
 
 template void smearing_HYP_new(std::vector<std::vector<su3>> &conf,
                                double alpha1, double alpha2, double alpha3);
+
+// su3_abelian
+template su3_abelian staples_first(const std::vector<su3_abelian> &vec,
+                                   link1 &link, int eta);
+template su3_abelian
+staples_second(const std::vector<std::vector<su3_abelian>> &smearing_first,
+               link1 &link, std::unordered_map<int, int> &indexes, int rho,
+               int mu, int nu);
+template su3_abelian
+staples_second_refresh(const std::vector<su3_abelian> &vec, link1 &link,
+                       int eta, int nu,
+                       double alpha3); // staples for refreshing
+                                       // algorythm(refresh link every step)
+template su3_abelian
+staples_third(const std::vector<std::vector<su3_abelian>> &smearing_second,
+              link1 &link, std::unordered_map<int, int> indexes, int nu,
+              int mu);
+template su3_abelian staples_third_refresh(const std::vector<su3_abelian> &vec,
+                                           link1 &link, int eta, double alpha2,
+                                           double alpha3);
+template std::vector<su3_abelian>
+smearing_first(const std::vector<su3_abelian> &array, double alpha3, int mu,
+               int nu, int rho);
+template std::vector<std::vector<su3_abelian>>
+smearing_first_full(const std::vector<su3_abelian> &array, double alpha3);
+template std::vector<su3_abelian>
+smearing_second(const std::vector<su3_abelian> &array,
+                std::vector<std::vector<su3_abelian>> &smearing_first,
+                double alpha2, int mu, int nu);
+template std::vector<std::vector<su3_abelian>>
+smearing_second_full(const std::vector<su3_abelian> &array,
+                     std::vector<std::vector<su3_abelian>> &smearing_first,
+                     double alpha2);
+template std::vector<su3_abelian>
+smearing_HYP(const std::vector<su3_abelian> &array,
+             std::vector<std::vector<su3_abelian>> &smearing_second,
+             double alpha1);
+template std::vector<su3_abelian>
+smearing_APE(const std::vector<su3_abelian> &array, double alpha_APE);
+template std::vector<su3_abelian>
+smearing1_APE(const std::vector<su3_abelian> &array, double alpha_APE);
+template std::map<std::tuple<int, int>, std::vector<su3_abelian>>
+smearing_APE_2d(const std::vector<su3_abelian> &array, double alpha_APE);
+template void smearing_APE_2d_continue(
+    std::map<std::tuple<int, int>, std::vector<su3_abelian>> &smeared,
+    double alpha_APE);
+template void smearing_APE_2d_continue_plane(
+    std::map<std::tuple<int, int>, std::vector<su3_abelian>> &smeared, int mu,
+    double alpha_APE);
+template su3_abelian staples_2d_continue(std::vector<su3_abelian> &array1,
+                                         std::vector<su3_abelian> &array2,
+                                         link1 &link, int i, int j);
+template su3_abelian
+smearing_first_refresh(const std::vector<su3_abelian> &vec, link1 &link, int nu,
+                       int rho,
+                       double alpha3); // refresh link every step
+template su3_abelian
+smearing_second_refresh(const std::vector<su3_abelian> &vec, link1 &link,
+                        int nu, double alpha2,
+                        double alpha3); // refresh link every step
+template std::vector<su3_abelian>
+smearing_HYP_refresh(data<su3_abelian> &conf, double alpha1, double alpha2,
+                     double alpha3); // refresh link every step
+template std::vector<su3_abelian>
+smearing_APE_refresh(data<su3_abelian> &conf,
+                     double alpha_APE); // refresh link every step
+
+template std::vector<std::vector<su3_abelian>>
+separate_smearing(std::vector<su3_abelian> &conf);
+
+template void smearing_plane_minor(std::vector<su3_abelian> &smeared,
+                                   std::vector<su3_abelian> &conf_mu,
+                                   std::vector<su3_abelian> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+
+template void smearing_plane_major(std::vector<su3_abelian> &smeared,
+                                   std::vector<su3_abelian> &conf_mu,
+                                   std::vector<su3_abelian> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+
+template void smearing_APE_new(std::vector<std::vector<su3_abelian>> &conf,
+                               double alpha);
+
+template void smearing_plane_HYP_minor(std::vector<su3_abelian> &smeared,
+                                       std::vector<su3_abelian> &conf_mu,
+                                       std::vector<su3_abelian> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha,
+                                       double divisor);
+
+template void smearing_plane_HYP_major(std::vector<su3_abelian> &smeared,
+                                       std::vector<su3_abelian> &conf_mu,
+                                       std::vector<su3_abelian> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha,
+                                       double divisor);
+
+template void smearing_HYP_new(std::vector<std::vector<su3_abelian>> &conf,
+                               double alpha1, double alpha2, double alpha3);

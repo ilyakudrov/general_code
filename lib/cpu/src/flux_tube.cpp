@@ -1084,3 +1084,52 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<su3>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
                          int transverse_coordinate, std::string direction);
+
+// su3_abelian
+template std::map<int, double>
+wilson_plaket_schwinger_electric(const std::vector<su3_abelian> &array,
+                                 const std::vector<su3_abelian> &plaket,
+                                 int d_min, int d_max, int t, int r);
+template std::vector<su3_abelian>
+calculate_plaket_schwinger_time(const std::vector<su3_abelian> &array);
+template std::vector<std::vector<su3_abelian>>
+calculate_plaket_schwinger_space(const std::vector<su3_abelian> &array);
+template std::vector<su3_abelian>
+calculate_schwinger_lines_short(const std::vector<su3_abelian> &array, int d);
+template std::vector<std::vector<su3_abelian>>
+calculate_schwinger_line(const std::vector<su3_abelian> &array, int d,
+                         int x_trans);
+template std::vector<double>
+calculate_plaket_time_tr(const std::vector<su3_abelian> &array);
+template std::vector<double>
+calculate_plaket_space_tr(const std::vector<su3_abelian> &array);
+template std::vector<su3_abelian>
+calculate_polyakov_loop(const std::vector<su3_abelian> &array);
+template std::vector<su3_abelian>
+calculate_wilson_loop(const std::vector<su3_abelian> &array, int r, int time);
+template std::vector<double>
+calculate_wilson_loop_tr(const std::vector<su3_abelian> &array, int r,
+                         int time);
+
+template std::vector<double>
+wilson_plane_tr(std::vector<su3_abelian> &wilson_lines_mu,
+                std::vector<su3_abelian> &wilson_lines_nu, int size_mu1,
+                int size_mu2, int size_nu1, int size_nu2, int length_mu,
+                int length_nu);
+
+template std::vector<double> plaket_plane_tr(std::vector<su3_abelian> &conf_mu,
+                                             std::vector<su3_abelian> &conf_nu,
+                                             int size_mu1, int size_mu2,
+                                             int size_nu1, int size_nu2);
+
+template std::vector<double>
+plaket_aver_tr_time(std::vector<std::vector<su3_abelian>> conf);
+template std::vector<double>
+plaket_aver_tr_space(std::vector<std::vector<su3_abelian>> conf);
+
+template std::map<std::tuple<int, int, int>, double>
+wilson_plaket_correlator(std::vector<double> plaket_tr,
+                         std::vector<std::vector<su3_abelian>> &conf_wilson,
+                         int T_min, int T_max, int R_min, int R_max,
+                         int main_coordinate, int transverse_coordinate,
+                         std::string direction);
