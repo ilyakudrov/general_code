@@ -35,26 +35,6 @@ int main(int argc, char *argv[]) {
 
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
-  // string path_abelian = "../../confs/su3/gluodynamics/36^4/beta6.3/"
-  //                       "CONF0001";
-  // string path_abelian = "../../confs/su3/mag/gluodynamics/36^4/beta6.3/"
-  //                       "CONFDP_gaugefixed_0001";
-  // string path_abelian =
-  //     "../../confs/su3/Landau_U1xU1/gluodynamics/32^4/beta6.2/"
-  //     "conf_Landau_gaugefixed_0001";
-
-  // string path_abelian =
-  //     "../../confs/su3/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
-  // string path_abelian = "../../confs/su3/140MeV/nt6/conf.0501";
-
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopole_24_0001";
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopoless_24_0001";
-  // string path_abelian = "../../confs/decomposed/monopole/gluodynamics/24^4/"
-  //                       "beta6.0/conf_monopole_0001";
   string path_abelian = "../../confs/decomposed/monopoless/gluodynamics/24^4/"
                         "beta6.0/conf_monopoless_0001";
 

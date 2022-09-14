@@ -1,15 +1,15 @@
 #!/bin/bash
-path_conf="../../../tests/confs/MA_gauge/su3/gluodynamics/36^4/beta6.3/CONFDP_gaugefixed_0001"
-conf_format=double_qc2dstag
+path_conf="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
+conf_format=double
 path_output_clusters_unwrapped="./result/clusters_unwrapped_36_0001"
 path_output_clusters_wrapped="./result/clusters_wrapped_36_0001"
 path_output_windings="./result/windings_36_0001"
 path_output_monopoles="./result/monopoles_36_0001"
 bytes_skip=0
-x_size=36
-y_size=36
-z_size=36
-t_size=36
+x_size=24
+y_size=24
+z_size=24
+t_size=24
 
 parameters="-path_conf ${path_conf} -conf_format ${conf_format} -path_output_clusters_unwrapped ${path_output_clusters_unwrapped}\
     -path_output_clusters_wrapped ${path_output_clusters_wrapped} -path_output_windings ${path_output_windings} -path_output_monopoles ${path_output_monopoles} \

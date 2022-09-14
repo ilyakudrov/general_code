@@ -31,57 +31,8 @@ int main(int argc, char *argv[]) {
 
   std::cout.precision(17);
 
-  // std::string path_abelian =
-  // "../../confs/abelian/mu0.00/CON_32^3x32_0001.LAT"; string path_abelian =
-  // "../../confs/mon_wl/mu0.00/CON_MON_MAG_031.LAT";
-  // std::string path_abelian =
-  //     "../../confs/MA_gauge/qc2dstag/40^4/mu0.05/s0/conf_abelian_0201";
-  // std::string path_abelian =
-  //     "../../confs/su2_suzuki/32^4/beta2.6/CON_fxd_MAG_001.LAT";
-  // std::string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/monopole_decomposition_su2/test/"
-  //     "result/conf_monopoless";
-  // std::string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/"
-  //     "monopole_decomposition_su2/test/result/conf_monopole1";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
-  // std::string path_abelian = "/home/ilya/soft/lattice/general_code/apps/"
-  //                            "monopole_decomposition_su2/test/result/monopole";
-  // std::string path_abelian =
-  //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
-  // std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
-  //                            "result/monopoless_24^4";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
   std::string path_abelian =
       "../../confs/su2/mag/su2_suzuki/24^4/beta2.4/conf_0001";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopoless/su2_suzuki/24^4/beta2.4/conf_monopoless_0001";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/CON_MON_MAG_035.LAT";
-  // std::string path_abelian = "../../../apps/monopole_decomposition_su2/test/"
-  //                            "result/monopoless_48^4_test";
-  // std::string path_abelian =
-  //     "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
-
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/decomposition/CON_MON_MAG_001.LAT";
-  // std::string path_abelian =
-  // "/home/ilya/soft/lattice/decomposition/test/confs/"
-  //                            "monopole/40^4/conf_monopole_0201";
-  // std::string path_abelian =
-  // "../../confs/decomposed/monopole/qc2dstag/40^4/"
-  //                            "mu0.05/s0/conf_monopole_0203";
-  // std::string path_abelian =
-  // "../../confs/decomposed/monopoless/qc2dstag/40^4/"
-  //                            "mu0.05/s0/conf_monopoless_0201";
 
   data<abelian> conf;
   // data<su2> conf;

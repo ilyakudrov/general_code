@@ -164,13 +164,13 @@ void data<su3>::read_double(std::string &file_name, int bites_skip) {
   long int index = 0;
 
   link1 link(x_size, y_size, z_size, t_size);
-  for (int mu = 0; mu < 4; mu++) {
-    for (int j = 0; j < 3; j++) {
-      for (int k = 0; k < 3; k++) {
-        for (int t = 0; t < t_size; t++) {
-          for (int z = 0; z < z_size; z++) {
-            for (int y = 0; y < y_size; y++) {
-              for (int x = 0; x < x_size; x++) {
+  for (int t = 0; t < t_size; t++) {
+    for (int z = 0; z < z_size; z++) {
+      for (int y = 0; y < y_size; y++) {
+        for (int x = 0; x < x_size; x++) {
+          for (int mu = 0; mu < 4; mu++) {
+            for (int k = 0; k < 3; k++) {
+              for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
 
                 array[link.place + mu].matrix[k][j] =

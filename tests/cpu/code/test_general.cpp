@@ -40,41 +40,10 @@ int main(int argc, char *argv[]) {
 
   link1 link(x_size, y_size, z_size, t_size);
   data<MATRIX_TYPE> conf;
-  // string conf_path = "../../confs/decomposed/test/monopoless";
-  // string conf_path =
-  // "../../confs/decomposed/monopoless/qc2dstag/40^4/mu0.05/"
-  //                    "s0/conf_monopoless_0201";
-  // string conf_path = "../../confs/su2/mag/su2_suzuki/24^4/beta2.4/conf_0001";
-  // string conf_path =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
-  // string conf_path = "../../../apps/monopole_decomposition_su2/test/result/"
-  //                    "monopoless_24^4";
-  // string conf_path =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/CON_MON_MAG_001.LAT";
-  // string conf_path =
-  //     "../../confs/su2/monopoless/su2_suzuki/24^4/beta2.4/conf_monopoless_0001";
-  // string conf_path =
-  //     "../../confs/su2/monopole/su2_suzuki/24^4/beta2.4/conf_monopole_0001";
-  // string conf_path =
-  //     "../../../apps/monopole_decomposition_su2/test/result/monopole_40^4";
-  // string conf_path =
-  //     "../../confs/su2/monopole/qc2dstag/40^4/mu0.00/conf_monopole_0201";
-  // string conf_path =
-  //     "../../confs/su2/monopole/su2_suzuki/48^4/beta2.8/conf_monopole_0035";
-  // string conf_path =
-  //     "../../confs/su2/monopoless/su2_suzuki/48^4/beta2.8/conf_monopoless_0035";
-  // string conf_path = "../../confs/su3/Landau_U1/gluodynamics/24^4/beta6.0/"
-  //                    "conf_Landau_gaugefixed_0001";
-  // string conf_path = "../../confs/su3/gluodynamics/32^4/beta6.2/CONF0001";
-  // string conf_path =
-  //     "../../confs/su3/mag/gluodynamics/32^4/beta6.2/CONFDP_gaugefixed_0001";
-  // string conf_path =
-  // "../../confs/su3/Landau_U1xU1/gluodynamics/32^4/beta6.2/"
-  //                    "conf_Landau_gaugefixed_0001";
-  string conf_path = "../../confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/"
-                     "CONFDP_gaugefixed_0001";
-  // conf.read_double(conf_path, 0);
-  conf.read_double_qc2dstag(conf_path);
+  string conf_path = "../../confs/decomposed/monopoless/gluodynamics/24^4/"
+                     "beta6.0/conf_monopoless_0001";
+  conf.read_double(conf_path, 0);
+  // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 8);
   // conf.read_double_convert_abelian(conf_path, 8);
