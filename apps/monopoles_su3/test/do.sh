@@ -1,10 +1,10 @@
 #!/bin/bash
 path_conf="../../../tests/confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
-conf_format=double
-path_output_clusters_unwrapped="./result/clusters_unwrapped_36_0001"
-path_output_clusters_wrapped="./result/clusters_wrapped_36_0001"
-path_output_windings="./result/windings_36_0001"
-path_output_monopoles="./result/monopoles_36_0001"
+conf_format=double_qc2dstag
+path_output_clusters_unwrapped="./result/clusters_unwrapped_24_0001"
+path_output_clusters_wrapped="./result/clusters_wrapped_24_0001"
+path_output_windings="./result/windings_24_0001"
+path_output_monopoles="./result/monopoles_24_0001"
 bytes_skip=0
 x_size=24
 y_size=24

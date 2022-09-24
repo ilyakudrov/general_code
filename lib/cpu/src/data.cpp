@@ -158,8 +158,7 @@ void data<su3>::read_double(std::string &file_name, int bites_skip) {
 
   stream.ignore(bites_skip);
   if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
-    std::cout << "data<su3_full>::read_double_fortran error: " << file_name
-              << std::endl;
+    std::cout << "data<su3>::read_double error: " << file_name << std::endl;
 
   long int index = 0;
 
@@ -259,7 +258,7 @@ template <> void data<su3>::read_ildg(std::string &file_name) {
         for (int j = 0; j < 3; j++) {
           for (int k = 0; k < 3; k++) {
             place = i * 18 + j * 6 + k * 2;
-            A.matrix[j][k] = complex_t(v[i * 18 + j * 6 + k * 2], v[place + 1]);
+            A.matrix[j][k] = complex_t(v[place], v[place + 1]);
           }
         }
         array.push_back(A);

@@ -33,6 +33,12 @@ std::vector<double> calculate_current(std::vector<double> &angles);
 
 std::vector<int> calculate_current_singular(std::vector<double> &angles);
 
+std::vector<double> calculate_current_monopole_plakets(
+    std::vector<std::vector<double>> monopole_plakets);
+
+std::vector<std::vector<std::vector<double>>>
+make_monopole_plakets(std::vector<std::vector<double>> &angles);
+
 // functions for obtaining information about clusters for testing
 
 void print_currents(loop *ll);

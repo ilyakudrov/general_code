@@ -492,7 +492,7 @@ int link1::monopole_plaket_singular_mu(std::vector<double> &angles, int mu) {
 // }
 
 void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
-                        double *J, std::vector<double> &angles) {
+                        double *J) {
   double j0, j1, j2, j3;
   link1 linkx(*this);
   linkx.move(0, 1);
@@ -555,7 +555,7 @@ void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
 }
 
 void link1::get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
-                                 int *J, std::vector<double> &angles) {
+                                 int *J) {
   link1 linkx(*this);
   linkx.move(0, 1);
   link1 linky(*this);

@@ -1,6 +1,6 @@
 #!/bin/bash
-path_conf="../../../tests/confs/su3/mag/gluodynamics/24^4/beta6.0/CONFDP_gaugefixed_0001"
-conf_format=double_qc2dstag
+path_conf="../../../tests/confs/decomposed/monopoless/gluodynamics/24^4/beta6.0/conf_monopoless_0001"
+conf_format=double
 path_conf_monopole="./result/conf_monopole_24_0001"
 path_conf_monopoless="./result/conf_monopoless_24_0001"
 path_inverse_laplacian="../../../tests/confs/su2/inverse_laplacian/ALPHA24x24_d.LAT"

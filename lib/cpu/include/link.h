@@ -123,11 +123,11 @@ public:
   double monopole_plaket_mu(std::vector<double> &angles, int mu);
   int monopole_plaket_singular_mu(std::vector<double> &angles, int mu);
   int current_test(double *J);
-  void get_current(std::vector<std::vector<double>> &monopole_plaket, double *J,
-                   std::vector<double> &angles);
+  void get_current(std::vector<std::vector<double>> &monopole_plaket,
+                   double *J);
 
   void get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
-                            int *J, std::vector<double> &angles);
+                            int *J);
 };
 
 std::ostream &operator<<(std::ostream &os, const link1 &link);

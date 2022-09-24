@@ -214,7 +214,7 @@ std::vector<double> calculate_current(std::vector<double> &angles) {
 
   SPACE_ITER_START
 
-  link.get_current(monopole_plaket, &J[link.place], angles);
+  link.get_current(monopole_plaket, &J[link.place]);
 
   SPACE_ITER_END
 
@@ -232,11 +232,114 @@ std::vector<int> calculate_current_singular(std::vector<double> &angles) {
 
   SPACE_ITER_START
 
-  link.get_current_singular(monopole_plaket_singular, &J[link.place], angles);
+  link.get_current_singular(monopole_plaket_singular, &J[link.place]);
 
   SPACE_ITER_END
 
   return J;
+}
+
+std::vector<double> calculate_current_monopole_plakets(
+    std::vector<std::vector<double>> monopole_plakets) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<double> J(data_size);
+
+  SPACE_ITER_START
+
+  link.get_current(monopole_plakets, &J[link.place]);
+
+  SPACE_ITER_END
+
+  return J;
+}
+
+std::vector<std::vector<std::vector<double>>>
+make_monopole_plakets(std::vector<std::vector<double>> &angles) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<double> J(data_size);
+
+  std::vector<std::vector<std::vector<double>>> monopole_plakets(3);
+
+  for (int i = 0; i < 3; i++) {
+    monopole_plakets[i] = calculate_monopole_plaket(angles[i]);
+  }
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < monopole_plakets[i].size(); j++) {
+      for (int k = 0; k < monopole_plakets[i][j].size(); k++) {
+
+        while (monopole_plakets[i][j][k] >= M_PI) {
+          monopole_plakets[i][j][k] -= 2 * M_PI;
+        }
+
+        while (monopole_plakets[i][j][k] < -M_PI) {
+          monopole_plakets[i][j][k] += 2 * M_PI;
+        }
+      }
+    }
+  }
+
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < monopole_plakets[0].size(); j++) {
+    for (int k = 0; k < monopole_plakets[0][0].size(); k++) {
+
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += monopole_plakets[i][j][k];
+      }
+
+      // if (sum >= M_PI || sum <= -M_PI)
+      //   std::cout << sum << std::endl;
+
+      if (sum >= M_PI) {
+        place = 0;
+        extremal = monopole_plakets[0][j][k];
+
+        if (monopole_plakets[1][j][k] >= extremal) {
+          extremal = monopole_plakets[1][j][k];
+          place = 1;
+        }
+
+        if (monopole_plakets[2][j][k] >= extremal) {
+          place = 2;
+        }
+
+        monopole_plakets[place][j][k] -= 2 * M_PI;
+      }
+
+      if (sum <= -M_PI) {
+        place = 0;
+        extremal = monopole_plakets[0][j][k];
+
+        if (monopole_plakets[1][j][k] <= extremal) {
+          extremal = monopole_plakets[1][j][k];
+          place = 1;
+        }
+
+        if (monopole_plakets[2][j][k] <= extremal) {
+          place = 2;
+        }
+
+        monopole_plakets[place][j][k] += 2 * M_PI;
+      }
+
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += monopole_plakets[i][j][k];
+      }
+
+      if (sum >= M_PI || sum <= -M_PI)
+        std::cout << sum << std::endl;
+    }
+  }
+
+  return monopole_plakets;
 }
 
 template <class T> int find_current(link1 &link, std::vector<T> &J) {
