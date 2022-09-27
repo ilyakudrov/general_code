@@ -59,15 +59,114 @@ int main(int argc, char *argv[]) {
   // vector<vector<double>> angles =
   // read_double_su3_convet_angles(path_abelian);
 
-  link1 link(x_size, y_size, z_size, t_size);
+  std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
+
+  cout << "abelian link" << endl << endl;
+
+  for (int i = 0; i < 4; i++) {
+    cout << angles[0][i] << " " << angles[1][i] << " " << angles[2][i] << endl;
+  }
 
   std::vector<std::vector<std::vector<double>>> monopole_plakets =
       make_monopole_plakets(angles);
 
-  for (int color = 0; color < angles.size(); color++) {
+  cout << "abelian plaket" << endl << endl;
+
+  for (int i = 0; i < 6; i++) {
+    cout << monopole_plakets[0][i][0] << " " << monopole_plakets[1][i][0] << " "
+         << monopole_plakets[2][i][0] << endl;
+  }
+
+  vector<double> test(3);
+  for (int i = 0; i < 3; i++) {
+    test[i] = 0;
+    for (int j = 0; j < 6; j++) {
+      for (int k = 0; k < monopole_plakets[i][j].size(); k++) {
+        test[i] += monopole_plakets[i][j][k];
+      }
+    }
+  }
+  cout << "test " << test[0] << " " << test[1] << " " << test[2] << endl;
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  vector<vector<double>> J_test(3);
+  for (int i = 0; i < 3; i++) {
+    J_test[i] = calculate_current_monopole_plakets(monopole_plakets[i]);
+  }
+
+  for (int y = 0; y < 20; y++) {
+    for (int x = 0; x < x_size; x++) {
+      link.go_update(x, y, 0, 0);
+      for (int mu = 0; mu < 4; mu++) {
+
+        if (J_test[0][link.place + mu] > 0.3 ||
+            J_test[0][link.place + mu] < -0.3 ||
+            J_test[1][link.place + mu] > 0.3 ||
+            J_test[1][link.place + mu] < -0.3 ||
+            J_test[2][link.place + mu] > 0.3 ||
+            J_test[2][link.place + mu] < -0.3) {
+          cout << 1 << " " << 1 << " " << y + 1 << " " << x + 1 << " " << mu + 1
+               << " " << J_test[0][link.place + mu] << " "
+               << J_test[1][link.place + mu] << " "
+               << J_test[2][link.place + mu] << endl;
+        }
+      }
+    }
+  }
+
+  vector<vector<int>> J_number(3, vector<int>(4));
+  for (int color = 0; color < 3; color++) {
+    for (int t = 0; t < t_size; t++) {
+      for (int z = 0; z < z_size; z++) {
+        for (int y = 0; y < y_size; y++) {
+          for (int x = 0; x < x_size; x++) {
+            link.go_update(x, y, z, t);
+
+            for (int mu = 0; mu < 4; mu++) {
+
+              if (J_test[color][link.place + mu] < -1.3 ||
+                  J_test[color][link.place + mu] > 1.3)
+                J_number[color][mu] += 2;
+
+              else if (J_test[color][link.place + mu] < -0.3 ||
+                       J_test[color][link.place + mu] > 0.3)
+                J_number[color][mu]++;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (int color = 0; color < 3; color++) {
+    cout << J_number[color][0] << " " << J_number[color][1] << " "
+         << J_number[color][2] << " " << J_number[color][3] << endl;
+  }
+  int J_sum = 0;
+  for (int color = 0; color < 3; color++) {
+    for (auto a : J_test[color]) {
+      J_sum += abs(a);
+    }
+  }
+  int J_sum1 = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 4; j++) {
+      J_sum1 += J_number[i][j];
+    }
+  }
+  cout << "J_sum = " << J_sum << " J_sum1 = " << J_sum1 << endl;
+
+  for (int color = 0; color < 3; color++) {
 
     vector<double> J =
         calculate_current_monopole_plakets(monopole_plakets[color]);
+
+    int J_sum = 0;
+
+    for (auto a : J) {
+      J_sum += abs(a);
+    }
     vector<loop *> LL = calculate_clusters(J);
 
     int length;
@@ -83,8 +182,12 @@ int main(int argc, char *argv[]) {
     int space_currents = 0;
     int time_currents = 0;
 
+    int lengths_sum = 0;
+
     for (int i = 0; i < LL.size(); i++) {
       length = cluster_length(LL[i]);
+      lengths_sum += length;
+
       lengths_mu = length_mu(LL[i]);
 
       currents = currents_directions(LL[i]);
@@ -107,6 +210,8 @@ int main(int argc, char *argv[]) {
       else if (lengths_mu[3] != 0)
         lengths_wrapped[length]++;
     }
+
+    cout << "J_sum = " << J_sum << " lengths sum =  " << lengths_sum << endl;
 
     cout << "unwrapped clusters:" << endl << endl;
 

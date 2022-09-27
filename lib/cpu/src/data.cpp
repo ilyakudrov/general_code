@@ -522,6 +522,32 @@ template <> void data<abelian>::write_double(std::string &file_name) {
   stream.close();
 }
 
+template <> void data<su3>::write_double(std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ofstream stream(file_name);
+  if (!stream.write((char *)&array[0], data_size * 18 * sizeof(double)))
+    std::cout << "write_double<su3> error: " << file_name << std::endl;
+  stream.close();
+}
+
+template <> void data<su3_abelian>::write_double(std::string &file_name) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ofstream stream(file_name);
+
+  for (int i = 0; i < 3; i++) {
+    std::vector<double> angles(data_size);
+    for (int j = 0; j < data_size; j++) {
+      angles[j] = atan2(array[j].matrix[i].imag, array[j].matrix[i].real);
+    }
+
+    if (!stream.write((char *)&angles[0], data_size * sizeof(double)))
+      std::cout << "write_double<su3_abelian> error: " << file_name
+                << std::endl;
+  }
+
+  stream.close();
+}
+
 template class data<su2>;
 template class data<abelian>;
 template class data<su3>;

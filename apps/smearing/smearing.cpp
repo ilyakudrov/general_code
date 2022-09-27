@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
 
   string conf_format_wilson;
   string conf_path_wilson;
+  string conf_path_output;
   string conf_format_plaket;
   string conf_path_plaket;
   string path_wilson;
@@ -37,6 +38,7 @@ int main(int argc, char *argv[]) {
   int T_min, T_max, R_min, R_max;
   int bytes_skip_wilson = 0;
   int bytes_skip_plaket = 0;
+  bool save_conf = false;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "-conf_format_wilson") {
       conf_format_wilson = argv[++i];
@@ -44,6 +46,8 @@ int main(int argc, char *argv[]) {
       bytes_skip_wilson = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-conf_path_wilson") {
       conf_path_wilson = argv[++i];
+    } else if (string(argv[i]) == "-conf_path_output") {
+      conf_path_output = argv[++i];
     } else if (string(argv[i]) == "-conf_format_plaket") {
       conf_format_plaket = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip_plaket") {
@@ -78,6 +82,8 @@ int main(int argc, char *argv[]) {
       istringstream(string(argv[++i])) >> wilson_enabled;
     } else if (string(argv[i]) == "-flux_enabled") {
       istringstream(string(argv[++i])) >> flux_enabled;
+    } else if (string(argv[i]) == "-save_conf") {
+      istringstream(string(argv[++i])) >> save_conf;
     } else if (string(argv[i]) == "-path_wilson") {
       path_wilson = argv[++i];
     } else if (string(argv[i]) == "-path_flux") {
@@ -104,6 +110,7 @@ int main(int argc, char *argv[]) {
 
   cout << "conf_format_wilson " << conf_format_wilson << endl;
   cout << "conf_path_wilson " << conf_path_wilson << endl;
+  cout << "conf_path_output " << conf_path_output << endl;
   cout << "bytes_skip_wilson " << bytes_skip_wilson << endl;
   cout << "conf_format_plaket " << conf_format_plaket << endl;
   cout << "conf_path_plaket " << conf_path_plaket << endl;
@@ -122,6 +129,7 @@ int main(int argc, char *argv[]) {
   cout << "path_flux " << path_flux << endl;
   cout << "wilson_enabled " << wilson_enabled << endl;
   cout << "flux_enabled " << flux_enabled << endl;
+  cout << "save_conf " << save_conf << endl;
   cout << "T_min " << T_min << endl;
   cout << "T_max " << T_max << endl;
   cout << "R_min " << R_min << endl;
@@ -145,6 +153,8 @@ int main(int argc, char *argv[]) {
       conf_plaket.read_double(conf_path_plaket, bytes_skip_plaket);
     } else if (string(conf_format_plaket) == "double_qc2dstag") {
       conf_plaket.read_double_qc2dstag(conf_path_plaket);
+    } else if (string(conf_format_plaket) == "ildg") {
+      conf_plaket.read_ildg(conf_path_plaket);
     } else {
       cout << "wrong conf format: " << conf_format_plaket << endl;
       return 0;
@@ -174,6 +184,8 @@ int main(int argc, char *argv[]) {
     conf_wilson.read_double(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "double_qc2dstag") {
     conf_wilson.read_double_qc2dstag(conf_path_wilson);
+  } else if (string(conf_format_wilson) == "ildg") {
+    conf_wilson.read_ildg(conf_path_wilson);
   } else {
     cout << "wrong conf format: " << conf_format_wilson << endl;
     return 0;
@@ -281,5 +293,10 @@ int main(int argc, char *argv[]) {
   }
   if (flux_enabled) {
     stream_flux.close();
+  }
+
+  if (save_conf) {
+    conf_wilson.array = merge_wilson(conf_separated);
+    conf_wilson.write_double(conf_path_output);
   }
 }

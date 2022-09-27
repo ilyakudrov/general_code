@@ -104,7 +104,7 @@ std::vector<int> reflect_pattern(const std::vector<int> &pattern,
 std::vector<int> make_offaxis_pattern(const std::vector<int> &line_direction);
 
 // Polyakov loop
-template <class T> double polyakov(const std::vector<T> &array);
+template <class T> double polyakov_loop(const std::vector<T> &array);
 
 // Polyakov_correlator
 template <class T>
@@ -128,6 +128,9 @@ template <class T> double plaket_parallel(std::vector<std::vector<T>> conf);
 
 template <class T>
 std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf);
+
+template <class T>
+std::vector<T> merge_wilson(std::vector<std::vector<T>> &conf_separated);
 
 template <class T>
 std::vector<T> wilson_lines(std::vector<T> separated, int length, int size1,

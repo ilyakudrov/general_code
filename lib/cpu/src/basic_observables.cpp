@@ -964,16 +964,14 @@ std::vector<int> make_offaxis_pattern(const std::vector<int> &line_direction) {
   return pattern;
 }
 
-template <class T> double polyakov(const std::vector<T> &array) {
+template <class T> double polyakov_loop(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<double> polyakov_loop;
-  polyakov_loop.reserve(x_size * y_size * z_size * t_size);
+  double polyakov_loop;
   link.move_dir(3);
   SPACE_ITER_START;
-  polyakov_loop.push_back(link.polyakov_loop(array).tr());
+  polyakov_loop += link.polyakov_loop(array).tr();
   SPACE_ITER_END;
-  return accumulate(polyakov_loop.cbegin(), polyakov_loop.cend(), 0.0) /
-         polyakov_loop.size();
+  return polyakov_loop / (x_size * y_size * z_size * t_size);
 }
 
 template <class T>
@@ -1126,6 +1124,26 @@ std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf) {
   }
 
   return result;
+}
+
+template <class T>
+std::vector<T> merge_wilson(std::vector<std::vector<T>> &conf_separated) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<T> conf_merged(data_size);
+
+  for (int mu = 0; mu < 4; mu++) {
+
+    SPACE_ITER_START
+
+    conf_merged[link.place + mu] = conf_separated[mu][link.place / 4];
+
+    SPACE_ITER_END
+  }
+
+  return conf_merged;
 }
 
 template <class T>
@@ -1284,7 +1302,7 @@ template std::vector<su2> wilson_lines_offaxis(const std::vector<su2> &array,
 template std::vector<su2> wilson_lines_offaxis_increase(
     const std::vector<su2> &array, const std::vector<su2> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
-template double polyakov(const std::vector<su2> &array);
+template double polyakov_loop(const std::vector<su2> &array);
 template std::vector<double>
 calculate_polyakov_loops(const std::vector<su2> &array);
 template std::map<int, double>
@@ -1300,6 +1318,9 @@ wilson_spatial(const std::vector<su2> &array,
                int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<su2>> separate_wilson(std::vector<su2> &conf);
+
+template std::vector<su2>
+merge_wilson(std::vector<std::vector<su2>> &conf_separated);
 
 template std::vector<su2> wilson_lines(std::vector<su2> separated, int length,
                                        int size1, int size2);
@@ -1364,7 +1385,7 @@ template std::vector<abelian> wilson_lines_offaxis_increase(
     const std::vector<abelian> &array, const std::vector<abelian> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
 
-template double polyakov(const std::vector<abelian> &array);
+template double polyakov_loop(const std::vector<abelian> &array);
 template std::vector<double>
 calculate_polyakov_loops(const std::vector<abelian> &array);
 template std::map<int, double>
@@ -1382,6 +1403,9 @@ wilson_spatial(const std::vector<abelian> &array,
 
 template std::vector<std::vector<abelian>>
 separate_wilson(std::vector<abelian> &conf);
+
+template std::vector<abelian>
+merge_wilson(std::vector<std::vector<abelian>> &conf_separated);
 
 template std::vector<abelian> wilson_lines(std::vector<abelian> separated,
                                            int length, int size1, int size2);
@@ -1440,7 +1464,7 @@ template std::vector<su3> wilson_lines_offaxis(const std::vector<su3> &array,
 template std::vector<su3> wilson_lines_offaxis_increase(
     const std::vector<su3> &array, const std::vector<su3> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
-template double polyakov(const std::vector<su3> &array);
+template double polyakov_loop(const std::vector<su3> &array);
 template std::vector<double>
 calculate_polyakov_loops(const std::vector<su3> &array);
 template std::map<int, double>
@@ -1456,6 +1480,9 @@ wilson_spatial(const std::vector<su3> &array,
                int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<su3>> separate_wilson(std::vector<su3> &conf);
+
+template std::vector<su3>
+merge_wilson(std::vector<std::vector<su3>> &conf_separated);
 
 template std::vector<su3> wilson_lines(std::vector<su3> separated, int length,
                                        int size1, int size2);
@@ -1520,7 +1547,7 @@ wilson_lines_offaxis_increase(const std::vector<su3_abelian> &array,
                               const std::vector<su3_abelian> &lines1,
                               const std::vector<int> pattern,
                               const std::vector<int> direction);
-template double polyakov(const std::vector<su3_abelian> &array);
+template double polyakov_loop(const std::vector<su3_abelian> &array);
 template std::vector<double>
 calculate_polyakov_loops(const std::vector<su3_abelian> &array);
 template std::map<int, double>
@@ -1538,6 +1565,9 @@ wilson_spatial(const std::vector<su3_abelian> &array,
 
 template std::vector<std::vector<su3_abelian>>
 separate_wilson(std::vector<su3_abelian> &conf);
+
+template std::vector<su3_abelian>
+merge_wilson(std::vector<std::vector<su3_abelian>> &conf_separated);
 
 template std::vector<su3_abelian>
 wilson_lines(std::vector<su3_abelian> separated, int length, int size1,

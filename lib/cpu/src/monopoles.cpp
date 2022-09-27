@@ -342,6 +342,7 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
   return monopole_plakets;
 }
 
+// returns 0 if no current has been found, direction +-1..4 if it has
 template <class T> int find_current(link1 &link, std::vector<T> &J) {
   for (int mu = 0; mu < 4; mu++) {
     if ((J[link.place + mu] > 0.3) || (J[link.place + mu] < -0.3))
@@ -603,6 +604,10 @@ void site_number_recurrent(loop *loop, int &link_number,
     link_number++;
   }
 }
+
+// bool if_cluster_closed(loop *node) {
+
+// }
 
 template int find_current(link1 &link, std::vector<double> &J);
 template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
