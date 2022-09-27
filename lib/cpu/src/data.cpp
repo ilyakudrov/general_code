@@ -267,6 +267,18 @@ template <> void data<su3>::read_ildg(std::string &file_name) {
   }
 }
 
+template <> void data<su2>::read_ildg(std::string &file_name) {
+  std::cout << "read_ildg<su2> is not implemented" << std::endl;
+}
+
+template <> void data<abelian>::read_ildg(std::string &file_name) {
+  std::cout << "read_ildg<abelian> is not implemented" << std::endl;
+}
+
+template <> void data<su3_abelian>::read_ildg(std::string &file_name) {
+  std::cout << "read_ildg<su3_abelian> is not implemented" << std::endl;
+}
+
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   std::ifstream stream(file_name);
