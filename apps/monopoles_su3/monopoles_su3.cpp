@@ -95,6 +95,9 @@ int main(int argc, char **argv) {
   vector<vector<double>> angles = make_angles_SU3(conf_su3.array);
   conf_su3.array.erase(conf_su3.array.begin(), conf_su3.array.end());
 
+  std::vector<std::vector<std::vector<double>>> monopole_plakets =
+      make_monopole_plakets(angles);
+
   std::ofstream output_stream_clusters_unwrapped(
       path_output_clusters_unwrapped);
   std::ofstream output_stream_clusters_wrapped(path_output_clusters_wrapped);
@@ -109,7 +112,8 @@ int main(int argc, char **argv) {
 
   for (int color = 0; color < angles.size(); color++) {
 
-    vector<double> J = calculate_current(angles[color]);
+    vector<double> J =
+        calculate_current_monopole_plakets(monopole_plakets[color]);
     vector<loop *> LL = calculate_clusters(J);
 
     int length;

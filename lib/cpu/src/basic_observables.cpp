@@ -975,7 +975,7 @@ template <class T> double polyakov_loop(const std::vector<T> &array) {
 }
 
 template <class T>
-std::vector<double> calculate_polyakov_loops(const std::vector<T> &array) {
+std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<double> polyakov_loops(x_size * y_size * z_size * t_size);
   link.move_dir(3);
@@ -991,15 +991,16 @@ std::vector<double> calculate_polyakov_loops(const std::vector<T> &array) {
 template <class T>
 std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
                                                int D_min, int D_max) {
-  std::vector<double> polyakov_loops = calculate_polyakov_loops(conf);
+  std::vector<double> polyakov_loops = calculate_polyakov_loops_tr(conf);
   std::map<int, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   double polyakov_tmp;
   SPACE_ITER_START
 
+  polyakov_tmp = polyakov_loops[link.place / 4];
+
   for (int mu = 0; mu < 3; mu++) {
-    polyakov_tmp = polyakov_loops[link.place / 4];
     link.move(mu, D_min - 1);
     for (int D = D_min; D <= D_max; D++) {
       link.move(mu, 1);
@@ -1008,6 +1009,63 @@ std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
     }
     link.move(mu, -D_max);
   }
+
+  SPACE_ITER_END;
+
+  for (auto it = polyakov_loop_correlator.begin();
+       it != polyakov_loop_correlator.end(); ++it) {
+    it->second = it->second / (x_size * y_size * z_size * t_size * 3);
+  }
+
+  return polyakov_loop_correlator;
+}
+
+template <class T>
+std::vector<T> calculate_polyakov_loops(const std::vector<T> &array) {
+  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<T> polyakov_loops(x_size * y_size * z_size * t_size);
+  link.move_dir(3);
+  SPACE_ITER_START;
+
+  polyakov_loops[link.place / 4] = link.polyakov_loop(array);
+
+  SPACE_ITER_END;
+
+  return polyakov_loops;
+}
+
+template <class T>
+std::map<int, double>
+polyakov_loop_correlator_singlet(const std::vector<T> &conf, int D_min,
+                                 int D_max) {
+  std::vector<T> polyakov_loops = calculate_polyakov_loops(conf);
+  std::map<int, double> polyakov_loop_correlator;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  T polyakov_tmp;
+  SPACE_ITER_START
+
+  polyakov_tmp = polyakov_loops[link.place / 4];
+
+  for (int mu = 0; mu < 3; mu++) {
+    link.move(mu, D_min);
+    for (int D = D_min; D <= D_max; D++) {
+      polyakov_loop_correlator[D] +=
+          // polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
+          (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
+      link.move(mu, 1);
+    }
+    link.move(mu, -D_max - 1);
+  }
+
+  // polyakov_tmp = polyakov_loops[link.place / 4];
+
+  // for (int mu = 0; mu < 3; mu++) {
+  //   link.move(mu, 1);
+  //   polyakov_loop_correlator[1] +=
+  //       (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
+  //   link.move(mu, -1);
+  // }
 
   SPACE_ITER_END;
 
@@ -1304,11 +1362,17 @@ template std::vector<su2> wilson_lines_offaxis_increase(
     const std::vector<int> pattern, const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su2> &array);
 template std::vector<double>
-calculate_polyakov_loops(const std::vector<su2> &array);
+calculate_polyakov_loops_tr(const std::vector<su2> &array);
 template std::map<int, double>
 polyakov_loop_correlator(const std::vector<su2> &conf, int D_min, int D_max);
 template std::vector<su2> wilson_lines_single(const std::vector<su2> &array,
                                               int length);
+template std::vector<su2>
+calculate_polyakov_loops(const std::vector<su2> &array);
+
+template std::map<int, double>
+polyakov_loop_correlator_singlet(const std::vector<su2> &conf, int D_min,
+                                 int D_max);
 template double wilson_loop_single_size(std::vector<su2> lines1,
                                         std::vector<su2> lines2, int mu, int nu,
                                         int r1, int r2);
@@ -1387,10 +1451,15 @@ template std::vector<abelian> wilson_lines_offaxis_increase(
 
 template double polyakov_loop(const std::vector<abelian> &array);
 template std::vector<double>
-calculate_polyakov_loops(const std::vector<abelian> &array);
+calculate_polyakov_loops_tr(const std::vector<abelian> &array);
 template std::map<int, double>
 polyakov_loop_correlator(const std::vector<abelian> &conf, int D_min,
                          int D_max);
+template std::vector<abelian>
+calculate_polyakov_loops(const std::vector<abelian> &array);
+template std::map<int, double>
+polyakov_loop_correlator_singlet(const std::vector<abelian> &conf, int D_min,
+                                 int D_max);
 template std::vector<abelian>
 wilson_lines_single(const std::vector<abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<abelian> lines1,
@@ -1466,9 +1535,14 @@ template std::vector<su3> wilson_lines_offaxis_increase(
     const std::vector<int> pattern, const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su3> &array);
 template std::vector<double>
-calculate_polyakov_loops(const std::vector<su3> &array);
+calculate_polyakov_loops_tr(const std::vector<su3> &array);
 template std::map<int, double>
 polyakov_loop_correlator(const std::vector<su3> &conf, int D_min, int D_max);
+template std::vector<su3>
+calculate_polyakov_loops(const std::vector<su3> &array);
+template std::map<int, double>
+polyakov_loop_correlator_singlet(const std::vector<su3> &conf, int D_min,
+                                 int D_max);
 template std::vector<su3> wilson_lines_single(const std::vector<su3> &array,
                                               int length);
 template double wilson_loop_single_size(std::vector<su3> lines1,
@@ -1549,10 +1623,15 @@ wilson_lines_offaxis_increase(const std::vector<su3_abelian> &array,
                               const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su3_abelian> &array);
 template std::vector<double>
-calculate_polyakov_loops(const std::vector<su3_abelian> &array);
+calculate_polyakov_loops_tr(const std::vector<su3_abelian> &array);
 template std::map<int, double>
 polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_min,
                          int D_max);
+template std::vector<su3_abelian>
+calculate_polyakov_loops(const std::vector<su3_abelian> &array);
+template std::map<int, double>
+polyakov_loop_correlator_singlet(const std::vector<su3_abelian> &conf,
+                                 int D_min, int D_max);
 template std::vector<su3_abelian>
 wilson_lines_single(const std::vector<su3_abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<su3_abelian> lines1,

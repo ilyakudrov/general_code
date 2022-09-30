@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 4;
 
   std::cout.precision(17);
 
@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/conf_monopoless_0001";
-  string conf_path = "../../confs/decomposed/monopoless/gluodynamics/24^4/"
-                     "beta6.0/conf_monopoless_0001";
+  // string conf_path = "../../confs/smeared/QCD/140MeV/nt4/smeared_0501";
+  string conf_path = "../../confs/SU3_conf/QCD/140MeV/nt4/conf.0501";
   // string conf_path = "../../confs/test_output/conf_monopole_0001";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001";
@@ -62,29 +62,12 @@ int main(int argc, char *argv[]) {
   //                    "test_Landau/result/conf_Landau_gaugefixed_0501";
   // string conf_path =
   //     "../../confs/Coulomb_su3/QCD/140MeV/nt4/conf_Coulomb_gaugefixed_0502";
-  conf.read_double(conf_path, 0);
+  // conf.read_double(conf_path, 0);
   // conf.read_double_qc2dstag(conf_path);
-  // conf.read_ildg(conf_path);
+  conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 8);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
-
-  // cout << "initial functional " << MAG_functional_su2(conf.array) << endl;
-
-  for (int i = 0; i < 4; i++) {
-    cout << conf.array[i] << endl;
-    cout << conf.array[i].determinant() << endl;
-  }
-
-  // double angle_sum;
-  // for (int i = 0; i < 1; i++) {
-  //   angle_sum = 0;
-  //   for (int j = 0; j < 3; j++) {
-  //     angle_sum +=
-  //         atan2(conf.array[i].matrix[j].imag, conf.array[i].matrix[j].real);
-  //   }
-  //   cout << "angle sum " << angle_sum << endl;
-  // }
 
   // plakets and polyakov loop
   start_time = clock();
