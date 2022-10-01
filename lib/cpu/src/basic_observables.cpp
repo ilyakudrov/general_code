@@ -1047,31 +1047,31 @@ polyakov_loop_correlator_singlet(const std::vector<T> &conf, int D_min,
 
   polyakov_tmp = polyakov_loops[link.place / 4];
 
-  for (int mu = 0; mu < 3; mu++) {
-    link.move(mu, D_min);
-    for (int D = D_min; D <= D_max; D++) {
-      polyakov_loop_correlator[D] +=
-          // polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
-          (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
-      link.move(mu, 1);
-    }
-    link.move(mu, -D_max - 1);
-  }
+  // for (int mu = 0; mu < 3; mu++) {
+  //   link.move(mu, D_min);
+  //   for (int D = D_min; D <= D_max; D++) {
+  //     polyakov_loop_correlator[D] +=
+  //         // polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
+  //         (polyakov_tmp * polyakov_loops[link.place / 4].conj()).tr();
+  //     link.move(mu, 1);
+  //   }
+  //   link.move(mu, -D_max - 1);
+  // }
 
-  // polyakov_tmp = polyakov_loops[link.place / 4];
+  polyakov_tmp = polyakov_loops[link.place / 4];
 
   // for (int mu = 0; mu < 3; mu++) {
-  //   link.move(mu, 1);
-  //   polyakov_loop_correlator[1] +=
-  //       (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
-  //   link.move(mu, -1);
+  link.move(0, 1);
+  polyakov_loop_correlator[1] +=
+      (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
+  link.move(0, -1);
   // }
 
   SPACE_ITER_END;
 
   for (auto it = polyakov_loop_correlator.begin();
        it != polyakov_loop_correlator.end(); ++it) {
-    it->second = it->second / (x_size * y_size * z_size * t_size * 3);
+    it->second = it->second / (x_size * y_size * z_size * t_size /* * 3*/);
   }
 
   return polyakov_loop_correlator;

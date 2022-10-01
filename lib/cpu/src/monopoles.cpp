@@ -123,7 +123,7 @@ read_double_su3_convet_angles(std::string &file_path) {
 }
 
 std::vector<double>
-convert_abelian_to_abelian(std::vector<abelian> &conf_abelian) {
+convert_abelian_to_angles(std::vector<abelian> &conf_abelian) {
   std::vector<double> angles(conf_abelian.size());
 
   for (int i = 0; i < conf_abelian.size(); i++) {
