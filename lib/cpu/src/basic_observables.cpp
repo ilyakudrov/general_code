@@ -43,7 +43,7 @@
   for (int z = 0; z < z_size; z++) {                                           \
     for (int y = 0; y < y_size; y++) {                                         \
       for (int x = 0; x < x_size; x++) {                                       \
-        link.go(x, y, z, t);                                                   \
+        link.go(x, y, z, 0);                                                   \
         link.update(0);                                                        \
         link.update(1);                                                        \
         link.update(2);
@@ -57,7 +57,7 @@
   for (int z = 0; z < z_size; z++) {                                           \
     for (int y = 0; y < y_size; y++) {                                         \
       for (int x = 0; x < x_size; x++) {                                       \
-        link.go(x, y, z, t);                                                   \
+        link.go(x, y, z, 0);                                                   \
         link.update(0);                                                        \
         link.update(1);                                                        \
         link.update(2);                                                        \
@@ -72,6 +72,7 @@
 #include "../include/flux_tube.h"
 #include "../include/link.h"
 
+#include <algorithm>
 #include <numeric>
 #include <omp.h>
 
@@ -1023,58 +1024,132 @@ std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
 template <class T>
 std::vector<T> calculate_polyakov_loops(const std::vector<T> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<T> polyakov_loops(x_size * y_size * z_size * t_size);
+  std::vector<T> polyakov_loops(x_size * y_size * z_size);
   link.move_dir(3);
-  SPACE_ITER_START;
+  int place;
 
-  polyakov_loops[link.place / 4] = link.polyakov_loop(array);
+  ITER_START_ZYX
 
-  SPACE_ITER_END;
+  place = link.place / 4;
+
+  polyakov_loops[place] = link.polyakov_loop(array);
+
+  ITER_END_3
 
   return polyakov_loops;
 }
 
-template <class T>
-std::map<int, double>
-polyakov_loop_correlator_singlet(const std::vector<T> &conf, int D_min,
-                                 int D_max) {
-  std::vector<T> polyakov_loops = calculate_polyakov_loops(conf);
-  std::map<int, double> polyakov_loop_correlator;
-  link1 link(x_size, y_size, z_size, t_size);
+#pragma omp declare reduction(vec_double_plus : std::vector<double> : \
+                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
+                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 
-  T polyakov_tmp;
-  SPACE_ITER_START
+std::map<double, double>
+polyakov_average_directions(std::vector<double> correlators, int D_max) {
+  std::map<double, double> result;
+  std::map<double, int> corr_num;
 
-  polyakov_tmp = polyakov_loops[link.place / 4];
+  double distance;
+  int result_size = 2 * D_max + 1;
+  int result_size1 = result_size * result_size;
+  int Dx_min;
 
-  // for (int mu = 0; mu < 3; mu++) {
-  //   link.move(mu, D_min);
-  //   for (int D = D_min; D <= D_max; D++) {
-  //     polyakov_loop_correlator[D] +=
-  //         // polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
-  //         (polyakov_tmp * polyakov_loops[link.place / 4].conj()).tr();
-  //     link.move(mu, 1);
-  //   }
-  //   link.move(mu, -D_max - 1);
-  // }
+  for (int Dz = -D_max; Dz <= D_max; Dz++) {
+    for (int Dy = -D_max; Dy <= D_max; Dy++) {
+      if (Dy != 0 && Dz != 0)
+        Dx_min = 0;
+      else
+        Dx_min = -D_max;
+      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
 
-  polyakov_tmp = polyakov_loops[link.place / 4];
+        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
 
-  // for (int mu = 0; mu < 3; mu++) {
-  link.move(0, 1);
-  polyakov_loop_correlator[1] +=
-      (polyakov_tmp ^ polyakov_loops[link.place / 4]).tr();
-  link.move(0, -1);
-  // }
-
-  SPACE_ITER_END;
-
-  for (auto it = polyakov_loop_correlator.begin();
-       it != polyakov_loop_correlator.end(); ++it) {
-    it->second = it->second / (x_size * y_size * z_size * t_size /* * 3*/);
+        if (!(Dy != 0 && Dz != 0 && Dx < 0)) {
+          if (distance <= D_max && !(Dx == 0 && Dy == 0 && Dz == 0)) {
+            result[distance] +=
+                correlators[(Dz + D_max) * result_size1 +
+                            (Dy + D_max) * result_size + Dx + D_max];
+            corr_num[distance]++;
+          }
+        }
+      }
+    }
   }
 
-  return polyakov_loop_correlator;
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    it->second /= corr_num[it->first];
+  }
+
+  return result;
+}
+
+template <class T>
+std::vector<double> polyakov_loop_correlator_singlet(const std::vector<T> &conf,
+                                                     int D_max) {
+  std::vector<T> polyakov_loops = calculate_polyakov_loops(conf);
+  std::map<double, double> polyakov_loop_correlator;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  int result_size = 2 * D_max + 1;
+  int result_size1 = result_size * result_size;
+
+  std::vector<double> correlator(result_size * result_size * result_size);
+
+  T polyakov_tmp;
+  double distance;
+  int Dx_min;
+
+#pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
+                                             Dx_min)                           \
+    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
+                                                      : correlator)
+  ITER_START_ZYX
+
+  polyakov_tmp = polyakov_loops[link.place / 4];
+  link.move(2, -D_max);
+  for (int Dz = -D_max; Dz <= D_max; Dz++) {
+    link.move(1, -D_max);
+    for (int Dy = -D_max; Dy <= D_max; Dy++) {
+      if (Dy != 0 && Dz != 0)
+        Dx_min = 0;
+      else
+        Dx_min = -D_max;
+
+      link.move(0, Dx_min);
+
+      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
+
+        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
+
+        if (distance <= D_max) {
+
+          correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
+                     Dx + D_max] +=
+              polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
+        }
+
+        link.move(0, 1);
+      }
+      link.move(1, 1);
+      link.move(0, -D_max - 1);
+    }
+    link.move(2, 1);
+    link.move(1, -D_max - 1);
+  }
+
+  ITER_END_3
+
+  int size = x_size * y_size * z_size;
+
+  for (int Dz = -D_max; Dz <= D_max; Dz++) {
+    for (int Dy = -D_max; Dy <= D_max; Dy++) {
+      for (int Dx = -D_max; Dx <= D_max; Dx++) {
+        correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
+                   Dx + D_max] /= size;
+      }
+    }
+  }
+
+  return correlator;
 }
 
 template <class T>
@@ -1370,9 +1445,8 @@ template std::vector<su2> wilson_lines_single(const std::vector<su2> &array,
 template std::vector<su2>
 calculate_polyakov_loops(const std::vector<su2> &array);
 
-template std::map<int, double>
-polyakov_loop_correlator_singlet(const std::vector<su2> &conf, int D_min,
-                                 int D_max);
+template std::vector<double>
+polyakov_loop_correlator_singlet(const std::vector<su2> &conf, int D_max);
 template double wilson_loop_single_size(std::vector<su2> lines1,
                                         std::vector<su2> lines2, int mu, int nu,
                                         int r1, int r2);
@@ -1457,9 +1531,8 @@ polyakov_loop_correlator(const std::vector<abelian> &conf, int D_min,
                          int D_max);
 template std::vector<abelian>
 calculate_polyakov_loops(const std::vector<abelian> &array);
-template std::map<int, double>
-polyakov_loop_correlator_singlet(const std::vector<abelian> &conf, int D_min,
-                                 int D_max);
+template std::vector<double>
+polyakov_loop_correlator_singlet(const std::vector<abelian> &conf, int D_max);
 template std::vector<abelian>
 wilson_lines_single(const std::vector<abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<abelian> lines1,
@@ -1540,9 +1613,8 @@ template std::map<int, double>
 polyakov_loop_correlator(const std::vector<su3> &conf, int D_min, int D_max);
 template std::vector<su3>
 calculate_polyakov_loops(const std::vector<su3> &array);
-template std::map<int, double>
-polyakov_loop_correlator_singlet(const std::vector<su3> &conf, int D_min,
-                                 int D_max);
+template std::vector<double>
+polyakov_loop_correlator_singlet(const std::vector<su3> &conf, int D_max);
 template std::vector<su3> wilson_lines_single(const std::vector<su3> &array,
                                               int length);
 template double wilson_loop_single_size(std::vector<su3> lines1,
@@ -1629,9 +1701,9 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_min,
                          int D_max);
 template std::vector<su3_abelian>
 calculate_polyakov_loops(const std::vector<su3_abelian> &array);
-template std::map<int, double>
+template std::vector<double>
 polyakov_loop_correlator_singlet(const std::vector<su3_abelian> &conf,
-                                 int D_min, int D_max);
+                                 int D_max);
 template std::vector<su3_abelian>
 wilson_lines_single(const std::vector<su3_abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<su3_abelian> lines1,

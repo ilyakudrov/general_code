@@ -8,6 +8,14 @@
 #include <iostream>
 #include <omp.h>
 
+#ifndef MATRIX_WILSON
+#define MATRIX_WILSON su2
+#endif
+
+#ifndef MATRIX_PLAKET
+#define MATRIX_PLAKET su2
+#endif
+
 using namespace std;
 
 int x_size;
@@ -194,6 +202,7 @@ int main(int argc, char *argv[]) {
   cout << "wilson plaket unsmeared " << plaket(conf_wilson.array) << endl;
 
   ofstream stream_wilson;
+  stream_wilson.precision(17);
   // open file
   if (wilson_enabled) {
     stream_wilson.open(path_wilson);
@@ -203,6 +212,7 @@ int main(int argc, char *argv[]) {
     stream_wilson << "smearing_step,time_size,space_size,wilson_loop" << endl;
   }
   ofstream stream_flux;
+  stream_flux.precision(17);
   // open file
   if (flux_enabled) {
     stream_flux.open(path_flux);

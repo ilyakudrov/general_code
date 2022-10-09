@@ -122,6 +122,13 @@ std::map<int, double>
 polyakov_loop_correlator_singlet(const std::vector<T> &conf, int D_min,
                                  int D_max);
 
+std::map<double, double>
+polyakov_average_directions(std::vector<double> correlators, int D_max);
+
+template <class T>
+std::vector<double> polyakov_loop_correlator_singlet(const std::vector<T> &conf,
+                                                     int D_max);
+
 template <class T>
 double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                     int size_mu1, int size_mu2, int size_nu1, int size_nu2);
