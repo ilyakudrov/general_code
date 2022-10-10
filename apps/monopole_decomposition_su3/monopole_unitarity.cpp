@@ -31,7 +31,6 @@ int main(int argc, char **argv) {
   int bytes_skip = 0;
   string path_conf_monopole;
   string path_conf_monopoless;
-  string path_inverse_laplacian;
 
   bool parallel = false;
 
@@ -47,8 +46,6 @@ int main(int argc, char **argv) {
       path_conf_monopole = argv[++i];
     } else if (string(argv[i]) == "-path_conf_monopoless") {
       path_conf_monopoless = argv[++i];
-    } else if (string(argv[i]) == "-path_inverse_laplacian") {
-      path_inverse_laplacian = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-x_size") {
@@ -59,8 +56,6 @@ int main(int argc, char **argv) {
       z_size = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-t_size") {
       t_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-parallel") {
-      istringstream(string(argv[++i])) >> parallel;
     } else
       cout << "unknown parameter " << argv[i] << endl;
   }
@@ -69,7 +64,6 @@ int main(int argc, char **argv) {
   cout << "conf_format " << conf_format << endl;
   cout << "path_conf_monopole " << path_conf_monopole << endl;
   cout << "path_conf_monopoless " << path_conf_monopoless << endl;
-  cout << "path_inverse_laplacian " << path_inverse_laplacian << endl;
   cout << "bytes_skip " << bytes_skip << endl;
 
   cout << "x_size " << x_size << endl;
@@ -96,29 +90,8 @@ int main(int argc, char **argv) {
 
   cout.precision(17);
 
-  std::vector<std::vector<double>> angles_su3 = make_angles_SU3(conf_su3.array);
-
-  vector<double> inverse_laplacian =
-      read_inverse_laplacian(path_inverse_laplacian);
-
-  vector<vector<double>> angles_monopoole(3);
-
-  start_time = omp_get_wtime();
-
-  for (int i = 0; i < 3; i++) {
-    if (parallel) {
-      angles_monopoole[i] =
-          make_monopole_angles_parallel(angles_su3[i], inverse_laplacian);
-    } else {
-      angles_monopoole[i] =
-          make_monopole_angles(angles_su3[i], inverse_laplacian);
-    }
-    angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
-  }
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "decomposition time: " << search_time << std::endl;
+  std::vector<std::vector<double>> angles_monopoole =
+      read_double_angles_su3(path_conf_monopole);
 
   make_unitary(angles_monopoole);
 

@@ -7,7 +7,7 @@ OBJFILES=$(OBJ_PATH)/link_$(ARCH).o $(OBJ_PATH)/data_$(ARCH).o $(OBJ_PATH)/basic
 	$(OBJ_PATH)/smearing_$(ARCH).o $(OBJ_PATH)/monopoles_$(ARCH).o $(OBJ_PATH)/loop_$(ARCH).o $(OBJ_PATH)/eigen_$(ARCH).o $(OBJ_PATH)/abelian_projection_su3_$(ARCH).o \
 	$(OBJ_PATH)/mag_$(ARCH).o $(OBJ_PATH)/Landau_U1_$(ARCH).o $(OBJ_PATH)/decomposition_$(ARCH).o
 
-TARGETS=decomposition_su3
+TARGETS=decomposition_su3 monopole_unitarity
 
 $(TARGETS): %: %.cpp $(OBJFILES)
 	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) -fopenmp -o $@_$(ARCH)

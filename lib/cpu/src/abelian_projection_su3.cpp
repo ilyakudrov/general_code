@@ -60,3 +60,25 @@ void angles_project(std::vector<std::vector<double>> &angles) {
     }
   }
 }
+
+void make_unitary(std::vector<std::vector<double>> &angles) {
+  double sum;
+  for (int i = 0; i < angles[0].size(); i++) {
+    sum = 0;
+    for (int j = 0; j < 3; j++) {
+      sum += angles[j][i];
+    }
+
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
+
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
+
+    for (int j = 0; j < 3; j++) {
+      angles[j][i] -= sum / 3;
+    }
+  }
+}
