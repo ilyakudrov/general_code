@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
         if (flux_enabled) {
 
           flux_tube = wilson_plaket_correlator(
-              plaket_time_tr, conf_separated, 6, L_time / 2, L_spat / 4,
+              plaket_time_tr, conf_separated, 2, L_time / 2, L_spat / 4,
               L_spat / 2, 5, 0, "longitudinal");
 
           for (auto it = flux_tube.begin(); it != flux_tube.end(); it++) {
