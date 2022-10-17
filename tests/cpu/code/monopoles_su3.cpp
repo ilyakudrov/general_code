@@ -35,14 +35,16 @@ int main(int argc, char *argv[]) {
 
   // string path_abelian =
   //     "../../confs/MA_gauge/su3/QCD/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/"
-  //     "monopole_decomposition_su3/test/result/conf_monopole_0001";
-  // string path_abelian = "../../confs/Landau_U1xU1/gluodynamics/36^4/beta6.3/"
-  //                       "conf_Landau_gaugefixed_0001";
+  // string path_abelian = "../../confs/decomposed/monopole/gluodynamics/36^4/"
+  //                       "beta6.3/conf_monopole_0001";
   string path_abelian =
       "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-      "test/result/conf_monopoless_36_0001";
+      "test/result/conf_monopole_36_0001";
+  // string path_abelian = "../../confs/Landau_U1xU1/gluodynamics/36^4/beta6.3/"
+  //                       "conf_Landau_gaugefixed_0001";
+  // string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopoless_36_0001";
   // string path_abelian =
   // "../../confs/decomposed/monopoless/gluodynamics/24^4/"
   //                       "beta6.0/conf_monopoless_0001";
@@ -51,18 +53,18 @@ int main(int argc, char *argv[]) {
   // string path_abelian = "../../confs/decomposed/monopole/gluodynamics/36^4/"
   // "beta6.3/conf_monopole_0001";
   // string path_abelian =
-  // "../../confs/decomposed/monopoless/gluodynamics/36^4/"
-  //                       "beta6.3/conf_monopoless_0001";
+  // "../../confs/decomposed/monopoless/gluodynamics/24^4/"
+  //                       "beta6.0/conf_monopoless_0001";
 
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
   // conf.read_double_qc2dstag(path_abelian);
-  conf.read_double(path_abelian, 0);
+  // conf.read_double(path_abelian, 0);
   // conf.read_ildg(path_abelian);
   // conf.read_double_convert_abelian(path_abelian, 0);
   // vector<vector<double>> angles = conf.array;
-  vector<vector<double>> angles = make_angles_SU3(conf.array);
-  // vector<vector<double>> angles = read_double_angles_su3(path_abelian);
+  // vector<vector<double>> angles = make_angles_SU3(conf.array);
+  vector<vector<double>> angles = read_double_angles_su3(path_abelian);
   // vector<vector<double>> angles =
   // read_double_su3_convet_angles(path_abelian);
 

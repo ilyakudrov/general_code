@@ -74,6 +74,8 @@ int main(int argc, char **argv) {
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
 
+  vector<int> lattice_sizes = {x_size, y_size, z_size, t_size};
+
   data<su3> conf_su3;
 
   // read configuration
@@ -119,7 +121,9 @@ int main(int argc, char **argv) {
     int length;
 
     map<int, int> lengths_unwrapped;
-    map<int, int> lengths_wrapped;
+    map<int, int> lengths_wrapped_time;
+    map<int, int> lengths_wrapped_space;
+    map<int, int> lengths_wrapped_both;
     map<int, int> space_windings;
     map<int, int> time_windings;
     vector<int> lengths_mu;
@@ -138,20 +142,42 @@ int main(int argc, char **argv) {
       space_currents += currents[0];
       time_currents += currents[1];
 
-      for (int j = 0; j < 3; j++) {
-        if (lengths_mu[j] != 0) {
-          space_windings[abs(lengths_mu[j]) / x_size]++;
+      int wrappings_time_tmp = 0;
+      int wrappings_space_tmp = 0;
+
+      if (lengths_mu[0] == 0 && lengths_mu[1] == 0 && lengths_mu[2] == 0 &&
+          lengths_mu[3] == 0) {
+        lengths_unwrapped[length]++;
+      }
+
+      else {
+
+        for (int mu = 0; mu < 3; mu++) {
+          if (lengths_mu[mu] != 0) {
+            wrappings_space_tmp += abs(lengths_mu[mu]) / lattice_sizes[mu];
+          }
+        }
+
+        if (lengths_mu[3] != 0) {
+          wrappings_time_tmp += abs(lengths_mu[3]) / lattice_sizes[3];
+        }
+
+        if (wrappings_space_tmp != 0) {
+          space_windings[wrappings_space_tmp]++;
+        }
+
+        if (wrappings_time_tmp != 0) {
+          time_windings[wrappings_time_tmp]++;
+        }
+
+        if (wrappings_space_tmp != 0 && wrappings_time_tmp != 0) {
+          lengths_wrapped_both[length]++;
+        } else if (wrappings_space_tmp != 0) {
+          lengths_wrapped_space[length]++;
+        } else if (wrappings_time_tmp != 0) {
+          lengths_wrapped_time[length]++;
         }
       }
-
-      if (lengths_mu[3] != 0) {
-        time_windings[abs(lengths_mu[3]) / t_size]++;
-      }
-
-      if (lengths_mu[3] == 0)
-        lengths_unwrapped[length]++;
-      else if (lengths_mu[3] != 0)
-        lengths_wrapped[length]++;
     }
 
     for (auto it = lengths_unwrapped.cbegin(); it != lengths_unwrapped.cend();
@@ -160,10 +186,20 @@ int main(int argc, char **argv) {
                                        << it->second << endl;
     }
 
-    for (auto it = lengths_wrapped.cbegin(); it != lengths_wrapped.cend();
-         ++it) {
+    for (auto it = lengths_wrapped_time.cbegin();
+         it != lengths_wrapped_time.cend(); ++it) {
       output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
-                                     << it->second << endl;
+                                     << it->second << ",time" << endl;
+    }
+    for (auto it = lengths_wrapped_space.cbegin();
+         it != lengths_wrapped_space.cend(); ++it) {
+      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
+                                     << it->second << ",space" << endl;
+    }
+    for (auto it = lengths_wrapped_both.cbegin();
+         it != lengths_wrapped_both.cend(); ++it) {
+      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
+                                     << it->second << ",both" << endl;
     }
 
     for (auto it = time_windings.begin(); it != time_windings.end(); ++it) {
