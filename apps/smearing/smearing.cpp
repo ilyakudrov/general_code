@@ -159,6 +159,8 @@ int main(int argc, char *argv[]) {
       conf_plaket.read_float(conf_path_plaket, bytes_skip_plaket);
     } else if (string(conf_format_plaket) == "double") {
       conf_plaket.read_double(conf_path_plaket, bytes_skip_plaket);
+    } else if (string(conf_format_plaket) == "double_vitaly") {
+      conf_plaket.read_double_vitaly(conf_path_plaket, bytes_skip_plaket);
     } else if (string(conf_format_plaket) == "double_qc2dstag") {
       conf_plaket.read_double_qc2dstag(conf_path_plaket);
     } else if (string(conf_format_plaket) == "ildg") {
@@ -190,6 +192,8 @@ int main(int argc, char *argv[]) {
     conf_wilson.read_float(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "double") {
     conf_wilson.read_double(conf_path_wilson, bytes_skip_wilson);
+  } else if (string(conf_format_wilson) == "double_vitaly") {
+    conf_wilson.read_double_vitaly(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "double_qc2dstag") {
     conf_wilson.read_double_qc2dstag(conf_path_wilson);
   } else if (string(conf_format_wilson) == "ildg") {

@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su3_abelian
 
 using namespace std;
 
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 4;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   std::cout.precision(17);
 
@@ -54,7 +54,8 @@ int main(int argc, char *argv[]) {
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/conf_monopoless_0001";
   // string conf_path = "../../confs/smeared/QCD/140MeV/nt4/smeared_0501";
-  string conf_path = "../../confs/SU3_conf/QCD/140MeV/nt4/conf.0501";
+  string conf_path =
+      "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
   // string conf_path = "../../confs/test_output/conf_monopole_0001";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001";
@@ -62,10 +63,11 @@ int main(int argc, char *argv[]) {
   //                    "test_Landau/result/conf_Landau_gaugefixed_0501";
   // string conf_path =
   //     "../../confs/Coulomb_su3/QCD/140MeV/nt4/conf_Coulomb_gaugefixed_0502";
-  // conf.read_double(conf_path, 0);
+  // conf.read_double(conf_path, 4);
+  conf.read_double_vitaly(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
-  conf.read_ildg(conf_path);
-  // conf.read_float(conf_path, 8);
+  // conf.read_ildg(conf_path);
+  // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 

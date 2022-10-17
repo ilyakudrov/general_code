@@ -25,6 +25,8 @@ public:
   // read conf file of doubles, usual ordering
   void read_double(std::string &file_name, int bites_skip);
 
+  void read_double_vitaly(std::string &file_name, int bites_skip);
+
   void read_ildg(std::string &file_name);
 
   // read conf file of floats, ml5 ordering

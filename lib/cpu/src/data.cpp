@@ -191,9 +191,10 @@ void data<su3_abelian>::read_double(std::string &file_name, int bites_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ifstream stream(file_name);
-  std::vector<double> v(data_size * 4);
+  std::vector<double> v(data_size);
 
   array.resize(data_size);
+  stream.ignore(bites_skip);
 
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
@@ -203,6 +204,44 @@ void data<su3_abelian>::read_double(std::string &file_name, int bites_skip) {
       array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
     }
   }
+}
+
+template <>
+void data<su3_abelian>::read_double_vitaly(std::string &file_name,
+                                           int bites_skip) {
+  int lattice_size = x_size * y_size * z_size * t_size;
+
+  std::ifstream stream(file_name);
+  std::vector<double> v(lattice_size * 4 * 3);
+
+  array.resize(lattice_size * 4 * 3);
+  stream.ignore(bites_skip);
+
+  if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
+    std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
+
+  for (int i = 0; i < lattice_size; i++) {
+    for (int mu = 0; mu < 4; mu++) {
+      for (int j = 0; j < 3; j++) {
+        array[i * 4 + mu].matrix[j] =
+            complex_t(cos(v[mu * lattice_size * 3 + j * lattice_size + i]),
+                      sin(v[mu * lattice_size * 3 + j * lattice_size + i]));
+      }
+    }
+  }
+}
+
+template <>
+void data<su2>::read_double_vitaly(std::string &file_name, int bites_skip) {
+  std::cout << "read_double_vitaly<su2> is not implemented" << std::endl;
+}
+template <>
+void data<su3>::read_double_vitaly(std::string &file_name, int bites_skip) {
+  std::cout << "read_double_vitaly<su3> is not implemented" << std::endl;
+}
+template <>
+void data<abelian>::read_double_vitaly(std::string &file_name, int bites_skip) {
+  std::cout << "read_double_vitaly<abelian> is not implemented" << std::endl;
 }
 
 double reverseValue(const char *data) {
