@@ -65,16 +65,16 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_wilson(conf.array);
 
-  int D_max = 32;
+  int D_max = 8;
 
   start_time = omp_get_wtime();
 
-  // std::map<int, double> polyakov_correlator =
-  //     polyakov_loop_correlator_singlet(conf.array, D_min, D_max);
-  // std::map<double, double> polyakov_correlator =
-  //     polyakov_loop_correlator_singlet_offaxis(conf.array, D_min, D_max);
+  //   std::vector<double> polyakov_correlator_vec =
+  //       polyakov_loop_correlator_singlet(conf.array, D_max);
+  //   std::vector<double> polyakov_correlator_vec =
+  //       polyakov_loop_correlator(conf.array, D_max);
   std::vector<double> polyakov_correlator_vec =
-      polyakov_loop_correlator_singlet(conf.array, D_max);
+      polyakov_loop_correlator_complex(conf.array, D_max);
 
   std::map<double, double> polyakov_correlator =
       polyakov_average_directions(polyakov_correlator_vec, D_max);

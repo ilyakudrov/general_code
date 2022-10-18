@@ -298,6 +298,10 @@ double su3::tr() {
   return (matrix[0][0].real + matrix[1][1].real + matrix[2][2].real) / 3;
 }
 
+complex_t su3::tr_complex() {
+  return (matrix[0][0] + matrix[1][1] + matrix[2][2]) / 3;
+}
+
 double su3::multiply_tr(const su3 &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {

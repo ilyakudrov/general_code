@@ -146,6 +146,8 @@ public:
   // calculate trace of the matrix
   double tr();
 
+  complex_t tr_complex();
+
   double multiply_tr(const su3 &B);
 
   // calculate inverse of the matrix

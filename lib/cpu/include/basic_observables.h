@@ -111,8 +111,14 @@ template <class T>
 std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array);
 
 template <class T>
-std::map<int, double> polyakov_loop_correlator(const std::vector<T> &conf,
-                                               int D_min, int D_max);
+std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
+                                             int D_max);
+
+std::vector<complex_t>
+calculate_polyakov_loops_tr_complex(const std::vector<su3> &array);
+
+std::vector<double>
+polyakov_loop_correlator_complex(const std::vector<su3> &conf, int D_max);
 
 template <class T>
 std::vector<T> calculate_polyakov_loops(const std::vector<T> &array);
