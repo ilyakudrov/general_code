@@ -22,7 +22,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3_abelian
+#define MATRIX_TYPE su3
 
 using namespace std;
 

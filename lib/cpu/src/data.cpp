@@ -235,10 +235,36 @@ template <>
 void data<su2>::read_double_vitaly(std::string &file_name, int bites_skip) {
   std::cout << "read_double_vitaly<su2> is not implemented" << std::endl;
 }
+
 template <>
 void data<su3>::read_double_vitaly(std::string &file_name, int bites_skip) {
-  std::cout << "read_double_vitaly<su3> is not implemented" << std::endl;
+  int lattice_size = x_size * y_size * z_size * t_size;
+
+  std::ifstream stream(file_name);
+  std::vector<double> v(lattice_size * 4 * 18);
+
+  array.resize(lattice_size * 4 * 18);
+  stream.ignore(bites_skip);
+
+  if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
+    std::cout << "data<su3>::read_double_vitaly error: " << file_name
+              << std::endl;
+
+  for (int i = 0; i < lattice_size; i++) {
+    for (int mu = 0; mu < 4; mu++) {
+      for (int j = 0; j < 3; j++) {
+        for (int k = 0; k < 3; k++) {
+          array[i * 4 + mu].matrix[j][k] =
+              complex_t(v[mu * lattice_size * 18 + k * lattice_size * 6 +
+                          j * lattice_size * 2 + i * 2],
+                        v[mu * lattice_size * 18 + k * lattice_size * 6 +
+                          j * lattice_size * 2 + i * 2 + 1]);
+        }
+      }
+    }
+  }
 }
+
 template <>
 void data<abelian>::read_double_vitaly(std::string &file_name, int bites_skip) {
   std::cout << "read_double_vitaly<abelian> is not implemented" << std::endl;
