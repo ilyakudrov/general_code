@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
   string conf_format;
   int bytes_skip = 0;
   string path_output_correlator;
+  string correlator_type;
 
   int D_max;
 
@@ -41,6 +42,8 @@ int main(int argc, char **argv) {
       path_conf = argv[++i];
     } else if (string(argv[i]) == "-path_output_correlator") {
       path_output_correlator = argv[++i];
+    } else if (string(argv[i]) == "-correlator_type") {
+      correlator_type = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-D_max") {
@@ -92,12 +95,20 @@ int main(int argc, char **argv) {
 
   output_correlator << "distance,correlator" << endl;
 
+  std::vector<double> polyakov_correlator_vec;
+
   start_time = omp_get_wtime();
 
-  std::vector<double> polyakov_correlator_vec =
-      polyakov_loop_correlator_singlet(conf.array, D_max);
+  if (correlator_type == "singlet") {
+    polyakov_correlator_vec =
+        polyakov_loop_correlator_singlet(conf.array, D_max);
+  } else if (correlator_type == "color_average") {
+    polyakov_correlator_vec = polyakov_loop_correlator(conf.array, D_max);
+  } else {
+    cout << "invalid correlator_type" << endl;
+  }
 
-  std::map<double, double> polyakov_correlator =
+  std ::map<double, double> polyakov_correlator =
       polyakov_average_directions(polyakov_correlator_vec, D_max);
 
   end_time = omp_get_wtime();

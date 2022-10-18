@@ -818,6 +818,10 @@ double su3_abelian::tr() {
   return (matrix[0].real + matrix[1].real + matrix[2].real) / 3;
 }
 
+complex_t su3_abelian::tr_complex() {
+  return (matrix[0] + matrix[1] + matrix[2]) / 3;
+}
+
 double su3_abelian::multiply_tr(const su3_abelian &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {

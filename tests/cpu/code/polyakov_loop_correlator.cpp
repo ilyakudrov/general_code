@@ -71,10 +71,8 @@ int main(int argc, char *argv[]) {
 
   //   std::vector<double> polyakov_correlator_vec =
   //       polyakov_loop_correlator_singlet(conf.array, D_max);
-  //   std::vector<double> polyakov_correlator_vec =
-  //       polyakov_loop_correlator(conf.array, D_max);
   std::vector<double> polyakov_correlator_vec =
-      polyakov_loop_correlator_complex(conf.array, D_max);
+      polyakov_loop_correlator(conf.array, D_max);
 
   std::map<double, double> polyakov_correlator =
       polyakov_average_directions(polyakov_correlator_vec, D_max);
