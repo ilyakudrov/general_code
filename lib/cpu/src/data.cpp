@@ -214,7 +214,7 @@ void data<su3_abelian>::read_double_vitaly(std::string &file_name,
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 3);
 
-  array.resize(lattice_size * 4 * 3);
+  array.resize(lattice_size * 4);
   stream.ignore(bites_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
@@ -243,7 +243,7 @@ void data<su3>::read_double_vitaly(std::string &file_name, int bites_skip) {
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
 
-  array.resize(lattice_size * 4 * 18);
+  array.resize(lattice_size * 4);
   stream.ignore(bites_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))

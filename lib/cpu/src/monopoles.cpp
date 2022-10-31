@@ -122,12 +122,37 @@ read_double_su3_convet_angles(std::string &file_path) {
   return angles;
 }
 
-std::vector<double>
-convert_abelian_to_angles(std::vector<abelian> &conf_abelian) {
+std::vector<double> convert_to_angles(std::vector<abelian> &conf_abelian) {
   std::vector<double> angles(conf_abelian.size());
 
   for (int i = 0; i < conf_abelian.size(); i++) {
     angles[i] = conf_abelian[i].phi;
+  }
+
+  return angles;
+}
+
+std::vector<std::vector<double>>
+convert_to_angles(std::vector<su3_abelian> &conf) {
+  std::vector<std::vector<double>> angles(3, std::vector<double>(conf.size()));
+
+  for (int i = 0; i < conf.size(); i++) {
+    for (int j = 0; j < 3; j++) {
+      angles[j][i] = atan2(conf[i].matrix[j].imag, conf[i].matrix[j].real);
+    }
+  }
+
+  return angles;
+}
+
+std::vector<std::vector<double>> convert_to_angles(std::vector<su3> &conf) {
+  std::vector<std::vector<double>> angles(3, std::vector<double>(conf.size()));
+
+  for (int i = 0; i < conf.size(); i++) {
+    for (int j = 0; j < 3; j++) {
+      angles[j][i] =
+          atan2(conf[i].matrix[j][j].imag, conf[i].matrix[j][j].real);
+    }
   }
 
   return angles;

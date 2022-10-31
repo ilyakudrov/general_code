@@ -1,9 +1,11 @@
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
+#include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/monopoles.h"
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
@@ -22,7 +24,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su3_abelian
 
 using namespace std;
 
@@ -40,44 +42,61 @@ int main(int argc, char *argv[]) {
 
   data<MATRIX_TYPE> conf;
   // string conf_path =
-  //     "../../confs/Coulomb_su3/QCD/140MeV/nt4/conf_Coulomb_gaugefixed_0501";
-  // string conf_path = "/home/ilya/soft/source/culgt/src/gaugefixing/apps/"
-  //                    "test_Coulomb/result/conf_Coulomb_gaugefixed_0501";
-  // string conf_path = "/home/ilya/soft/source/culgt/src/gaugefixing/apps/"
-  //                    "test_Coulomb/result/conf_Coulomb_gaugefixed_0001";
-  // string conf_path = "../../confs/test_monopole/conf_monopole_0001";
-  // string conf_path = "../../confs/decomposed/monopoless/gluodynamics/24^4/"
-  //                    "beta6.0/conf_monopoless_0001";
-  // string conf_path = "../../confs/decomposed/monopole/gluodynamics/24^4/"
-  //                    "beta6.0/conf_monopole_0001";
+  //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
   // string conf_path =
-  // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
-  //                    "result/conf_monopoless_0001";
-  // string conf_path = "../../confs/smeared/QCD/140MeV/nt4/smeared_0501";
+  //     "../../confs/decomposed/monopoless/gluodynamics/16^4/MLS_conf.01001.lat";
+  // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/"
+  //                    "CON_MON_MAG_01001.LAT";
   string conf_path =
-      "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
-  // string conf_path = "../../confs/test_output/conf_monopole_0001";
+      "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+      "test/result/conf_monopole_16_1001_non-unitary";
   // string conf_path =
-  // "../../confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001";
-  // string conf_path = "/home/ilya/soft/source/culgt/src/gaugefixing/apps/"
-  //                    "test_Landau/result/conf_Landau_gaugefixed_0501";
-  // string conf_path =
-  //     "../../confs/Coulomb_su3/QCD/140MeV/nt4/conf_Coulomb_gaugefixed_0502";
-  // conf.read_double(conf_path, 4);
-  conf.read_double_vitaly(conf_path, 4);
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopole_16_1001";
+  // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/old/"
+  //                    "CON_MON_MAG_01001.LAT";
+  conf.read_double(conf_path, 0);
+  // conf.read_double_vitaly(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
   // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
+  // double sum;
+  // for (int i = 0; i < 4; i++) {
+  //   sum = 0;
+  //   for (int j = 0; j < 3; j++) {
+  //     sum += atan2(conf.array[i].matrix[j].imag,
+  //     conf.array[i].matrix[j].real); cout << "sum " << sum << endl;
+  //   }
+  //   cout << "sum " << sum << endl;
+  // }
+
+  // vector<vector<double>> angles = convert_to_angles(conf.array);
+
+  // string conf_path1 =
+  //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
+
+  // data<su3> conf1;
+  // conf1.read_double_vitaly(conf_path1, 4);
+  // std::cout << "plaket su3 " << plaket(conf1.array) << std::endl;
+
+  // get_monopoless_optimized_su3(conf1.array, angles);
+  // std::cout << "plaket monopoless1 " << plaket(conf1.array) << std::endl;
+
+  // string conf_path2 =
+  //     "../../confs/decomposed/monopoless/gluodynamics/16^4/MLS_conf.01001.lat";
+  // data<su3> conf2;
+  // conf2.read_double_vitaly(conf_path2, 4);
+  // std::cout << "plaket monopoless2 " << plaket(conf2.array) << std::endl;
+
   // plakets and polyakov loop
   start_time = clock();
-  std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
-  std::cout << "qc2dstag plaket_time " << plaket_time(conf.array) << std::endl;
-  std::cout << "qc2dstag plaket_space " << plaket_space(conf.array)
-            << std::endl;
-  std::cout << "qc2dstag polyakov " << polyakov_loop(conf.array) << std::endl;
+  std::cout << "plaket " << plaket(conf.array) << std::endl;
+  std::cout << "plaket_time " << plaket_time(conf.array) << std::endl;
+  std::cout << "plaket_space " << plaket_space(conf.array) << std::endl;
+  std::cout << "polyakov " << polyakov_loop(conf.array) << std::endl;
   end_time = clock();
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time * 1. / CLOCKS_PER_SEC

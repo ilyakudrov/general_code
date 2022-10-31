@@ -1,14 +1,14 @@
 #!/bin/bash
-path_conf="../../../tests/confs/Landau_U1xU1/gluodynamics/36^4/beta6.3/conf_Landau_gaugefixed_0001"
-conf_format=double_qc2dstag
-path_conf_monopole="./result/conf_monopole_36_0001"
-path_conf_monopoless="./result/conf_monopoless_36_0001"
-path_inverse_laplacian="../../../tests/confs/inverse_laplacian/ALPHA36x36_d.LAT"
-bytes_skip=0
-x_size=36
-y_size=36
-z_size=36
-t_size=36
+path_conf="../../../tests/confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat"
+conf_format=double_vitaly
+path_conf_monopole="./result/conf_monopole_16_1001"
+path_conf_monopoless="./result/conf_monopoless_16_1001"
+path_inverse_laplacian="../../../tests/confs/inverse_laplacian/ALPHA16x16_d.LAT"
+bytes_skip=4
+x_size=16
+y_size=16
+z_size=16
+t_size=16
 parallel=true
 
 parameters="-path_conf ${path_conf} -conf_format ${conf_format} -path_conf_monopole ${path_conf_monopole} -path_conf_monopoless ${path_conf_monopoless} \

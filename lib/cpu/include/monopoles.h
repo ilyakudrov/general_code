@@ -10,8 +10,10 @@ std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);
 std::vector<std::vector<double>>
 read_double_su3_convet_angles(std::string &file_path);
 std::vector<double> read_double_qc2dstag_convet_abelian(std::string &file_path);
-std::vector<double>
-convert_abelian_to_angles(std::vector<abelian> &conf_abelian);
+std::vector<double> convert_to_angles(std::vector<abelian> &conf_abelian);
+std::vector<std::vector<double>>
+convert_to_angles(std::vector<su3_abelian> &conf);
+std::vector<std::vector<double>> convert_to_angles(std::vector<su3> &conf);
 
 std::vector<std::vector<double>>
 calculate_monopole_plaket(std::vector<double> &angles);
