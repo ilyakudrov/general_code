@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
   cout.precision(17);
 
-  vector<double> angles = convert_abelian_to_angles(conf.array);
+  vector<double> angles = convert_to_angles(conf.array);
 
   conf.array.erase(conf.array.begin(), conf.array.end());
 
@@ -97,8 +97,7 @@ int main(int argc, char **argv) {
   std::ofstream output_stream_monopoles(path_output_monopoles);
 
   output_stream_clusters_unwrapped << "length,number" << endl;
-  output_stream_clusters_wrapped
-      << "length,number,space wrappings,time wrappings,direction" << endl;
+  output_stream_clusters_wrapped << "length,number,direction" << endl;
   output_stream_windings << "winding_number,cluster_number,direction" << endl;
   output_stream_monopoles << "asymmetry" << endl;
 
