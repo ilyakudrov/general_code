@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
   std::ofstream output_stream_monopoles(path_output_monopoles);
 
   output_stream_clusters_unwrapped << "color,length,number" << endl;
-  output_stream_clusters_wrapped << "color,length,number" << endl;
+  output_stream_clusters_wrapped << "color,length,number,direction" << endl;
   output_stream_windings << "color,winding_number,cluster_number,direction"
                          << endl;
   output_stream_monopoles << "color,asymmetry" << endl;
