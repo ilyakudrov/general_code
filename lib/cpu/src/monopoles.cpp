@@ -285,27 +285,10 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   link1 link(x_size, y_size, z_size, t_size);
 
-  std::vector<double> J(data_size);
-
   std::vector<std::vector<std::vector<double>>> monopole_plakets(3);
 
   for (int i = 0; i < 3; i++) {
     monopole_plakets[i] = calculate_monopole_plaket(angles[i]);
-  }
-
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < monopole_plakets[i].size(); j++) {
-      for (int k = 0; k < monopole_plakets[i][j].size(); k++) {
-
-        while (monopole_plakets[i][j][k] >= M_PI) {
-          monopole_plakets[i][j][k] -= 2 * M_PI;
-        }
-
-        while (monopole_plakets[i][j][k] < -M_PI) {
-          monopole_plakets[i][j][k] += 2 * M_PI;
-        }
-      }
-    }
   }
 
   double sum;
@@ -318,9 +301,6 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
       for (int i = 0; i < 3; i++) {
         sum += monopole_plakets[i][j][k];
       }
-
-      // if (sum >= M_PI || sum <= -M_PI)
-      //   std::cout << sum << std::endl;
 
       if (sum >= M_PI) {
         place = 0;
@@ -365,6 +345,73 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
   }
 
   return monopole_plakets;
+}
+
+std::vector<std::vector<std::vector<int>>>
+make_monopole_plakets_singular(std::vector<std::vector<double>> &angles) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<std::vector<std::vector<int>>> dirac_plakets(3);
+
+  for (int i = 0; i < 3; i++) {
+    dirac_plakets[i] = calculate_monopole_plaket_singular(angles[i]);
+  }
+
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < dirac_plakets[0].size(); j++) {
+    for (int k = 0; k < dirac_plakets[0][0].size(); k++) {
+
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += dirac_plakets[i][j][k];
+      }
+
+      if (sum >= 1) {
+        place = 0;
+        extremal = dirac_plakets[0][j][k];
+
+        if (dirac_plakets[1][j][k] >= extremal) {
+          extremal = dirac_plakets[1][j][k];
+          place = 1;
+        }
+
+        if (dirac_plakets[2][j][k] >= extremal) {
+          place = 2;
+        }
+
+        dirac_plakets[place][j][k] -= 1;
+      }
+
+      if (sum <= -1) {
+        place = 0;
+        extremal = dirac_plakets[0][j][k];
+
+        if (dirac_plakets[1][j][k] <= extremal) {
+          extremal = dirac_plakets[1][j][k];
+          place = 1;
+        }
+
+        if (dirac_plakets[2][j][k] <= extremal) {
+          place = 2;
+        }
+
+        dirac_plakets[place][j][k] += 1;
+      }
+
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += dirac_plakets[i][j][k];
+      }
+
+      if (sum != 0)
+        std::cout << "sum error " << sum << std::endl;
+    }
+  }
+
+  return dirac_plakets;
 }
 
 // returns 0 if no current has been found, direction +-1..4 if it has

@@ -468,29 +468,6 @@ int link1::monopole_plaket_singular_mu(std::vector<double> &angles, int mu) {
   return singular;
 }
 
-// int link1::monopole_plaket_singular_complex_mu(
-//     std::vector<complex_t> &gauge_complex, std::vector<complex_t>
-//     &conf_complex, int mu) {
-//   int singular = 0;
-//   complex_t plaket = gauge_complex[place/4] * conf_complex[place +
-//   direction]; move(direction, 1); plaket = (plaket ^ gauge_complex[place/4])
-//   ; move(direction, -1); move(mu, 1); plaket -= angles[place + direction];
-//   move(mu, -1);
-//   plaket -= angles[place + mu];
-//   double angle = atan2(plaket.imag, plaket.real);
-//   while ((angle > Pi) || (angle < -Pi)) {
-//     if (angle > Pi) {
-//       angle = angle - 2 * Pi;
-//       singular++;
-//     }
-//     if (angle < -Pi) {
-//       angle = angle + 2 * Pi;
-//       singular--;
-//     }
-//   }
-//   return singular;
-// }
-
 void link1::get_current(std::vector<std::vector<double>> &monopole_plaket,
                         double *J) {
   double j0, j1, j2, j3;

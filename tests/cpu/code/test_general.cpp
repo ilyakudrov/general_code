@@ -24,7 +24,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3_abelian
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 4;
 
   std::cout.precision(17);
 
@@ -47,31 +47,44 @@ int main(int argc, char *argv[]) {
   //     "../../confs/decomposed/monopoless/gluodynamics/16^4/MLS_conf.01001.lat";
   // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/"
   //                    "CON_MON_MAG_01001.LAT";
-  string conf_path =
-      "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-      "test/result/conf_monopole_16_1001_non-unitary";
+  // string conf_path =
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopole_16_1001_non-unitary";
   // string conf_path =
   //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
   //     "test/result/conf_monopole_16_1001";
   // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/old/"
   //                    "CON_MON_MAG_01001.LAT";
-  conf.read_double(conf_path, 0);
+  string conf_path = "../../confs/MA_gauge/su3/QCD/140MeV/nt4/steps_2000/"
+                     "copies=1/tol=1e-13/conf.SP_gaugefixed_0501";
+
+  // conf.read_double(conf_path, 0);
   // conf.read_double_vitaly(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
-  // conf.read_ildg(conf_path);
+  conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
+  cout << "mag functional " << mag_functional_su3(conf.array) << endl;
+
   // double sum;
-  // for (int i = 0; i < 4; i++) {
+  // double sum_aver = 0;
+  // double sum_max = 0;
+  // for (int i = 0; i < conf.array.size(); i++) {
   //   sum = 0;
   //   for (int j = 0; j < 3; j++) {
   //     sum += atan2(conf.array[i].matrix[j].imag,
-  //     conf.array[i].matrix[j].real); cout << "sum " << sum << endl;
+  //     conf.array[i].matrix[j].real);
   //   }
-  //   cout << "sum " << sum << endl;
+  //   sum_aver += sum;
+  //   if (sum > sum_max) {
+  //     sum_max = sum;
+  //   }
+  //   // cout << "sum " << sum << endl;
   // }
+  // sum_aver = sum_aver / conf.array.size();
+  // cout << "sum_aver = " << sum_aver << " sum_max =  " << sum_max << endl;
 
   // vector<vector<double>> angles = convert_to_angles(conf.array);
 

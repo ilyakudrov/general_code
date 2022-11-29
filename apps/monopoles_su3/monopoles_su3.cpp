@@ -97,14 +97,13 @@ int main(int argc, char **argv) {
   vector<vector<double>> angles = make_angles_SU3(conf_su3.array);
   conf_su3.array.erase(conf_su3.array.begin(), conf_su3.array.end());
 
-  std::vector<std::vector<std::vector<double>>> monopole_plakets =
+  vector<vector<vector<double>>> monopole_plakets =
       make_monopole_plakets(angles);
 
-  std::ofstream output_stream_clusters_unwrapped(
-      path_output_clusters_unwrapped);
-  std::ofstream output_stream_clusters_wrapped(path_output_clusters_wrapped);
-  std::ofstream output_stream_windings(path_output_windings);
-  std::ofstream output_stream_monopoles(path_output_monopoles);
+  ofstream output_stream_clusters_unwrapped(path_output_clusters_unwrapped);
+  ofstream output_stream_clusters_wrapped(path_output_clusters_wrapped);
+  ofstream output_stream_windings(path_output_windings);
+  ofstream output_stream_monopoles(path_output_monopoles);
 
   output_stream_clusters_unwrapped << "color,length,number" << endl;
   output_stream_clusters_wrapped << "color,length,number,direction" << endl;

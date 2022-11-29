@@ -21,15 +21,38 @@ int t_size;
 
 using namespace std;
 
+template <class T>
+tuple<double, T> aver_and_max_plaket(vector<vector<vector<T>>> plakets) {
+  double aver = 0;
+  T max = 0;
+  T sum_tmp;
+  int size = plakets[0][0].size();
+  for (int j = 0; j < 6; j++) {
+    for (int k = 0; k < size; k++) {
+      sum_tmp = 0;
+      for (int i = 0; i < 3; i++) {
+        sum_tmp += plakets[i][j][k];
+      }
+      aver += sum_tmp;
+      if (abs(sum_tmp) > max) {
+        max = abs(sum_tmp);
+      }
+    }
+  }
+  aver /= size * 6;
+
+  return tuple<double, T>({aver, max});
+}
+
 int main(int argc, char *argv[]) {
   unsigned int start_time;
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 6;
 
   cout.precision(17);
 
@@ -47,24 +70,24 @@ int main(int argc, char *argv[]) {
   // string path_abelian =
   //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
   //     "test/result/conf_monopoless_16_1001_non-unitary";
+  // string path_abelian =
+  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
+  //     "test/result/conf_monopoless_16_1001";
   string path_abelian =
-      "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-      "test/result/conf_monopoless_16_1001";
-  // string path_abelian = "../../confs/decomposed/monopole/gluodynamics/24^4/"
-  //                       "beta6.0/conf_monopole_0001";
+      "../../confs/MA_gauge/su3/QCD/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
 
   // data<su3_abelian> conf;
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
   // conf.read_double_qc2dstag(path_abelian);
-  conf.read_double(path_abelian, 0);
+  // conf.read_double(path_abelian, 0);
   // conf.read_double_vitaly(path_abelian, 4);
-  // conf.read_ildg(path_abelian);
+  conf.read_ildg(path_abelian);
   // conf.read_double_convert_abelian(path_abelian, 0);
   // vector<vector<double>> angles = conf.array;
-  // vector<vector<double>> angles = make_angles_SU3(conf.array);
+  vector<vector<double>> angles = make_angles_SU3(conf.array);
   // vector<vector<double>> angles = read_double_angles_su3(path_abelian);
-  vector<vector<double>> angles = convert_to_angles(conf.array);
+  // vector<vector<double>> angles = convert_to_angles(conf.array);
   // vector<vector<double>> angles =
   // read_double_su3_convet_angles(path_abelian);
 
@@ -77,7 +100,7 @@ int main(int argc, char *argv[]) {
     cout << "sum = " << sum << endl;
   }
 
-  std::cout << "qc2dstag plaket " << plaket(conf.array) << std::endl;
+  cout << "qc2dstag plaket " << plaket(conf.array) << endl;
 
   cout << "abelian link" << endl << endl;
 
@@ -85,8 +108,10 @@ int main(int argc, char *argv[]) {
     cout << angles[0][i] << " " << angles[1][i] << " " << angles[2][i] << endl;
   }
 
-  std::vector<std::vector<std::vector<double>>> monopole_plakets =
+  vector<vector<vector<double>>> monopole_plakets =
       make_monopole_plakets(angles);
+  vector<vector<vector<int>>> dirac_plakets =
+      make_monopole_plakets_singular(angles);
 
   cout << "abelian plaket" << endl << endl;
 
@@ -108,7 +133,15 @@ int main(int argc, char *argv[]) {
 
   link1 link(x_size, y_size, z_size, t_size);
 
-  vector<vector<double>> J_test(3);
+  tuple<double, double> abelian_aver = aver_and_max_plaket(monopole_plakets);
+  tuple<double, double> dirac_aver = aver_and_max_plaket(dirac_plakets);
+
+  cout << "abelian_aver " << get<0>(abelian_aver) << " " << get<1>(abelian_aver)
+       << endl;
+  cout << "dirac_aver " << get<0>(dirac_aver) << " " << get<1>(dirac_aver)
+       << endl;
+
+  /*vector<vector<double>> J_test(3);
   for (int i = 0; i < 3; i++) {
     J_test[i] = calculate_current_monopole_plakets(monopole_plakets[i]);
   }
@@ -173,7 +206,7 @@ int main(int argc, char *argv[]) {
       J_sum1 += J_number[i][j];
     }
   }
-  cout << "J_sum = " << J_sum << " J_sum1 = " << J_sum1 << endl;
+  cout << "J_sum = " << J_sum << " J_sum1 = " << J_sum1 << endl;*/
 
   for (int color = 0; color < 3; color++) {
     vector<double> J =
