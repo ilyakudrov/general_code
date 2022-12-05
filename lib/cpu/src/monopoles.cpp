@@ -282,7 +282,6 @@ std::vector<double> calculate_current_monopole_plakets(
 
 std::vector<std::vector<std::vector<double>>>
 make_monopole_plakets(std::vector<std::vector<double>> &angles) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
   link1 link(x_size, y_size, z_size, t_size);
 
   std::vector<std::vector<std::vector<double>>> monopole_plakets(3);
@@ -333,14 +332,6 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
 
         monopole_plakets[place][j][k] += 2 * M_PI;
       }
-
-      sum = 0;
-      for (int i = 0; i < 3; i++) {
-        sum += monopole_plakets[i][j][k];
-      }
-
-      if (sum >= M_PI || sum <= -M_PI)
-        std::cout << sum << std::endl;
     }
   }
 
@@ -349,7 +340,6 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
 
 std::vector<std::vector<std::vector<int>>>
 make_monopole_plakets_singular(std::vector<std::vector<double>> &angles) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
   link1 link(x_size, y_size, z_size, t_size);
 
   std::vector<std::vector<std::vector<int>>> dirac_plakets(3);
@@ -400,18 +390,79 @@ make_monopole_plakets_singular(std::vector<std::vector<double>> &angles) {
 
         dirac_plakets[place][j][k] += 1;
       }
-
-      sum = 0;
-      for (int i = 0; i < 3; i++) {
-        sum += dirac_plakets[i][j][k];
-      }
-
-      if (sum != 0)
-        std::cout << "sum error " << sum << std::endl;
     }
   }
 
   return dirac_plakets;
+}
+
+void make_plakets_both(
+    std::vector<std::vector<double>> &angles,
+    std::vector<std::vector<std::vector<double>>> &monopole_plakets,
+    std::vector<std::vector<std::vector<int>>> &dirac_plakets) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<std::vector<std::vector<double>>> monopole_plakets_tmp(3);
+
+  for (int i = 0; i < 3; i++) {
+    monopole_plakets_tmp[i] = calculate_monopole_plaket(angles[i]);
+  }
+
+  std::vector<std::vector<std::vector<int>>> dirac_plakets_tmp(3);
+
+  for (int i = 0; i < 3; i++) {
+    dirac_plakets_tmp[i] = calculate_monopole_plaket_singular(angles[i]);
+  }
+
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < monopole_plakets_tmp[0].size(); j++) {
+    for (int k = 0; k < monopole_plakets_tmp[0][0].size(); k++) {
+
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += monopole_plakets_tmp[i][j][k];
+      }
+
+      if (sum >= M_PI) {
+        place = 0;
+        extremal = monopole_plakets_tmp[0][j][k];
+
+        if (monopole_plakets_tmp[1][j][k] >= extremal) {
+          extremal = monopole_plakets_tmp[1][j][k];
+          place = 1;
+        }
+
+        if (monopole_plakets_tmp[2][j][k] >= extremal) {
+          place = 2;
+        }
+
+        monopole_plakets_tmp[place][j][k] -= 2 * M_PI;
+        dirac_plakets_tmp[place][j][k] += 1;
+      }
+
+      if (sum <= -M_PI) {
+        place = 0;
+        extremal = monopole_plakets_tmp[0][j][k];
+
+        if (monopole_plakets_tmp[1][j][k] <= extremal) {
+          extremal = monopole_plakets_tmp[1][j][k];
+          place = 1;
+        }
+
+        if (monopole_plakets_tmp[2][j][k] <= extremal) {
+          place = 2;
+        }
+
+        monopole_plakets_tmp[place][j][k] += 2 * M_PI;
+        dirac_plakets_tmp[place][j][k] -= 1;
+      }
+    }
+  }
+
+  monopole_plakets = std::move(monopole_plakets_tmp);
+  dirac_plakets = std::move(dirac_plakets_tmp);
 }
 
 // returns 0 if no current has been found, direction +-1..4 if it has

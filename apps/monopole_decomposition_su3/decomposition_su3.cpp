@@ -103,16 +103,16 @@ int main(int argc, char **argv) {
   vector<double> inverse_laplacian =
       read_inverse_laplacian(path_inverse_laplacian);
 
-  vector<vector<double>> angles_monopoole(3);
+  vector<vector<double>> angles_monopole(3);
 
   start_time = omp_get_wtime();
 
   for (int i = 0; i < 3; i++) {
     if (parallel) {
-      angles_monopoole[i] =
+      angles_monopole[i] =
           make_monopole_angles_parallel(angles_su3[i], inverse_laplacian);
     } else {
-      angles_monopoole[i] =
+      angles_monopole[i] =
           make_monopole_angles(angles_su3[i], inverse_laplacian);
     }
     angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
@@ -122,11 +122,11 @@ int main(int argc, char **argv) {
   search_time = end_time - start_time;
   std::cout << "decomposition time: " << search_time << std::endl;
 
-  make_unitary(angles_monopoole);
+  make_unitary(angles_monopole);
 
-  write_double_angles_su3(path_conf_monopole, angles_monopoole);
+  write_double_angles_su3(path_conf_monopole, angles_monopole);
 
-  get_monopoless_optimized_su3(conf_su3.array, angles_monopoole);
+  get_monopoless_optimized_su3(conf_su3.array, angles_monopole);
 
   write_double_su3(path_conf_monopoless, conf_su3.array);
 }

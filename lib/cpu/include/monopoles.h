@@ -44,6 +44,11 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles);
 std::vector<std::vector<std::vector<int>>>
 make_monopole_plakets_singular(std::vector<std::vector<double>> &angles);
 
+void make_plakets_both(
+    std::vector<std::vector<double>> &angles,
+    std::vector<std::vector<std::vector<double>>> &monopole_plakets,
+    std::vector<std::vector<std::vector<int>>> &dirac_plakets);
+
 // functions for obtaining information about clusters for testing
 
 void print_currents(loop *ll);

@@ -1167,8 +1167,13 @@ make_monopole_angles_parallel(std::vector<double> &angles,
 
   int data_size = x_size * y_size * z_size * t_size;
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(angles);
+  // std::vector<std::vector<int>> monopole_plaket =
+  //     calculate_monopole_plaket_singular(angles);
+
+  std::vector<std::vector<std::vector<double>>> monopole_plakets(3);
+  std::vector<std::vector<std::vector<int>>> dirac_plakets(3);
+
+  make_plakets_both(angles, monopole_plakets, dirac_plakets);
 
   std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
   std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
