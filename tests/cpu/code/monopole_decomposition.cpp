@@ -3,6 +3,7 @@
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/monopoles.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -66,11 +67,14 @@ int main(int argc, char *argv[]) {
 
   vector<double> conf_angles_U1 = convert_complex_to_angles(conf_complex);
 
+  vector<vector<int>> dirac_plakets =
+      calculate_monopole_plaket_singular(conf_angles_U1);
+
   vector<double> monopole_angles;
 
   start_time = omp_get_wtime();
 
-  monopole_angles = make_monopole_angles(conf_angles_U1, inverse_laplacian);
+  monopole_angles = make_monopole_angles(dirac_plakets, inverse_laplacian);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -87,7 +91,7 @@ int main(int argc, char *argv[]) {
   start_time = omp_get_wtime();
 
   monopole_angles =
-      make_monopole_angles_parallel(conf_angles_U1, inverse_laplacian);
+      make_monopole_angles_parallel(dirac_plakets, inverse_laplacian);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;

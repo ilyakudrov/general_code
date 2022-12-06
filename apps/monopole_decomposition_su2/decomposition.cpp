@@ -2,6 +2,7 @@
 #include "../../lib/cpu/include/Landau_U1.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
+#include "../../lib/cpu/include/monopoles.h"
 
 #include <chrono>
 #include <fstream>
@@ -136,8 +137,11 @@ int main(int argc, char **argv) {
 
   cout << "decomposition started" << endl;
 
+  vector<vector<int>> dirac_plakets =
+      calculate_monopole_plaket_singular(conf_angles_U1);
+
   vector<double> monopole_angles =
-      make_monopole_angles(conf_angles_U1, inverse_laplacian);
+      make_monopole_angles(dirac_plakets, inverse_laplacian);
 
   cout << "decomposition ended" << endl;
 

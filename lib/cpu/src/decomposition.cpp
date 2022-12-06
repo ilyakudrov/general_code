@@ -335,10 +335,10 @@ std::vector<double> make_monopole_angles2(std::vector<double> &angles,
   return monopole_angles;
 }
 
-void monopole_plaket_difference_nonzero(
-    std::vector<std::vector<int>> &monopole_plaket,
-    std::vector<std::vector<int>> &monopole_difference,
-    std::vector<std::vector<int>> &monopole_coordinate) {
+void dirac_plaket_difference_nonzero(
+    std::vector<std::vector<int>> &dirac_plaket,
+    std::vector<std::vector<int>> &dirac_difference,
+    std::vector<std::vector<int>> &dirac_coordinate) {
 
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -373,20 +373,20 @@ void monopole_plaket_difference_nonzero(
           }
         }
 
-        angle_tmp = monopole_plaket[index][link.place / 4];
+        angle_tmp = dirac_plaket[index][link.place / 4];
 
         link.move(nu, -1);
 
-        diff += factor * (angle_tmp - monopole_plaket[index][link.place / 4]);
+        diff += factor * (angle_tmp - dirac_plaket[index][link.place / 4]);
 
         link.move(nu, 1);
       }
     }
 
     if (diff != 0) {
-      monopole_difference[mu].push_back(diff);
+      dirac_difference[mu].push_back(diff);
       for (int nu = 0; nu < 4; nu++) {
-        monopole_coordinate[mu].push_back(link.coordinate[nu]);
+        dirac_coordinate[mu].push_back(link.coordinate[nu]);
       }
     }
   }
@@ -443,27 +443,25 @@ void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
   }
 }
 
-std::vector<double> make_monopole_angles1(std::vector<double> &angles,
-                                          std::vector<double> &laplace) {
+std::vector<double>
+make_monopole_angles1(std::vector<std::vector<int>> &dirac_plakets,
+                      std::vector<double> &laplace) {
   link1 link(x_size, y_size, z_size, t_size);
 
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<double> angles_decomposed(data_size);
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(angles);
+  std::vector<std::vector<int>> dirac_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> dirac_coordinate(4, std::vector<int>());
 
-  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
-  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
-
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
+  dirac_plaket_difference_nonzero(dirac_plakets, dirac_difference,
+                                  dirac_coordinate);
 
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
 
-  double monopole_angle = 0;
+  double dirac_angle = 0;
   int angle_tmp;
 
   std::vector<int> laplace_coordinate(4);
@@ -471,9 +469,9 @@ std::vector<double> make_monopole_angles1(std::vector<double> &angles,
   int angles_place;
 
   for (int mu = 0; mu < 4; mu++) {
-    for (int i = 0; i < monopole_difference[mu].size(); i++) {
+    for (int i = 0; i < dirac_difference[mu].size(); i++) {
 
-      decomposition_step(monopole_difference, monopole_coordinate, laplace,
+      decomposition_step(dirac_difference, dirac_coordinate, laplace,
                          angles_decomposed, i, mu);
     }
   }
@@ -533,7 +531,7 @@ void decomposition_step3(std::vector<std::vector<int>> &monopole_difference,
 }
 
 std::vector<std::vector<double>>
-make_monopole_angles3(std::vector<double> &angles,
+make_monopole_angles3(std::vector<std::vector<int>> &dirac_plakets,
                       std::vector<double> &laplace) {
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -542,19 +540,16 @@ make_monopole_angles3(std::vector<double> &angles,
   std::vector<std::vector<double>> angles_decomposed(
       4, std::vector<double>(data_size));
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(angles);
+  std::vector<std::vector<int>> dirac_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> dirac_coordinate(4, std::vector<int>());
 
-  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
-  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
-
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
+  dirac_plaket_difference_nonzero(dirac_plakets, dirac_difference,
+                                  dirac_coordinate);
 
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
 
-  double monopole_angle = 0;
+  double dirac_angle = 0;
   int angle_tmp;
 
   std::vector<int> laplace_coordinate(4);
@@ -562,9 +557,9 @@ make_monopole_angles3(std::vector<double> &angles,
   int angles_place;
 
   for (int mu = 0; mu < 4; mu++) {
-    for (int i = 0; i < monopole_difference[mu].size(); i++) {
+    for (int i = 0; i < dirac_difference[mu].size(); i++) {
 
-      decomposition_step3(monopole_difference, monopole_coordinate, laplace,
+      decomposition_step3(dirac_difference, dirac_coordinate, laplace,
                           angles_decomposed, i, mu);
     }
   }
@@ -671,25 +666,23 @@ void decomposition_step(int monopole_difference,
   }
 }
 
-std::vector<double> make_monopole_angles(std::vector<double> &angles,
-                                         std::vector<double> &laplace) {
+std::vector<double>
+make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
+                     std::vector<double> &laplace) {
 
   link1 link(x_size, y_size, z_size, t_size);
 
   int data_size = x_size * y_size * z_size * t_size;
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(angles);
+  std::vector<std::vector<int>> dirac_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> dirac_coordinate(4, std::vector<int>());
 
-  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
-  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
+  dirac_plaket_difference_nonzero(dirac_plakets, dirac_difference,
+                                  dirac_coordinate);
 
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
-
-  for (int mu = 0; mu < monopole_plaket.size(); mu++) {
-    monopole_plaket[mu].clear();
-    monopole_plaket[mu].shrink_to_fit();
+  for (int mu = 0; mu < dirac_plakets.size(); mu++) {
+    dirac_plakets[mu].clear();
+    dirac_plakets[mu].shrink_to_fit();
   }
 
   std::vector<std::vector<double>> angles_decomposed(
@@ -699,14 +692,13 @@ std::vector<double> make_monopole_angles(std::vector<double> &angles,
 
   for (int mu = 0; mu < 4; mu++) {
 
-    for (int i = 0; i < monopole_difference[mu].size(); i++) {
+    for (int i = 0; i < dirac_difference[mu].size(); i++) {
 
-      coordinate = {monopole_coordinate[mu][4 * i],
-                    monopole_coordinate[mu][4 * i + 1],
-                    monopole_coordinate[mu][4 * i + 2],
-                    monopole_coordinate[mu][4 * i + 3]};
+      coordinate = {
+          dirac_coordinate[mu][4 * i], dirac_coordinate[mu][4 * i + 1],
+          dirac_coordinate[mu][4 * i + 2], dirac_coordinate[mu][4 * i + 3]};
 
-      decomposition_step(monopole_difference[mu][i], coordinate, laplace,
+      decomposition_step(dirac_difference[mu][i], coordinate, laplace,
                          angles_decomposed[mu]);
     }
   }
@@ -1160,30 +1152,22 @@ void decomposition_step_parallel2(int monopole_difference,
 }
 
 std::vector<double>
-make_monopole_angles_parallel(std::vector<double> &angles,
+make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
                               std::vector<double> &laplace) {
 
   link1 link(x_size, y_size, z_size, t_size);
 
   int data_size = x_size * y_size * z_size * t_size;
 
-  // std::vector<std::vector<int>> monopole_plaket =
-  //     calculate_monopole_plaket_singular(angles);
+  std::vector<std::vector<int>> dirac_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> dirac_coordinate(4, std::vector<int>());
 
-  std::vector<std::vector<std::vector<double>>> monopole_plakets(3);
-  std::vector<std::vector<std::vector<int>>> dirac_plakets(3);
+  dirac_plaket_difference_nonzero(dirac_plakets, dirac_difference,
+                                  dirac_coordinate);
 
-  make_plakets_both(angles, monopole_plakets, dirac_plakets);
-
-  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
-  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
-
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
-
-  for (int mu = 0; mu < monopole_plaket.size(); mu++) {
-    monopole_plaket[mu].clear();
-    monopole_plaket[mu].shrink_to_fit();
+  for (int mu = 0; mu < dirac_plakets.size(); mu++) {
+    dirac_plakets[mu].clear();
+    dirac_plakets[mu].shrink_to_fit();
   }
 
   std::vector<std::vector<double>> angles_decomposed(
@@ -1193,19 +1177,18 @@ make_monopole_angles_parallel(std::vector<double> &angles,
 
   for (int mu = 0; mu < 4; mu++) {
 
-    for (int i = 0; i < monopole_difference[mu].size(); i++) {
+    for (int i = 0; i < dirac_difference[mu].size(); i++) {
 
-      coordinate = {monopole_coordinate[mu][4 * i],
-                    monopole_coordinate[mu][4 * i + 1],
-                    monopole_coordinate[mu][4 * i + 2],
-                    monopole_coordinate[mu][4 * i + 3]};
+      coordinate = {
+          dirac_coordinate[mu][4 * i], dirac_coordinate[mu][4 * i + 1],
+          dirac_coordinate[mu][4 * i + 2], dirac_coordinate[mu][4 * i + 3]};
 
-      if (monopole_coordinate[mu][i * 4] > x_size / 2) {
+      if (dirac_coordinate[mu][i * 4] > x_size / 2) {
 
-        decomposition_step_parallel1(monopole_difference[mu][i], coordinate,
+        decomposition_step_parallel1(dirac_difference[mu][i], coordinate,
                                      laplace, angles_decomposed[mu]);
       } else {
-        decomposition_step_parallel2(monopole_difference[mu][i], coordinate,
+        decomposition_step_parallel2(dirac_difference[mu][i], coordinate,
                                      laplace, angles_decomposed[mu]);
       }
     }

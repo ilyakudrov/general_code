@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
   string path_conf_monopoless;
   string path_inverse_laplacian;
 
+  bool compensate_dirac = false;
   bool parallel = false;
 
   int ml5_conf_num = 0;
@@ -105,17 +106,27 @@ int main(int argc, char **argv) {
 
   vector<vector<double>> angles_monopole(3);
 
+  vector<vector<vector<double>>> monopole_plakets(3);
+  vector<vector<vector<int>>> dirac_plakets(3);
+
+  make_plakets_both(angles_su3, monopole_plakets, dirac_plakets);
+  for (int i = 0; i < monopole_plakets.size(); i++) {
+    monopole_plakets[i].erase(monopole_plakets[i].begin(),
+                              monopole_plakets[i].end());
+    angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
+  }
+
   start_time = omp_get_wtime();
 
   for (int i = 0; i < 3; i++) {
     if (parallel) {
       angles_monopole[i] =
-          make_monopole_angles_parallel(angles_su3[i], inverse_laplacian);
+          make_monopole_angles_parallel(dirac_plakets[i], inverse_laplacian);
     } else {
       angles_monopole[i] =
-          make_monopole_angles(angles_su3[i], inverse_laplacian);
+          make_monopole_angles(dirac_plakets[i], inverse_laplacian);
     }
-    angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
+    dirac_plakets[i].erase(dirac_plakets[i].begin(), dirac_plakets[i].end());
   }
 
   end_time = omp_get_wtime();

@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
   // conf.read_double(path_abelian, 0);
   // conf.read_float(path_abelian, 8);
   conf.read_double_convert_abelian(path_abelian, 8);
-  std::vector<double> angles = convert_abelian_to_angles(conf.array);
+  std::vector<double> angles = convert_to_angles(conf.array);
   // std::vector<double> angles
   // = read_angles_float_fortran(path_abelian); std::vector<double> angles =
   // read_double_qc2dstag_convet_abelian(path_abelian);

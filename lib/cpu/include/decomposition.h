@@ -44,68 +44,69 @@ double get_monopole_angle(std::vector<std::vector<int>> &monopole_plaket,
                           link1 &link_tmp, std::vector<double> &laplace,
                           int mu);
 
-std::vector<double> make_monopole_angles2(std::vector<double> &angles,
-                                          std::vector<double> &laplace);
+std::vector<double>
+make_monopole_angles2(std::vector<std::vector<int>> &dirac_plakets,
+                      std::vector<double> &laplace);
 
-void monopole_plaket_difference_nonzero(
-    std::vector<std::vector<int>> &monopole_plaket,
-    std::vector<std::vector<int>> &monopole_difference,
-    std::vector<std::vector<int>> &monopole_coordinate);
+void dirac_plaket_difference_nonzero(
+    std::vector<std::vector<int>> &dirac_plaket,
+    std::vector<std::vector<int>> &dirac_difference,
+    std::vector<std::vector<int>> &dirac_coordinate);
 
-std::vector<double> make_monopole_angles1(std::vector<double> &angles,
-                                          std::vector<double> &laplace);
+std::vector<double>
+make_monopole_angles1(std::vector<std::vector<int>> &dirac_plakets,
+                      std::vector<double> &laplace);
 
-void decomposition_step2(std::vector<std::vector<int>> &monopole_difference,
-                         std::vector<std::vector<int>> &monopole_coordinate,
+void decomposition_step2(std::vector<std::vector<int>> &dirac_difference,
+                         std::vector<std::vector<int>> &dirac_coordinate,
                          std::vector<double> &laplace,
                          std::vector<double> &angles_decomposed, int i, int mu);
 
-std::vector<double> make_monopole_angles2(std::vector<double> &angles,
-                                          std::vector<double> &laplace);
-
-void decomposition_step3(std::vector<std::vector<int>> &monopole_difference,
-                         std::vector<std::vector<int>> &monopole_coordinate,
+void decomposition_step3(std::vector<std::vector<int>> &dirac_difference,
+                         std::vector<std::vector<int>> &dirac_coordinate,
                          std::vector<double> &laplace,
                          std::vector<std::vector<double>> &angles_decomposed,
                          int i, int mu);
 
 std::vector<std::vector<double>>
-make_monopole_angles3(std::vector<double> &angles,
+make_monopole_angles3(std::vector<std::vector<int>> &dirac_plakets,
                       std::vector<double> &laplace);
 
-void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
-                        std::vector<std::vector<int>> &monopole_coordinate,
+void decomposition_step(std::vector<std::vector<int>> &dirac_difference,
+                        std::vector<std::vector<int>> &dirac_coordinate,
                         std::vector<double> &laplace,
                         std::vector<std::vector<double>> &angles_decomposed,
                         int i, int mu);
 
-std::vector<double> make_monopole_angles(std::vector<double> &angles,
-                                         std::vector<double> &laplace);
+std::vector<double>
+make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
+                     std::vector<double> &laplace);
 
-void decomposition_step_parallel(int monopole_difference,
-                                 std::vector<int> &monopole_coordinate,
+void decomposition_step_parallel(int dirac_difference,
+                                 std::vector<int> &dirac_coordinate,
                                  std::vector<double> &laplace,
                                  std::vector<double> &angles_decomposed);
 
 void decomposition_step_parallel3_simple_positive(
-    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    std::vector<int> &dirac_coordinate, std::vector<double> &laplace,
     std::vector<double> &angles_decomposed);
 
 void decomposition_step_parallel3_simple_negative(
-    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    std::vector<int> &dirac_coordinate, std::vector<double> &laplace,
     std::vector<double> &angles_decomposed);
 
 void decomposition_step_parallel1(
-    std::vector<std::vector<int>> &monopole_difference,
-    std::vector<std::vector<int>> &monopole_coordinate,
+    std::vector<std::vector<int>> &dirac_difference,
+    std::vector<std::vector<int>> &dirac_coordinate,
     std::vector<double> &laplace,
     std::vector<std::vector<double>> &angles_decomposed, int i, int mu);
 
 void decomposition_step_parallel2(
-    std::vector<std::vector<int>> &monopole_difference,
-    std::vector<std::vector<int>> &monopole_coordinate,
+    std::vector<std::vector<int>> &dirac_difference,
+    std::vector<std::vector<int>> &dirac_coordinate,
     std::vector<double> &laplace,
     std::vector<std::vector<double>> &angles_decomposed, int i, int mu);
 
-std::vector<double> make_monopole_angles_parallel(std::vector<double> &angles,
-                                                  std::vector<double> &laplace);
+std::vector<double>
+make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
+                              std::vector<double> &laplace);
