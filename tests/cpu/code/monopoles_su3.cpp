@@ -129,40 +129,31 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 6;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   cout.precision(17);
 
   // string path_abelian =
-  //     "../../confs/decomposed/monopole/gluodynamics/16^4/CON_MON_MAG_01001.LAT";
+  // "../../../apps/monopole_decomposition_su3/test/result/"
+  //                       "conf_monopole_16_1001_compensate";
   // string path_abelian =
-  // "../../confs/decomposed/monopole/gluodynamics/16^4/old/"
-  //                       "CON_MON_MAG_01001.LAT";
+  // "../../../apps/monopole_decomposition_su3/test/result/"
+  //                       "conf_monopole_16_1001_nocompensate";
   // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopole_16_1001";
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopole_16_1001_non-unitary";
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopoless_16_1001_non-unitary";
-  // string path_abelian =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopoless_16_1001";
-  string path_abelian =
-      "../../confs/MA_gauge/su3/QCD/140MeV/nt6/conf.SP_gaugefixed_0501.ildg";
+  //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
+  string path_abelian = "../../../apps/monopole_decomposition_su3/test/result/"
+                        "conf_monopoless_16_1001_nocompensate";
 
   // data<su3_abelian> conf;
   data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
   // conf.read_double_qc2dstag(path_abelian);
-  // conf.read_double(path_abelian, 0);
+  conf.read_double(path_abelian, 0);
   // conf.read_double_vitaly(path_abelian, 4);
-  conf.read_ildg(path_abelian);
+  // conf.read_ildg(path_abelian);
   // conf.read_double_convert_abelian(path_abelian, 0);
   // vector<vector<double>> angles = conf.array;
   vector<vector<double>> angles = make_angles_SU3(conf.array);

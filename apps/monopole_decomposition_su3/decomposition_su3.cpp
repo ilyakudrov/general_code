@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   string path_conf_monopoless;
   string path_inverse_laplacian;
 
-  bool compensate_dirac = false;
+  bool compensate_dirac = true;
   bool parallel = false;
 
   int ml5_conf_num = 0;
@@ -62,6 +62,8 @@ int main(int argc, char **argv) {
       t_size = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-parallel") {
       istringstream(string(argv[++i])) >> parallel;
+    } else if (string(argv[i]) == "-compensate_dirac") {
+      istringstream(string(argv[++i])) >> compensate_dirac;
     } else
       cout << "unknown parameter " << argv[i] << endl;
   }
@@ -72,6 +74,8 @@ int main(int argc, char **argv) {
   cout << "path_conf_monopoless " << path_conf_monopoless << endl;
   cout << "path_inverse_laplacian " << path_inverse_laplacian << endl;
   cout << "bytes_skip " << bytes_skip << endl;
+  cout << "parallel " << parallel << endl;
+  cout << "compensate_dirac " << compensate_dirac << endl;
 
   cout << "x_size " << x_size << endl;
   cout << "y_size " << y_size << endl;
@@ -104,17 +108,24 @@ int main(int argc, char **argv) {
   vector<double> inverse_laplacian =
       read_inverse_laplacian(path_inverse_laplacian);
 
-  vector<vector<double>> angles_monopole(3);
-
   vector<vector<vector<double>>> monopole_plakets(3);
   vector<vector<vector<int>>> dirac_plakets(3);
 
-  make_plakets_both(angles_su3, monopole_plakets, dirac_plakets);
-  for (int i = 0; i < monopole_plakets.size(); i++) {
-    monopole_plakets[i].erase(monopole_plakets[i].begin(),
-                              monopole_plakets[i].end());
-    angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
+  if (compensate_dirac) {
+    make_plakets_both(angles_su3, monopole_plakets, dirac_plakets);
+    for (int i = 0; i < monopole_plakets.size(); i++) {
+      monopole_plakets[i].erase(monopole_plakets[i].begin(),
+                                monopole_plakets[i].end());
+      angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
+    }
+  } else {
+    for (int i = 0; i < monopole_plakets.size(); i++) {
+      dirac_plakets[i] = calculate_monopole_plaket_singular(angles_su3[i]);
+      angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
+    }
   }
+
+  vector<vector<double>> angles_monopole(3);
 
   start_time = omp_get_wtime();
 
