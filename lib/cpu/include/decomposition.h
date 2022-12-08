@@ -19,6 +19,14 @@ void write_double_su3(std::string &file_name, std::vector<su3> &conf_su3);
 
 std::vector<std::vector<double>> get_angles_su3(std::vector<su3> &conf_su3);
 
+std::vector<su3_abelian> get_abelian(std::vector<su3> &conf);
+
+std::vector<abelian> get_abelian(std::vector<su2> &conf);
+
+std::vector<su3> get_offdiagonal(std::vector<su3> &conf);
+
+std::vector<su2> get_offdiagonal(std::vector<su2> &conf);
+
 std::vector<double> merge_angles(std::vector<std::vector<double>> &angles);
 
 std::vector<su2> get_monopoless(std::vector<su2> &conf_su2,

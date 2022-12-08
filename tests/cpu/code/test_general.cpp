@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 4;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   std::cout.precision(17);
 
@@ -55,18 +55,24 @@ int main(int argc, char *argv[]) {
   //     "test/result/conf_monopole_16_1001";
   // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/old/"
   //                    "CON_MON_MAG_01001.LAT";
-  string conf_path = "../../confs/MA_gauge/su3/QCD/140MeV/nt4/steps_2000/"
-                     "copies=1/tol=1e-13/conf.SP_gaugefixed_0501";
+  string conf_path = "../../../apps/monopole_decomposition_su3/test/result/"
+                     "conf_monopoless_16_1001_compensate";
+
+  data<su3> conf_tmp;
+  // conf_tmp.read_double_vitaly(conf_path, 4);
+  conf_tmp.read_double(conf_path, 0);
+  // conf.array = get_abelian(conf_tmp.array);
+  conf.array = get_offdiagonal(conf_tmp.array);
 
   // conf.read_double(conf_path, 0);
   // conf.read_double_vitaly(conf_path, 4);
   // conf.read_double_qc2dstag(conf_path);
-  conf.read_ildg(conf_path);
+  // conf.read_ildg(conf_path);
   // conf.read_float(conf_path, 4);
   // conf.read_double_convert_abelian(conf_path, 8);
   // conf.read_double_qc2dstag_convert_abelian(conf_path);
 
-  cout << "mag functional " << mag_functional_su3(conf.array) << endl;
+  // cout << "mag functional " << mag_functional_su3(conf.array) << endl;
 
   // double sum;
   // double sum_aver = 0;

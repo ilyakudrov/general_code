@@ -20,12 +20,18 @@ public:
   data();
 
   // read conf file of floats, usual ordering
-  void read_float(std::string &file_name, int bites_skip);
+  void read_float(std::string &file_name, int bytes_skip);
 
   // read conf file of doubles, usual ordering
-  void read_double(std::string &file_name, int bites_skip);
+  void read_double(std::string &file_name, int bytes_skip);
 
-  void read_double_vitaly(std::string &file_name, int bites_skip);
+  void read_double_abelian(std::string &file_name, int bytes_skip);
+
+  void read_double_offdiagonal(std::string &file_name, int bytes_skip);
+
+  void read_double_vitaly(std::string &file_name, int bytes_skip);
+
+  void read_double_vitaly_abelian(std::string &file_name, int bytes_skip);
 
   void read_ildg(std::string &file_name);
 
@@ -46,8 +52,8 @@ public:
   // writes conf in file, fortran ordering, float
   void write_float_fortran(std::string &file_name);
 
-  void read_float_convert_abelian(std::string &file_name, int bites_skip);
-  void read_double_convert_abelian(std::string &file_name, int bites_skip);
+  void read_float_convert_abelian(std::string &file_name, int bytes_skip);
+  void read_double_convert_abelian(std::string &file_name, int bytes_skip);
   void read_double_qc2dstag_convert_abelian(std::string &file_name);
 };
 // read conf_num configurations from ml5 file and write them to vector in order

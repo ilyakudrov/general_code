@@ -1,4 +1,5 @@
 #include "../include/data.h"
+#include "../include/decomposition.h"
 #include "../include/link.h"
 
 #include "../include/c-lime/lime.h"
@@ -36,12 +37,12 @@ template <class T> data<T>::data() {
   array.reserve(4 * x_size * y_size * z_size * t_size);
 }
 
-template <> void data<su2>::read_float(std::string &file_name, int bites_skip) {
+template <> void data<su2>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
     std::cout << "read_float<su2> error: " << file_name << std::endl;
   su2 A;
@@ -56,12 +57,12 @@ template <> void data<su2>::read_float(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<abelian>::read_float(std::string &file_name, int bites_skip) {
+void data<abelian>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
   std::vector<float> v(data_size);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
     std::cout << "read_float<abelian> error: " << file_name << std::endl;
   for (int i = 0; i < data_size; i++) {
@@ -70,12 +71,12 @@ void data<abelian>::read_float(std::string &file_name, int bites_skip) {
   stream.close();
 }
 
-template <> void data<su3>::read_float(std::string &file_name, int bites_skip) {
+template <> void data<su3>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 18);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size * 18) * sizeof(float)))
     std::cout << "read_float<su3> error: " << file_name << std::endl;
   su3 A;
@@ -94,7 +95,7 @@ template <> void data<su3>::read_float(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<su3_abelian>::read_float(std::string &file_name, int bites_skip) {
+void data<su3_abelian>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ifstream stream(file_name);
@@ -113,12 +114,12 @@ void data<su3_abelian>::read_float(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<abelian>::read_double(std::string &file_name, int bites_skip) {
+void data<abelian>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   std::ifstream stream(file_name);
   std::vector<double> v(data_size);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
     std::cout << "read_double<abelian> error: " << file_name << std::endl;
 
@@ -129,13 +130,13 @@ void data<abelian>::read_double(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<su2>::read_double(std::string &file_name, int bites_skip) {
+void data<su2>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   array.reserve(data_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(double)))
     std::cout << "read_double<su2> error: " << file_name << std::endl;
   su2 A;
@@ -150,13 +151,13 @@ void data<su2>::read_double(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<su3>::read_double(std::string &file_name, int bites_skip) {
+void data<su3>::read_double(std::string &file_name, int bytes_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.resize(data_size1);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 18);
 
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
     std::cout << "data<su3>::read_double error: " << file_name << std::endl;
 
@@ -187,14 +188,14 @@ void data<su3>::read_double(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<su3_abelian>::read_double(std::string &file_name, int bites_skip) {
+void data<su3_abelian>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ifstream stream(file_name);
   std::vector<double> v(data_size);
 
   array.resize(data_size);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
 
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
@@ -207,15 +208,135 @@ void data<su3_abelian>::read_double(std::string &file_name, int bites_skip) {
 }
 
 template <>
+void data<abelian>::read_double_abelian(std::string &file_name,
+                                        int bytes_skip) {
+  std::cout << "read_double_abelian<abelian> is not implemented" << std::endl;
+}
+
+template <>
+void data<su2>::read_double_abelian(std::string &file_name, int bytes_skip) {
+  std::cout << "read_double_abelian<su2> is not implemented" << std::endl;
+}
+
+template <>
+void data<su3>::read_double_abelian(std::string &file_name, int bytes_skip) {
+  std::cout << "read_double_abelian<su3> is not implemented" << std::endl;
+}
+
+template <>
+void data<su3_abelian>::read_double_abelian(std::string &file_name,
+                                            int bytes_skip) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.resize(data_size1);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size1 * 18);
+
+  stream.ignore(bytes_skip);
+  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+    std::cout << "data<su3_abelian>::read_double_abelian error: " << file_name
+              << std::endl;
+
+  long int index = 0;
+  complex_t complex_tmp;
+
+  link1 link(x_size, y_size, z_size, t_size);
+  for (int t = 0; t < t_size; t++) {
+    for (int z = 0; z < z_size; z++) {
+      for (int y = 0; y < y_size; y++) {
+        for (int x = 0; x < x_size; x++) {
+          for (int mu = 0; mu < 4; mu++) {
+            for (int k = 0; k < 3; k++) {
+              for (int j = 0; j < 3; j++) {
+                link.go_update(x, y, z, t);
+
+                if (k == j) {
+                  complex_tmp = complex_t(v[index], v[index + 1]);
+                  array[link.place + mu].matrix[j] =
+                      complex_tmp / complex_tmp.module();
+                }
+
+                index += 2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  stream.close();
+}
+
+template <>
+void data<abelian>::read_double_offdiagonal(std::string &file_name,
+                                            int bytes_skip) {
+  std::cout << "read_double_offdiagonal<abelian> is not implemented"
+            << std::endl;
+}
+
+template <>
+void data<su2>::read_double_offdiagonal(std::string &file_name,
+                                        int bytes_skip) {
+  std::cout << "read_double_offdiagonal<su2> is not implemented" << std::endl;
+}
+
+template <>
+void data<su3>::read_double_offdiagonal(std::string &file_name,
+                                        int bytes_skip) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.resize(data_size1);
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size1 * 18);
+
+  stream.ignore(bytes_skip);
+  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+    std::cout << "data<su3>::read_double_offdiagonal error: " << file_name
+              << std::endl;
+
+  long int index = 0;
+  complex_t complex_tmp;
+
+  link1 link(x_size, y_size, z_size, t_size);
+  for (int t = 0; t < t_size; t++) {
+    for (int z = 0; z < z_size; z++) {
+      for (int y = 0; y < y_size; y++) {
+        for (int x = 0; x < x_size; x++) {
+          for (int mu = 0; mu < 4; mu++) {
+            for (int k = 0; k < 3; k++) {
+              for (int j = 0; j < 3; j++) {
+                link.go_update(x, y, z, t);
+
+                array[link.place + mu].matrix[k][j] =
+                    complex_t(v[index], v[index + 1]);
+
+                index += 2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  array = get_offdiagonal(array);
+  stream.close();
+}
+
+template <>
+void data<su3_abelian>::read_double_offdiagonal(std::string &file_name,
+                                                int bytes_skip) {
+  std::cout << "read_double_offdiagonal<su3_abelian> is not implemented"
+            << std::endl;
+}
+
+template <>
 void data<su3_abelian>::read_double_vitaly(std::string &file_name,
-                                           int bites_skip) {
+                                           int bytes_skip) {
   int lattice_size = x_size * y_size * z_size * t_size;
 
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 3);
 
   array.resize(lattice_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
     std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
@@ -232,19 +353,19 @@ void data<su3_abelian>::read_double_vitaly(std::string &file_name,
 }
 
 template <>
-void data<su2>::read_double_vitaly(std::string &file_name, int bites_skip) {
+void data<su2>::read_double_vitaly(std::string &file_name, int bytes_skip) {
   std::cout << "read_double_vitaly<su2> is not implemented" << std::endl;
 }
 
 template <>
-void data<su3>::read_double_vitaly(std::string &file_name, int bites_skip) {
+void data<su3>::read_double_vitaly(std::string &file_name, int bytes_skip) {
   int lattice_size = x_size * y_size * z_size * t_size;
 
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
 
   array.resize(lattice_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
     std::cout << "data<su3>::read_double_vitaly error: " << file_name
@@ -266,8 +387,60 @@ void data<su3>::read_double_vitaly(std::string &file_name, int bites_skip) {
 }
 
 template <>
-void data<abelian>::read_double_vitaly(std::string &file_name, int bites_skip) {
+void data<abelian>::read_double_vitaly(std::string &file_name, int bytes_skip) {
   std::cout << "read_double_vitaly<abelian> is not implemented" << std::endl;
+}
+
+template <>
+void data<su3_abelian>::read_double_vitaly_abelian(std::string &file_name,
+                                                   int bytes_skip) {
+  int lattice_size = x_size * y_size * z_size * t_size;
+
+  std::ifstream stream(file_name);
+  std::vector<double> v(lattice_size * 4 * 18);
+
+  array.resize(lattice_size * 4);
+  stream.ignore(bytes_skip);
+
+  if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
+    std::cout << "data<su3>::read_double_vitaly error: " << file_name
+              << std::endl;
+
+  complex_t complex_tmp;
+
+  for (int i = 0; i < lattice_size; i++) {
+    for (int mu = 0; mu < 4; mu++) {
+      for (int j = 0; j < 3; j++) {
+        complex_tmp =
+            complex_t(v[mu * lattice_size * 18 + j * lattice_size * 6 +
+                        j * lattice_size * 2 + i * 2],
+                      v[mu * lattice_size * 18 + j * lattice_size * 6 +
+                        j * lattice_size * 2 + i * 2 + 1]);
+        array[i * 4 + mu].matrix[j] = complex_tmp / complex_tmp.module();
+      }
+    }
+  }
+}
+
+template <>
+void data<su2>::read_double_vitaly_abelian(std::string &file_name,
+                                           int bytes_skip) {
+  std::cout << "read_double_vitaly_abelian<su2> is not implemented"
+            << std::endl;
+}
+
+template <>
+void data<su3>::read_double_vitaly_abelian(std::string &file_name,
+                                           int bytes_skip) {
+  std::cout << "read_double_vitaly_abelian<su3> is not implemented"
+            << std::endl;
+}
+
+template <>
+void data<abelian>::read_double_vitaly_abelian(std::string &file_name,
+                                               int bytes_skip) {
+  std::cout << "read_double_vitaly_abelian<abelian> is not implemented"
+            << std::endl;
 }
 
 double reverseValue(const char *data) {
@@ -382,13 +555,13 @@ void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
 
 template <>
 void data<abelian>::read_float_convert_abelian(std::string &file_name,
-                                               int bites_skip) {
+                                               int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   array.reserve(data_size);
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
     std::cout << "read_float_convert_abelian<abelian> error: " << file_name
               << std::endl;
@@ -401,19 +574,19 @@ void data<abelian>::read_float_convert_abelian(std::string &file_name,
 
 template <>
 void data<su2>::read_float_convert_abelian(std::string &file_name,
-                                           int bites_skip) {
+                                           int bytes_skip) {
   std::cout << "wrong type for read_float_convert_abelian" << std::endl;
 }
 
 template <>
 void data<abelian>::read_double_convert_abelian(std::string &file_name,
-                                                int bites_skip) {
+                                                int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
   array.reserve(data_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size * 4);
-  stream.ignore(bites_skip);
+  stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(double)))
     std::cout << "read_double_convert_abelian<abelian> error: " << file_name
               << std::endl;
@@ -425,7 +598,7 @@ void data<abelian>::read_double_convert_abelian(std::string &file_name,
 
 template <>
 void data<su2>::read_double_convert_abelian(std::string &file_name,
-                                            int bites_skip) {
+                                            int bytes_skip) {
   std::cout << "wrong type for read_double_convert_abelian" << std::endl;
 }
 

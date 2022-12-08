@@ -99,6 +99,65 @@ std::vector<std::vector<double>> get_angles_su3(std::vector<su3> &conf_su3) {
   return angles;
 }
 
+std::vector<su3_abelian> get_abelian(std::vector<su3> &conf) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<su3_abelian> abelian(data_size);
+
+  for (int i = 0; i < data_size; i++) {
+    for (int c = 0; c < 3; c++) {
+      abelian[i].matrix[c] =
+          conf[i].matrix[c][c] / conf[i].matrix[c][c].module();
+    }
+  }
+
+  return abelian;
+}
+
+std::vector<abelian> get_abelian(std::vector<su2> &conf) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<abelian> conf_abelian(data_size);
+
+  for (int i = 0; i < data_size; i++) {
+    conf_abelian[i] = abelian(1, atan2(conf[i].a3, conf[i].a0));
+  }
+
+  return conf_abelian;
+}
+
+std::vector<su3> get_offdiagonal(std::vector<su3> &conf) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<su3> conf_offdiagonal(data_size);
+  su3 A;
+
+  for (int i = 0; i < data_size; i++) {
+    for (int c = 0; c < 3; c++) {
+      A.matrix[c][c] = conf[i].matrix[c][c] / conf[i].matrix[c][c].module();
+    }
+    conf_offdiagonal[i] = conf[i] ^ A;
+  }
+
+  return conf_offdiagonal;
+}
+
+std::vector<su2> get_offdiagonal(std::vector<su2> &conf) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+
+  std::vector<su2> conf_offdiagonal(data_size);
+  su2 A;
+  double module;
+
+  for (int i = 0; i < data_size; i++) {
+    module = sqrt(conf[i].a0 * conf[i].a0 * +conf[i].a3 * conf[i].a3);
+    A = su2(conf[i].a0 / module, 0, 0, conf[i].a3 / module);
+    conf_offdiagonal[i] = conf[i] ^ A;
+  }
+
+  return conf_offdiagonal;
+}
+
 std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
   int data_size = x_size * y_size * z_size * t_size;
 

@@ -1,6 +1,7 @@
 #include "../../lib/cpu/include/smearing.h"
 #include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
+#include "../../lib/cpu/include/decomposition.h"
 #include "../../lib/cpu/include/flux_tube.h"
 #include "../../lib/cpu/include/matrix.h"
 
@@ -14,6 +15,10 @@
 
 #ifndef MATRIX_PLAKET
 #define MATRIX_PLAKET su2
+#endif
+
+#ifndef MATRIX_AUXILIARY
+#define MATRIX_AUXILIARY su2
 #endif
 
 using namespace std;
@@ -196,6 +201,12 @@ int main(int argc, char *argv[]) {
     conf_wilson.read_double_vitaly(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "double_qc2dstag") {
     conf_wilson.read_double_qc2dstag(conf_path_wilson);
+  } else if (string(conf_format_wilson) == "double_vitaly_abelian") {
+    conf_wilson.read_double_vitaly_abelian(conf_path_wilson, bytes_skip_wilson);
+  } else if (string(conf_format_wilson) == "double_abelian") {
+    conf_wilson.read_double_abelian(conf_path_wilson, bytes_skip_wilson);
+  } else if (string(conf_format_wilson) == "double_offdiagonal") {
+    conf_wilson.read_double_offdiagonal(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "ildg") {
     conf_wilson.read_ildg(conf_path_wilson);
   } else {
