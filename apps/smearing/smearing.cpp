@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
   int bytes_skip_wilson = 0;
   int bytes_skip_plaket = 0;
   bool save_conf = false;
+  bool convert = false;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "-conf_format_wilson") {
       conf_format_wilson = argv[++i];
@@ -67,6 +68,8 @@ int main(int argc, char *argv[]) {
       bytes_skip_plaket = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-conf_path_plaket") {
       conf_path_plaket = argv[++i];
+    } else if (string(argv[i]) == "-convert") {
+      istringstream(string(argv[++i])) >> convert;
     } else if (string(argv[i]) == "-HYP_alpha1") {
       HYP_alpha1 = atof(argv[++i]);
     } else if (string(argv[i]) == "-HYP_alpha2") {
@@ -193,6 +196,10 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // get_data(conf_wilson, conf_path_wilson, conf_format_wilson,
+  // bytes_skip_wilson,
+  //          convert);
+
   if (string(conf_format_wilson) == "float") {
     conf_wilson.read_float(conf_path_wilson, bytes_skip_wilson);
   } else if (string(conf_format_wilson) == "double") {
@@ -277,7 +284,7 @@ int main(int argc, char *argv[]) {
 
       start_time = omp_get_wtime();
 
-      if (APE_step % calculation_step_APE == 0 &&
+      if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step >= calculation_APE_start) {
 
         if (wilson_enabled) {

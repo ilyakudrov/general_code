@@ -58,3 +58,11 @@ public:
 };
 // read conf_num configurations from ml5 file and write them to vector in order
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num);
+
+template <class T>
+void read_file(data<T> &conf_data, std::string file_path,
+               std::string file_format, int bytes_skip);
+
+template <class T>
+void get_data(data<T> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert);

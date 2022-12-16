@@ -1,11 +1,11 @@
 #include "../include/data.h"
 #include "../include/decomposition.h"
 #include "../include/link.h"
+#include <cstring>
 
 #include "../include/c-lime/lime.h"
 #include "../include/c-lime/lime_config.h"
 #include "../include/c-lime/lime_fixed_types.h"
-#include <cstring>
 
 #define PLACE_DATA                                                             \
   (t) * 4 * x_size *y_size *z_size + (z)*4 * x_size *y_size + (y)*4 * x_size + \
@@ -802,3 +802,69 @@ template class data<su2>;
 template class data<abelian>;
 template class data<su3>;
 template class data<su3_abelian>;
+
+template <class T>
+void read_file(data<T> &conf_data, std::string file_path,
+               std::string file_format, int bytes_skip) {
+  if (std::string(file_format) == "float") {
+    conf_data.read_float(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double") {
+    conf_data.read_double(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double_vitaly") {
+    conf_data.read_double_vitaly(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double_qc2dstag") {
+    conf_data.read_double_qc2dstag(file_path);
+  } else if (std::string(file_format) == "ildg") {
+    conf_data.read_ildg(file_path);
+  } else {
+    std::cout << "wrong conf format: " << file_format << std::endl;
+  }
+}
+
+template <>
+void get_data(data<su3_abelian> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  if (!convert) {
+    read_file(conf_data, file_path, file_format, bytes_skip);
+  } else {
+    data<su3> data_tmp;
+    read_file(data_tmp, file_path, file_format, bytes_skip);
+    conf_data.array = get_abelian(data_tmp.array);
+  }
+}
+
+template <>
+void get_data(data<su3> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  if (!convert) {
+    read_file(conf_data, file_path, file_format, bytes_skip);
+  } else {
+    data<su3> data_tmp;
+    read_file(data_tmp, file_path, file_format, bytes_skip);
+    conf_data.array = get_offdiagonal(data_tmp.array);
+  }
+}
+
+template <>
+void get_data(data<abelian> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  if (!convert) {
+    read_file(conf_data, file_path, file_format, bytes_skip);
+  } else {
+    data<su2> data_tmp;
+    read_file(data_tmp, file_path, file_format, bytes_skip);
+    conf_data.array = get_abelian(data_tmp.array);
+  }
+}
+
+template <>
+void get_data(data<su2> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  if (!convert) {
+    read_file(conf_data, file_path, file_format, bytes_skip);
+  } else {
+    data<su2> data_tmp;
+    read_file(data_tmp, file_path, file_format, bytes_skip);
+    conf_data.array = get_offdiagonal(data_tmp.array);
+  }
+}
