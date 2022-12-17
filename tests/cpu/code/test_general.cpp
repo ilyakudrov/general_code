@@ -24,7 +24,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su3_abelian
 
 using namespace std;
 
@@ -41,74 +41,14 @@ int main(int argc, char *argv[]) {
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf;
-  // string conf_path =
-  //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
-  // string conf_path =
-  //     "../../confs/decomposed/monopoless/gluodynamics/16^4/MLS_conf.01001.lat";
-  // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/"
-  //                    "CON_MON_MAG_01001.LAT";
-  // string conf_path =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopole_16_1001_non-unitary";
-  // string conf_path =
-  //     "/home/ilya/soft/lattice/general_code/apps/monopole_decomposition_su3/"
-  //     "test/result/conf_monopole_16_1001";
-  // string conf_path = "../../confs/decomposed/monopole/gluodynamics/16^4/old/"
-  //                    "CON_MON_MAG_01001.LAT";
-  string conf_path = "../../../apps/monopole_decomposition_su3/test/result/"
-                     "conf_monopoless_16_1001_compensate";
 
-  data<su3> conf_tmp;
-  // conf_tmp.read_double_vitaly(conf_path, 4);
-  conf_tmp.read_double(conf_path, 0);
-  // conf.array = get_abelian(conf_tmp.array);
-  conf.array = get_offdiagonal(conf_tmp.array);
+  string conf_path = "../../confs/decomposed/monopoless/gluodynamics/16^4/"
+                     "beta6.0/conf_monopoless_1001";
+  string conf_format = "double";
+  int bytes_skip = 0;
+  bool convert = 1;
 
-  // conf.read_double(conf_path, 0);
-  // conf.read_double_vitaly(conf_path, 4);
-  // conf.read_double_qc2dstag(conf_path);
-  // conf.read_ildg(conf_path);
-  // conf.read_float(conf_path, 4);
-  // conf.read_double_convert_abelian(conf_path, 8);
-  // conf.read_double_qc2dstag_convert_abelian(conf_path);
-
-  // cout << "mag functional " << mag_functional_su3(conf.array) << endl;
-
-  // double sum;
-  // double sum_aver = 0;
-  // double sum_max = 0;
-  // for (int i = 0; i < conf.array.size(); i++) {
-  //   sum = 0;
-  //   for (int j = 0; j < 3; j++) {
-  //     sum += atan2(conf.array[i].matrix[j].imag,
-  //     conf.array[i].matrix[j].real);
-  //   }
-  //   sum_aver += sum;
-  //   if (sum > sum_max) {
-  //     sum_max = sum;
-  //   }
-  //   // cout << "sum " << sum << endl;
-  // }
-  // sum_aver = sum_aver / conf.array.size();
-  // cout << "sum_aver = " << sum_aver << " sum_max =  " << sum_max << endl;
-
-  // vector<vector<double>> angles = convert_to_angles(conf.array);
-
-  // string conf_path1 =
-  //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
-
-  // data<su3> conf1;
-  // conf1.read_double_vitaly(conf_path1, 4);
-  // std::cout << "plaket su3 " << plaket(conf1.array) << std::endl;
-
-  // get_monopoless_optimized_su3(conf1.array, angles);
-  // std::cout << "plaket monopoless1 " << plaket(conf1.array) << std::endl;
-
-  // string conf_path2 =
-  //     "../../confs/decomposed/monopoless/gluodynamics/16^4/MLS_conf.01001.lat";
-  // data<su3> conf2;
-  // conf2.read_double_vitaly(conf_path2, 4);
-  // std::cout << "plaket monopoless2 " << plaket(conf2.array) << std::endl;
+  get_data(conf, conf_path, conf_format, bytes_skip, convert);
 
   // plakets and polyakov loop
   start_time = clock();

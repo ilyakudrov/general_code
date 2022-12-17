@@ -75,23 +75,9 @@ int main(int argc, char **argv) {
 
   data<su2> conf_su2;
 
-  // for ml5 configuration
-  vector<float> ml5_data;
-
   // read configuration
-  if (std::string(conf_format) == "float") {
-    conf_su2.read_float(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double") {
-    conf_su2.read_double(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double_qc2dstag") {
-    conf_su2.read_double_qc2dstag(path_conf);
-  } else if (conf_format == "ml5") {
-    ml5_data = read_full_ml5(path_conf, ml5_conf_num);
-    conf_su2.read_float_ml5(ml5_data, ml5_conf_num);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  bool convert = 0;
+  get_data(conf_su2, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 

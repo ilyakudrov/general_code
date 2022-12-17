@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
   int bytes_skip_wilson = 0;
   int bytes_skip_plaket = 0;
   bool save_conf = false;
-  bool convert = false;
+  bool convert_plaket = false;
+  bool convert_wilson = false;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "-conf_format_wilson") {
       conf_format_wilson = argv[++i];
@@ -68,8 +69,10 @@ int main(int argc, char *argv[]) {
       bytes_skip_plaket = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-conf_path_plaket") {
       conf_path_plaket = argv[++i];
-    } else if (string(argv[i]) == "-convert") {
-      istringstream(string(argv[++i])) >> convert;
+    } else if (string(argv[i]) == "-convert_plaket") {
+      istringstream(string(argv[++i])) >> convert_plaket;
+    } else if (string(argv[i]) == "-convert_wilson") {
+      istringstream(string(argv[++i])) >> convert_wilson;
     } else if (string(argv[i]) == "-HYP_alpha1") {
       HYP_alpha1 = atof(argv[++i]);
     } else if (string(argv[i]) == "-HYP_alpha2") {
@@ -131,6 +134,8 @@ int main(int argc, char *argv[]) {
   cout << "conf_format_plaket " << conf_format_plaket << endl;
   cout << "conf_path_plaket " << conf_path_plaket << endl;
   cout << "bytes_skip_plaket " << bytes_skip_plaket << endl;
+  cout << "convert_plaket " << convert_plaket << endl;
+  cout << "convert_wilson " << convert_wilson << endl;
   cout << "HYP_alpha1 " << HYP_alpha1 << endl;
   cout << "HYP_alpha2 " << HYP_alpha2 << endl;
   cout << "HYP_alpha3 " << HYP_alpha3 << endl;
@@ -163,20 +168,8 @@ int main(int argc, char *argv[]) {
   double plaket_unsmeared;
 
   if (flux_enabled) {
-    if (string(conf_format_plaket) == "float") {
-      conf_plaket.read_float(conf_path_plaket, bytes_skip_plaket);
-    } else if (string(conf_format_plaket) == "double") {
-      conf_plaket.read_double(conf_path_plaket, bytes_skip_plaket);
-    } else if (string(conf_format_plaket) == "double_vitaly") {
-      conf_plaket.read_double_vitaly(conf_path_plaket, bytes_skip_plaket);
-    } else if (string(conf_format_plaket) == "double_qc2dstag") {
-      conf_plaket.read_double_qc2dstag(conf_path_plaket);
-    } else if (string(conf_format_plaket) == "ildg") {
-      conf_plaket.read_ildg(conf_path_plaket);
-    } else {
-      cout << "wrong conf format: " << conf_format_plaket << endl;
-      return 0;
-    }
+    get_data(conf_plaket, conf_path_plaket, conf_format_plaket,
+             bytes_skip_plaket, convert_plaket);
 
     plaket_unsmeared = plaket(conf_plaket.array);
 
@@ -196,30 +189,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // get_data(conf_wilson, conf_path_wilson, conf_format_wilson,
-  // bytes_skip_wilson,
-  //          convert);
-
-  if (string(conf_format_wilson) == "float") {
-    conf_wilson.read_float(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "double") {
-    conf_wilson.read_double(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "double_vitaly") {
-    conf_wilson.read_double_vitaly(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "double_qc2dstag") {
-    conf_wilson.read_double_qc2dstag(conf_path_wilson);
-  } else if (string(conf_format_wilson) == "double_vitaly_abelian") {
-    conf_wilson.read_double_vitaly_abelian(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "double_abelian") {
-    conf_wilson.read_double_abelian(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "double_offdiagonal") {
-    conf_wilson.read_double_offdiagonal(conf_path_wilson, bytes_skip_wilson);
-  } else if (string(conf_format_wilson) == "ildg") {
-    conf_wilson.read_ildg(conf_path_wilson);
-  } else {
-    cout << "wrong conf format: " << conf_format_wilson << endl;
-    return 0;
-  }
+  get_data(conf_wilson, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
+           convert_wilson);
 
   cout << "wilson plaket unsmeared " << plaket(conf_wilson.array) << endl;
 

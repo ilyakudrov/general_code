@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
   int L_spat, L_time;
   int T_min, T_max, R_min, R_max;
   int bytes_skip = 0;
+  bool convert = 0;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "-conf_format") {
       conf_format = argv[++i];
@@ -36,6 +37,8 @@ int main(int argc, char *argv[]) {
       bytes_skip = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-conf_path") {
       conf_path = argv[++i];
+    } else if (string(argv[i]) == "-convert") {
+      istringstream(string(argv[++i])) >> convert;
     } else if (string(argv[i]) == "-L_spat") {
       L_spat = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-L_time") {
@@ -61,6 +64,7 @@ int main(int argc, char *argv[]) {
   cout << "conf_format " << conf_format << endl;
   cout << "conf_path " << conf_path << endl;
   cout << "bytes_skip " << bytes_skip << endl;
+  cout << "convert " << convert << endl;
   cout << "L_spat " << L_spat << endl;
   cout << "L_time " << L_time << endl;
   cout << "path_wilson " << path_wilson << endl;
@@ -74,18 +78,7 @@ int main(int argc, char *argv[]) {
 
   data<MATRIX> conf;
 
-  if (string(conf_format) == "float") {
-    conf.read_float(conf_path, bytes_skip);
-  } else if (string(conf_format) == "double") {
-    conf.read_double(conf_path, bytes_skip);
-  } else if (string(conf_format) == "double_qc2dstag") {
-    conf.read_double_qc2dstag(conf_path);
-  } else if (string(conf_format) == "ildg") {
-    conf.read_ildg(conf_path);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  get_data(conf, conf_path, conf_format, bytes_skip, convert);
 
   cout << "plaket " << plaket(conf.array) << endl;
 

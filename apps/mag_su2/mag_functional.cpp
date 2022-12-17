@@ -60,16 +60,8 @@ int main(int argc, char **argv) {
   data<su2> conf_su2;
 
   // read configuration
-  if (std::string(conf_format) == "float") {
-    conf_su2.read_float(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double") {
-    conf_su2.read_double(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double_qc2dstag") {
-    conf_su2.read_double_qc2dstag(path_conf);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  bool convert = 0;
+  get_data(conf_su2, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 

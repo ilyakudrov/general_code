@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
   int bytes_skip = 0;
   string path_output_correlator;
   string correlator_type;
+  bool convert = 0;
 
   int D_max;
 
@@ -46,6 +47,8 @@ int main(int argc, char **argv) {
       correlator_type = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "-convert") {
+      istringstream(string(argv[++i])) >> convert;
     } else if (string(argv[i]) == "-D_max") {
       D_max = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-x_size") {
@@ -64,6 +67,7 @@ int main(int argc, char **argv) {
   cout << "conf_format " << conf_format << endl;
   cout << "bytes_skip " << bytes_skip << endl;
   cout << "D_max " << D_max << endl;
+  cout << "convert " << convert << endl;
 
   cout << "path_output_correlator " << path_output_correlator << endl;
 
@@ -75,18 +79,7 @@ int main(int argc, char **argv) {
   data<MATRIX> conf;
 
   // read configuration
-  if (std::string(conf_format) == "float") {
-    conf.read_float(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double") {
-    conf.read_double(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double_qc2dstag") {
-    conf.read_double_qc2dstag(path_conf);
-  } else if (std::string(conf_format) == "ildg") {
-    conf.read_ildg(path_conf);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  get_data(conf, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 

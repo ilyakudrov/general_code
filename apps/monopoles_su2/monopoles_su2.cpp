@@ -77,12 +77,8 @@ int main(int argc, char **argv) {
   data<abelian> conf;
 
   // read configuration
-  if (std::string(conf_format) == "double") {
-    conf.read_double_convert_abelian(path_conf, bytes_skip);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  bool convert = 0;
+  get_data(conf, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 

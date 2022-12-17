@@ -86,20 +86,8 @@ int main(int argc, char **argv) {
   data<su3> conf_su3;
 
   // read configuration
-  if (std::string(conf_format) == "float") {
-    conf_su3.read_float(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double") {
-    conf_su3.read_double(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "double_qc2dstag") {
-    conf_su3.read_double_qc2dstag(path_conf);
-  } else if (std::string(conf_format) == "double_vitaly") {
-    conf_su3.read_double_vitaly(path_conf, bytes_skip);
-  } else if (std::string(conf_format) == "ildg") {
-    conf_su3.read_ildg(path_conf);
-  } else {
-    cout << "wrong conf format: " << conf_format << endl;
-    return 0;
-  }
+  bool convert = 0;
+  get_data(conf_su3, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 
