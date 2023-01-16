@@ -150,7 +150,7 @@ std::vector<su2> get_offdiagonal(std::vector<su2> &conf) {
   double module;
 
   for (int i = 0; i < data_size; i++) {
-    module = sqrt(conf[i].a0 * conf[i].a0 * +conf[i].a3 * conf[i].a3);
+    module = sqrt(conf[i].a0 * conf[i].a0 + conf[i].a3 * conf[i].a3);
     A = su2(conf[i].a0 / module, 0, 0, conf[i].a3 / module);
     conf_offdiagonal[i] = conf[i] ^ A;
   }
