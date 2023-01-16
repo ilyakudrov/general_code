@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
       calculate_monopole_plaket_singular(conf_angles_U1);
 
   vector<double> monopole_angles =
-      make_monopole_angles(dirac_plakets, inverse_laplacian);
+      make_monopole_angles_parallel(dirac_plakets, inverse_laplacian);
 
   cout << "decomposition ended" << endl;
 

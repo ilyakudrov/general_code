@@ -1,23 +1,25 @@
 #!/bin/bash
 conf_format_wilson="double_qc2dstag"
-conf_path_wilson="../../../tests/confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001"
+conf_path_wilson="../../../tests/confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/steps_500/copies=3/conf_Landau_gaugefixed_0001"
 bytes_skip_wilson=0
-wilson_type="su3"
+wilson_type="su3_abelian"
 conf_format_plaket="double_qc2dstag"
+convert_wilson=1
 # conf_path_plaket="../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
-conf_path_plaket="../../../tests/confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001"
+conf_path_plaket="../../../tests/confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/steps_500/copies=3/conf_Landau_gaugefixed_0001"
 bytes_skip_plaket=0
-plaket_type="su3"
+plaket_type="su3_abelian"
+convert_plaket=1
 HYP_alpha1=1
 HYP_alpha2=1
 HYP_alpha3=0.5
 APE_alpha=0.5
 APE_enabled=1
 HYP_enabled=1
-APE_steps=10
-calculation_step_APE=10
-calculation_APE_start=10
-HYP_steps=1
+APE_steps=700
+calculation_step_APE=100
+calculation_APE_start=800
+HYP_steps=0
 L_spat=24
 L_time=24
 path_wilson=./result/wilson_loops
@@ -30,8 +32,8 @@ R_min=1
 R_max=24
 save_conf=1
 conf_path_output="/home/ilya/soft/lattice/general_code/apps/smearing/test/result/smeared_0001"
-parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson} -bytes_skip_wilson ${bytes_skip_wilson}\
-    -conf_format_plaket ${conf_format_plaket} -conf_path_plaket ${conf_path_plaket} -bytes_skip_plaket ${bytes_skip_plaket}\
+parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson} -bytes_skip_wilson ${bytes_skip_wilson} -convert_wilson ${convert_wilson}\
+    -conf_format_plaket ${conf_format_plaket} -conf_path_plaket ${conf_path_plaket} -bytes_skip_plaket ${bytes_skip_plaket} -convert_plaket ${convert_plaket}\
     -HYP_alpha1 ${HYP_alpha1} -HYP_alpha2 ${HYP_alpha2} -HYP_alpha3 ${HYP_alpha3}\
     -APE_alpha ${APE_alpha} -APE_enabled ${APE_enabled} -HYP_enabled ${HYP_enabled}\
     -APE_steps ${APE_steps} -HYP_steps ${HYP_steps} -L_spat ${L_spat} -L_time ${L_time} -conf_path_output ${conf_path_output}\

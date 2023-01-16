@@ -33,20 +33,26 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf;
 
-  string conf_path = "../../confs/decomposed/monopoless/gluodynamics/16^4/"
-                     "beta6.0/conf_monopoless_1001";
+  // string conf_path = "../../confs/MA_gauge/su3/gluodynamics/24^4/beta6.0/"
+  //                    "steps_500/copies=3/conf_gaugefixed_0001";
+  string conf_path = "../../confs/su2/su2_suzuki/48^4/beta2.6/CON_MC_001.LAT";
+  // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
+  //                    "steps_500/copies=3/conf_Landau_gaugefixed_0001";
+  // string conf_path =
+  // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
+  //                    "result/smeared_0001";
   string conf_format = "double";
-  int bytes_skip = 0;
-  bool convert = 1;
+  int bytes_skip = 4;
+  bool convert = 0;
 
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
 
