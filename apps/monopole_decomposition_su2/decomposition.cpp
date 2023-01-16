@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <omp.h>
 
 using namespace std;
 
@@ -19,9 +20,9 @@ int t_size;
 
 int main(int argc, char **argv) {
 
-  unsigned int start_time;
-  unsigned int end_time;
-  unsigned int search_time;
+  double start_time;
+  double end_time;
+  double search_time;
 
   string path_conf;
   string conf_format;
@@ -91,15 +92,14 @@ int main(int argc, char **argv) {
   cout << "initial Landau U1 functional "
        << Landau_functional_complex(conf_complex) << endl;
 
-  start_time = clock();
+  start_time = omp_get_wtime();
 
   make_maximization_final(gauge_complex, conf_complex, OR_steps,
                           tolerance_maximal, tolerance_average);
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  cout << "make_maximization_final time: " << search_time * 1. / CLOCKS_PER_SEC
-       << endl;
+  cout << "make_maximization_final time: " << search_time << endl;
 
   normalize_complex(gauge_complex);
 
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
   vector<double> inverse_laplacian =
       read_inverse_laplacian(path_inverse_laplacian);
 
-  start_time = clock();
+  start_time = omp_get_wtime();
 
   cout << "decomposition started" << endl;
 
@@ -131,10 +131,9 @@ int main(int argc, char **argv) {
 
   cout << "decomposition ended" << endl;
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  cout << "make_monopole_angles time: " << search_time * 1. / CLOCKS_PER_SEC
-       << endl;
+  cout << "make_monopole_angles time: " << search_time << endl;
 
   write_double_angles(path_conf_monopole, monopole_angles);
 
