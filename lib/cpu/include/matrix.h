@@ -2,6 +2,7 @@
 
 #include <complex>
 #include <iostream>
+#include <vector>
 
 struct complex_t {
   double real;
@@ -71,6 +72,8 @@ public:
 
   double multiply_tr(const su2 &B);
 
+  double multiply_tr_adjoint(const su2 &B);
+
   // calculate inverse of the matrix
   su2 inverse();
 
@@ -117,6 +120,8 @@ public:
 
   double multiply_tr(const abelian &B);
 
+  double multiply_tr_adjoint(const abelian &B);
+
   // inverse
   abelian inverse();
   // conjugated
@@ -149,6 +154,8 @@ public:
   complex_t tr_complex();
 
   double multiply_tr(const su3 &B);
+
+  double multiply_tr_adjoint(const su3 &B, std::vector<su3> &generators_su3);
 
   // calculate inverse of the matrix
   su3 inverse();
@@ -207,6 +214,8 @@ public:
   complex_t tr_complex();
 
   double multiply_tr(const su3_abelian &B);
+
+  double multiply_tr_adjoint(const su3_abelian &B);
 
   // calculate inverse of the matrix
   su3_abelian inverse();
@@ -291,3 +300,5 @@ spin operator*(const spin &A, const double &x);
 double operator*(const spin &A, const spin &B);
 
 std::ostream &operator<<(std::ostream &os, const spin &A);
+
+std::vector<su3> get_generators_su3();

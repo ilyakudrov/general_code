@@ -170,3 +170,14 @@ template <class T>
 std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
                 int time_min, int time_max);
+
+template <class T>
+double wilson_adjoint_plane(std::vector<T> &wilson_lines_mu,
+                            std::vector<T> &wilson_lines_nu, int size_mu1,
+                            int size_mu2, int size_nu1, int size_nu2,
+                            int length_mu, int length_nu);
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_adjoint_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
+                        int time_min, int time_max);

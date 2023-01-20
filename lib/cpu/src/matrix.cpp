@@ -152,6 +152,11 @@ double su2::multiply_tr(const su2 &B) {
   return a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
 }
 
+double su2::multiply_tr_adjoint(const su2 &B) {
+  double trace = a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
+  return trace * trace;
+}
+
 su2 su2::inverse() {
   double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   return su2(a0 / rho, -a1 / rho, -a2 / rho, -a3 / rho);
@@ -228,6 +233,11 @@ double abelian::tr() { return r * cos(phi); }
 
 double abelian::multiply_tr(const abelian &B) {
   return r * B.r * cos(phi - B.phi);
+}
+
+double abelian::multiply_tr_adjoint(const abelian &B) {
+  double trace = r * B.r * cos(phi - B.phi);
+  return trace * trace;
 }
 
 abelian abelian::inverse() { return abelian(1 / r, -phi); }
@@ -311,6 +321,32 @@ double su3::multiply_tr(const su3 &B) {
     }
   }
   return trace / 3;
+}
+
+double multiply_tr(const su3 &A, const su3 &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int k = 0; k < 3; k++) {
+      trace += A.matrix[i][k].real * B.matrix[k][i].real -
+               A.matrix[i][k].imag * B.matrix[k][i].imag;
+    }
+  }
+  return trace / 3;
+}
+
+double su3::multiply_tr_adjoint(const su3 &B,
+                                std::vector<su3> &generators_su3) {
+  su3 U = this->matrix * B;
+
+  double trace = 0;
+  su3 C;
+
+  for (int i = 0; i < 8; i++) {
+    C = (U * generators_su3[i]) ^ U;
+    trace += ::multiply_tr(C, generators_su3[i]);
+  }
+
+  return trace;
 }
 
 su3 su3::inverse() {
@@ -831,6 +867,15 @@ double su3_abelian::multiply_tr(const su3_abelian &B) {
   return trace / 3;
 }
 
+double su3_abelian::multiply_tr_adjoint(const su3_abelian &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    trace +=
+        matrix[i].real * B.matrix[i].real + matrix[i].imag * B.matrix[i].imag;
+  }
+  return trace * trace;
+}
+
 su3_abelian su3_abelian::inverse() {
   su3_abelian B;
   for (int i = 0; i < 3; i++) {
@@ -1161,4 +1206,61 @@ std::ostream &operator<<(std::ostream &os, const spin &A) {
      << "a2 = " << A.a2 << " "
      << "a3 = " << A.a3 << " ";
   return os;
+}
+
+std::vector<su3> get_generators_su3() {
+  std::vector<su3> generators(8);
+
+  complex_t matrix[3][3];
+
+  // lambda1
+  matrix[0][1] = complex_t(1, 0);
+  matrix[1][0] = complex_t(1, 0);
+  generators[0] = su3(matrix);
+
+  // lambda2
+  matrix[0][1] = complex_t(0, -1);
+  matrix[1][0] = complex_t(0, 1);
+  generators[1] = su3(matrix);
+
+  // lambda3
+  matrix[0][1] = complex_t(0, 0);
+  matrix[1][0] = complex_t(0, 0);
+  matrix[0][0] = complex_t(1, 0);
+  matrix[1][1] = complex_t(-1, 0);
+  generators[2] = su3(matrix);
+
+  // lambda4
+  matrix[0][0] = complex_t(0, 0);
+  matrix[1][1] = complex_t(0, 0);
+  matrix[0][2] = complex_t(1, 0);
+  matrix[2][0] = complex_t(1, 0);
+  generators[3] = su3(matrix);
+
+  // lambda5
+  matrix[0][2] = complex_t(0, -1);
+  matrix[2][0] = complex_t(0, 1);
+  generators[4] = su3(matrix);
+
+  // lambda6
+  matrix[0][2] = complex_t(0, 0);
+  matrix[2][0] = complex_t(0, 0);
+  matrix[1][2] = complex_t(1, 0);
+  matrix[2][1] = complex_t(1, 0);
+  generators[5] = su3(matrix);
+
+  // lambda7
+  matrix[1][2] = complex_t(0, -1);
+  matrix[2][1] = complex_t(0, 1);
+  generators[6] = su3(matrix);
+
+  // lambda8
+  matrix[1][2] = complex_t(0, 0);
+  matrix[2][1] = complex_t(0, 0);
+  matrix[0][0] = complex_t(1 / sqrt(3), 0);
+  matrix[1][1] = complex_t(1 / sqrt(3), 0);
+  matrix[2][2] = complex_t(-2 / sqrt(3), 0);
+  generators[7] = su3(matrix);
+
+  return generators;
 }
