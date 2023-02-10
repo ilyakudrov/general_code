@@ -155,7 +155,7 @@ public:
 
   double multiply_tr(const su3 &B);
 
-  double multiply_tr_adjoint(const su3 &B, std::vector<su3> &generators_su3);
+  double multiply_tr_adjoint(const su3 &B);
 
   // calculate inverse of the matrix
   su3 inverse();

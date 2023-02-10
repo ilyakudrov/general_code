@@ -69,8 +69,6 @@ int main(int argc, char *argv[]) {
   search_time = end_time - start_time;
   std::cout << "smearing APE time: " << search_time << std::endl;
 
-  std::cout << "smearing APE time: " << search_time << std::endl;
-
   std::cout << "plaket after smearing: " << plaket_parallel(conf_separated)
             << std::endl;
   std::cout << "plaket_time after smearing: "

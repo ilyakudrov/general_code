@@ -1,32 +1,321 @@
-#include "../include/matrix.h"
-#include <cmath>
-#include <vector>
+#pragma once
 
-complex_t::complex_t(const double real1, const double imag1) {
+#include "cuda_host_device.h"
+
+namespace matrix_gpu {
+
+struct complex_t {
+  double real;
+  double imag;
+
+  CUDA_DEVICE complex_t(const double real1, const double imag1);
+  CUDA_DEVICE complex_t();
+
+  CUDA_DEVICE double module();
+
+  CUDA_DEVICE double norm2();
+
+  CUDA_DEVICE double angle();
+
+  CUDA_DEVICE complex_t conj();
+
+  CUDA_DEVICE complex_t negative();
+
+  CUDA_DEVICE complex_t mult_by_imag(double x);
+
+  CUDA_DEVICE complex_t sqrt_complex();
+
+  CUDA_DEVICE complex_t &operator+=(const complex_t &a);
+
+  CUDA_DEVICE complex_t &operator-=(const complex_t &a);
+
+  CUDA_DEVICE complex_t &operator*=(const complex_t &a);
+
+  CUDA_DEVICE complex_t &operator*=(const double &a);
+
+  CUDA_DEVICE complex_t &operator/=(const complex_t &a);
+
+  CUDA_DEVICE complex_t &operator/=(const double &a);
+};
+
+CUDA_DEVICE complex_t operator+(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator-(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator*(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator*(const double &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator*(const complex_t &a, const double &b);
+
+CUDA_DEVICE complex_t operator^(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator%(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator&(const complex_t &a, const complex_t &b);
+
+CUDA_DEVICE complex_t operator/(const complex_t &a, const double &b);
+
+CUDA_DEVICE complex_t operator/(const complex_t &a, const complex_t &b);
+
+// su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
+class su2 {
+public:
+  double a0, a1, a2, a3;
+  CUDA_DEVICE su2(double b0, double b1, double b2, double b3);
+  CUDA_DEVICE su2();
+
+  // calculate trace of the matrix
+  CUDA_DEVICE double tr();
+
+  CUDA_DEVICE double multiply_tr(const su2 &B);
+
+  CUDA_DEVICE double multiply_tr_adjoint(const su2 &B);
+
+  // calculate inverse of the matrix
+  CUDA_DEVICE su2 inverse();
+
+  // calculate conjugate of the matrix
+  CUDA_DEVICE su2 conj() const;
+
+  // gets projection onto su2 group
+  CUDA_DEVICE su2 proj();
+
+  // calculates module of vector in sigma matrices representation
+  CUDA_DEVICE double module();
+
+  // left and right multiplication of the matrix on sigma[3] matrix
+  CUDA_DEVICE su2 sigma3_mult() const;
+
+  CUDA_DEVICE su2 &operator+=(const su2 &A);
+};
+
+CUDA_DEVICE su2 operator+(const su2 &A, const su2 &B);
+CUDA_DEVICE su2 operator-(const su2 &A, const su2 &B);
+CUDA_DEVICE su2 operator*(const double &x, const su2 &A);
+CUDA_DEVICE su2 operator*(const su2 &A, const double &x);
+
+// matrix multiplication A * B
+CUDA_DEVICE su2 operator*(const su2 &A, const su2 &B);
+
+// matrix multiplication A * B.conj()
+CUDA_DEVICE su2 operator^(const su2 &A, const su2 &B);
+
+// matrix multiplication A.conj() * B
+CUDA_DEVICE su2 operator%(const su2 &A, const su2 &B);
+
+// abelian variable (module * exp(i * phi))
+class abelian {
+public:
+  double r, phi;
+  CUDA_DEVICE abelian();
+  CUDA_DEVICE abelian(double r1, double phi1);
+
+  // trace
+  CUDA_DEVICE double tr();
+
+  CUDA_DEVICE double multiply_tr(const abelian &B);
+
+  CUDA_DEVICE double multiply_tr_adjoint(const abelian &B);
+
+  // inverse
+  CUDA_DEVICE abelian inverse();
+  // conjugated
+  CUDA_DEVICE abelian conj() const;
+  CUDA_DEVICE abelian proj();
+  CUDA_DEVICE double module();
+};
+
+CUDA_DEVICE abelian operator+(const abelian &A, const abelian &B);
+CUDA_DEVICE abelian operator-(const abelian &A, const abelian &B);
+CUDA_DEVICE abelian operator*(const double &x, const abelian &A);
+CUDA_DEVICE abelian operator*(const abelian &A, const double &x);
+
+CUDA_DEVICE abelian operator*(const abelian &A, const abelian &B);
+CUDA_DEVICE abelian operator^(const abelian &A, const abelian &B);
+CUDA_DEVICE abelian operator%(const abelian &A, const abelian &B);
+
+// su3 matrix in 3x3 complex matrix representation
+class su3 {
+public:
+  complex_t matrix[3][3];
+  CUDA_DEVICE su3(complex_t B[3][3]);
+  CUDA_DEVICE su3();
+
+  // calculate trace of the matrix
+  CUDA_DEVICE double tr();
+
+  CUDA_DEVICE complex_t tr_complex();
+
+  CUDA_DEVICE double multiply_tr(const su3 &B);
+
+  CUDA_DEVICE double multiply_tr_adjoint(const su3 &B);
+
+  // calculate inverse of the matrix
+  CUDA_DEVICE su3 inverse();
+
+  // calculate conjugate of the matrix
+  CUDA_DEVICE su3 conj() const;
+
+  CUDA_DEVICE su3 mult_by_imag(double x);
+
+  // gets projection onto su3 group
+  CUDA_DEVICE su3 proj();
+
+  // muliply from left and right by lambda3
+  CUDA_DEVICE su3 lambda3_mult();
+
+  // muliply from left and right by lambda8
+  CUDA_DEVICE su3 lambda8_mult();
+
+  // calculates module of vector in sigma matrices representation
+  CUDA_DEVICE double module();
+
+  CUDA_DEVICE complex_t determinant();
+
+  CUDA_DEVICE complex_t unitarity_check();
+};
+
+CUDA_DEVICE su3 operator+(const su3 &A, const su3 &B);
+CUDA_DEVICE su3 operator-(const su3 &A, const su3 &B);
+CUDA_DEVICE su3 operator*(const double &x, const su3 &A);
+CUDA_DEVICE su3 operator*(const su3 &A, const double &x);
+
+CUDA_DEVICE su3 operator*(const complex_t &x, const su3 &A);
+CUDA_DEVICE su3 operator*(const su3 &A, const complex_t &x);
+
+// matrix multiplication A * B
+CUDA_DEVICE su3 operator*(const su3 &A, const su3 &B);
+
+// matrix multiplication A * B.conj()
+CUDA_DEVICE su3 operator^(const su3 &A, const su3 &B);
+
+// matrix multiplication A.conj() * B
+CUDA_DEVICE su3 operator%(const su3 &A, const su3 &B);
+
+// diagonal su3 matrix
+class su3_abelian {
+public:
+  complex_t matrix[3];
+  CUDA_DEVICE su3_abelian(complex_t B[3]);
+  CUDA_DEVICE su3_abelian();
+
+  // calculate trace of the matrix
+  CUDA_DEVICE double tr();
+
+  CUDA_DEVICE complex_t tr_complex();
+
+  CUDA_DEVICE double multiply_tr(const su3_abelian &B);
+
+  CUDA_DEVICE double multiply_tr_adjoint(const su3_abelian &B);
+
+  // calculate inverse of the matrix
+  CUDA_DEVICE su3_abelian inverse();
+
+  // calculate conjugate of the matrix
+  CUDA_DEVICE su3_abelian conj() const;
+
+  CUDA_DEVICE su3_abelian mult_by_imag(double x);
+
+  // gets projection onto su3 group
+  CUDA_DEVICE su3_abelian proj();
+
+  // muliply from left and right by lambda3
+  CUDA_DEVICE su3_abelian lambda3_mult();
+
+  // muliply from left and right by lambda8
+  CUDA_DEVICE su3_abelian lambda8_mult();
+
+  // calculates module of vector in sigma matrices representation
+  CUDA_DEVICE double module();
+
+  CUDA_DEVICE complex_t determinant();
+
+  CUDA_DEVICE complex_t unitarity_check();
+};
+
+CUDA_DEVICE su3_abelian operator+(const su3_abelian &A, const su3_abelian &B);
+CUDA_DEVICE su3_abelian operator-(const su3_abelian &A, const su3_abelian &B);
+CUDA_DEVICE su3_abelian operator*(const double &x, const su3_abelian &A);
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const double &x);
+
+CUDA_DEVICE su3_abelian operator*(const complex_t &x, const su3_abelian &A);
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const complex_t &x);
+
+// matrix multiplication A * B
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const su3_abelian &B);
+
+// matrix multiplication A * B.conj()
+CUDA_DEVICE su3_abelian operator^(const su3_abelian &A, const su3_abelian &B);
+
+// matrix multiplication A.conj() * B
+CUDA_DEVICE su3_abelian operator%(const su3_abelian &A, const su3_abelian &B);
+
+// 3D vector realisation for spin model.
+class spin {
+public:
+  double a1, a2, a3;
+
+  CUDA_DEVICE spin(double a1, double a2, double a3);
+  CUDA_DEVICE spin(su2 U);
+  CUDA_DEVICE spin();
+
+  CUDA_DEVICE double norm();
+  // set norm equal to unity
+  CUDA_DEVICE void normalize();
+  // reflect spin-vector through the V-vector axis
+  CUDA_DEVICE double reflect(spin &V);
+  // reflect without difference calculation
+  CUDA_DEVICE void reflect_fast(spin &V);
+  // rorate spin-vector to the same direction as V-vector
+  CUDA_DEVICE double parallel(spin &V);
+  // parallel without difference calculation
+  CUDA_DEVICE void parallel_fast(spin &V);
+  // check identity matrix
+  CUDA_DEVICE bool IsUnit();
+  // contribution from neighbour site
+  CUDA_DEVICE spin contribution(const su2 &A) const;
+  // contribution from neighbour site in negative direction (conjugated matrix)
+  CUDA_DEVICE spin contribution_conj(const su2 &A) const;
+  CUDA_DEVICE void contribution1(const su2 &A, const spin &b);
+  CUDA_DEVICE void contribution1_conj(const su2 &A, const spin &b);
+  // calculation of gauge matrix G from spin vector.
+  CUDA_DEVICE su2 GetGaugeMatrix();
+};
+
+CUDA_DEVICE spin operator+(const spin &A, const spin &B);
+CUDA_DEVICE spin operator-(const spin &A, const spin &B);
+CUDA_DEVICE spin operator*(const double &x, const spin &A);
+CUDA_DEVICE spin operator*(const spin &A, const double &x);
+CUDA_DEVICE double operator*(const spin &A, const spin &B);
+
+CUDA_DEVICE complex_t::complex_t(const double real1, const double imag1) {
   real = real1;
   imag = imag1;
 }
 
-complex_t::complex_t() {
+CUDA_DEVICE complex_t::complex_t() {
   real = 0;
   imag = 0;
 }
 
-double complex_t::module() { return sqrt(real * real + imag * imag); }
+CUDA_DEVICE double complex_t::module() {
+  return sqrt(real * real + imag * imag);
+}
 
-double complex_t::norm2() { return real * real + imag * imag; }
+CUDA_DEVICE double complex_t::norm2() { return real * real + imag * imag; }
 
-double complex_t::angle() { return atan2(imag, real); }
+CUDA_DEVICE double complex_t::angle() { return atan2(imag, real); }
 
-complex_t complex_t::conj() { return complex_t(real, -imag); }
+CUDA_DEVICE complex_t complex_t::conj() { return complex_t(real, -imag); }
 
-complex_t complex_t::negative() { return complex_t(-real, -imag); }
+CUDA_DEVICE complex_t complex_t::negative() { return complex_t(-real, -imag); }
 
-complex_t complex_t::mult_by_imag(double x) {
+CUDA_DEVICE complex_t complex_t::mult_by_imag(double x) {
   return complex_t(-imag * x, real * x);
 }
 
-complex_t complex_t::sqrt_complex() {
+CUDA_DEVICE complex_t complex_t::sqrt_complex() {
   double module = sqrt(sqrt(real * real + imag * imag));
 
   double phi = atan2(imag, real) / 2;
@@ -34,67 +323,67 @@ complex_t complex_t::sqrt_complex() {
   return complex_t(module * cos(phi), module * sin(phi));
 }
 
-complex_t operator+(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator+(const complex_t &a, const complex_t &b) {
   return complex_t(a.real + b.real, a.imag + b.imag);
 }
 
-complex_t operator-(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator-(const complex_t &a, const complex_t &b) {
   return complex_t(a.real - b.real, a.imag - b.imag);
 }
 
-complex_t operator*(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator*(const complex_t &a, const complex_t &b) {
   return complex_t(a.real * b.real - a.imag * b.imag,
                    a.real * b.imag + a.imag * b.real);
 }
 
-complex_t operator*(const double &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator*(const double &a, const complex_t &b) {
   return complex_t(a * b.real, a * b.imag);
 }
 
-complex_t operator*(const complex_t &a, const double &b) {
+CUDA_DEVICE complex_t operator*(const complex_t &a, const double &b) {
   return complex_t(a.real * b, a.imag * b);
 }
 
-complex_t operator^(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator^(const complex_t &a, const complex_t &b) {
   return complex_t(a.real * b.real + a.imag * b.imag,
                    a.imag * b.real - a.real * b.imag);
 }
 
-complex_t operator%(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator%(const complex_t &a, const complex_t &b) {
   return complex_t(a.real * b.real + a.imag * b.imag,
                    a.real * b.imag - a.imag * b.real);
 }
 
-complex_t operator&(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator&(const complex_t &a, const complex_t &b) {
   return complex_t(a.real * b.real - a.imag * b.imag,
                    -a.imag * b.real - a.real * b.imag);
 }
 
-complex_t operator/(const complex_t &a, const double &b) {
+CUDA_DEVICE complex_t operator/(const complex_t &a, const double &b) {
   return complex_t(a.real / b, a.imag / b);
 }
 
-complex_t operator/(const complex_t &a, const complex_t &b) {
+CUDA_DEVICE complex_t operator/(const complex_t &a, const complex_t &b) {
   double norm_factor = 1. / (b.real * b.real + b.imag * b.imag);
   return complex_t((a.real * b.real + a.imag * b.imag) * norm_factor,
                    (a.imag * b.real - a.real * b.imag) * norm_factor);
 }
 
-complex_t &complex_t::operator+=(const complex_t &a) {
+CUDA_DEVICE complex_t &complex_t::operator+=(const complex_t &a) {
   real += a.real;
   imag += a.imag;
 
   return *this;
 }
 
-complex_t &complex_t::operator-=(const complex_t &a) {
+CUDA_DEVICE complex_t &complex_t::operator-=(const complex_t &a) {
   real -= a.real;
   imag -= a.imag;
 
   return *this;
 }
 
-complex_t &complex_t::operator*=(const complex_t &a) {
+CUDA_DEVICE complex_t &complex_t::operator*=(const complex_t &a) {
   double tmp1 = real * a.real - imag * a.imag;
   imag = real * a.imag + imag * a.real;
   real = tmp1;
@@ -102,14 +391,14 @@ complex_t &complex_t::operator*=(const complex_t &a) {
   return *this;
 }
 
-complex_t &complex_t::operator*=(const double &a) {
+CUDA_DEVICE complex_t &complex_t::operator*=(const double &a) {
   real *= a;
   imag *= a;
 
   return *this;
 }
 
-complex_t &complex_t::operator/=(const complex_t &a) {
+CUDA_DEVICE complex_t &complex_t::operator/=(const complex_t &a) {
   double norm_factor = 1. / (a.real * a.real + a.imag * a.imag);
   double tmp = (real * a.real + imag * a.imag) * norm_factor;
 
@@ -119,89 +408,86 @@ complex_t &complex_t::operator/=(const complex_t &a) {
   return *this;
 }
 
-complex_t &complex_t::operator/=(const double &a) {
+CUDA_DEVICE complex_t &complex_t::operator/=(const double &a) {
   real /= a;
   imag /= a;
 
   return *this;
 }
 
-std::ostream &operator<<(std::ostream &os, const complex_t &a) {
-  os << "(" << a.real << ", " << a.imag << ")";
-  return os;
-}
-
 // su2 methods
-su2::su2() {
+CUDA_DEVICE su2::su2() {
   a0 = 1.;
   a1 = 0;
   a2 = 0;
   a3 = 0;
 }
 
-su2::su2(double b0, double b1, double b2, double b3) {
+CUDA_DEVICE su2::su2(double b0, double b1, double b2, double b3) {
   a0 = b0;
   a1 = b1;
   a2 = b2;
   a3 = b3;
 }
 
-double su2::tr() { return a0; }
+CUDA_DEVICE double su2::tr() { return a0; }
 
-double su2::multiply_tr(const su2 &B) {
+CUDA_DEVICE double su2::multiply_tr(const su2 &B) {
   return a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
 }
 
-double su2::multiply_tr_adjoint(const su2 &B) {
+CUDA_DEVICE double su2::multiply_tr_adjoint(const su2 &B) {
   double trace = a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
   return trace * trace - 1;
 }
 
-su2 su2::inverse() {
+CUDA_DEVICE su2 su2::inverse() {
   double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   return su2(a0 / rho, -a1 / rho, -a2 / rho, -a3 / rho);
 }
-double su2::module() { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
-su2 su2::conj() const { return su2(a0, -a1, -a2, -a3); }
-su2 su2::proj() {
+CUDA_DEVICE double su2::module() {
+  return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
+}
+CUDA_DEVICE su2 su2::conj() const { return su2(a0, -a1, -a2, -a3); }
+CUDA_DEVICE su2 su2::proj() {
   double rho = sqrt(a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3);
   return su2(a0 / rho, a1 / rho, a2 / rho, a3 / rho);
 }
-su2 su2::sigma3_mult() const { return su2(a0, -a1, -a2, a3); }
+CUDA_DEVICE su2 su2::sigma3_mult() const { return su2(a0, -a1, -a2, a3); }
 
-su2 operator+(const su2 &A, const su2 &B) {
+CUDA_DEVICE su2 operator+(const su2 &A, const su2 &B) {
   return su2(A.a0 + B.a0, A.a1 + B.a1, A.a2 + B.a2, A.a3 + B.a3);
 }
-su2 operator-(const su2 &A, const su2 &B) {
+CUDA_DEVICE su2 operator-(const su2 &A, const su2 &B) {
   return su2(A.a0 - B.a0, A.a1 - B.a1, A.a2 - B.a2, A.a3 - B.a3);
 }
-su2 operator*(const double &x, const su2 &A) {
+CUDA_DEVICE su2 operator*(const double &x, const su2 &A) {
   return su2(A.a0 * x, A.a1 * x, A.a2 * x, A.a3 * x);
 }
-su2 operator*(const su2 &A, const double &x) {
+CUDA_DEVICE su2 operator*(const su2 &A, const double &x) {
   return su2(A.a0 * x, A.a1 * x, A.a2 * x, A.a3 * x);
 }
 
-su2 operator*(const su2 &A, const su2 &B) {
+CUDA_DEVICE su2 operator*(const su2 &A, const su2 &B) {
   return su2(A.a0 * B.a0 - A.a1 * B.a1 - A.a2 * B.a2 - A.a3 * B.a3,
              A.a0 * B.a1 + B.a0 * A.a1 + A.a3 * B.a2 - A.a2 * B.a3,
              A.a0 * B.a2 + B.a0 * A.a2 + A.a1 * B.a3 - A.a3 * B.a1,
              A.a0 * B.a3 + B.a0 * A.a3 + A.a2 * B.a1 - A.a1 * B.a2);
 }
-su2 operator^(const su2 &A, const su2 &B) {
+CUDA_DEVICE su2 operator^(const su2 &A, const su2 &B) {
   return su2(A.a0 * B.a0 + A.a1 * B.a1 + A.a2 * B.a2 + A.a3 * B.a3,
              -A.a0 * B.a1 + B.a0 * A.a1 - A.a3 * B.a2 + A.a2 * B.a3,
              -A.a0 * B.a2 + B.a0 * A.a2 - A.a1 * B.a3 + A.a3 * B.a1,
              -A.a0 * B.a3 + B.a0 * A.a3 - A.a2 * B.a1 + A.a1 * B.a2);
 }
-su2 operator%(const su2 &A, const su2 &B) {
+CUDA_DEVICE su2 operator%(const su2 &A, const su2 &B) {
   return su2(A.a0 * B.a0 + A.a1 * B.a1 + A.a2 * B.a2 + A.a3 * B.a3,
              A.a0 * B.a1 - B.a0 * A.a1 - A.a3 * B.a2 + A.a2 * B.a3,
              A.a0 * B.a2 - B.a0 * A.a2 - A.a1 * B.a3 + A.a3 * B.a1,
              A.a0 * B.a3 - B.a0 * A.a3 - A.a2 * B.a1 + A.a1 * B.a2);
 }
 
-su2 &su2::operator+=(const su2 &A) {
+CUDA_DEVICE su2 &su2::operator+=(const su2 &A) {
   a0 += A.a0;
   a1 += A.a1;
   a2 += A.a2;
@@ -210,42 +496,34 @@ su2 &su2::operator+=(const su2 &A) {
   return *this;
 }
 
-std::ostream &operator<<(std::ostream &os, const su2 &A) {
-  os << "a0 = " << A.a0 << " "
-     << "a1 = " << A.a1 << " "
-     << "a2 = " << A.a2 << " "
-     << "a3 = " << A.a3;
-  return os;
-}
-
 // abelian methods
-abelian::abelian() {
+CUDA_DEVICE abelian::abelian() {
   r = 1;
   phi = 0;
 }
 
-abelian::abelian(double r1, double phi1) {
+CUDA_DEVICE abelian::abelian(double r1, double phi1) {
   r = r1;
   phi = phi1;
 }
 
-double abelian::tr() { return r * cos(phi); }
+CUDA_DEVICE double abelian::tr() { return r * cos(phi); }
 
-double abelian::multiply_tr(const abelian &B) {
+CUDA_DEVICE double abelian::multiply_tr(const abelian &B) {
   return r * B.r * cos(phi - B.phi);
 }
 
-double abelian::multiply_tr_adjoint(const abelian &B) {
+CUDA_DEVICE double abelian::multiply_tr_adjoint(const abelian &B) {
   double trace = r * B.r * cos(2 * (phi - B.phi));
   return trace * trace;
 }
 
-abelian abelian::inverse() { return abelian(1 / r, -phi); }
-double abelian::module() { return r; }
-abelian abelian::conj() const { return abelian(r, -phi); }
-abelian abelian::proj() { return abelian(1, phi); }
+CUDA_DEVICE abelian abelian::inverse() { return abelian(1 / r, -phi); }
+CUDA_DEVICE double abelian::module() { return r; }
+CUDA_DEVICE abelian abelian::conj() const { return abelian(r, -phi); }
+CUDA_DEVICE abelian abelian::proj() { return abelian(1, phi); }
 
-abelian operator+(const abelian &A, const abelian &B) {
+CUDA_DEVICE abelian operator+(const abelian &A, const abelian &B) {
   return abelian(sqrt((A.r * sin(A.phi) + B.r * sin(B.phi)) *
                           (A.r * sin(A.phi) + B.r * sin(B.phi)) +
                       (A.r * cos(A.phi) + B.r * cos(B.phi)) *
@@ -253,7 +531,7 @@ abelian operator+(const abelian &A, const abelian &B) {
                  atan2(A.r * sin(A.phi) + B.r * sin(B.phi),
                        A.r * cos(A.phi) + B.r * cos(B.phi)));
 }
-abelian operator-(const abelian &A, const abelian &B) {
+CUDA_DEVICE abelian operator-(const abelian &A, const abelian &B) {
   return abelian(sqrt((A.r * sin(A.phi) - B.r * sin(B.phi)) *
                           (A.r * sin(A.phi) - B.r * sin(B.phi)) +
                       (A.r * cos(A.phi) - B.r * cos(B.phi)) *
@@ -261,31 +539,25 @@ abelian operator-(const abelian &A, const abelian &B) {
                  atan2(A.r * sin(A.phi) - B.r * sin(B.phi),
                        A.r * cos(A.phi) - B.r * cos(B.phi)));
 }
-abelian operator*(const double &x, const abelian &A) {
+CUDA_DEVICE abelian operator*(const double &x, const abelian &A) {
   return abelian(A.r * x, A.phi);
 }
-abelian operator*(const abelian &A, const double &x) {
+CUDA_DEVICE abelian operator*(const abelian &A, const double &x) {
   return abelian(A.r * x, A.phi);
 }
 
-abelian operator*(const abelian &A, const abelian &B) {
+CUDA_DEVICE abelian operator*(const abelian &A, const abelian &B) {
   return abelian(A.r * B.r, A.phi + B.phi);
 }
-abelian operator^(const abelian &A, const abelian &B) {
+CUDA_DEVICE abelian operator^(const abelian &A, const abelian &B) {
   return abelian(A.r * B.r, A.phi - B.phi);
 }
-abelian operator%(const abelian &A, const abelian &B) {
+CUDA_DEVICE abelian operator%(const abelian &A, const abelian &B) {
   return abelian(A.r * B.r, B.phi - A.phi);
 }
 
-std::ostream &operator<<(std::ostream &os, const abelian &A) {
-  os << "r = " << A.r << " "
-     << "phi = " << A.phi << " " << std::endl;
-  return os;
-}
-
 // su3 methods
-su3::su3() {
+CUDA_DEVICE su3::su3() {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       if (i != j)
@@ -296,7 +568,7 @@ su3::su3() {
   }
 }
 
-su3::su3(complex_t B[3][3]) {
+CUDA_DEVICE su3::su3(complex_t B[3][3]) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       matrix[i][j] = B[i][j];
@@ -304,15 +576,15 @@ su3::su3(complex_t B[3][3]) {
   }
 }
 
-double su3::tr() {
+CUDA_DEVICE double su3::tr() {
   return (matrix[0][0].real + matrix[1][1].real + matrix[2][2].real) / 3;
 }
 
-complex_t su3::tr_complex() {
+CUDA_DEVICE complex_t su3::tr_complex() {
   return (matrix[0][0] + matrix[1][1] + matrix[2][2]) / 3;
 }
 
-double su3::multiply_tr(const su3 &B) {
+CUDA_DEVICE double su3::multiply_tr(const su3 &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
@@ -323,7 +595,7 @@ double su3::multiply_tr(const su3 &B) {
   return trace / 3;
 }
 
-double multiply_tr(const su3 &A, const su3 &B) {
+CUDA_DEVICE double multiply_tr(const su3 &A, const su3 &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
@@ -334,7 +606,7 @@ double multiply_tr(const su3 &A, const su3 &B) {
   return trace / 3;
 }
 
-double su3::multiply_tr_adjoint(const su3 &B) {
+CUDA_DEVICE double su3::multiply_tr_adjoint(const su3 &B) {
   complex_t trace = complex_t(0, 0);
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
@@ -345,7 +617,7 @@ double su3::multiply_tr_adjoint(const su3 &B) {
   return trace.norm2() - 1;
 }
 
-su3 su3::inverse() {
+CUDA_DEVICE su3 su3::inverse() {
   su3 B;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -356,11 +628,11 @@ su3 su3::inverse() {
   return B;
 }
 
-complex_t determinant_part(complex_t B[3][3], int i, int j, int k) {
+CUDA_DEVICE complex_t determinant_part(complex_t B[3][3], int i, int j, int k) {
   return B[0][i] * (B[1][j] * B[2][k] - B[2][j] * B[1][k]);
 }
 
-double su3::module() {
+CUDA_DEVICE double su3::module() {
   complex_t determinant;
   determinant = determinant_part(matrix, 0, 1, 2);
   determinant = determinant + determinant_part(matrix, 1, 0, 2);
@@ -368,7 +640,7 @@ double su3::module() {
   return determinant.real;
 }
 
-complex_t su3::determinant() {
+CUDA_DEVICE complex_t su3::determinant() {
   complex_t determinant;
   determinant = determinant_part(matrix, 0, 1, 2);
   determinant = determinant - determinant_part(matrix, 1, 0, 2);
@@ -376,7 +648,7 @@ complex_t su3::determinant() {
   return determinant;
 }
 
-complex_t su3::unitarity_check() {
+CUDA_DEVICE complex_t su3::unitarity_check() {
   su3 A = this->conj();
   A = A * *this;
 
@@ -392,7 +664,7 @@ complex_t su3::unitarity_check() {
   return non_diagonal;
 }
 
-su3 su3::conj() const {
+CUDA_DEVICE su3 su3::conj() const {
   su3 B;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -403,7 +675,7 @@ su3 su3::conj() const {
   return B;
 }
 
-su3 su3::mult_by_imag(double x) {
+CUDA_DEVICE su3 su3::mult_by_imag(double x) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -428,7 +700,7 @@ su3 su3::mult_by_imag(double x) {
   return A;
 }*/
 
-void project_su2(complex_t v[][2]) {
+CUDA_DEVICE void project_su2(complex_t v[][2]) {
   complex_t u[2][2];
 
   // v*v^dagger
@@ -551,7 +823,7 @@ void project_su2(complex_t v[][2]) {
   }
 }
 
-su3 su3::proj() {
+CUDA_DEVICE su3 su3::proj() {
 
   su3 A;
 
@@ -689,7 +961,7 @@ su3 su3::proj() {
   return A;
 }
 
-su3 su3::lambda3_mult() {
+CUDA_DEVICE su3 su3::lambda3_mult() {
 
   su3 A;
 
@@ -703,7 +975,7 @@ su3 su3::lambda3_mult() {
   return su3(A);
 }
 
-su3 su3::lambda8_mult() {
+CUDA_DEVICE su3 su3::lambda8_mult() {
 
   su3 A(matrix);
 
@@ -722,7 +994,7 @@ su3 su3::lambda8_mult() {
   return su3(A);
 }
 
-su3 operator+(const su3 &A, const su3 &B) {
+CUDA_DEVICE su3 operator+(const su3 &A, const su3 &B) {
   su3 C;
   complex_t a;
   for (int i = 0; i < 3; i++) {
@@ -732,7 +1004,7 @@ su3 operator+(const su3 &A, const su3 &B) {
   }
   return C;
 }
-su3 operator-(const su3 &A, const su3 &B) {
+CUDA_DEVICE su3 operator-(const su3 &A, const su3 &B) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -741,7 +1013,7 @@ su3 operator-(const su3 &A, const su3 &B) {
   }
   return C;
 }
-su3 operator*(const double &x, const su3 &A) {
+CUDA_DEVICE su3 operator*(const double &x, const su3 &A) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -750,7 +1022,7 @@ su3 operator*(const double &x, const su3 &A) {
   }
   return C;
 }
-su3 operator*(const su3 &A, const double &x) {
+CUDA_DEVICE su3 operator*(const su3 &A, const double &x) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -759,7 +1031,7 @@ su3 operator*(const su3 &A, const double &x) {
   }
   return C;
 }
-su3 operator*(const complex_t &x, const su3 &A) {
+CUDA_DEVICE su3 operator*(const complex_t &x, const su3 &A) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -768,7 +1040,7 @@ su3 operator*(const complex_t &x, const su3 &A) {
   }
   return C;
 }
-su3 operator*(const su3 &A, const complex_t &x) {
+CUDA_DEVICE su3 operator*(const su3 &A, const complex_t &x) {
   su3 C;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -778,7 +1050,7 @@ su3 operator*(const su3 &A, const complex_t &x) {
   return C;
 }
 
-su3 operator*(const su3 &A, const su3 &B) {
+CUDA_DEVICE su3 operator*(const su3 &A, const su3 &B) {
   su3 C;
   complex_t a;
   for (int i = 0; i < 3; i++) {
@@ -793,7 +1065,7 @@ su3 operator*(const su3 &A, const su3 &B) {
   return C;
 }
 
-su3 operator^(const su3 &A, const su3 &B) {
+CUDA_DEVICE su3 operator^(const su3 &A, const su3 &B) {
   su3 C;
   complex_t a;
   for (int i = 0; i < 3; i++) {
@@ -808,7 +1080,7 @@ su3 operator^(const su3 &A, const su3 &B) {
   return C;
 }
 
-su3 operator%(const su3 &A, const su3 &B) {
+CUDA_DEVICE su3 operator%(const su3 &A, const su3 &B) {
   su3 C;
   complex_t a;
   for (int i = 0; i < 3; i++) {
@@ -823,38 +1095,28 @@ su3 operator%(const su3 &A, const su3 &B) {
   return C;
 }
 
-std::ostream &operator<<(std::ostream &os, const su3 &A) {
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      os << "(" << A.matrix[i][j].real << ", " << A.matrix[i][j].imag << ") ";
-    }
-    os << std::endl;
-  }
-  return os;
-}
-
 // su3_abelian methods
-su3_abelian::su3_abelian(complex_t B[3]) {
+CUDA_DEVICE su3_abelian::su3_abelian(complex_t B[3]) {
   for (int i = 0; i < 3; i++) {
     matrix[i] = B[i];
   }
 }
 
-su3_abelian::su3_abelian() {
+CUDA_DEVICE su3_abelian::su3_abelian() {
   for (int i = 0; i < 3; i++) {
     matrix[i] = complex_t(1, 0);
   }
 }
 
-double su3_abelian::tr() {
+CUDA_DEVICE double su3_abelian::tr() {
   return (matrix[0].real + matrix[1].real + matrix[2].real) / 3;
 }
 
-complex_t su3_abelian::tr_complex() {
+CUDA_DEVICE complex_t su3_abelian::tr_complex() {
   return (matrix[0] + matrix[1] + matrix[2]) / 3;
 }
 
-double su3_abelian::multiply_tr(const su3_abelian &B) {
+CUDA_DEVICE double su3_abelian::multiply_tr(const su3_abelian &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     trace +=
@@ -863,7 +1125,7 @@ double su3_abelian::multiply_tr(const su3_abelian &B) {
   return trace / 3;
 }
 
-double su3_abelian::multiply_tr_adjoint(const su3_abelian &B) {
+CUDA_DEVICE double su3_abelian::multiply_tr_adjoint(const su3_abelian &B) {
   double trace = 0;
   complex_t tmp = complex_t(0, 0);
   for (int i = 0; i < 3; i++) {
@@ -873,7 +1135,7 @@ double su3_abelian::multiply_tr_adjoint(const su3_abelian &B) {
   return trace;
 }
 
-su3_abelian su3_abelian::inverse() {
+CUDA_DEVICE su3_abelian su3_abelian::inverse() {
   su3_abelian B;
   for (int i = 0; i < 3; i++) {
     B.matrix[i].real = matrix[i].real;
@@ -882,16 +1144,16 @@ su3_abelian su3_abelian::inverse() {
   return B;
 }
 
-double su3_abelian::module() {
+CUDA_DEVICE double su3_abelian::module() {
   complex_t tmp = matrix[0] * matrix[1];
   return tmp.real * matrix[2].real - tmp.imag * matrix[2].imag;
 }
 
-complex_t su3_abelian::determinant() {
+CUDA_DEVICE complex_t su3_abelian::determinant() {
   return matrix[0] * matrix[1] * matrix[2];
 }
 
-su3_abelian su3_abelian::conj() const {
+CUDA_DEVICE su3_abelian su3_abelian::conj() const {
   su3_abelian B;
   for (int i = 0; i < 3; i++) {
     B.matrix[i].real = matrix[i].real;
@@ -900,7 +1162,7 @@ su3_abelian su3_abelian::conj() const {
   return B;
 }
 
-su3_abelian su3_abelian::mult_by_imag(double x) {
+CUDA_DEVICE su3_abelian su3_abelian::mult_by_imag(double x) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = matrix[i].mult_by_imag(x);
@@ -908,7 +1170,7 @@ su3_abelian su3_abelian::mult_by_imag(double x) {
   return C;
 }
 
-su3_abelian su3_abelian::proj() {
+CUDA_DEVICE su3_abelian su3_abelian::proj() {
   su3_abelian A;
   for (int i = 0; i < 3; i++) {
     A.matrix[i] = matrix[i] / matrix[i].module();
@@ -917,7 +1179,7 @@ su3_abelian su3_abelian::proj() {
   return A;
 }
 
-su3_abelian operator+(const su3_abelian &A, const su3_abelian &B) {
+CUDA_DEVICE su3_abelian operator+(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
   complex_t a;
   for (int i = 0; i < 3; i++) {
@@ -925,35 +1187,35 @@ su3_abelian operator+(const su3_abelian &A, const su3_abelian &B) {
   }
   return C;
 }
-su3_abelian operator-(const su3_abelian &A, const su3_abelian &B) {
+CUDA_DEVICE su3_abelian operator-(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = A.matrix[i] - B.matrix[i];
   }
   return C;
 }
-su3_abelian operator*(const double &x, const su3_abelian &A) {
+CUDA_DEVICE su3_abelian operator*(const double &x, const su3_abelian &A) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = x * A.matrix[i];
   }
   return C;
 }
-su3_abelian operator*(const su3_abelian &A, const double &x) {
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const double &x) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = x * A.matrix[i];
   }
   return C;
 }
-su3_abelian operator*(const complex_t &x, const su3_abelian &A) {
+CUDA_DEVICE su3_abelian operator*(const complex_t &x, const su3_abelian &A) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = x * A.matrix[i];
   }
   return C;
 }
-su3_abelian operator*(const su3_abelian &A, const complex_t &x) {
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const complex_t &x) {
   su3_abelian C;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = x * A.matrix[i];
@@ -961,7 +1223,7 @@ su3_abelian operator*(const su3_abelian &A, const complex_t &x) {
   return C;
 }
 
-su3_abelian operator*(const su3_abelian &A, const su3_abelian &B) {
+CUDA_DEVICE su3_abelian operator*(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
 
   C.matrix[0] = A.matrix[0] * B.matrix[0];
@@ -971,7 +1233,7 @@ su3_abelian operator*(const su3_abelian &A, const su3_abelian &B) {
   return C;
 }
 
-su3_abelian operator^(const su3_abelian &A, const su3_abelian &B) {
+CUDA_DEVICE su3_abelian operator^(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
 
   C.matrix[0] = A.matrix[0] ^ B.matrix[0];
@@ -981,7 +1243,7 @@ su3_abelian operator^(const su3_abelian &A, const su3_abelian &B) {
   return C;
 }
 
-su3_abelian operator%(const su3_abelian &A, const su3_abelian &B) {
+CUDA_DEVICE su3_abelian operator%(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
 
   C.matrix[0] = A.matrix[0] % B.matrix[0];
@@ -991,30 +1253,23 @@ su3_abelian operator%(const su3_abelian &A, const su3_abelian &B) {
   return C;
 }
 
-std::ostream &operator<<(std::ostream &os, const su3_abelian &A) {
-  for (int i = 0; i < 3; i++) {
-    os << "(" << A.matrix[i].real << ", " << A.matrix[i].imag << ") ";
-  }
-  os << std::endl;
-  return os;
-}
-
 // spin methods
-spin::spin() {
+CUDA_DEVICE spin::spin() {
   a1 = (double)0.0;
   a2 = (double)0.0;
   a3 = (double)1.0;
 }
-spin::spin(su2 U) {
+CUDA_DEVICE spin::spin(su2 U) {
   a1 = 2 * (U.a0 * U.a2 + U.a3 * U.a1);
   a2 = 2 * (U.a3 * U.a2 + U.a0 * U.a1);
   a3 = 1. - 2 * (U.a2 * U.a2 + U.a1 * U.a1);
 }
-spin::spin(double a1, double a2, double a3) : a1(a1), a2(a2), a3(a3) {}
+CUDA_DEVICE spin::spin(double a1, double a2, double a3)
+    : a1(a1), a2(a2), a3(a3) {}
 
-double spin::norm() { return sqrt(a1 * a1 + a2 * a2 + a3 * a3); }
+CUDA_DEVICE double spin::norm() { return sqrt(a1 * a1 + a2 * a2 + a3 * a3); }
 
-void spin::normalize() {
+CUDA_DEVICE void spin::normalize() {
   double norm = sqrt(a1 * a1 + a2 * a2 + a3 * a3);
   a1 = a1 / norm;
   a2 = a2 / norm;
@@ -1023,7 +1278,7 @@ void spin::normalize() {
 
 // Function reflect spin vector through arbitrary spin vector
 // it's more convenient to just change the spin variable
-double spin::reflect(spin &V) {
+CUDA_DEVICE double spin::reflect(spin &V) {
   double tmp1 = (V.a1 * V.a1 - V.a2 * V.a2 - V.a3 * V.a3) * a1 +
                 2 * V.a1 * (V.a2 * a2 + V.a3 * a3);
 
@@ -1048,7 +1303,7 @@ double spin::reflect(spin &V) {
   return 1 - c;
 }
 
-void spin::reflect_fast(spin &V) {
+CUDA_DEVICE void spin::reflect_fast(spin &V) {
   double tmp1 = (V.a1 * V.a1 - V.a2 * V.a2 - V.a3 * V.a3) * a1 +
                 2 * V.a1 * (V.a2 * a2 + V.a3 * a3);
 
@@ -1065,7 +1320,7 @@ void spin::reflect_fast(spin &V) {
   a3 = tmp3 / norm2;
 }
 
-double spin::parallel(spin &V) {
+CUDA_DEVICE double spin::parallel(spin &V) {
   double vNorm = V.norm();
 
   double b1 = V.a1 / vNorm;
@@ -1081,7 +1336,7 @@ double spin::parallel(spin &V) {
   return 1 - c;
 }
 
-void spin::parallel_fast(spin &V) {
+CUDA_DEVICE void spin::parallel_fast(spin &V) {
   double vNorm = V.norm();
 
   a1 = V.a1 / vNorm;
@@ -1089,11 +1344,13 @@ void spin::parallel_fast(spin &V) {
   a3 = V.a3 / vNorm;
 }
 
-bool spin::IsUnit() { return (this->norm() - 1.) > 1e-6 ? false : true; }
+CUDA_DEVICE bool spin::IsUnit() {
+  return (this->norm() - 1.) > 1e-6 ? false : true;
+}
 
 // vector which spin variable is multiplied on
 // it's contribution from single neighbour site in one direction
-spin spin::contribution(const su2 &A) const {
+CUDA_DEVICE spin spin::contribution(const su2 &A) const {
   double q1 = A.a1 * A.a1;
   double q2 = A.a2 * A.a2;
   double q3 = A.a3 * A.a3;
@@ -1113,7 +1370,7 @@ spin spin::contribution(const su2 &A) const {
 }
 
 // supposed to be used for spin variable on current lattice cite
-spin spin::contribution_conj(const su2 &A) const {
+CUDA_DEVICE spin spin::contribution_conj(const su2 &A) const {
   double q1 = A.a1 * A.a1;
   double q2 = A.a2 * A.a2;
   double q3 = A.a3 * A.a3;
@@ -1132,7 +1389,7 @@ spin spin::contribution_conj(const su2 &A) const {
               a1 * (q13 - q02) + a2 * (q23 + q01) + a3 * (A5 + 2 * q3));
 }
 
-void spin::contribution1(const su2 &A, const spin &b) {
+CUDA_DEVICE void spin::contribution1(const su2 &A, const spin &b) {
   double q1 = A.a1 * A.a1;
   double q2 = A.a2 * A.a2;
   double q3 = A.a3 * A.a3;
@@ -1149,7 +1406,7 @@ void spin::contribution1(const su2 &A, const spin &b) {
   a3 += 2 * b.a1 * (q13 + q02) + 2 * b.a2 * (q23 - q01) + b.a3 * (A5 + 2 * q3);
 }
 
-void spin::contribution1_conj(const su2 &A, const spin &b) {
+CUDA_DEVICE void spin::contribution1_conj(const su2 &A, const spin &b) {
   double q1 = A.a1 * A.a1;
   double q2 = A.a2 * A.a2;
   double q3 = A.a3 * A.a3;
@@ -1178,86 +1435,24 @@ void spin::contribution1_conj(const su2 &A, const spin &b) {
 // g_1 = - b/sqrt(2-2*c)
 // g_2 = - sqrt(2-2*c) / 2
 // g_3 = 0
-su2 spin::GetGaugeMatrix() {
+CUDA_DEVICE su2 spin::GetGaugeMatrix() {
   double sq = sqrt(2. - 2 * a3);
   return su2(-a1 / sq, 0., -sq / 2., -a2 / sq);
 }
-spin operator*(const double &x, const spin &A) {
+CUDA_DEVICE spin operator*(const double &x, const spin &A) {
   return spin(A.a1 * x, A.a2 * x, A.a3 * x);
 }
-spin operator*(const spin &A, const double &x) {
+CUDA_DEVICE spin operator*(const spin &A, const double &x) {
   return spin(A.a1 * x, A.a2 * x, A.a3 * x);
 }
-spin operator+(const spin &A, const spin &B) {
+CUDA_DEVICE spin operator+(const spin &A, const spin &B) {
   return spin(A.a1 + B.a1, A.a2 + B.a2, A.a3 + B.a3);
 }
-spin operator-(const spin &A, const spin &B) {
+CUDA_DEVICE spin operator-(const spin &A, const spin &B) {
   return spin(A.a1 - B.a1, A.a2 - B.a2, A.a3 - B.a3);
 }
-double operator*(const spin &A, const spin &B) {
+CUDA_DEVICE double operator*(const spin &A, const spin &B) {
   return A.a1 * B.a1 + A.a2 * B.a2 + A.a3 * B.a3;
 }
 
-std::ostream &operator<<(std::ostream &os, const spin &A) {
-  os << "a1 = " << A.a1 << " "
-     << "a2 = " << A.a2 << " "
-     << "a3 = " << A.a3 << " ";
-  return os;
-}
-
-std::vector<su3> get_generators_su3() {
-  std::vector<su3> generators(8);
-
-  complex_t matrix[3][3];
-
-  // lambda1
-  matrix[0][1] = complex_t(1, 0);
-  matrix[1][0] = complex_t(1, 0);
-  generators[0] = su3(matrix);
-
-  // lambda2
-  matrix[0][1] = complex_t(0, -1);
-  matrix[1][0] = complex_t(0, 1);
-  generators[1] = su3(matrix);
-
-  // lambda3
-  matrix[0][1] = complex_t(0, 0);
-  matrix[1][0] = complex_t(0, 0);
-  matrix[0][0] = complex_t(1, 0);
-  matrix[1][1] = complex_t(-1, 0);
-  generators[2] = su3(matrix);
-
-  // lambda4
-  matrix[0][0] = complex_t(0, 0);
-  matrix[1][1] = complex_t(0, 0);
-  matrix[0][2] = complex_t(1, 0);
-  matrix[2][0] = complex_t(1, 0);
-  generators[3] = su3(matrix);
-
-  // lambda5
-  matrix[0][2] = complex_t(0, -1);
-  matrix[2][0] = complex_t(0, 1);
-  generators[4] = su3(matrix);
-
-  // lambda6
-  matrix[0][2] = complex_t(0, 0);
-  matrix[2][0] = complex_t(0, 0);
-  matrix[1][2] = complex_t(1, 0);
-  matrix[2][1] = complex_t(1, 0);
-  generators[5] = su3(matrix);
-
-  // lambda7
-  matrix[1][2] = complex_t(0, -1);
-  matrix[2][1] = complex_t(0, 1);
-  generators[6] = su3(matrix);
-
-  // lambda8
-  matrix[1][2] = complex_t(0, 0);
-  matrix[2][1] = complex_t(0, 0);
-  matrix[0][0] = complex_t(1 / sqrt(3), 0);
-  matrix[1][1] = complex_t(1 / sqrt(3), 0);
-  matrix[2][2] = complex_t(-2 / sqrt(3), 0);
-  generators[7] = su3(matrix);
-
-  return generators;
-}
+} // namespace matrix_gpu

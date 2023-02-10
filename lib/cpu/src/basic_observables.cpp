@@ -1666,9 +1666,7 @@ double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
   su3 loops;
   double result = 0;
 
-  std::vector<su3> generators_su3 = get_generators_su3();
-
-#pragma omp parallel for collapse(3) private(loops) firstprivate(generators_su3) reduction(+ : result)
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
   for (int k = 0; k < data_size; k += size_nu2) {
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
@@ -1684,8 +1682,7 @@ double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
           loops = loops ^
                   wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
 
-        result += loops.multiply_tr_adjoint(wilson_lines_nu[i + k + j],
-                                            generators_su3);
+        result += loops.multiply_tr_adjoint(wilson_lines_nu[i + k + j]);
       }
     }
   }
