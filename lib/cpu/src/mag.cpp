@@ -3,6 +3,7 @@
 #include "../include/matrix.h"
 
 #include <fstream>
+#include <iostream>
 #include <random>
 #include <vector>
 

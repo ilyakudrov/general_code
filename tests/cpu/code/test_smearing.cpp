@@ -13,10 +13,10 @@
 
 #define MATRIX_TYPE su3
 
-int x_size = 64;
-int y_size = 64;
-int z_size = 64;
-int t_size = 16;
+int x_size = 36;
+int y_size = 36;
+int z_size = 36;
+int t_size = 36;
 
 using namespace std;
 
@@ -25,23 +25,21 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  double alpha1 = 0.1;
-  double alpha2 = 0.1;
+  double alpha1 = 1;
+  double alpha2 = 1;
   double alpha3 = 0.5;
   double alpha_APE = 0.5;
   double stout_rho = 0.15;
 
   data<MATRIX_TYPE> conf;
   data<MATRIX_TYPE> smeared;
-  // string conf_path = "../../confs/su2/CONF0201";
-  string conf_path =
-      "../../confs/Coulomb_su3/QCD/140MeV/nt16/conf_Coulomb_gaugefixed_0501";
-  // string conf_path = "../../confs/SU3_conf/nt14/conf.0501";
-  // string conf_path = "../../confs/qc2dstag/40^4/mu0.00/CONF0201";
-  // conf.read_double(path_su2, 8);
-  // conf_abelian.read_float(path_abelian, 0);
-  // conf.read_double_qc2dstag(conf_path);
-  conf.read_ildg(conf_path);
+  string conf_path = "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001";
+
+  string conf_format = "double_qc2dstag";
+  int bytes_skip = 0;
+  bool convert = 0;
+
+  get_data(conf, conf_path, conf_format, bytes_skip, convert);
 
   std::cout.precision(17);
 
@@ -59,9 +57,6 @@ int main(int argc, char *argv[]) {
   start_time = omp_get_wtime();
 
   for (int i = 0; i < 10; i++) {
-
-    start_time = omp_get_wtime();
-
     smearing_APE_new(conf_separated, alpha_APE);
   }
 
