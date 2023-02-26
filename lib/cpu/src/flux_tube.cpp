@@ -852,6 +852,7 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
       } else if (direction.compare("transversal") == 0) {
         main_coordinate_min = -main_coordinate;
         main_coordinate_max = main_coordinate;
+        transverse_coordinate = r / 2 + transverse_coordinate;
       } else {
         std::cout << "wrong direction" << std::endl;
         exit(1);
