@@ -25,7 +25,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -34,28 +34,38 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 36;
-  y_size = 36;
-  z_size = 36;
-  t_size = 36;
+  x_size = 48;
+  y_size = 48;
+  z_size = 48;
+  t_size = 48;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf;
 
-  string conf_path = "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001";
+  string conf_path = "../../confs/su2/su2_suzuki/48^4/beta2.8/CON_MC_001.LAT";
   // string conf_path =
+  // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
+  // =
   //     "../../confs/MA_gauge/su2/su2_suzuki/48^4/beta2.6/conf_0001";
   // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
   //                    "steps_500/copies=3/conf_Landau_gaugefixed_0001";
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/smeared_0001";
-  string conf_format = "double_qc2dstag";
-  int bytes_skip = 0;
+  string conf_format = "double";
+  int bytes_skip = 8;
   bool convert = 0;
 
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
+
+  string path_spins =
+      "../../confs/spins/su2/su2_suzuki/48^4/beta2.8/T_step=0.0001/spins_0001";
+  vector<spin> spins = read_spins(path_spins);
+
+  for (int i = 0; i < 10; i++) {
+    cout << spins[i] << endl;
+  }
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();

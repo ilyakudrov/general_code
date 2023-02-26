@@ -70,9 +70,11 @@ public:
   // calculate trace of the matrix
   double tr();
 
+  double multiply_conj_tr(const su2 &B);
+
   double multiply_tr(const su2 &B);
 
-  double multiply_tr_adjoint(const su2 &B);
+  double multiply_conj_tr_adjoint(const su2 &B);
 
   // calculate inverse of the matrix
   su2 inverse();
@@ -118,9 +120,11 @@ public:
   // trace
   double tr();
 
+  double multiply_conj_tr(const abelian &B);
+
   double multiply_tr(const abelian &B);
 
-  double multiply_tr_adjoint(const abelian &B);
+  double multiply_conj_tr_adjoint(const abelian &B);
 
   // inverse
   abelian inverse();
@@ -153,9 +157,11 @@ public:
 
   complex_t tr_complex();
 
+  double multiply_conj_tr(const su3 &B);
+
   double multiply_tr(const su3 &B);
 
-  double multiply_tr_adjoint(const su3 &B);
+  double multiply_conj_tr_adjoint(const su3 &B);
 
   // calculate inverse of the matrix
   su3 inverse();
@@ -213,9 +219,11 @@ public:
 
   complex_t tr_complex();
 
+  double multiply_conj_tr(const su3_abelian &B);
+
   double multiply_tr(const su3_abelian &B);
 
-  double multiply_tr_adjoint(const su3_abelian &B);
+  double multiply_conj_tr_adjoint(const su3_abelian &B);
 
   // calculate inverse of the matrix
   su3_abelian inverse();

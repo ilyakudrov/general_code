@@ -59,12 +59,13 @@
 
 template <class T>
 std::vector<T> calculate_plaket_time(const std::vector<T> array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec;
+  vec.reserve(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
   for (int dir = 1; dir < 3; dir++) {
     link.move_dir(dir);
-    vec.push_back(link.plaket_mu(array, 3));
+    vec.push_back(link.plaket_schwinger_average(array, 3));
   }
   SPACE_ITER_END;
   return vec;
@@ -72,13 +73,14 @@ std::vector<T> calculate_plaket_time(const std::vector<T> array) {
 
 template <class T>
 std::vector<T> calculate_plaket_space(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec;
+  vec.reserve(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
+    link.move_dir(dir);
     for (int j = dir + 1; j < 3; j++) {
-      link.move_dir(dir);
-      vec[PLACE1_NODIR + dir + j - 2] = link.plaket_mu(array, j);
+      vec.push_back(link.plaket_schwinger_average(array, j));
     }
   }
   SPACE_ITER_END;
@@ -174,73 +176,90 @@ calculate_schwinger_line(const std::vector<T> &array, int d, int x_trans) {
 }
 
 template <class T>
-std::vector<std::vector<T>>
-calculate_wilson_loops_schwinger(const std::vector<T> &array, int r, int t) {
-  std::vector<std::vector<T>> vec(3, std::vector<T>(data_size / 4));
+std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
+                                                int r, int t) {
+  std::vector<T> vec(data_size / 4);
   link1 link(x_size, y_size, z_size, t_size);
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
     SPACE_ITER_START;
-    vec[mu][link.place / 4] = link.wilson_loop_schwinger(array, r, t);
+    vec[link.place / 4 * 3 + mu] = link.wilson_loop_schwinger(array, r, t);
     SPACE_ITER_END;
   }
   return vec;
 }
 
 template <class T>
-std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<T> &array,
-                                 const std::vector<T> &plaket, int d_min,
-                                 int d_max, int t, int r) {
+std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<T> &array, const std::vector<T> &plaket,
+    const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
+    int t, int r) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<T> schwinger_lines;
 
-  std::vector<std::vector<T>> wilson_loops =
-      calculate_wilson_loops_schwinger(array, r, t);
-  std::map<int, double> result;
+  std::vector<T> wilson_loops = calculate_wilson_loops_schwinger(array, r, t);
+  std::vector<double> correlator(d_max - d_min + 1);
+  T W;
   T A;
-  for (int d = d_min; d <= d_max; d++) {
+  int d = 0;
+  int place = 0;
 
-    schwinger_lines = calculate_schwinger_lines_short(array, abs(d));
+  SPACE_ITER_START
 
-    SPACE_ITER_START;
+  place = link.place / 4 * 3;
 
-    for (int dir = 0; dir < 3; dir++) {
-      A = wilson_loops[dir][link.place / 4];
-
-      if (d < 0) {
-
-        link.move(dir, d);
-        A = (A ^ schwinger_lines[link.place * 3 / 4 + dir]);
-        A = A * plaket[link.place / 4];
-        A = A * schwinger_lines[link.place * 3 / 4 + dir];
-        result[d] += A.tr();
-        link.move(dir, -d);
-
-      } else if (d > 0) {
-
-        A = (A * schwinger_lines[link.place * 3 / 4 + dir]);
-        link.move(dir, d);
-        A = A * plaket[link.place / 4];
-        link.move(dir, -d);
-        A = A ^ schwinger_lines[link.place * 3 / 4 + dir];
-        result[d] += A.tr();
-
-      } else {
-
-        A = A * plaket[link.place / 4];
-        result[d] += A.tr();
-      }
+  for (int dir = 0; dir < 3; dir++) {
+    W = wilson_loops[place + dir];
+    d = d_min;
+    while (d < 0) {
+      A = W ^ schwinger_lines[abs(d) - 1][place + dir];
+      A = A * plaket[place + dir];
+      correlator[d - d_min] +=
+          A.multiply_tr(schwinger_lines[abs(d)][place + dir]);
+      d++;
     }
-
-    SPACE_ITER_END;
+    if (d == 0) {
+      correlator[d - d_min] += W.multiply_tr(plaket[place + dir]);
+      d++;
+    }
+    while (d <= d_max) {
+      A = W * schwinger_lines[abs(d) - 1][place + dir];
+      A = A * plaket[place + dir];
+      correlator[d - d_min] +=
+          A.multiply_tr(schwinger_lines[abs(d) - 1][place + dir]);
+      d++;
+    }
   }
 
-  for (auto it = result.begin(); it != result.end(); ++it) {
-    it->second = it->second / (x_size * y_size * z_size * t_size * 3);
-  }
+  SPACE_ITER_END
 
+  std::map<int, double> result;
+  for (int i = 0; i < correlator.size(); i++) {
+    result[i + d_min] = correlator[i] / (x_size * y_size * z_size * t_size * 3);
+  }
   return result;
+}
+
+template <class T>
+double wilson_plaket_electric_longitudinal(const std::vector<T> &array,
+                                           const std::vector<T> &plaket, int t,
+                                           int r) {
+  link1 link(x_size, y_size, z_size, t_size);
+
+  std::vector<T> wilson_loops = calculate_wilson_loops_schwinger(array, r, t);
+  int place = 0;
+  double correlator = 0;
+
+  SPACE_ITER_START
+
+  place = link.place / 4 * 3;
+
+  for (int dir = 0; dir < 3; dir++) {
+    correlator += wilson_loops[place + dir].tr() * plaket[place + dir].tr();
+  }
+
+  SPACE_ITER_END
+
+  return correlator;
 }
 
 template <class T>
@@ -310,54 +329,6 @@ std::vector<double> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
   }
   return vec;
 }
-
-// calculate std::vector of wilson loop traces with particular time size
-// template <class T>
-// std::vector<std::vector<double>> calculate_wilson_loop_tr(const
-// std::vector<T> &array,
-//                                                std::vector<int>
-//                                                space_sizes, int time_size)
-//                                                {
-//   link1 link(x_size, y_size, z_size, t_size);
-//   std::vector<std::vector<double>> wilson(space_sizes.size());
-//   std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
-//   std::vector<T> space_lines;
-//   for (int i = time_min; i <= time_max; i++) {
-//     time_lines[i - time_min] = wilson_lines(array, 3, i);
-//   }
-//   T A;
-//   for (int dir = 0; dir < 3; dir++) {
-//     for (int r = r_min; r <= r_max; r++) {
-//       if (r == r_min)
-//         space_lines = wilson_lines(array, dir, r);
-//       else
-//         space_lines = wilson_line_increase(array, space_lines, dir, r - 1);
-//       for (int time = time_min; time <= time_max; time++) {
-
-//         SPACE_ITER_START
-
-//         A = time_lines[time - time_min][link.place / 4];
-//         link.move(3, time);
-//         A = A * space_lines[link.place / 4];
-//         link.move(3, -time);
-//         link.move(dir, r);
-//         A = A * time_lines[time - time_min][link.place / 4].conj();
-//         link.move(dir, -r);
-//         A = A * space_lines[link.place / 4].conj();
-
-//         wilson[(r - r_min) + (time - time_min) * (r_max - r_min + 1)] +=
-//         A.tr();
-
-//         SPACE_ITER_END
-//       }
-//     }
-//   }
-//   for (int i = 0; i < (time_max - time_min + 1) * (r_max - r_min + 1); i++)
-//   {
-//     wilson[i] = wilson[i] / (DATA_SIZE / 4 * 3);
-//   }
-//   return wilson;
-// }
 
 std::map<int, double>
 wilson_plaket_correlator_electric(const std::vector<double> &wilson_loop_tr,
@@ -601,10 +572,10 @@ wilson_plane_tr(std::vector<T> &wilson_lines_mu,
 
         if (k + i + length_nu / 2 * size_nu1 >= size_nu2)
           wilson_loops_tr[i + k + j + length_nu / 2 * size_nu1 - size_nu2] =
-              loops.multiply_tr(wilson_lines_nu[i + k + j]);
+              loops.multiply_conj_tr(wilson_lines_nu[i + k + j]);
         else
           wilson_loops_tr[i + k + j + length_nu / 2 * size_nu1] =
-              loops.multiply_tr(wilson_lines_nu[i + k + j]);
+              loops.multiply_conj_tr(wilson_lines_nu[i + k + j]);
       }
     }
   }
@@ -635,7 +606,7 @@ std::vector<double> plaket_plane_tr(std::vector<T> &conf_mu,
         else
           loops = loops ^ conf_mu[i + k + j - size_nu2 + size_nu1];
 
-        wilson_loops_tr[i + k + j] = loops.multiply_tr(conf_nu[i + k + j]);
+        wilson_loops_tr[i + k + j] = loops.multiply_conj_tr(conf_nu[i + k + j]);
       }
     }
   }
@@ -945,10 +916,12 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 
 // su2
 
-template std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<su2> &array,
-                                 const std::vector<su2> &plaket, int d_min,
-                                 int d_max, int t, int r);
+template std::vector<su2> calculate_plaket_time(const std::vector<su2> array);
+template std::vector<su2> calculate_plaket_space(const std::vector<su2> &array);
+template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<su2> &array, const std::vector<su2> &plaket,
+    const std::vector<std::vector<su2>> &schwinger_lines, int d_min, int d_max,
+    int t, int r);
 template std::vector<su2>
 calculate_plaket_schwinger_time(const std::vector<su2> &array);
 template std::vector<std::vector<su2>>
@@ -992,10 +965,14 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 
 // abelian
 
-template std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<abelian> &array,
-                                 const std::vector<abelian> &plaket, int d_min,
-                                 int d_max, int t, int r);
+template std::vector<abelian>
+calculate_plaket_time(const std::vector<abelian> array);
+template std::vector<abelian>
+calculate_plaket_space(const std::vector<abelian> &array);
+template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<abelian> &array, const std::vector<abelian> &plaket,
+    const std::vector<std::vector<abelian>> &schwinger_lines, int d_min,
+    int d_max, int t, int r);
 template std::vector<abelian>
 calculate_plaket_schwinger_time(const std::vector<abelian> &array);
 template std::vector<std::vector<abelian>>
@@ -1040,10 +1017,12 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 
 // su3
 
-template std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<su3> &array,
-                                 const std::vector<su3> &plaket, int d_min,
-                                 int d_max, int t, int r);
+template std::vector<su3> calculate_plaket_time(const std::vector<su3> array);
+template std::vector<su3> calculate_plaket_space(const std::vector<su3> &array);
+template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<su3> &array, const std::vector<su3> &plaket,
+    const std::vector<std::vector<su3>> &schwinger_lines, int d_min, int d_max,
+    int t, int r);
 template std::vector<su3>
 calculate_plaket_schwinger_time(const std::vector<su3> &array);
 template std::vector<std::vector<su3>>
@@ -1086,10 +1065,16 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
                          int transverse_coordinate, std::string direction);
 
 // su3_abelian
-template std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<su3_abelian> &array,
-                                 const std::vector<su3_abelian> &plaket,
-                                 int d_min, int d_max, int t, int r);
+
+template std::vector<su3_abelian>
+calculate_plaket_time(const std::vector<su3_abelian> array);
+template std::vector<su3_abelian>
+calculate_plaket_space(const std::vector<su3_abelian> &array);
+template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<su3_abelian> &array,
+    const std::vector<su3_abelian> &plaket,
+    const std::vector<std::vector<su3_abelian>> &schwinger_lines, int d_min,
+    int d_max, int t, int r);
 template std::vector<su3_abelian>
 calculate_plaket_schwinger_time(const std::vector<su3_abelian> &array);
 template std::vector<std::vector<su3_abelian>>

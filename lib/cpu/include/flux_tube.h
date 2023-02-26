@@ -26,10 +26,10 @@ template <class T>
 std::vector<std::vector<T>>
 calculate_schwinger_line(const std::vector<T> &array, int d, int x_trans);
 template <class T>
-std::map<int, double>
-wilson_plaket_schwinger_electric(const std::vector<T> &array,
-                                 const std::vector<T> &plaket, int d_min,
-                                 int d_max, int t, int r);
+std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
+    const std::vector<T> &array, const std::vector<T> &plaket,
+    const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
+    int t, int r);
 
 // Wilson_plaket_correlator
 template <class T>
@@ -38,6 +38,7 @@ template <class T>
 std::vector<double> calculate_plaket_space_tr(const std::vector<T> &array);
 double plaket4_time(const std::vector<double> &plaket_tr, link1 &link);
 double plaket4_space(const std::vector<double> &plaket_tr, link1 &link, int nu);
+
 template <class T>
 std::vector<double> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
                                              int time);

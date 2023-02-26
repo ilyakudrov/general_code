@@ -148,11 +148,15 @@ su2::su2(double b0, double b1, double b2, double b3) {
 
 double su2::tr() { return a0; }
 
-double su2::multiply_tr(const su2 &B) {
+double su2::multiply_conj_tr(const su2 &B) {
   return a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
 }
 
-double su2::multiply_tr_adjoint(const su2 &B) {
+double su2::multiply_tr(const su2 &B) {
+  return a0 * B.a0 - a1 * B.a1 - a2 * B.a2 - a3 * B.a3;
+}
+
+double su2::multiply_conj_tr_adjoint(const su2 &B) {
   double trace = a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
   return trace * trace - 1;
 }
@@ -231,13 +235,17 @@ abelian::abelian(double r1, double phi1) {
 
 double abelian::tr() { return r * cos(phi); }
 
-double abelian::multiply_tr(const abelian &B) {
+double abelian::multiply_conj_tr(const abelian &B) {
   return r * B.r * cos(phi - B.phi);
 }
 
-double abelian::multiply_tr_adjoint(const abelian &B) {
+double abelian::multiply_tr(const abelian &B) {
+  return r * B.r * cos(phi + B.phi);
+}
+
+double abelian::multiply_conj_tr_adjoint(const abelian &B) {
   double trace = r * B.r * cos(2 * (phi - B.phi));
-  return trace * trace;
+  return trace;
 }
 
 abelian abelian::inverse() { return abelian(1 / r, -phi); }
@@ -312,7 +320,7 @@ complex_t su3::tr_complex() {
   return (matrix[0][0] + matrix[1][1] + matrix[2][2]) / 3;
 }
 
-double su3::multiply_tr(const su3 &B) {
+double su3::multiply_conj_tr(const su3 &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
@@ -323,18 +331,18 @@ double su3::multiply_tr(const su3 &B) {
   return trace / 3;
 }
 
-double multiply_tr(const su3 &A, const su3 &B) {
+double su3::multiply_tr(const su3 &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
-      trace += A.matrix[i][k].real * B.matrix[k][i].real -
-               A.matrix[i][k].imag * B.matrix[k][i].imag;
+      trace += matrix[i][k].real * B.matrix[k][i].real -
+               matrix[i][k].imag * B.matrix[k][i].imag;
     }
   }
   return trace / 3;
 }
 
-double su3::multiply_tr_adjoint(const su3 &B) {
+double su3::multiply_conj_tr_adjoint(const su3 &B) {
   complex_t trace = complex_t(0, 0);
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
@@ -854,7 +862,7 @@ complex_t su3_abelian::tr_complex() {
   return (matrix[0] + matrix[1] + matrix[2]) / 3;
 }
 
-double su3_abelian::multiply_tr(const su3_abelian &B) {
+double su3_abelian::multiply_conj_tr(const su3_abelian &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
     trace +=
@@ -863,7 +871,16 @@ double su3_abelian::multiply_tr(const su3_abelian &B) {
   return trace / 3;
 }
 
-double su3_abelian::multiply_tr_adjoint(const su3_abelian &B) {
+double su3_abelian::multiply_tr(const su3_abelian &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    trace +=
+        matrix[i].real * B.matrix[i].real - matrix[i].imag * B.matrix[i].imag;
+  }
+  return trace / 3;
+}
+
+double su3_abelian::multiply_conj_tr_adjoint(const su3_abelian &B) {
   double trace = 0;
   complex_t tmp = complex_t(0, 0);
   for (int i = 0; i < 3; i++) {

@@ -1344,7 +1344,7 @@ std::vector<double> polyakov_loop_correlator_singlet(const std::vector<T> &conf,
 
           correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
                      Dx + D_max] +=
-              polyakov_tmp.multiply_tr(polyakov_loops[link.place / 4]);
+              polyakov_tmp.multiply_conj_tr(polyakov_loops[link.place / 4]);
         }
 
         link.move(0, 1);
@@ -1395,7 +1395,7 @@ double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
         else
           loops = loops ^ conf_mu[i + k + j - size_nu2 + size_nu1];
 
-        result += loops.multiply_tr(conf_nu[i + k + j]);
+        result += loops.multiply_conj_tr(conf_nu[i + k + j]);
       }
     }
   }
@@ -1559,7 +1559,7 @@ double wilson_plane(std::vector<T> &wilson_lines_mu,
           loops = loops ^
                   wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
 
-        result += loops.multiply_tr(wilson_lines_nu[i + k + j]);
+        result += loops.multiply_conj_tr(wilson_lines_nu[i + k + j]);
       }
     }
   }
@@ -1649,40 +1649,7 @@ double wilson_adjoint_plane(std::vector<T> &wilson_lines_mu,
           loops = loops ^
                   wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
 
-        result += loops.multiply_tr_adjoint(wilson_lines_nu[i + k + j]);
-      }
-    }
-  }
-
-  return result / data_size;
-}
-
-double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
-                            std::vector<su3> &wilson_lines_nu, int size_mu1,
-                            int size_mu2, int size_nu1, int size_nu2,
-                            int length_mu, int length_nu) {
-  int data_size = x_size * y_size * z_size * t_size;
-
-  su3 loops;
-  double result = 0;
-
-#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
-  for (int k = 0; k < data_size; k += size_nu2) {
-    for (int i = 0; i < size_nu2; i += size_mu2) {
-      for (int j = 0; j < size_mu2; j++) {
-        if (j < size_mu2 - length_mu * size_mu1)
-          loops = wilson_lines_mu[i + k + j] *
-                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
-        else
-          loops = wilson_lines_mu[i + k + j] *
-                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
-        if (i + j < size_nu2 - length_nu * size_nu1)
-          loops = loops ^ wilson_lines_mu[i + k + j + length_nu * size_nu1];
-        else
-          loops = loops ^
-                  wilson_lines_mu[i + k + j - size_nu2 + length_nu * size_nu1];
-
-        result += loops.multiply_tr_adjoint(wilson_lines_nu[i + k + j]);
+        result += loops.multiply_conj_tr_adjoint(wilson_lines_nu[i + k + j]);
       }
     }
   }
@@ -1994,11 +1961,11 @@ template double plaket_space_parallel(std::vector<std::vector<su3>> conf);
 
 template double plaket_parallel(std::vector<std::vector<su3>> conf);
 
-// template double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
-//                                      std::vector<su3> &wilson_lines_nu,
-//                                      int size_mu1, int size_mu2, int
-//                                      size_nu1, int size_nu2, int length_mu,
-//                                      int length_nu);
+template double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
+                                     std::vector<su3> &wilson_lines_nu,
+                                     int size_mu1, int size_mu2, int size_nu1,
+                                     int size_nu2, int length_mu,
+                                     int length_nu);
 
 template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<su3>> conf, int r_min,
