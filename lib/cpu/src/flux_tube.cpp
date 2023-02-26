@@ -823,7 +823,6 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<T>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
                          int transverse_coordinate, std::string direction) {
-
   int data_size1 = x_size * y_size * z_size * t_size;
 
   std::vector<int> steps = {1, x_size, x_size * y_size,

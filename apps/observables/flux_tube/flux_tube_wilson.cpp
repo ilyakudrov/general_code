@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
   cout << "flux tube transversal electric new time: " << search_time << endl;
 
   for (auto it = flux_tube.begin(); it != flux_tube.end(); it++) {
-    stream_electric_long
+    stream_electric_trans
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
   cout << "flux tube transversal magnetic new time: " << search_time << endl;
 
   for (auto it = flux_tube.begin(); it != flux_tube.end(); it++) {
-    stream_magnetic_long
+    stream_magnetic_trans
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
