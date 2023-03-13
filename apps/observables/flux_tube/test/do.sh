@@ -15,10 +15,10 @@ output_path_electric_long=./result/flux_tube_electric_long
 output_path_magnetic_long=./result/flux_tube_magnetic_long
 output_path_electric_trans=./result/flux_tube_electric_trans
 output_path_magnetic_trans=./result/flux_tube_magnetic_trans
-T_min=4
-T_max=6
-R_min=4
-R_max=6
+T_min=2
+T_max=20
+R_min=2
+R_max=20
 parameters="-conf_format_plaket ${conf_format_plaket} -conf_path_plaket ${conf_path_plaket}\
     -bytes_skip_plaket ${bytes_skip_plaket} -convert_plaket ${convert_plaket}\
     -conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson}\

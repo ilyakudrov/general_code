@@ -838,6 +838,8 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
     time_lines[t] = wilson_lines(conf_wilson[3], t, steps[3], steps[4]);
   }
 
+  int transverse_shift = transverse_coordinate;
+
   std::vector<double> wilson_tr;
 
   for (int t = T_min; t <= T_max; t += 2) {
@@ -851,7 +853,7 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
       } else if (direction.compare("transversal") == 0) {
         main_coordinate_min = -main_coordinate;
         main_coordinate_max = main_coordinate;
-        transverse_coordinate = r / 2 + transverse_coordinate;
+        transverse_coordinate = r / 2 + transverse_shift;
       } else {
         std::cout << "wrong direction" << std::endl;
         exit(1);
