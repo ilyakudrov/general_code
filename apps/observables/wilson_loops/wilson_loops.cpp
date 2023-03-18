@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
   string conf_format;
   string conf_path;
   string path_wilson;
+  string representation;
   int L_spat, L_time;
   int T_min, T_max, R_min, R_max;
   int bytes_skip = 0;
@@ -44,6 +45,8 @@ int main(int argc, char *argv[]) {
       L_time = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-path_wilson") {
       path_wilson = argv[++i];
+    } else if (string(argv[i]) == "-representation") {
+      representation = argv[++i];
     } else if (string(argv[i]) == "-T_min") {
       T_min = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-T_max") {
@@ -67,6 +70,7 @@ int main(int argc, char *argv[]) {
   cout << "L_spat " << L_spat << endl;
   cout << "L_time " << L_time << endl;
   cout << "path_wilson " << path_wilson << endl;
+  cout << "representation " << representation << endl;
   cout << "T_min " << T_min << endl;
   cout << "T_max " << T_max << endl;
   cout << "R_min " << R_min << endl;
@@ -95,8 +99,18 @@ int main(int argc, char *argv[]) {
 
   start_time = omp_get_wtime();
 
-  map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  map<tuple<int, int>, double> wilson_loops;
+
+  if (representation.compare("fundamental") == 0) {
+    cout << "fundamental" << endl;
+    wilson_loops = wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  } else if (representation.compare("adjoint") == 0) {
+    cout << "adjoint" << endl;
+    wilson_loops =
+        wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  } else {
+    cout << "wrong representation" << endl;
+  }
 
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
     stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
