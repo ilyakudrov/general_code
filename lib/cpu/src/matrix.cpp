@@ -158,7 +158,7 @@ double su2::multiply_tr(const su2 &B) {
 
 double su2::multiply_conj_tr_adjoint(const su2 &B) {
   double trace = a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
-  return trace * trace - 1;
+  return 4 * trace * trace - 1;
 }
 
 su2 su2::inverse() {
