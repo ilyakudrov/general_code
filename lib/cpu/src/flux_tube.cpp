@@ -63,9 +63,9 @@ std::vector<T> calculate_plaket_time(const std::vector<T> array) {
   vec.reserve(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
-  for (int dir = 1; dir < 3; dir++) {
+  for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec.push_back(link.plaket_schwinger_average(array, 3));
+    vec[link.place / 4 * 3 + dir] = link.plaket_mu(array, 3);
   }
   SPACE_ITER_END;
   return vec;
@@ -178,7 +178,7 @@ calculate_schwinger_line(const std::vector<T> &array, int d, int x_trans) {
 template <class T>
 std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
                                                 int r, int t) {
-  std::vector<T> vec(data_size / 4);
+  std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
@@ -200,32 +200,36 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
   std::vector<double> correlator(d_max - d_min + 1);
   T W;
   T A;
+  T S;
   int d = 0;
   int place = 0;
 
   SPACE_ITER_START
 
-  place = link.place / 4 * 3;
-
   for (int dir = 0; dir < 3; dir++) {
-    W = wilson_loops[place + dir];
+    W = wilson_loops[link.place / 4 * 3 + dir];
     d = d_min;
+    link.move(dir, d_min);
     while (d < 0) {
-      A = W ^ schwinger_lines[abs(d) - 1][place + dir];
+      place = link.place / 4 * 3;
+      S = schwinger_lines[abs(d) - 1][place + dir];
+      A = W ^ S;
       A = A * plaket[place + dir];
-      correlator[d - d_min] +=
-          A.multiply_tr(schwinger_lines[abs(d)][place + dir]);
+      correlator[d - d_min] += A.multiply_tr(S);
+      link.move(dir, 1);
       d++;
     }
     if (d == 0) {
-      correlator[d - d_min] += W.multiply_tr(plaket[place + dir]);
+      correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
       d++;
     }
     while (d <= d_max) {
-      A = W * schwinger_lines[abs(d) - 1][place + dir];
-      A = A * plaket[place + dir];
-      correlator[d - d_min] +=
-          A.multiply_tr(schwinger_lines[abs(d) - 1][place + dir]);
+      S = schwinger_lines[abs(d) - 1][link.place / 4 * 3 + dir];
+      A = W * S;
+      link.move(dir, d);
+      A = A * plaket[link.place / 4 * 3 + dir];
+      correlator[d - d_min] += A.multiply_conj_tr(S);
+      link.move(dir, -d);
       d++;
     }
   }
@@ -234,8 +238,45 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
 
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
-    result[i + d_min] = correlator[i] / (x_size * y_size * z_size * t_size * 3);
+    result[i + d_min - r / 2] =
+        correlator[i] / (x_size * y_size * z_size * t_size * 3);
   }
+  return result;
+}
+
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
+                                     const std::vector<T> &array_wilson,
+                                     int T_min, int T_max, int R_min, int R_max,
+                                     int d_ouside) {
+
+  std::vector<T> plaket_schwinger_electric =
+      calculate_plaket_time(array_plaket);
+
+  std::vector<std::vector<T>> schwinger_lines_short(R_max + d_ouside,
+                                                    std::vector<T>());
+
+  for (int d = 0; d < R_max + d_ouside; d++) {
+    schwinger_lines_short[d] =
+        calculate_schwinger_lines_short(array_wilson, d + 1);
+  }
+
+  std::map<std::tuple<int, int, int>, double> result;
+
+  for (int t = T_min; t <= T_max; t += 2) {
+    for (int r = R_min; r <= R_max; r += 2) {
+      std::map<int, double> schwinger_electric =
+          wilson_plaket_schwinger_electric_longitudinal(
+              array_wilson, plaket_schwinger_electric, schwinger_lines_short,
+              -d_ouside, r + d_ouside, t, r);
+      for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
+           ++it) {
+        result[std::tuple<int, int, double>(t, r, it->first)] = it->second;
+      }
+    }
+  }
+
   return result;
 }
 
@@ -818,6 +859,17 @@ void wilson_plaket_correlator_plane_transversal(
 }
 
 template <class T>
+std::vector<double> plaket_tr_single_dir_test(std::vector<T> &conf, int mu) {
+  std::vector<double> result(data_size / 4);
+  link1 link(x_size, y_size, z_size, t_size);
+  link.move_dir(mu);
+  SPACE_ITER_START;
+  result[link.place / 4] = link.plaket_schwinger_average(conf, 3).tr();
+  SPACE_ITER_END;
+  return result;
+}
+
+template <class T>
 std::map<std::tuple<int, int, int>, double>
 wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<T>> &conf_wilson, int T_min,
@@ -924,6 +976,11 @@ template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su2> &array, const std::vector<su2> &plaket,
     const std::vector<std::vector<su2>> &schwinger_lines, int d_min, int d_max,
     int t, int r);
+template std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(const std::vector<su2> &array_plaket,
+                                     const std::vector<su2> &array_wilson,
+                                     int T_min, int T_max, int R_min, int R_max,
+                                     int d_max);
 template std::vector<su2>
 calculate_plaket_schwinger_time(const std::vector<su2> &array);
 template std::vector<std::vector<su2>>
@@ -959,6 +1016,8 @@ plaket_aver_tr_time(std::vector<std::vector<su2>> conf);
 template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<su2>> conf);
 
+template std::vector<double> plaket_tr_single_dir_test(std::vector<su2> &conf,
+                                                       int mu);
 template std::map<std::tuple<int, int, int>, double>
 wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<su2>> &conf_wilson, int T_min,
@@ -975,6 +1034,11 @@ template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<abelian> &array, const std::vector<abelian> &plaket,
     const std::vector<std::vector<abelian>> &schwinger_lines, int d_min,
     int d_max, int t, int r);
+template std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(const std::vector<abelian> &array_plaket,
+                                     const std::vector<abelian> &array_wilson,
+                                     int T_min, int T_max, int R_min, int R_max,
+                                     int d_max);
 template std::vector<abelian>
 calculate_plaket_schwinger_time(const std::vector<abelian> &array);
 template std::vector<std::vector<abelian>>
@@ -1010,6 +1074,8 @@ plaket_aver_tr_time(std::vector<std::vector<abelian>> conf);
 template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<abelian>> conf);
 
+template std::vector<double>
+plaket_tr_single_dir_test(std::vector<abelian> &conf, int mu);
 template std::map<std::tuple<int, int, int>, double>
 wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<abelian>> &conf_wilson,
@@ -1025,6 +1091,11 @@ template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3> &array, const std::vector<su3> &plaket,
     const std::vector<std::vector<su3>> &schwinger_lines, int d_min, int d_max,
     int t, int r);
+template std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(const std::vector<su3> &array_plaket,
+                                     const std::vector<su3> &array_wilson,
+                                     int T_min, int T_max, int R_min, int R_max,
+                                     int d_max);
 template std::vector<su3>
 calculate_plaket_schwinger_time(const std::vector<su3> &array);
 template std::vector<std::vector<su3>>
@@ -1060,6 +1131,8 @@ plaket_aver_tr_time(std::vector<std::vector<su3>> conf);
 template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<su3>> conf);
 
+template std::vector<double> plaket_tr_single_dir_test(std::vector<su3> &conf,
+                                                       int mu);
 template std::map<std::tuple<int, int, int>, double>
 wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<su3>> &conf_wilson, int T_min,
@@ -1077,6 +1150,11 @@ template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3_abelian> &plaket,
     const std::vector<std::vector<su3_abelian>> &schwinger_lines, int d_min,
     int d_max, int t, int r);
+template std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(
+    const std::vector<su3_abelian> &array_plaket,
+    const std::vector<su3_abelian> &array_wilson, int T_min, int T_max,
+    int R_min, int R_max, int d_max);
 template std::vector<su3_abelian>
 calculate_plaket_schwinger_time(const std::vector<su3_abelian> &array);
 template std::vector<std::vector<su3_abelian>>
@@ -1114,6 +1192,8 @@ plaket_aver_tr_time(std::vector<std::vector<su3_abelian>> conf);
 template std::vector<double>
 plaket_aver_tr_space(std::vector<std::vector<su3_abelian>> conf);
 
+template std::vector<double>
+plaket_tr_single_dir_test(std::vector<su3_abelian> &conf, int mu);
 template std::map<std::tuple<int, int, int>, double>
 wilson_plaket_correlator(std::vector<double> plaket_tr,
                          std::vector<std::vector<su3_abelian>> &conf_wilson,

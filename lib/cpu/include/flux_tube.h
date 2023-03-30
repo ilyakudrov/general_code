@@ -30,6 +30,12 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<T> &array, const std::vector<T> &plaket,
     const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
     int t, int r);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
+                                     const std::vector<T> &array_wilson,
+                                     int T_min, int T_max, int R_min, int R_max,
+                                     int d_max);
 
 // Wilson_plaket_correlator
 template <class T>
@@ -90,6 +96,9 @@ void wilson_plaket_correlator_plane_transversal(
     std::vector<double> &correlator, const std::vector<double> &wilson_loop_tr,
     const std::vector<double> &plaket_tr, int size_mu1, int size_mu2,
     int size_nu1, int size_nu2, int d, int x_trans_min, int x_trans_max);
+
+template <class T>
+std::vector<double> plaket_tr_single_dir_test(std::vector<T> &conf, int mu);
 
 template <class T>
 std::map<std::tuple<int, int, int>, double>

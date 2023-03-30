@@ -281,34 +281,26 @@ template <class T>
 T link1::wilson_loop_schwinger(const std::vector<T> &array, int r, int t) {
   int dir = direction;
   T A;
-  move_dir(3);
   for (int i = 0; i < t / 2; i++) {
-    A = A * array[place + direction];
+    A = A * array[place + 3];
     move(3, 1);
   }
-  move_dir(dir);
   for (int i = 0; i < r; i++) {
     A = A * array[place + direction];
     move(dir, 1);
   }
-  move_dir(3);
-  move(3, -1);
-  for (int i = 0; i < t - 1; i++) {
-    A = A ^ array[place + direction];
+  for (int i = 0; i < t; i++) {
     move(3, -1);
+    A = A ^ array[place + 3];
   }
-  move_dir(dir);
-  move(dir, -1);
-  for (int i = 0; i < r - 1; i++) {
-    A = A ^ array[place + direction];
+  for (int i = 0; i < r; i++) {
     move(dir, -1);
+    A = A ^ array[place + direction];
   }
-  move_dir(3);
   for (int i = 0; i < t / 2; i++) {
-    A = A * array[place + direction];
+    A = A * array[place + 3];
     move(3, 1);
   }
-  move_dir(dir);
   return A;
 }
 

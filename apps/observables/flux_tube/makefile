@@ -11,3 +11,5 @@ OBJ_FILES=$(OBJ_PATH)/data_$(ARCH).o $(OBJ_PATH)/basic_observables_$(ARCH).o $(O
 
 flux_tube_wilson: flux_tube_wilson.cpp $(OBJ_FILES)
 	$(GCC) flux_tube_wilson.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -o flux_tube_wilson_$(MATRIX_PLAKET)_$(MATRIX_WILSON)_$(ARCH)
+flux_tube_schwinger: flux_tube_schwinger.cpp $(OBJ_FILES)
+	$(GCC) flux_tube_schwinger.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -o flux_tube_schwinger_$(MATRIX_PLAKET)_$(MATRIX_WILSON)_$(ARCH)

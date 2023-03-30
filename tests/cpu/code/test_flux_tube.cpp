@@ -50,46 +50,10 @@ int main(int argc, char *argv[]) {
   get_data(conf_smeared, path_smeared, conf_format_smeared, bytes_skip_smeared,
            convert_smeared);
 
-  cout << "schwinger wilson flux tube test" << endl;
+  cout << "wilson plaket flux tube test" << endl;
 
   int R = 18;
   int T = 2;
-
-  // start_time = omp_get_wtime();
-  // vector<MATRIX_TYPE> plaket_schwinger_electric =
-  //     calculate_plaket_time(conf_qc2dstag.array);
-  // end_time = clock();
-  // search_time = end_time - start_time;
-  // cout << "calculate_plaket_schwinger_time time: "
-  //      << search_time * 1. / CLOCKS_PER_SEC << endl;
-
-  // vector<vector<MATRIX_TYPE>> schwinger_lines_short(R + 5,
-  //                                                   vector<MATRIX_TYPE>());
-  // for (int d = 0; d < R + 5; d++) {
-  //   schwinger_lines_short[d] =
-  //       calculate_schwinger_lines_short(conf_smeared.array, d + 1);
-  // }
-
-  // start_time = omp_get_wtime();
-  // map<int, double> schwinger_electric =
-  //     wilson_plaket_schwinger_electric_longitudinal(
-  //         conf_smeared.array, plaket_schwinger_electric,
-  //         schwinger_lines_short, -5, R + 5, T, R);
-  // end_time = clock();
-  // search_time = end_time - start_time;
-  // cout << "wilson_plaket_schwinger_electric_longitudinal time: "
-  //      << search_time * 1. / CLOCKS_PER_SEC << endl;
-
-  // for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
-  //      ++it) {
-  //   cout << "d = " << it->first << " schwinger_electric = " << it->second
-  //        << endl;
-  // }
-
-  // cout << "wilson plaket flux tube test" << endl;
-
-  R = 18;
-  T = 2;
   int d_min = -5;
   int d_max = R + 5;
 
