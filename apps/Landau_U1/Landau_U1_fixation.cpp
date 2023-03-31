@@ -94,8 +94,17 @@ int main(int argc, char **argv) {
   apply_gauge_Landau_complex(gauge_complex, conf_complex);
   apply_gauge_Landau(gauge_complex, conf_su2.array);
 
-  cout << "functional after applying gauge "
-       << Landau_functional_complex(conf_complex) << endl;
+  double Landau_functional = Landau_functional_complex(conf_complex);
 
-  write_double_su2(path_functional_output, conf_su2.array);
+  cout << "Landau functional " << Landau_functional << endl;
+
+  ofstream functional_stream;
+  functional_stream.open(path_functional_output);
+
+  functional_stream.precision(17);
+
+  functional_stream << "functional" << endl;
+  functional_stream << Landau_functional << endl;
+
+  write_double_su2(path_conf_output, conf_su2.array);
 }
