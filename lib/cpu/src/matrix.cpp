@@ -421,21 +421,6 @@ su3 su3::mult_by_imag(double x) {
   return C;
 }
 
-/*su3 su3::proj() {
-  su3 A = *this;
-  A = (1. / sqrt((A ^ A).tr() / 3)) * A;
-  complex_t x;
-  for (int i = 0; i < 4; i++) {
-    A = 1.5 * A - 0.5 * ((A ^ A) * A);
-    // A = A * (complex_t(1, 0) - (1. / 3) * (A.determinant() - complex_t(1,
-    // 0)));
-    x = complex_t(1, -(A).determinant().imag / 3);
-    // A = A * x;
-  }
-
-  return A;
-}*/
-
 void project_su2(complex_t v[][2]) {
   complex_t u[2][2];
 

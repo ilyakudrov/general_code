@@ -1,9 +1,11 @@
 #include "../include/smearing.h"
 #include "../include/link.h"
+#include "../include/matrix.h"
 
 #include <algorithm>
 #include <execution>
 #include <omp.h>
+#include <utility>
 #include <vector>
 
 // #define data_size                                                              \
@@ -667,14 +669,16 @@ std::vector<std::vector<T>> separate_smearing(std::vector<T> &conf) {
 }
 
 template <class T>
-void smearing_plane_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
-                          std::vector<T> &conf_nu, int size_mu1, int size_mu2,
-                          int size_nu1, int size_nu2, double alpha) {
+void smearing_plane_minor(std::vector<T> &smeared,
+                          const std::vector<T> &conf_mu,
+                          const std::vector<T> &conf_nu, int size_mu1,
+                          int size_mu2, int size_nu1, int size_nu2,
+                          double alpha) {
   int data_size1 = x_size * y_size * z_size * t_size;
 
   T bracket;
 
-#pragma omp parallel for collapse(3) private(bracket)
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
   for (int k = 0; k < data_size1; k += size_nu2) {
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
@@ -684,7 +688,6 @@ void smearing_plane_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
           bracket =
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
         if (j < size_mu2 - size_mu1) {
-
           smeared[i + k + j] =
               smeared[i + k + j] +
               alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
@@ -725,14 +728,137 @@ void smearing_plane_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
 }
 
 template <class T>
-void smearing_plane_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
-                          std::vector<T> &conf_nu, int size_mu1, int size_mu2,
-                          int size_nu1, int size_nu2, double alpha) {
+void smearing_plane_minor_start(std::vector<T> &smeared,
+                                const std::vector<T> &conf_mu,
+                                const std::vector<T> &conf_nu, int size_mu1,
+                                int size_mu2, int size_nu1, int size_nu2,
+                                double alpha) {
   int data_size1 = x_size * y_size * z_size * t_size;
 
   T bracket;
 
-#pragma omp parallel for collapse(3) private(bracket)
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (i < size_nu2 - size_nu1) {
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        } else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (j < size_mu2 - size_mu1) {
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        } else
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+        if (i >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
+          else
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket *
+                         conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket *
+                         conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
+          else
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                           size_mu2 + size_mu1]);
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+void smearing_plane_minor_end(std::vector<T> &smeared,
+                              const std::vector<T> &conf_mu,
+                              const std::vector<T> &conf_nu, int size_mu1,
+                              int size_mu2, int size_nu1, int size_nu2,
+                              double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  T bracket;
+
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (i < size_nu2 - size_nu1) {
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        } else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (j < size_mu2 - size_mu1) {
+          smeared[i + k + j] =
+              smeared[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        } else
+          smeared[i + k + j] =
+              smeared[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+
+        if (i >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                    .proj();
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
+                    .proj();
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+void smearing_plane_major(std::vector<T> &smeared,
+                          const std::vector<T> &conf_mu,
+                          const std::vector<T> &conf_nu, int size_mu1,
+                          int size_mu2, int size_nu1, int size_nu2,
+                          double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  T bracket;
+
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
   for (int k = 0; k < data_size1; k += size_mu2) {
     for (int i = 0; i < size_mu2; i += size_nu2) {
       for (int j = 0; j < size_nu2; j++) {
@@ -783,35 +909,150 @@ void smearing_plane_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
 }
 
 template <class T>
-void smearing_APE_new(std::vector<std::vector<T>> &conf, double alpha) {
-  std::vector<std::vector<T>> smeared(3);
+void smearing_plane_major_start(std::vector<T> &smeared,
+                                const std::vector<T> &conf_mu,
+                                const std::vector<T> &conf_nu, int size_mu1,
+                                int size_mu2, int size_nu1, int size_nu2,
+                                double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
 
-  for (int i = 0; i < 3; i++) {
-    smeared[i] = conf[i];
-  }
+  T bracket;
 
-  smearing_plane_minor(smeared[0], conf[0], conf[1], 1, x_size, x_size,
-                       x_size * y_size, alpha);
-  smearing_plane_minor(smeared[0], conf[0], conf[2], 1, x_size, x_size * y_size,
-                       x_size * y_size * z_size, alpha);
-  smearing_plane_major(smeared[1], conf[1], conf[0], x_size, x_size * y_size, 1,
-                       x_size, alpha);
-  smearing_plane_minor(smeared[1], conf[1], conf[2], x_size, x_size * y_size,
-                       x_size * y_size, x_size * y_size * z_size, alpha);
-  smearing_plane_major(smeared[2], conf[2], conf[0], x_size * y_size,
-                       x_size * y_size * z_size, 1, x_size, alpha);
-  smearing_plane_major(smeared[2], conf[2], conf[1], x_size * y_size,
-                       x_size * y_size * z_size, x_size, x_size * y_size,
-                       alpha);
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_mu2) {
+    for (int i = 0; i < size_mu2; i += size_nu2) {
+      for (int j = 0; j < size_nu2; j++) {
+        if (j < size_nu2 - size_nu1)
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (i < size_mu2 - size_mu1)
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        else
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
 
-  for (int j = 0; j < 3; j++) {
-    for (int i = 0; i < smeared[j].size(); i++) {
-      smeared[j][i] = smeared[j][i].proj();
+        if (j >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (i < size_mu2 - size_mu1) {
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
+
+          } else
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket *
+                         conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (i < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket *
+                         conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
+          else
+            smeared[i + k + j] =
+                smeared[i + k + j] +
+                alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                           size_mu2 + size_mu1]);
+        }
+      }
     }
   }
+}
+
+template <class T>
+void smearing_plane_major_end(std::vector<T> &smeared,
+                              const std::vector<T> &conf_mu,
+                              const std::vector<T> &conf_nu, int size_mu1,
+                              int size_mu2, int size_nu1, int size_nu2,
+                              double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  T bracket;
+
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_mu2) {
+    for (int i = 0; i < size_mu2; i += size_nu2) {
+      for (int j = 0; j < size_nu2; j++) {
+        if (j < size_nu2 - size_nu1)
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (i < size_mu2 - size_mu1)
+          smeared[i + k + j] =
+              smeared[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        else
+          smeared[i + k + j] =
+              smeared[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+
+        if (j >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (i < size_mu2 - size_mu1) {
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                    .proj();
+
+          } else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                    .proj();
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (i < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
+                    .proj();
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
+  std::vector<std::vector<T>> smeared(3, std::vector<T>(conf[0].size()));
+
+  smearing_plane_minor_start(smeared[0], conf[0], conf[1], 1, x_size, x_size,
+                             x_size * y_size, alpha);
+  smearing_plane_minor_end(smeared[0], conf[0], conf[2], 1, x_size,
+                           x_size * y_size, x_size * y_size * z_size, alpha);
+  smearing_plane_major_start(smeared[1], conf[1], conf[0], x_size,
+                             x_size * y_size, 1, x_size, alpha);
+  smearing_plane_minor_end(smeared[1], conf[1], conf[2], x_size,
+                           x_size * y_size, x_size * y_size,
+                           x_size * y_size * z_size, alpha);
+  smearing_plane_major_start(smeared[2], conf[2], conf[0], x_size * y_size,
+                             x_size * y_size * z_size, 1, x_size, alpha);
+  smearing_plane_major_end(smeared[2], conf[2], conf[1], x_size * y_size,
+                           x_size * y_size * z_size, x_size, x_size * y_size,
+                           alpha);
 
   for (int i = 0; i < 3; i++) {
-    conf[i] = smeared[i];
+    conf[i] = std::move(smeared[i]);
   }
 }
 
@@ -1202,19 +1443,30 @@ template std::vector<std::vector<su2>>
 separate_smearing(std::vector<su2> &conf);
 
 template void smearing_plane_minor(std::vector<su2> &smeared,
-                                   std::vector<su2> &conf_mu,
-                                   std::vector<su2> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<su2> &conf_mu,
+                                   const std::vector<su2> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_minor_start(std::vector<su2> &smeared,
+                                         const std::vector<su2> &conf_mu,
+                                         const std::vector<su2> &conf_nu,
+                                         int size_mu1, int size_mu2,
+                                         int size_nu1, int size_nu2,
+                                         double alpha);
 
 template void smearing_plane_major(std::vector<su2> &smeared,
-                                   std::vector<su2> &conf_mu,
-                                   std::vector<su2> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<su2> &conf_mu,
+                                   const std::vector<su2> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_major_end(std::vector<su2> &smeared,
+                                       const std::vector<su2> &conf_mu,
+                                       const std::vector<su2> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha);
 
-template void smearing_APE_new(std::vector<std::vector<su2>> &conf,
-                               double alpha);
+template void smearing_APE_parallel(std::vector<std::vector<su2>> &conf,
+                                    double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su2> &smeared,
                                        std::vector<su2> &conf_mu,
@@ -1300,19 +1552,30 @@ template std::vector<std::vector<abelian>>
 separate_smearing(std::vector<abelian> &conf);
 
 template void smearing_plane_minor(std::vector<abelian> &smeared,
-                                   std::vector<abelian> &conf_mu,
-                                   std::vector<abelian> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<abelian> &conf_mu,
+                                   const std::vector<abelian> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_minor_start(std::vector<abelian> &smeared,
+                                         const std::vector<abelian> &conf_mu,
+                                         const std::vector<abelian> &conf_nu,
+                                         int size_mu1, int size_mu2,
+                                         int size_nu1, int size_nu2,
+                                         double alpha);
 
 template void smearing_plane_major(std::vector<abelian> &smeared,
-                                   std::vector<abelian> &conf_mu,
-                                   std::vector<abelian> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<abelian> &conf_mu,
+                                   const std::vector<abelian> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_major_end(std::vector<abelian> &smeared,
+                                       const std::vector<abelian> &conf_mu,
+                                       const std::vector<abelian> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha);
 
-template void smearing_APE_new(std::vector<std::vector<abelian>> &conf,
-                               double alpha);
+template void smearing_APE_parallel(std::vector<std::vector<abelian>> &conf,
+                                    double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<abelian> &smeared,
                                        std::vector<abelian> &conf_mu,
@@ -1394,19 +1657,30 @@ template std::vector<std::vector<su3>>
 separate_smearing(std::vector<su3> &conf);
 
 template void smearing_plane_minor(std::vector<su3> &smeared,
-                                   std::vector<su3> &conf_mu,
-                                   std::vector<su3> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<su3> &conf_mu,
+                                   const std::vector<su3> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_minor_start(std::vector<su3> &smeared,
+                                         const std::vector<su3> &conf_mu,
+                                         const std::vector<su3> &conf_nu,
+                                         int size_mu1, int size_mu2,
+                                         int size_nu1, int size_nu2,
+                                         double alpha);
 
 template void smearing_plane_major(std::vector<su3> &smeared,
-                                   std::vector<su3> &conf_mu,
-                                   std::vector<su3> &conf_nu, int size_mu1,
-                                   int size_mu2, int size_nu1, int size_nu2,
-                                   double alpha);
+                                   const std::vector<su3> &conf_mu,
+                                   const std::vector<su3> &conf_nu,
+                                   int size_mu1, int size_mu2, int size_nu1,
+                                   int size_nu2, double alpha);
+template void smearing_plane_major_end(std::vector<su3> &smeared,
+                                       const std::vector<su3> &conf_mu,
+                                       const std::vector<su3> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha);
 
-template void smearing_APE_new(std::vector<std::vector<su3>> &conf,
-                               double alpha);
+template void smearing_APE_parallel(std::vector<std::vector<su3>> &conf,
+                                    double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3> &smeared,
                                        std::vector<su3> &conf_mu,
@@ -1493,19 +1767,28 @@ template std::vector<std::vector<su3_abelian>>
 separate_smearing(std::vector<su3_abelian> &conf);
 
 template void smearing_plane_minor(std::vector<su3_abelian> &smeared,
-                                   std::vector<su3_abelian> &conf_mu,
-                                   std::vector<su3_abelian> &conf_nu,
+                                   const std::vector<su3_abelian> &conf_mu,
+                                   const std::vector<su3_abelian> &conf_nu,
                                    int size_mu1, int size_mu2, int size_nu1,
                                    int size_nu2, double alpha);
+template void smearing_plane_minor_start(
+    std::vector<su3_abelian> &smeared, const std::vector<su3_abelian> &conf_mu,
+    const std::vector<su3_abelian> &conf_nu, int size_mu1, int size_mu2,
+    int size_nu1, int size_nu2, double alpha);
 
 template void smearing_plane_major(std::vector<su3_abelian> &smeared,
-                                   std::vector<su3_abelian> &conf_mu,
-                                   std::vector<su3_abelian> &conf_nu,
+                                   const std::vector<su3_abelian> &conf_mu,
+                                   const std::vector<su3_abelian> &conf_nu,
                                    int size_mu1, int size_mu2, int size_nu1,
                                    int size_nu2, double alpha);
+template void smearing_plane_major_end(std::vector<su3_abelian> &smeared,
+                                       const std::vector<su3_abelian> &conf_mu,
+                                       const std::vector<su3_abelian> &conf_nu,
+                                       int size_mu1, int size_mu2, int size_nu1,
+                                       int size_nu2, double alpha);
 
-template void smearing_APE_new(std::vector<std::vector<su3_abelian>> &conf,
-                               double alpha);
+template void smearing_APE_parallel(std::vector<std::vector<su3_abelian>> &conf,
+                                    double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3_abelian> &smeared,
                                        std::vector<su3_abelian> &conf_mu,

@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
 
       start_time = omp_get_wtime();
 
-      smearing_APE_new(conf_separated, APE_alpha);
+      smearing_APE_parallel(conf_separated, APE_alpha);
 
       end_time = omp_get_wtime();
       smearing_time += end_time - start_time;
