@@ -288,10 +288,22 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
     //             << std::endl;
     // }
+    // if (test && dir == 0) {
+    //   std::cout << "left pike correlator " << correlator[d - d_min]
+    //             << std::endl;
+    //   std::cout << "left pike plaket_opposite "
+    //             << plaket_opposite[link.place / 4 * 3 + dir] << std::endl;
+    // }
     d++;
     correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
     // if (test && dir == 0) {
     //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    //   std::cout << "right pike plaket " << plaket[link.place / 4 * 3 + dir]
+    //             << std::endl;
+    // }
+    // if (test && dir == 0) {
+    //   std::cout << "right pike correlator " << correlator[d - d_min]
     //             << std::endl;
     // }
     d++;
@@ -310,6 +322,9 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
       //             << std::endl;
       // }
       correlator[d - d_min] += A.multiply_conj_tr(S);
+      // if (test && dir == 0) {
+      //   std::cout << "correlator " << correlator[d - d_min] << std::endl;
+      // }
       link.move(dir, -d);
       d++;
     }
@@ -336,6 +351,10 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
       //             << std::endl;
       // }
       correlator[d - d_min] += A.multiply_tr(S);
+      // if (test && dir == 0) {
+      //   std::cout << "left correlator " << correlator[d - d_min] <<
+      //   std::endl;
+      // }
       link.move(dir, 1);
       d++;
     }
@@ -345,10 +364,18 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
     //             << std::endl;
     // }
+    // if (test && dir == 0) {
+    //   std::cout << "left pike correlator " << correlator[d - d_min]
+    //             << std::endl;
+    // }
     d++;
     correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
     // if (test && dir == 0) {
     //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
+    // if (test && dir == 0) {
+    //   std::cout << "right pike correlator " << correlator[d - d_min]
     //             << std::endl;
     // }
     d++;
@@ -380,8 +407,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
 
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
-    result[i + d_min - r / 2] =
-        correlator[i] / (x_size * y_size * z_size * t_size * 3);
+    // result[i + d_min - r / 2] =
+    result[i] = correlator[i] / (x_size * y_size * z_size * t_size * 3);
   }
   return result;
 }
@@ -397,9 +424,7 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
       calculate_plaket_time(array_plaket);
 
   std::vector<T> plaket_schwinger_electric_opposite =
-      calculate_plaket_time(array_plaket);
-
-  std::cout.precision(17);
+      calculate_plaket_time_opposite(array_plaket);
 
   std::vector<std::vector<T>> schwinger_lines_short(
       std::max(R_max / 2, d_ouside), std::vector<T>());
