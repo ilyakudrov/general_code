@@ -29,7 +29,7 @@ template <class T>
 std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<T> &array, const std::vector<T> &plaket,
     const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
-    int t, int r);
+    int time, int r);
 template <class T>
 std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,

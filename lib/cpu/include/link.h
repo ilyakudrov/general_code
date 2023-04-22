@@ -70,6 +70,8 @@ public:
   // only positive directions make sense
   template <class T> T plaket_mu(const std::vector<T> &array, int mu);
 
+  template <class T> T plaket_mu_opposite(const std::vector<T> &array, int mu);
+
   template <class T>
   T plaket_schwinger_average(const std::vector<T> &array, int mu);
 
@@ -88,6 +90,9 @@ public:
 
   template <class T>
   T wilson_loop_schwinger(const std::vector<T> &array, int r, int t);
+
+  template <class T>
+  T wilson_loop_schwinger_opposite(const std::vector<T> &array, int r, int t);
 
   // used in wilson_loop
   // calculates straight lines for wilson loop in advance

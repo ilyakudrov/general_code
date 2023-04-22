@@ -57,15 +57,29 @@
 #include "../include/basic_observables.h"
 #include "../include/link.h"
 
+#include <algorithm>
+
 template <class T>
 std::vector<T> calculate_plaket_time(const std::vector<T> array) {
-  std::vector<T> vec;
-  vec.reserve(data_size / 4 * 3);
+  std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     vec[link.place / 4 * 3 + dir] = link.plaket_mu(array, 3);
+  }
+  SPACE_ITER_END;
+  return vec;
+}
+
+template <class T>
+std::vector<T> calculate_plaket_time_opposite(const std::vector<T> array) {
+  std::vector<T> vec(data_size / 4 * 3);
+  link1 link(x_size, y_size, z_size, t_size);
+  SPACE_ITER_START;
+  for (int dir = 0; dir < 3; dir++) {
+    link.move_dir(dir);
+    vec[link.place / 4 * 3 + dir] = link.plaket_mu_opposite(array, 3);
   }
   SPACE_ITER_END;
   return vec;
@@ -177,61 +191,189 @@ calculate_schwinger_line(const std::vector<T> &array, int d, int x_trans) {
 
 template <class T>
 std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
-                                                int r, int t) {
+                                                int r, int time) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
     SPACE_ITER_START;
-    vec[link.place / 4 * 3 + mu] = link.wilson_loop_schwinger(array, r, t);
+    vec[link.place / 4 * 3 + mu] = link.wilson_loop_schwinger(array, r, time);
     SPACE_ITER_END;
   }
   return vec;
 }
 
 template <class T>
+std::vector<T>
+calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
+                                          int time) {
+  std::vector<T> vec(data_size / 4 * 3);
+  link1 link(x_size, y_size, z_size, t_size);
+  for (int mu = 0; mu < 3; mu++) {
+    link.move_dir(mu);
+    SPACE_ITER_START;
+    vec[link.place / 4 * 3 + mu] =
+        link.wilson_loop_schwinger_opposite(array, r, time);
+    SPACE_ITER_END;
+  }
+  return vec;
+}
+
+#pragma omp declare reduction(vec_double_plus : std::vector<double> : \
+                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
+                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
+
+template <class T>
 std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<T> &array, const std::vector<T> &plaket,
+    const std::vector<T> &plaket_opposite,
     const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
-    int t, int r) {
+    int time, int r) {
   link1 link(x_size, y_size, z_size, t_size);
 
-  std::vector<T> wilson_loops = calculate_wilson_loops_schwinger(array, r, t);
-  std::vector<double> correlator(d_max - d_min + 1);
+  std::cout.precision(17);
+
+  std::vector<T> wilson_loops =
+      calculate_wilson_loops_schwinger(array, r, time);
+  std::vector<T> wilson_loops_opposite =
+      calculate_wilson_loops_schwinger_opposite(array, r, time);
+
+  std::vector<double> correlator(d_max - d_min + r);
   T W;
   T A;
   T S;
-  int d = 0;
-  int place = 0;
+  int d;
+  int place;
+  // bool test = false;
 
+  // #pragma omp parallel for collapse(3) private(W, A, S, link, d, place)          \
+//     firstprivate(d_min, d_max) reduction(vec_double_plus                       \
+//                                          : correlator)
   SPACE_ITER_START
+
+  // if (x == 0 && y == 0 && z == 0 && t == 0) {
+  //   test = true;
+  // }
 
   for (int dir = 0; dir < 3; dir++) {
     W = wilson_loops[link.place / 4 * 3 + dir];
+    // if (test && dir == 0) {
+    //   std::cout << "wilson loop place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
     d = d_min;
-    link.move(dir, d_min);
-    while (d < 0) {
+    link.move(dir, d_min + 1);
+    while (d < -1) {
       place = link.place / 4 * 3;
-      S = schwinger_lines[abs(d) - 1][place + dir];
+      S = schwinger_lines[abs(d) - 2][place + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
+      //   d
+      //             << " size " << abs(d) - 1 << std::endl;
+      // }
       A = W ^ S;
-      A = A * plaket[place + dir];
+      A = A * plaket_opposite[place + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " <<
+      //   d
+      //             << std::endl;
+      // }
       correlator[d - d_min] += A.multiply_tr(S);
       link.move(dir, 1);
       d++;
     }
-    if (d == 0) {
-      correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
-      d++;
-    }
-    while (d <= d_max) {
-      S = schwinger_lines[abs(d) - 1][link.place / 4 * 3 + dir];
+    correlator[d - d_min] +=
+        W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
+    // if (test && dir == 0) {
+    //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
+    d++;
+    correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
+    // if (test && dir == 0) {
+    //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
+    d++;
+    while (d < r / 2) {
+      S = schwinger_lines[d][link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
+      //   d
+      //             << " size " << abs(d) << std::endl;
+      // }
       A = W * S;
       link.move(dir, d);
       A = A * plaket[link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+      //             << std::endl;
+      // }
       correlator[d - d_min] += A.multiply_conj_tr(S);
       link.move(dir, -d);
       d++;
     }
+    link.move(dir, r);
+    W = wilson_loops_opposite[link.place / 4 * 3 + dir];
+    // if (test && dir == 0) {
+    //   std::cout << "wilson_loops_opposite place " << link.coordinate[0] << "
+    //   "
+    //             << d << std::endl;
+    // }
+    link.move(dir, -(r / 2 - 1));
+    while (d < r - 1) {
+      S = schwinger_lines[r - d - 2][link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
+      //   d
+      //             << " size " << r - d - 1 << std::endl;
+      // }
+      A = W ^ S;
+      A = A * plaket_opposite[link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " <<
+      //   d
+      //             << std::endl;
+      // }
+      correlator[d - d_min] += A.multiply_tr(S);
+      link.move(dir, 1);
+      d++;
+    }
+    correlator[d - d_min] +=
+        W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
+    // if (test && dir == 0) {
+    //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
+    d++;
+    correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
+    // if (test && dir == 0) {
+    //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+    //             << std::endl;
+    // }
+    d++;
+    while (d < r + d_max) {
+      S = schwinger_lines[d - r - 1][link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
+      //   d
+      //             << " size " << d - r << std::endl;
+      // }
+      A = W * S;
+      link.move(dir, d - r);
+      A = A * plaket[link.place / 4 * 3 + dir];
+      // if (test && dir == 0) {
+      //   std::cout << "plaket place " << link.coordinate[0] << " " << d
+      //             << std::endl;
+      // }
+      correlator[d - d_min] += A.multiply_conj_tr(S);
+      // if (test && dir == 0) {
+      //   std::cout << "d - d_min " << d - d_min << std::endl;
+      // }
+      link.move(dir, -(d - r));
+      d++;
+    }
+    // test = false;
   }
 
   SPACE_ITER_END
@@ -254,10 +396,15 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
   std::vector<T> plaket_schwinger_electric =
       calculate_plaket_time(array_plaket);
 
-  std::vector<std::vector<T>> schwinger_lines_short(R_max + d_ouside,
-                                                    std::vector<T>());
+  std::vector<T> plaket_schwinger_electric_opposite =
+      calculate_plaket_time(array_plaket);
 
-  for (int d = 0; d < R_max + d_ouside; d++) {
+  std::cout.precision(17);
+
+  std::vector<std::vector<T>> schwinger_lines_short(
+      std::max(R_max / 2, d_ouside), std::vector<T>());
+
+  for (int d = 0; d < std::max(R_max / 2, d_ouside); d++) {
     schwinger_lines_short[d] =
         calculate_schwinger_lines_short(array_wilson, d + 1);
   }
@@ -268,8 +415,9 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
     for (int r = R_min; r <= R_max; r += 2) {
       std::map<int, double> schwinger_electric =
           wilson_plaket_schwinger_electric_longitudinal(
-              array_wilson, plaket_schwinger_electric, schwinger_lines_short,
-              -d_ouside, r + d_ouside, t, r);
+              array_wilson, plaket_schwinger_electric,
+              plaket_schwinger_electric_opposite, schwinger_lines_short,
+              -d_ouside, d_ouside, t, r);
       for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
            ++it) {
         result[std::tuple<int, int, double>(t, r, it->first)] = it->second;
@@ -282,11 +430,12 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
 
 template <class T>
 double wilson_plaket_electric_longitudinal(const std::vector<T> &array,
-                                           const std::vector<T> &plaket, int t,
-                                           int r) {
+                                           const std::vector<T> &plaket,
+                                           int time, int r) {
   link1 link(x_size, y_size, z_size, t_size);
 
-  std::vector<T> wilson_loops = calculate_wilson_loops_schwinger(array, r, t);
+  std::vector<T> wilson_loops =
+      calculate_wilson_loops_schwinger(array, r, time);
   int place = 0;
   double correlator = 0;
 
@@ -974,8 +1123,9 @@ template std::vector<su2> calculate_plaket_time(const std::vector<su2> array);
 template std::vector<su2> calculate_plaket_space(const std::vector<su2> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su2> &array, const std::vector<su2> &plaket,
+    const std::vector<su2> &plaket_opposite,
     const std::vector<std::vector<su2>> &schwinger_lines, int d_min, int d_max,
-    int t, int r);
+    int time, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_longitudinal(const std::vector<su2> &array_plaket,
                                      const std::vector<su2> &array_wilson,
@@ -1032,8 +1182,9 @@ template std::vector<abelian>
 calculate_plaket_space(const std::vector<abelian> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<abelian> &array, const std::vector<abelian> &plaket,
+    const std::vector<abelian> &plaket_opposite,
     const std::vector<std::vector<abelian>> &schwinger_lines, int d_min,
-    int d_max, int t, int r);
+    int d_max, int time, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_longitudinal(const std::vector<abelian> &array_plaket,
                                      const std::vector<abelian> &array_wilson,
@@ -1089,8 +1240,9 @@ template std::vector<su3> calculate_plaket_time(const std::vector<su3> array);
 template std::vector<su3> calculate_plaket_space(const std::vector<su3> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3> &array, const std::vector<su3> &plaket,
+    const std::vector<su3> &plaket_opposite,
     const std::vector<std::vector<su3>> &schwinger_lines, int d_min, int d_max,
-    int t, int r);
+    int time, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_longitudinal(const std::vector<su3> &array_plaket,
                                      const std::vector<su3> &array_wilson,
@@ -1148,8 +1300,9 @@ calculate_plaket_space(const std::vector<su3_abelian> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3_abelian> &array,
     const std::vector<su3_abelian> &plaket,
+    const std::vector<su3_abelian> &plaket_opposite,
     const std::vector<std::vector<su3_abelian>> &schwinger_lines, int d_min,
-    int d_max, int t, int r);
+    int d_max, int time, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_longitudinal(
     const std::vector<su3_abelian> &array_plaket,
