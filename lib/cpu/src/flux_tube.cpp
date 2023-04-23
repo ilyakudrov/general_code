@@ -407,8 +407,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
 
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
-    // result[i + d_min - r / 2] =
-    result[i] = correlator[i] / (x_size * y_size * z_size * t_size * 3);
+    result[i + d_min - r / 2] =
+        correlator[i] / (x_size * y_size * z_size * t_size * 3);
   }
   return result;
 }

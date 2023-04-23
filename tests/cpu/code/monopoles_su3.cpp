@@ -144,8 +144,8 @@ int main(int argc, char *argv[]) {
   //                       "conf_monopole_16_1001_nocompensate";
   // string path_abelian =
   //     "../../confs/SU3_conf/gluodynamics/16^4/su3_mag_u1.01001.lat";
-  string path_abelian = "../../../apps/monopole_decomposition_su3/test/result/"
-                        "conf_monopoless_16_1001_nocompensate";
+  string path_abelian = "../../../tests/confs/decomposed/monopole/gluodynamics/"
+                        "36^4/beta6.3/steps_25/copies=4/conf_monopole_0001";
 
   // data<su3_abelian> conf;
   data<su3> conf;
@@ -162,14 +162,14 @@ int main(int argc, char *argv[]) {
   // vector<vector<double>> angles =
   // read_double_su3_convet_angles(path_abelian);
 
-  double sum;
-  for (int i = 0; i < 10; i++) {
-    sum = 0;
-    for (int j = 0; j < 3; j++) {
-      sum += angles[j][i];
-    }
-    cout << "sum = " << sum << endl;
-  }
+  // double sum;
+  // for (int i = 0; i < 10; i++) {
+  //   sum = 0;
+  //   for (int j = 0; j < 3; j++) {
+  //     sum += angles[j][i];
+  //   }
+  //   cout << "sum = " << sum << endl;
+  // }
 
   cout << "qc2dstag plaket " << plaket(conf.array) << endl;
 

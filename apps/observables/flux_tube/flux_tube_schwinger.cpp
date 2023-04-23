@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 
   map<tuple<int, int, int>, double> flux_tube_wilson;
 
-  vector<double> plaket_time_tr = plaket_aver_tr_time(separated_plaket);
+  vector<double> plaket_time_tr = calculate_plaket_time_tr(conf_plaket.array);
 
   start_time = omp_get_wtime();
   flux_tube_wilson =
