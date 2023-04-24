@@ -308,7 +308,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     // }
     d++;
     while (d < r / 2) {
-      S = schwinger_lines[d][link.place / 4 * 3 + dir];
+      S = schwinger_lines[d - 1][link.place / 4 * 3 + dir];
       // if (test && dir == 0) {
       //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
       //   d
