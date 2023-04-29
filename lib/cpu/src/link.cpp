@@ -133,6 +133,19 @@ template <class T> T link1::plaket_mu(const std::vector<T> &array, int mu) {
 }
 
 template <class T>
+T link1::plaket_mu_counterclock(const std::vector<T> &array, int mu) {
+  T A = array[place + mu];
+  move(mu, 1);
+  A = A * array[place + direction];
+  move(mu, -1);
+  move(direction, 1);
+  A = A ^ array[place + mu];
+  move(direction, -1);
+  A = A ^ array[place + direction];
+  return A;
+}
+
+template <class T>
 T link1::plaket_mu_opposite(const std::vector<T> &array, int mu) {
   move(direction, -1);
   T A = array[place + direction].conj();
@@ -635,6 +648,8 @@ void link1::get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
 
 // su2
 template su2 link1::plaket_mu(const std::vector<su2> &array, int mu);
+template su2 link1::plaket_mu_counterclock(const std::vector<su2> &array,
+                                           int mu);
 template su2 link1::plaket_mu_opposite(const std::vector<su2> &array, int mu);
 template su2
 link1::plaket_mu_opposite_counterclock(const std::vector<su2> &array, int mu);
@@ -669,6 +684,8 @@ template const su2 *link1::get_matrix(const std::vector<su2> &array);
 
 // abelian
 template abelian link1::plaket_mu(const std::vector<abelian> &array, int mu);
+template abelian
+link1::plaket_mu_counterclock(const std::vector<abelian> &array, int mu);
 template abelian link1::plaket_mu_opposite(const std::vector<abelian> &array,
                                            int mu);
 template abelian
@@ -707,6 +724,8 @@ template const abelian *link1::get_matrix(const std::vector<abelian> &array);
 
 // su3
 template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);
+template su3 link1::plaket_mu_counterclock(const std::vector<su3> &array,
+                                           int mu);
 template su3 link1::plaket_mu_opposite(const std::vector<su3> &array, int mu);
 template su3
 link1::plaket_mu_opposite_counterclock(const std::vector<su3> &array, int mu);
@@ -742,6 +761,8 @@ template const su3 *link1::get_matrix(const std::vector<su3> &array);
 // su3_abelian
 template su3_abelian link1::plaket_mu(const std::vector<su3_abelian> &array,
                                       int mu);
+template su3_abelian
+link1::plaket_mu_counterclock(const std::vector<su3_abelian> &array, int mu);
 template su3_abelian
 link1::plaket_mu_opposite(const std::vector<su3_abelian> &array, int mu);
 template su3_abelian

@@ -70,6 +70,9 @@ public:
   // only positive directions make sense
   template <class T> T plaket_mu(const std::vector<T> &array, int mu);
 
+  template <class T>
+  T plaket_mu_counterclock(const std::vector<T> &array, int mu);
+
   template <class T> T plaket_mu_opposite(const std::vector<T> &array, int mu);
 
   template <class T>

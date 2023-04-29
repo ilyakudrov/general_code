@@ -160,10 +160,9 @@ int main(int argc, char *argv[]) {
       flux_schwinger_electric_longitudinal(conf_plaket.array, conf_wilson.array,
                                            T_min, T_max, R_min, R_max, 5);
 
-  end_time = clock();
+  end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_longitudinal: "
-       << search_time * 1. / CLOCKS_PER_SEC << endl;
+  cout << "flux_schwinger_electric_longitudinal: " << search_time << endl;
 
   vector<vector<MATRIX_PLAKET>> separated_plaket =
       separate_wilson(conf_plaket.array);

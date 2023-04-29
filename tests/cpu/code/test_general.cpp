@@ -8,6 +8,7 @@
 #include "../../../lib/cpu/include/monopoles.h"
 #include "../../../lib/cpu/include/smearing.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -25,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -34,10 +35,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -45,7 +46,8 @@ int main(int argc, char *argv[]) {
 
   // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
   //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
-  string conf_path = "../../confs/SU3_conf/gluodynamics/24^4/beta6.0/CONF0001";
+  string conf_path = "../../confs/smeared/qc2dstag/40^4/mu0.00/"
+                     "HYP0_alpha=1_1_0.5_APE_alpha=0.5/smeared_0201";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
   // =
@@ -55,7 +57,7 @@ int main(int argc, char *argv[]) {
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/smeared_0001";
-  string conf_format = "double_qc2dstag";
+  string conf_format = "double";
   int bytes_skip = 0;
   bool convert = 0;
 

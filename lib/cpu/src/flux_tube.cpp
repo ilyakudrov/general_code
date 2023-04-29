@@ -56,6 +56,7 @@
 #include "../include/flux_tube.h"
 #include "../include/basic_observables.h"
 #include "../include/link.h"
+#include <omp.h>
 
 #include <algorithm>
 
@@ -95,6 +96,19 @@ calculate_plaket_time_opposite_counterclock(const std::vector<T> array) {
     link.move_dir(dir);
     vec[link.place / 4 * 3 + dir] =
         link.plaket_mu_opposite_counterclock(array, 3);
+  }
+  SPACE_ITER_END;
+  return vec;
+}
+
+template <class T>
+std::vector<T> calculate_plaket_time_counterclock(const std::vector<T> array) {
+  std::vector<T> vec(data_size / 4 * 3);
+  link1 link(x_size, y_size, z_size, t_size);
+  SPACE_ITER_START;
+  for (int dir = 0; dir < 3; dir++) {
+    link.move_dir(dir);
+    vec[link.place / 4 * 3 + dir] = link.plaket_mu_counterclock(array, 3);
   }
   SPACE_ITER_END;
   return vec;
@@ -246,6 +260,10 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     int time, int r) {
   link1 link(x_size, y_size, z_size, t_size);
 
+  double start_time;
+  double end_time;
+  double search_time;
+
   std::cout.precision(17);
 
   std::vector<T> wilson_loops =
@@ -259,165 +277,65 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
   T S;
   int d;
   int place;
-  // bool test = false;
 
-  // #pragma omp parallel for collapse(3) private(W, A, S, link, d, place)          \
-//     firstprivate(d_min, d_max) reduction(vec_double_plus                       \
-//                                          : correlator)
+#pragma omp parallel for collapse(4) private(W, A, S, link, d, place)          \
+    firstprivate(d_min, d_max) reduction(vec_double_plus                       \
+                                         : correlator)
   SPACE_ITER_START
-
-  // if (x == 0 && y == 0 && z == 0 && t == 0) {
-  //   test = true;
-  // }
 
   for (int dir = 0; dir < 3; dir++) {
     W = wilson_loops[link.place / 4 * 3 + dir];
-    // if (test && dir == 0) {
-    //   std::cout << "wilson loop place " << link.coordinate[0] << " " << d
-    //             << std::endl;
-    // }
     d = d_min;
     link.move(dir, d_min + 1);
     while (d < -1) {
       place = link.place / 4 * 3;
       S = schwinger_lines[abs(d) - 2][place + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
-      //   d
-      //             << " size " << abs(d) - 1 << std::endl;
-      // }
       A = W ^ S;
       A = A * plaket_opposite[place + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " <<
-      //   d
-      //             << std::endl;
-      // }
       correlator[d - d_min] += A.multiply_tr(S);
       link.move(dir, 1);
       d++;
     }
     correlator[d - d_min] +=
         W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
-    // if (test && dir == 0) {
-    //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
-    //             << std::endl;
-    // }
-    // if (test && dir == 0) {
-    //   std::cout << "left pike correlator " << correlator[d - d_min]
-    //             << std::endl;
-    //   std::cout << "left pike plaket_opposite "
-    //             << plaket_opposite[link.place / 4 * 3 + dir] << std::endl;
-    // }
     d++;
     correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
-    // if (test && dir == 0) {
-    //   std::cout << "plaket place " << link.coordinate[0] << " " << d
-    //             << std::endl;
-    //   std::cout << "right pike plaket " << plaket[link.place / 4 * 3 + dir]
-    //             << std::endl;
-    // }
-    // if (test && dir == 0) {
-    //   std::cout << "right pike correlator " << correlator[d - d_min]
-    //             << std::endl;
-    // }
     d++;
     while (d < r / 2) {
       S = schwinger_lines[d - 1][link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
-      //   d
-      //             << " size " << abs(d) << std::endl;
-      // }
       A = W * S;
       link.move(dir, d);
       A = A * plaket[link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "plaket place " << link.coordinate[0] << " " << d
-      //             << std::endl;
-      // }
       correlator[d - d_min] += A.multiply_conj_tr(S);
-      // if (test && dir == 0) {
-      //   std::cout << "correlator " << correlator[d - d_min] << std::endl;
-      // }
       link.move(dir, -d);
       d++;
     }
     link.move(dir, r);
     W = wilson_loops_opposite[link.place / 4 * 3 + dir];
-    // if (test && dir == 0) {
-    //   std::cout << "wilson_loops_opposite place " << link.coordinate[0] << "
-    //   "
-    //             << d << std::endl;
-    // }
     link.move(dir, -(r / 2 - 1));
     while (d < r - 1) {
       S = schwinger_lines[r - d - 2][link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
-      //   d
-      //             << " size " << r - d - 1 << std::endl;
-      // }
       A = W ^ S;
       A = A * plaket_opposite[link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " <<
-      //   d
-      //             << std::endl;
-      // }
       correlator[d - d_min] += A.multiply_tr(S);
-      // if (test && dir == 0) {
-      //   std::cout << "left correlator " << correlator[d - d_min] <<
-      //   std::endl;
-      // }
       link.move(dir, 1);
       d++;
     }
     correlator[d - d_min] +=
         W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
-    // if (test && dir == 0) {
-    //   std::cout << "plaket_opposite place " << link.coordinate[0] << " " << d
-    //             << std::endl;
-    // }
-    // if (test && dir == 0) {
-    //   std::cout << "left pike correlator " << correlator[d - d_min]
-    //             << std::endl;
-    // }
     d++;
     correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
-    // if (test && dir == 0) {
-    //   std::cout << "plaket place " << link.coordinate[0] << " " << d
-    //             << std::endl;
-    // }
-    // if (test && dir == 0) {
-    //   std::cout << "right pike correlator " << correlator[d - d_min]
-    //             << std::endl;
-    // }
     d++;
     while (d < r + d_max) {
       S = schwinger_lines[d - r - 1][link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "schwinger_lines place " << link.coordinate[0] << " " <<
-      //   d
-      //             << " size " << d - r << std::endl;
-      // }
       A = W * S;
       link.move(dir, d - r);
       A = A * plaket[link.place / 4 * 3 + dir];
-      // if (test && dir == 0) {
-      //   std::cout << "plaket place " << link.coordinate[0] << " " << d
-      //             << std::endl;
-      // }
       correlator[d - d_min] += A.multiply_conj_tr(S);
-      // if (test && dir == 0) {
-      //   std::cout << "d - d_min " << d - d_min << std::endl;
-      // }
       link.move(dir, -(d - r));
       d++;
     }
-    // test = false;
   }
-
   SPACE_ITER_END
 
   std::map<int, double> result;
@@ -436,7 +354,7 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
                                      int d_ouside) {
 
   std::vector<T> plaket_schwinger_electric =
-      calculate_plaket_time(array_plaket);
+      calculate_plaket_time_counterclock(array_plaket);
 
   std::vector<T> plaket_schwinger_electric_opposite =
       calculate_plaket_time_opposite_counterclock(array_plaket);
