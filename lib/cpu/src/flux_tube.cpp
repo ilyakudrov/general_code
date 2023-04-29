@@ -86,6 +86,21 @@ std::vector<T> calculate_plaket_time_opposite(const std::vector<T> array) {
 }
 
 template <class T>
+std::vector<T>
+calculate_plaket_time_opposite_counterclock(const std::vector<T> array) {
+  std::vector<T> vec(data_size / 4 * 3);
+  link1 link(x_size, y_size, z_size, t_size);
+  SPACE_ITER_START;
+  for (int dir = 0; dir < 3; dir++) {
+    link.move_dir(dir);
+    vec[link.place / 4 * 3 + dir] =
+        link.plaket_mu_opposite_counterclock(array, 3);
+  }
+  SPACE_ITER_END;
+  return vec;
+}
+
+template <class T>
 std::vector<T> calculate_plaket_space(const std::vector<T> &array) {
   std::vector<T> vec;
   vec.reserve(data_size / 4 * 3);
@@ -424,7 +439,7 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
       calculate_plaket_time(array_plaket);
 
   std::vector<T> plaket_schwinger_electric_opposite =
-      calculate_plaket_time_opposite(array_plaket);
+      calculate_plaket_time_opposite_counterclock(array_plaket);
 
   std::vector<std::vector<T>> schwinger_lines_short(
       std::max(R_max / 2, d_ouside), std::vector<T>());

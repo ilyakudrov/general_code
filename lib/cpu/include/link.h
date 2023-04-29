@@ -73,6 +73,9 @@ public:
   template <class T> T plaket_mu_opposite(const std::vector<T> &array, int mu);
 
   template <class T>
+  T plaket_mu_opposite_counterclock(const std::vector<T> &array, int mu);
+
+  template <class T>
   T plaket_schwinger_average(const std::vector<T> &array, int mu);
 
   // calculate schwinger line matrix in current direction and dir plane of

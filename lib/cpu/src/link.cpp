@@ -146,6 +146,19 @@ T link1::plaket_mu_opposite(const std::vector<T> &array, int mu) {
 }
 
 template <class T>
+T link1::plaket_mu_opposite_counterclock(const std::vector<T> &array, int mu) {
+  move(mu, -1);
+  T A = array[place + mu].conj();
+  move(direction, -1);
+  A = A ^ array[place + direction];
+  A = A * array[place + mu];
+  move(mu, 1);
+  A = A * array[place + direction];
+  move(direction, 1);
+  return A;
+}
+
+template <class T>
 T link1::plaket_schwinger_average(const std::vector<T> &array, int mu) {
   int dir = direction;
   T result;
@@ -623,6 +636,8 @@ void link1::get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
 // su2
 template su2 link1::plaket_mu(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_mu_opposite(const std::vector<su2> &array, int mu);
+template su2
+link1::plaket_mu_opposite_counterclock(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_schwinger_average(const std::vector<su2> &array,
                                              int mu);
 template su2 link1::schwinger_line(const std::vector<su2> &array, int d,
@@ -657,6 +672,9 @@ template abelian link1::plaket_mu(const std::vector<abelian> &array, int mu);
 template abelian link1::plaket_mu_opposite(const std::vector<abelian> &array,
                                            int mu);
 template abelian
+link1::plaket_mu_opposite_counterclock(const std::vector<abelian> &array,
+                                       int mu);
+template abelian
 link1::plaket_schwinger_average(const std::vector<abelian> &array, int mu);
 template abelian link1::schwinger_line(const std::vector<abelian> &array, int d,
                                        int dir, int x);
@@ -690,6 +708,8 @@ template const abelian *link1::get_matrix(const std::vector<abelian> &array);
 // su3
 template su3 link1::plaket_mu(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_mu_opposite(const std::vector<su3> &array, int mu);
+template su3
+link1::plaket_mu_opposite_counterclock(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_schwinger_average(const std::vector<su3> &array,
                                              int mu);
 template su3 link1::schwinger_line(const std::vector<su3> &array, int d,
@@ -724,6 +744,9 @@ template su3_abelian link1::plaket_mu(const std::vector<su3_abelian> &array,
                                       int mu);
 template su3_abelian
 link1::plaket_mu_opposite(const std::vector<su3_abelian> &array, int mu);
+template su3_abelian
+link1::plaket_mu_opposite_counterclock(const std::vector<su3_abelian> &array,
+                                       int mu);
 template su3_abelian
 link1::plaket_schwinger_average(const std::vector<su3_abelian> &array, int mu);
 template su3_abelian
