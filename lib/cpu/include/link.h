@@ -67,8 +67,11 @@ public:
   template <class T> const T *get_matrix(const std::vector<T> &array);
 
   // calculates plaket matrix in current direction and mu plane
-  // only positive directions make sense
-  template <class T> T plaket_mu(const std::vector<T> &array, int mu);
+  // end of the name means orientation of starting/end point of plaket
+  template <class T> T plaket_left_down(const std::vector<T> &array, int mu);
+  template <class T> T plaket_left_up(const std::vector<T> &array, int mu);
+  template <class T> T plaket_right_down(const std::vector<T> &array, int mu);
+  template <class T> T plaket_right_up(const std::vector<T> &array, int mu);
 
   template <class T>
   T plaket_mu_counterclock(const std::vector<T> &array, int mu);

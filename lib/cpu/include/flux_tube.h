@@ -6,7 +6,13 @@
 
 // Wilson_plaket_schwinger_correlator
 template <class T>
-std::vector<T> calculate_plaket_time(const std::vector<T> array);
+std::vector<T> calculate_plaket_time_left_down(const std::vector<T> array);
+template <class T>
+std::vector<T> calculate_plaket_time_left_up(const std::vector<T> array);
+template <class T>
+std::vector<T> calculate_plaket_time_right_down(const std::vector<T> array);
+template <class T>
+std::vector<T> calculate_plaket_time_right_up(const std::vector<T> array);
 template <class T>
 std::vector<T> calculate_plaket_space(const std::vector<T> &array);
 template <class T>
@@ -31,6 +37,9 @@ std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
 template <class T>
 std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<T> &array, const std::vector<T> &plaket,
+    const std::vector<T> &plaket_counterclock,
+    const std::vector<T> &plaket_opposite,
+    const std::vector<T> &plaket_opposite_counterclock,
     const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
     int time, int r);
 template <class T>

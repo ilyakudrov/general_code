@@ -82,7 +82,7 @@ template <class T> double plaket_time(const std::vector<T> &array) {
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
     SPACE_ITER_START;
-    plaket += link.plaket_mu(array, 3).tr();
+    plaket += link.plaket_left_down(array, 3).tr();
     SPACE_ITER_END;
   }
   return plaket / (x_size * y_size * z_size * t_size * 3);
@@ -95,7 +95,7 @@ template <class T> double plaket_space(const std::vector<T> &array) {
   for (int mu = 0; mu < 3; mu++) {
     for (int nu = mu + 1; nu < 3; nu++) {
       link.move_dir(nu);
-      plaket += link.plaket_mu(array, mu).tr();
+      plaket += link.plaket_left_down(array, mu).tr();
     }
   }
   SPACE_ITER_END;
@@ -109,7 +109,7 @@ template <class T> double plaket(const std::vector<T> &array) {
   for (int mu = 0; mu < 4; mu++) {
     for (int nu = mu + 1; nu < 4; nu++) {
       link.move_dir(nu);
-      plaket += link.plaket_mu(array, mu).tr();
+      plaket += link.plaket_left_down(array, mu).tr();
     }
   }
   SPACE_ITER_END;

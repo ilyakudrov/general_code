@@ -61,54 +61,56 @@
 #include <algorithm>
 
 template <class T>
-std::vector<T> calculate_plaket_time(const std::vector<T> array) {
+std::vector<T> calculate_plaket_time_left_down(const std::vector<T> array) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[link.place / 4 * 3 + dir] = link.plaket_mu(array, 3);
+    vec[link.place / 4 * 3 + dir] = link.plaket_left_down(array, 3);
   }
   SPACE_ITER_END;
   return vec;
 }
 
 template <class T>
-std::vector<T> calculate_plaket_time_opposite(const std::vector<T> array) {
+std::vector<T> calculate_plaket_time_left_up(const std::vector<T> array) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[link.place / 4 * 3 + dir] = link.plaket_mu_opposite(array, 3);
+    vec[link.place / 4 * 3 + dir] = link.plaket_left_up(array, 3);
   }
   SPACE_ITER_END;
   return vec;
 }
 
 template <class T>
-std::vector<T>
-calculate_plaket_time_opposite_counterclock(const std::vector<T> array) {
+std::vector<T> calculate_plaket_time_right_down(const std::vector<T> array) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[link.place / 4 * 3 + dir] =
-        link.plaket_mu_opposite_counterclock(array, 3);
+    vec[link.place / 4 * 3 + dir] = link.plaket_right_down(array, 3);
   }
   SPACE_ITER_END;
   return vec;
 }
 
 template <class T>
-std::vector<T> calculate_plaket_time_counterclock(const std::vector<T> array) {
+std::vector<T> calculate_plaket_time_right_up(const std::vector<T> array) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[link.place / 4 * 3 + dir] = link.plaket_mu_counterclock(array, 3);
+    vec[link.place / 4 * 3 + dir] = link.plaket_right_up(array, 3);
   }
   SPACE_ITER_END;
   return vec;
@@ -192,12 +194,13 @@ std::vector<T> calculate_schwinger_lines_short(const std::vector<T> &array,
                                                int d) {
   std::vector<T> vec(data_size * 3 / 4);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
+  SPACE_ITER_START
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
-    SPACE_ITER_START;
     vec[link.place * 3 / 4 + mu] = link.wilson_line(array, d);
-    SPACE_ITER_END;
   }
+  SPACE_ITER_END
   return vec;
 }
 
@@ -223,12 +226,13 @@ std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
                                                 int r, int time) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
+  SPACE_ITER_START;
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
-    SPACE_ITER_START;
     vec[link.place / 4 * 3 + mu] = link.wilson_loop_schwinger(array, r, time);
-    SPACE_ITER_END;
   }
+  SPACE_ITER_END;
   return vec;
 }
 
@@ -238,13 +242,14 @@ calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
                                           int time) {
   std::vector<T> vec(data_size / 4 * 3);
   link1 link(x_size, y_size, z_size, t_size);
+#pragma omp parallel for collapse(4) private(link)
+  SPACE_ITER_START;
   for (int mu = 0; mu < 3; mu++) {
     link.move_dir(mu);
-    SPACE_ITER_START;
     vec[link.place / 4 * 3 + mu] =
         link.wilson_loop_schwinger_opposite(array, r, time);
-    SPACE_ITER_END;
   }
+  SPACE_ITER_END;
   return vec;
 }
 
@@ -254,8 +259,10 @@ calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
 
 template <class T>
 std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
-    const std::vector<T> &array, const std::vector<T> &plaket,
-    const std::vector<T> &plaket_opposite,
+    const std::vector<T> &array, const std::vector<T> &plaket_left_down,
+    const std::vector<T> &plaket_left_up,
+    const std::vector<T> &plaket_right_down,
+    const std::vector<T> &plaket_right_up,
     const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
     int time, int r) {
   link1 link(x_size, y_size, z_size, t_size);
@@ -291,21 +298,22 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
       place = link.place / 4 * 3;
       S = schwinger_lines[abs(d) - 2][place + dir];
       A = W ^ S;
-      A = A * plaket_opposite[place + dir];
+      A = A ^ plaket_right_up[place + dir];
       correlator[d - d_min] += A.multiply_tr(S);
       link.move(dir, 1);
       d++;
     }
     correlator[d - d_min] +=
-        W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
+        W.multiply_conj_tr(plaket_right_up[link.place / 4 * 3 + dir]);
     d++;
-    correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
+    correlator[d - d_min] +=
+        W.multiply_tr(plaket_left_down[link.place / 4 * 3 + dir]);
     d++;
     while (d < r / 2) {
       S = schwinger_lines[d - 1][link.place / 4 * 3 + dir];
       A = W * S;
       link.move(dir, d);
-      A = A * plaket[link.place / 4 * 3 + dir];
+      A = A * plaket_left_down[link.place / 4 * 3 + dir];
       correlator[d - d_min] += A.multiply_conj_tr(S);
       link.move(dir, -d);
       d++;
@@ -316,21 +324,22 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     while (d < r - 1) {
       S = schwinger_lines[r - d - 2][link.place / 4 * 3 + dir];
       A = W ^ S;
-      A = A * plaket_opposite[link.place / 4 * 3 + dir];
+      A = A * plaket_right_up[link.place / 4 * 3 + dir];
       correlator[d - d_min] += A.multiply_tr(S);
       link.move(dir, 1);
       d++;
     }
     correlator[d - d_min] +=
-        W.multiply_tr(plaket_opposite[link.place / 4 * 3 + dir]);
+        W.multiply_tr(plaket_right_up[link.place / 4 * 3 + dir]);
     d++;
-    correlator[d - d_min] += W.multiply_tr(plaket[link.place / 4 * 3 + dir]);
+    correlator[d - d_min] +=
+        W.multiply_conj_tr(plaket_left_down[link.place / 4 * 3 + dir]);
     d++;
     while (d < r + d_max) {
       S = schwinger_lines[d - r - 1][link.place / 4 * 3 + dir];
       A = W * S;
       link.move(dir, d - r);
-      A = A * plaket[link.place / 4 * 3 + dir];
+      A = A ^ plaket_left_down[link.place / 4 * 3 + dir];
       correlator[d - d_min] += A.multiply_conj_tr(S);
       link.move(dir, -(d - r));
       d++;
@@ -353,11 +362,17 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
                                      int T_min, int T_max, int R_min, int R_max,
                                      int d_ouside) {
 
-  std::vector<T> plaket_schwinger_electric =
-      calculate_plaket_time_counterclock(array_plaket);
+  std::vector<T> plaket_time_left_down =
+      calculate_plaket_time_left_down(array_plaket);
 
-  std::vector<T> plaket_schwinger_electric_opposite =
-      calculate_plaket_time_opposite_counterclock(array_plaket);
+  std::vector<T> plaket_time_left_up =
+      calculate_plaket_time_left_up(array_plaket);
+
+  std::vector<T> plaket_time_right_down =
+      calculate_plaket_time_right_down(array_plaket);
+
+  std::vector<T> plaket_time_right_up =
+      calculate_plaket_time_right_up(array_plaket);
 
   std::vector<std::vector<T>> schwinger_lines_short(
       std::max(R_max / 2, d_ouside), std::vector<T>());
@@ -373,9 +388,9 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
     for (int r = R_min; r <= R_max; r += 2) {
       std::map<int, double> schwinger_electric =
           wilson_plaket_schwinger_electric_longitudinal(
-              array_wilson, plaket_schwinger_electric,
-              plaket_schwinger_electric_opposite, schwinger_lines_short,
-              -d_ouside, d_ouside, t, r);
+              array_wilson, plaket_time_left_down, plaket_time_left_up,
+              plaket_time_right_down, plaket_time_right_up,
+              schwinger_lines_short, -d_ouside, d_ouside, t, r);
       for (auto it = schwinger_electric.begin(); it != schwinger_electric.end();
            ++it) {
         result[std::tuple<int, int, double>(t, r, it->first)] = it->second;
@@ -417,7 +432,7 @@ std::vector<double> calculate_plaket_time_tr(const std::vector<T> &array) {
   SPACE_ITER_START;
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
-    vec[link.place / 4 * 3 + dir] = link.plaket_mu(array, 3).tr();
+    vec[link.place / 4 * 3 + dir] = link.plaket_left_down(array, 3).tr();
   }
   SPACE_ITER_END;
   return vec;
@@ -432,7 +447,7 @@ std::vector<double> calculate_plaket_space_tr(const std::vector<T> &array) {
   for (int dir = 0; dir < 3; dir++) {
     for (int j = dir + 1; j < 3; j++) {
       link.move_dir(dir);
-      vec[link.place / 4 * 3 + dir + j] = link.plaket_mu(array, j).tr();
+      vec[link.place / 4 * 3 + dir + j] = link.plaket_left_down(array, j).tr();
     }
   }
   SPACE_ITER_END;
@@ -1076,12 +1091,20 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 }
 
 // su2
-
-template std::vector<su2> calculate_plaket_time(const std::vector<su2> array);
+template std::vector<su2>
+calculate_plaket_time_left_down(const std::vector<su2> array);
+template std::vector<su2>
+calculate_plaket_time_left_up(const std::vector<su2> array);
+template std::vector<su2>
+calculate_plaket_time_right_down(const std::vector<su2> array);
+template std::vector<su2>
+calculate_plaket_time_right_up(const std::vector<su2> array);
 template std::vector<su2> calculate_plaket_space(const std::vector<su2> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su2> &array, const std::vector<su2> &plaket,
+    const std::vector<su2> &plaket_counterclock,
     const std::vector<su2> &plaket_opposite,
+    const std::vector<su2> &plaket_opposite_counterclock,
     const std::vector<std::vector<su2>> &schwinger_lines, int d_min, int d_max,
     int time, int r);
 template std::map<std::tuple<int, int, int>, double>
@@ -1135,12 +1158,20 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 // abelian
 
 template std::vector<abelian>
-calculate_plaket_time(const std::vector<abelian> array);
+calculate_plaket_time_left_down(const std::vector<abelian> array);
+template std::vector<abelian>
+calculate_plaket_time_left_up(const std::vector<abelian> array);
+template std::vector<abelian>
+calculate_plaket_time_right_down(const std::vector<abelian> array);
+template std::vector<abelian>
+calculate_plaket_time_right_up(const std::vector<abelian> array);
 template std::vector<abelian>
 calculate_plaket_space(const std::vector<abelian> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<abelian> &array, const std::vector<abelian> &plaket,
+    const std::vector<abelian> &plaket_counterclock,
     const std::vector<abelian> &plaket_opposite,
+    const std::vector<abelian> &plaket_opposite_counterclock,
     const std::vector<std::vector<abelian>> &schwinger_lines, int d_min,
     int d_max, int time, int r);
 template std::map<std::tuple<int, int, int>, double>
@@ -1194,11 +1225,20 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 
 // su3
 
-template std::vector<su3> calculate_plaket_time(const std::vector<su3> array);
+template std::vector<su3>
+calculate_plaket_time_left_down(const std::vector<su3> array);
+template std::vector<su3>
+calculate_plaket_time_left_up(const std::vector<su3> array);
+template std::vector<su3>
+calculate_plaket_time_right_down(const std::vector<su3> array);
+template std::vector<su3>
+calculate_plaket_time_right_up(const std::vector<su3> array);
 template std::vector<su3> calculate_plaket_space(const std::vector<su3> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3> &array, const std::vector<su3> &plaket,
+    const std::vector<su3> &plaket_counterclock,
     const std::vector<su3> &plaket_opposite,
+    const std::vector<su3> &plaket_opposite_counterclock,
     const std::vector<std::vector<su3>> &schwinger_lines, int d_min, int d_max,
     int time, int r);
 template std::map<std::tuple<int, int, int>, double>
@@ -1252,13 +1292,21 @@ wilson_plaket_correlator(std::vector<double> plaket_tr,
 // su3_abelian
 
 template std::vector<su3_abelian>
-calculate_plaket_time(const std::vector<su3_abelian> array);
+calculate_plaket_time_left_down(const std::vector<su3_abelian> array);
+template std::vector<su3_abelian>
+calculate_plaket_time_left_up(const std::vector<su3_abelian> array);
+template std::vector<su3_abelian>
+calculate_plaket_time_right_down(const std::vector<su3_abelian> array);
+template std::vector<su3_abelian>
+calculate_plaket_time_right_up(const std::vector<su3_abelian> array);
 template std::vector<su3_abelian>
 calculate_plaket_space(const std::vector<su3_abelian> &array);
 template std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
     const std::vector<su3_abelian> &array,
     const std::vector<su3_abelian> &plaket,
+    const std::vector<su3_abelian> &plaket_counterclock,
     const std::vector<su3_abelian> &plaket_opposite,
+    const std::vector<su3_abelian> &plaket_opposite_counterclock,
     const std::vector<std::vector<su3_abelian>> &schwinger_lines, int d_min,
     int d_max, int time, int r);
 template std::map<std::tuple<int, int, int>, double>
