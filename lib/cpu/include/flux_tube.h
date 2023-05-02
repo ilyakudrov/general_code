@@ -60,6 +60,11 @@ double plaket4_space(const std::vector<double> &plaket_tr, link1 &link, int nu);
 template <class T>
 std::vector<double> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
                                              int time);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+calculate_wilson_plaket_correlator_electric_longitudinal(
+    const std::vector<double> &plaket_tr, const std::vector<T> &conf_wilson,
+    int T_min, int T_max, int R_min, int R_max);
 
 std::map<int, double>
 wilson_plaket_correlator_electric(const std::vector<double> &wilson_loop_tr,
@@ -114,7 +119,7 @@ std::vector<double> plaket_tr_single_dir_test(std::vector<T> &conf, int mu);
 
 template <class T>
 std::map<std::tuple<int, int, int>, double>
-wilson_plaket_correlator(std::vector<double> plaket_tr,
+wilson_plaket_correlator(std::vector<double> &plaket_tr,
                          std::vector<std::vector<T>> &conf_wilson, int T_min,
                          int T_max, int R_min, int R_max, int main_coordinate,
                          int transverse_coordinate, std::string direction);

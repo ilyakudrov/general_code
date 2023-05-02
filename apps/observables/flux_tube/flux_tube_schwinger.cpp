@@ -179,9 +179,12 @@ int main(int argc, char *argv[]) {
   vector<double> plaket_time_tr = calculate_plaket_time_tr(conf_plaket.array);
 
   start_time = omp_get_wtime();
-  flux_tube_wilson =
-      wilson_plaket_correlator(plaket_time_tr, separated_wilson, T_min, T_max,
-                               R_min, R_max, 5, 0, "longitudinal");
+  // flux_tube_wilson =
+  //     wilson_plaket_correlator(plaket_time_tr, separated_wilson, T_min,
+  //     T_max,
+  //                              R_min, R_max, 5, 0, "longitudinal");
+  flux_tube_wilson = calculate_wilson_plaket_correlator_electric_longitudinal(
+      plaket_time_tr, conf_wilson.array, T_min, T_max, R_min, R_max);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   cout << "flux tube wilson longitudinal electric time: " << search_time
@@ -193,7 +196,7 @@ int main(int argc, char *argv[]) {
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << flux_tube_wilson[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), abs(get<2>(it->first)))]
+               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
         << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
         << endl;
