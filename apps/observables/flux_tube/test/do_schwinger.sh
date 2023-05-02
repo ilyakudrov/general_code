@@ -13,18 +13,20 @@ L_spat=40
 L_time=40
 output_path_electric_long=./result/flux_tube_schwinger_electric_long
 # output_path_magnetic_long=./result/flux_tube_magnetic_long
-# output_path_electric_trans=./result/flux_tube_electric_trans
+output_path_electric_trans=./result/flux_tube_schwinger_electric_trans
 # output_path_magnetic_trans=./result/flux_tube_magnetic_trans
 T_min=4
 T_max=4
 R_min=12
 R_max=12
+d_ouside=10
 parameters="-conf_format_plaket ${conf_format_plaket} -conf_path_plaket ${conf_path_plaket}\
     -bytes_skip_plaket ${bytes_skip_plaket} -convert_plaket ${convert_plaket}\
     -conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson}\
     -bytes_skip_wilson ${bytes_skip_wilson} -convert_wilson ${convert_wilson}\
     -output_path_electric_long ${output_path_electric_long}\
-    -L_spat ${L_spat} -L_time ${L_time}\
+    -output_path_electric_trans ${output_path_electric_trans}\
+    -L_spat ${L_spat} -L_time ${L_time} -d_ouside ${d_ouside}\
     -T_min ${T_min} -T_max ${T_max} -R_min ${R_min} -R_max ${R_max}"
 
 ../flux_tube_schwinger_${matrix_type_plaket}_${matrix_type_wilson}_test ${parameters}
