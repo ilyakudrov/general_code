@@ -657,7 +657,7 @@ std::map<int, double> wilson_plaket_correlator_electric_transversal(
     for (int mu = 0; mu < 3; mu++) {
       if (dir != mu) {
         link.move(mu, -d_max);
-        for (int d = -d_max; d <= d_max + 1; d++) {
+        for (int d = -d_max; d <= d_max; d++) {
           correlator[d + d_max] += a * plaket_tr[link.place / 4 * 3 + dir];
           link.move(dir, 1);
         }
@@ -713,16 +713,17 @@ calculate_wilson_plaket_correlator_electric_transversal(
   std::map<std::tuple<int, int, int>, double> flux_tube;
 
   std::vector<double> wilson_loop_tr;
+  std::map<int, double> correlator;
 
   for (int time = T_min; time <= T_max; time += 2) {
     for (int r = R_min; r <= R_max; r += 2) {
 
-      std::vector<double> wilson_loop_tr =
-          calculate_wilson_loop_tr(conf_wilson, r, time);
+      wilson_loop_tr = calculate_wilson_loop_tr(conf_wilson, r, time);
 
-      std::map<int, double> correlator =
-          wilson_plaket_correlator_electric_transversal(
-              wilson_loop_tr, plaket_tr, r, time, d_ouside);
+      std::cout << time << " " << r << std::endl;
+
+      correlator = wilson_plaket_correlator_electric_transversal(
+          wilson_loop_tr, plaket_tr, r, time, d_ouside);
 
       for (auto i = correlator.begin(); i != correlator.end(); i++) {
         flux_tube[std::tuple<int, int, int>(time, r, i->first)] = i->second;

@@ -155,7 +155,8 @@ int main(int argc, char *argv[]) {
   stream_electric_long
       << "T,R,d,correlator_schwinger,correlator_wilson,wilson_loop" << endl;
   // stream_magnetic_long << "T,R,d,correlator,wilson_loop,plaket" << endl;
-  stream_electric_trans << "T,R,d,correlator,wilson_loop,plaket" << endl;
+  stream_electric_trans
+      << "T,R,d,correlator_schwinger,correlator_wilson,wilson_loop" << endl;
   // stream_magnetic_trans << "T,R,d,correlator,wilson_loop,plaket" << endl;
 
   start_time = omp_get_wtime();
