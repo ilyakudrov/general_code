@@ -380,7 +380,7 @@ flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
 
   for (int d = 0; d < std::max(R_max / 2, d_ouside); d++) {
     schwinger_lines_short[d] =
-        calculate_schwinger_lines_short(array_wilson, d + 1);
+        calculate_schwinger_lines_short(array_plaket, d + 1);
   }
 
   std::map<std::tuple<int, int, int>, double> result;
@@ -498,7 +498,7 @@ std::map<std::tuple<int, int, int>, double> flux_schwinger_electric_transversal(
 
   for (int d = 0; d < std::max(R_max / 2, d_ouside); d++) {
     schwinger_lines_short[d] =
-        calculate_schwinger_lines_short(array_wilson, d + 1);
+        calculate_schwinger_lines_short(array_plaket, d + 1);
   }
 
   std::map<std::tuple<int, int, int>, double> result;
@@ -719,8 +719,6 @@ calculate_wilson_plaket_correlator_electric_transversal(
     for (int r = R_min; r <= R_max; r += 2) {
 
       wilson_loop_tr = calculate_wilson_loop_tr(conf_wilson, r, time);
-
-      std::cout << time << " " << r << std::endl;
 
       correlator = wilson_plaket_correlator_electric_transversal(
           wilson_loop_tr, plaket_tr, r, time, d_ouside);
