@@ -30,6 +30,50 @@ int t_size;
 
 using namespace std;
 
+void test_schwinger(vector<MATRIX_TYPE> &conf) {
+  link1 link(x_size, y_size, z_size, t_size);
+  int loop_size = 4;
+  int schwinger_length = 3;
+  MATRIX_TYPE A;
+  for (int i = 0; i < loop_size / 2; i++) {
+    A = A * conf[link.place + 3];
+    link.move(3, 1);
+  }
+  for (int i = 0; i < loop_size; i++) {
+    A = A * conf[link.place];
+    link.move(0, 1);
+  }
+  for (int i = 0; i < loop_size; i++) {
+    link.move(3, -1);
+    A = A ^ conf[link.place + 3];
+  }
+  for (int i = 0; i < loop_size; i++) {
+    link.move(0, -1);
+    A = A ^ conf[link.place];
+  }
+  for (int i = 0; i < loop_size / 2; i++) {
+    A = A * conf[link.place + 3];
+    link.move(3, 1);
+  }
+  for (int i = 0; i < 3; i++) {
+    link.move(0, -1);
+    A = A ^ conf[link.place];
+  }
+  link.move(3, -1);
+  A = A ^ conf[link.place + 3];
+  link.move(0, -1);
+  A = A ^ conf[link.place];
+  A = A * conf[link.place + 3];
+  link.move(3, 1);
+  A = A * conf[link.place];
+  link.move(0, 1);
+  for (int i = 0; i < 3; i++) {
+    A = A * conf[link.place];
+    link.move(0, 1);
+  }
+  cout << "Tr " << A.tr() << endl;
+}
+
 int main(int argc, char *argv[]) {
   double start_time;
   double end_time;
@@ -42,12 +86,14 @@ int main(int argc, char *argv[]) {
 
   std::cout.precision(17);
 
-  data<MATRIX_TYPE> conf;
+  data<MATRIX_TYPE> conf1;
+  data<MATRIX_TYPE> conf2;
 
   // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
   //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
-  string conf_path = "../../confs/smeared/qc2dstag/40^4/mu0.00/"
-                     "HYP0_alpha=1_1_0.5_APE_alpha=0.5/smeared_0201";
+  string conf_path1 = "../../confs/MA_gauge/su2/qc2dstag/40^4/"
+                      "mu0.00/conf_abelian_0201";
+  string conf_path2 = "../../confs/su2/qc2dstag/40^4/mu0.00/CONF0201";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
   // =
@@ -56,29 +102,42 @@ int main(int argc, char *argv[]) {
   //                    "steps_500/copies=3/conf_Landau_gaugefixed_0001";
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
-  //                    "result/smeared_0001";
-  string conf_format = "double";
+  //                    "result/smeared_0001"
+  string conf_format1 = "double";
+  string conf_format2 = "double_qc2dstag";
   int bytes_skip = 0;
   bool convert = 0;
 
-  get_data(conf, conf_path, conf_format, bytes_skip, convert);
+  get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
+  get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
+
+  test_schwinger(conf1.array);
+  test_schwinger(conf2.array);
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
-  std::cout << "plaket " << plaket(conf.array) << std::endl;
-  std::cout << "plaket_time " << plaket_time(conf.array) << std::endl;
-  std::cout << "plaket_space " << plaket_space(conf.array) << std::endl;
-  std::cout << "polyakov " << polyakov_loop(conf.array) << std::endl;
+  std::cout << "plaket " << plaket(conf1.array) << std::endl;
+  std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
+  std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
+  std::cout << "polyakov " << polyakov_loop(conf1.array) << std::endl;
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "plaket and staff time: " << search_time << std::endl;
+  start_time = omp_get_wtime();
+  std::cout << "plaket " << plaket(conf2.array) << std::endl;
+  std::cout << "plaket_time " << plaket_time(conf2.array) << std::endl;
+  std::cout << "plaket_space " << plaket_space(conf2.array) << std::endl;
+  std::cout << "polyakov " << polyakov_loop(conf2.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time << std::endl;
 
-  // cout << "MAG functional " << MAG_functional_su2(conf.array) << endl;
+  // cout << "MAG functional " << MAG_functional_su2(conf1.array) << endl;
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
-      separate_wilson(conf.array);
+      separate_wilson(conf1.array);
   // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
-  // separate_3(conf.array);
+  // separate_3(conf1.array);
 
   cout << "plaket parallel " << plaket_parallel(conf_separated) << endl;
   cout << "plaket time parallel " << plaket_time_parallel(conf_separated)
@@ -112,7 +171,7 @@ int main(int argc, char *argv[]) {
   start_time = omp_get_wtime();
 
   std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf.array, directions, 0.9, 4, 1, 4);
+      wilson_offaxis(conf1.array, directions, 0.9, 4, 1, 4);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;

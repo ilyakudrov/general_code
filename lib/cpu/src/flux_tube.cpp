@@ -285,6 +285,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
   int d;
   int place;
 
+  bool test = false;
+
 #pragma omp parallel for collapse(4) private(W, A, S, link, d, place)          \
     firstprivate(d_min, d_max) reduction(vec_double_plus                       \
                                          : correlator)
@@ -305,10 +307,10 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
       d++;
     }
     correlator[d - d_min] +=
-        W.multiply_conj_tr(plaket_right_up[link.place / 4 * 3 + dir]);
+        W.multiply_tr(plaket_right_up[link.place / 4 * 3 + dir]);
     d++;
     correlator[d - d_min] +=
-        W.multiply_tr(plaket_left_down[link.place / 4 * 3 + dir]);
+        W.multiply_conj_tr(plaket_left_down[link.place / 4 * 3 + dir]);
     d++;
     while (d < r / 2) {
       S = schwinger_lines[d - 1][link.place / 4 * 3 + dir];
@@ -346,6 +348,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
       d++;
     }
   }
+  test = false;
   SPACE_ITER_END
 
   std::map<int, double> result;
