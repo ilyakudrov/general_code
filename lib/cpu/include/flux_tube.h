@@ -79,6 +79,27 @@ std::map<std::tuple<int, int, int>, double>
 flux_schwinger_magnetic_transversal_tr(
     std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
     int T_min, int T_max, int R_min, int R_max, int d_max);
+template <class T>
+void flux_schwinger_all(std::vector<T> &array,
+                        std::vector<std::vector<T>> &schwinger_lines_short,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_electric_long_l,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_electric_long_tr,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_electric_trans_l,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_electric_trans_tr,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_magnetic_long_l,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_magnetic_long_tr,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_magnetic_trans_l,
+                        std::map<std::tuple<int, int, int>, double>
+                            &flux_tube_schwinger_magnetic_trans_tr,
+                        int T_min, int T_max, int R_min, int R_max,
+                        int d_ouside, int d_max);
 
 // Wilson_plaket_correlator
 template <class T>

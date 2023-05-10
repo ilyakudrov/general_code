@@ -217,101 +217,138 @@ int main(int argc, char *argv[]) {
         calculate_schwinger_lines_short(conf_wilson.array, d + 1);
   }
 
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_electric_long_l;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_electric_long_tr;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_electric_trans_l;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_electric_trans_tr;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_magnetic_long_l;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_magnetic_long_tr;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_magnetic_trans_l;
+  std::map<std::tuple<int, int, int>, double>
+      flux_tube_schwinger_magnetic_trans_tr;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_electric_long_l =
+  //         flux_schwinger_electric_longitudinal_l(conf_wilson.array,
+  //                                                schwinger_lines_short,
+  //                                                T_min, T_max, R_min, R_max,
+  //                                                d_ouside);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_electric_long_l: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_electric_long_tr =
+  //         flux_schwinger_electric_longitudinal_tr(
+  //             conf_wilson.array, schwinger_lines_short, T_min, T_max, R_min,
+  //             R_max, d_ouside);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_electric_long_tr: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_electric_trans_l =
+  //         flux_schwinger_electric_transversal_l(conf_wilson.array,
+  //                                               schwinger_lines_short, T_min,
+  //                                               T_max, R_min, R_max, d_max);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_electric_trans_l: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_electric_trans_tr =
+  //         flux_schwinger_electric_transversal_tr(conf_wilson.array,
+  //                                                schwinger_lines_short,
+  //                                                T_min, T_max, R_min, R_max,
+  //                                                d_max);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_electric_trans_tr: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_magnetic_long_l =
+  //         flux_schwinger_magnetic_longitudinal_l(conf_wilson.array,
+  //                                                schwinger_lines_short,
+  //                                                T_min, T_max, R_min, R_max,
+  //                                                d_ouside);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_magnetic_long_l: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_magnetic_long_tr =
+  //         flux_schwinger_magnetic_longitudinal_tr(
+  //             conf_wilson.array, schwinger_lines_short, T_min, T_max, R_min,
+  //             R_max, d_ouside);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_magnetic_long_tr: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_magnetic_trans_l =
+  //         flux_schwinger_magnetic_transversal_l(conf_wilson.array,
+  //                                               schwinger_lines_short, T_min,
+  //                                               T_max, R_min, R_max, d_max);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_magnetic_trans_l: " << search_time << endl;
+
+  // start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double>
+  //     flux_tube_schwinger_magnetic_trans_tr =
+  //         flux_schwinger_magnetic_transversal_tr(conf_wilson.array,
+  //                                                schwinger_lines_short,
+  //                                                T_min, T_max, R_min, R_max,
+  //                                                d_max);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_magnetic_trans_tr: " << search_time << endl;
+
   start_time = omp_get_wtime();
 
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_electric_long_l =
-          flux_schwinger_electric_longitudinal_l(conf_wilson.array,
-                                                 schwinger_lines_short, T_min,
-                                                 T_max, R_min, R_max, d_ouside);
+  flux_schwinger_all(
+      conf_wilson.array, schwinger_lines_short,
+      flux_tube_schwinger_electric_long_l, flux_tube_schwinger_electric_long_tr,
+      flux_tube_schwinger_electric_trans_l,
+      flux_tube_schwinger_electric_trans_tr,
+      flux_tube_schwinger_magnetic_long_l, flux_tube_schwinger_magnetic_long_tr,
+      flux_tube_schwinger_magnetic_trans_l,
+      flux_tube_schwinger_magnetic_trans_tr, T_min, T_max, R_min, R_max,
+      d_ouside, d_max);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_long_l: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_electric_long_tr =
-          flux_schwinger_electric_longitudinal_tr(
-              conf_wilson.array, schwinger_lines_short, T_min, T_max, R_min,
-              R_max, d_ouside);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_long_tr: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_electric_trans_l =
-          flux_schwinger_electric_transversal_l(conf_wilson.array,
-                                                schwinger_lines_short, T_min,
-                                                T_max, R_min, R_max, d_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_trans_l: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_electric_trans_tr =
-          flux_schwinger_electric_transversal_tr(conf_wilson.array,
-                                                 schwinger_lines_short, T_min,
-                                                 T_max, R_min, R_max, d_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_trans_tr: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_magnetic_long_l =
-          flux_schwinger_magnetic_longitudinal_l(conf_wilson.array,
-                                                 schwinger_lines_short, T_min,
-                                                 T_max, R_min, R_max, d_ouside);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_magnetic_long_l: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_magnetic_long_tr =
-          flux_schwinger_magnetic_longitudinal_tr(
-              conf_wilson.array, schwinger_lines_short, T_min, T_max, R_min,
-              R_max, d_ouside);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_magnetic_long_tr: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_magnetic_trans_l =
-          flux_schwinger_magnetic_transversal_l(conf_wilson.array,
-                                                schwinger_lines_short, T_min,
-                                                T_max, R_min, R_max, d_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_magnetic_trans_l: " << search_time << endl;
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double>
-      flux_tube_schwinger_magnetic_trans_tr =
-          flux_schwinger_magnetic_transversal_tr(conf_wilson.array,
-                                                 schwinger_lines_short, T_min,
-                                                 T_max, R_min, R_max, d_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_magnetic_trans_tr: " << search_time << endl;
+  cout << "flux_schwinger all: " << search_time << endl;
 
   // vector<vector<MATRIX_PLAKET>> separated_plaket =
   //     separate_wilson(conf_plaket.array);
