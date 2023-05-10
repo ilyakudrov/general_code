@@ -64,29 +64,12 @@ public:
 
   const spin *get_consecutive_spin(const std::vector<spin> &vec, int mu);
 
-  template <class T> const T *get_matrix(const std::vector<T> &array);
-
   // calculates plaket matrix in current direction and mu plane
   // end of the name means orientation of starting/end point of plaket
   template <class T> T plaket_left_down(const std::vector<T> &array, int mu);
   template <class T> T plaket_left_up(const std::vector<T> &array, int mu);
   template <class T> T plaket_right_down(const std::vector<T> &array, int mu);
   template <class T> T plaket_right_up(const std::vector<T> &array, int mu);
-
-  template <class T>
-  T plaket_mu_counterclock(const std::vector<T> &array, int mu);
-
-  template <class T> T plaket_mu_opposite(const std::vector<T> &array, int mu);
-
-  template <class T>
-  T plaket_mu_opposite_counterclock(const std::vector<T> &array, int mu);
-
-  template <class T>
-  T plaket_schwinger_average(const std::vector<T> &array, int mu);
-
-  // calculate schwinger line matrix in current direction and dir plane of
-  template <class T>
-  T schwinger_line(const std::vector<T> &array, int d, int dir, int x);
 
   // calculates polyakov loop in currect direction
   template <class T> T polyakov_loop(const std::vector<T> &array);
@@ -113,25 +96,6 @@ public:
   template <class T>
   T wilson_line_offaxis(const std::vector<T> &array,
                         const std::vector<int> &pattern);
-
-  // d - distance between "left" source and plaket
-  // D - distance between sources
-  template <class T>
-  double field1(
-      const std::vector<std::vector<T>> &schwinger_line,
-      const std::vector<T> &plaket, const std::vector<T> &polyakov_loop, int d,
-      int D, int dir,
-      int x); // Link is attached to the "left" source, dir points to the plaket
-  // second numerator
-  template <class T>
-  double
-  field2(const std::vector<T> &plaket, const std::vector<T> &polyakov_loop,
-         int d, int D, int dir,
-         int x); // attached to the "left" source, dir points to the plaket
-  // denominator
-  template <class T>
-  double field3(const std::vector<T> &polyakov_loop, int D,
-                int x); // attached to the "left" source and points to another
 
   // monopoles
   double monopole_plaket_mu(std::vector<double> &angles, int mu);

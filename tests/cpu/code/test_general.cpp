@@ -30,50 +30,6 @@ int t_size;
 
 using namespace std;
 
-void test_schwinger(vector<MATRIX_TYPE> &conf) {
-  link1 link(x_size, y_size, z_size, t_size);
-  int loop_size = 4;
-  int schwinger_length = 3;
-  MATRIX_TYPE A;
-  for (int i = 0; i < loop_size / 2; i++) {
-    A = A * conf[link.place + 3];
-    link.move(3, 1);
-  }
-  for (int i = 0; i < loop_size; i++) {
-    A = A * conf[link.place];
-    link.move(0, 1);
-  }
-  for (int i = 0; i < loop_size; i++) {
-    link.move(3, -1);
-    A = A ^ conf[link.place + 3];
-  }
-  for (int i = 0; i < loop_size; i++) {
-    link.move(0, -1);
-    A = A ^ conf[link.place];
-  }
-  for (int i = 0; i < loop_size / 2; i++) {
-    A = A * conf[link.place + 3];
-    link.move(3, 1);
-  }
-  for (int i = 0; i < 3; i++) {
-    link.move(0, -1);
-    A = A ^ conf[link.place];
-  }
-  link.move(3, -1);
-  A = A ^ conf[link.place + 3];
-  link.move(0, -1);
-  A = A ^ conf[link.place];
-  A = A * conf[link.place + 3];
-  link.move(3, 1);
-  A = A * conf[link.place];
-  link.move(0, 1);
-  for (int i = 0; i < 3; i++) {
-    A = A * conf[link.place];
-    link.move(0, 1);
-  }
-  cout << "Tr " << A.tr() << endl;
-}
-
 int main(int argc, char *argv[]) {
   double start_time;
   double end_time;
@@ -110,9 +66,6 @@ int main(int argc, char *argv[]) {
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
   get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
-
-  test_schwinger(conf1.array);
-  test_schwinger(conf2.array);
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();

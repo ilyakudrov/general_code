@@ -35,27 +35,61 @@ template <class T>
 std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
                                                 int r, int time);
 template <class T>
-std::map<int, double> wilson_plaket_schwinger_electric_longitudinal(
-    const std::vector<T> &array, const std::vector<T> &plaket,
-    const std::vector<T> &plaket_counterclock,
-    const std::vector<T> &plaket_opposite,
-    const std::vector<T> &plaket_opposite_counterclock,
-    const std::vector<std::vector<T>> &schwinger_lines, int d_min, int d_max,
-    int time, int r);
+std::vector<T>
+calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
+                                          int time);
 template <class T>
 std::map<std::tuple<int, int, int>, double>
-flux_schwinger_electric_longitudinal(const std::vector<T> &array_plaket,
-                                     const std::vector<T> &array_wilson,
-                                     int T_min, int T_max, int R_min, int R_max,
-                                     int d_max);
+flux_schwinger_electric_longitudinal_l(
+    const std::vector<T> &array,
+    std::vector<std::vector<T>> &schwinger_lines_short, int T_min, int T_max,
+    int R_min, int R_max, int d_ouside);
 template <class T>
-std::map<std::tuple<int, int, int>, double> flux_schwinger_electric_transversal(
-    const std::vector<T> &array_plaket, const std::vector<T> &array_wilson,
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_longitudinal_tr(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
     int T_min, int T_max, int R_min, int R_max, int d_ouside);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_transversal_l(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_max);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_electric_transversal_tr(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_max);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_magnetic_longitudinal_l(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_ouside);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_magnetic_longitudinal_tr(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_ouside);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_magnetic_transversal_l(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_max);
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+flux_schwinger_magnetic_transversal_tr(
+    std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
+    int T_min, int T_max, int R_min, int R_max, int d_max);
 
 // Wilson_plaket_correlator
 template <class T>
-std::vector<double> calculate_plaket_time_tr(const std::vector<T> &array);
+std::vector<double> calculate_plaket_time_trace_l(const std::vector<T> &array);
+template <class T>
+std::vector<double> calculate_plaket_time_trace_tr(const std::vector<T> &array);
+template <class T>
+std::vector<double> calculate_plaket_space_trace_l(const std::vector<T> array);
+template <class T>
+std::vector<double>
+calculate_plaket_space_trace_tr(const std::vector<T> &array);
 template <class T>
 std::vector<double> calculate_plaket_space_tr(const std::vector<T> &array);
 double plaket4_time(const std::vector<double> &plaket_tr, link1 &link);
