@@ -116,6 +116,10 @@ const spin *link1::get_consecutive_spin(const std::vector<spin> &vec, int mu) {
   return &vec[(place + (coordinate_new - coordinate[mu]) * multiplier[mu]) / 4];
 }
 
+template <class T> const T *link1::get_matrix(const std::vector<T> &array) {
+  return &array[place + direction];
+}
+
 template <class T>
 T link1::plaket_left_down(const std::vector<T> &array, int mu) {
   T A = array[place + direction];

@@ -64,6 +64,8 @@ public:
 
   const spin *get_consecutive_spin(const std::vector<spin> &vec, int mu);
 
+  template <class T> const T *get_matrix(const std::vector<T> &array);
+
   // calculates plaket matrix in current direction and mu plane
   // end of the name means orientation of starting/end point of plaket
   template <class T> T plaket_left_down(const std::vector<T> &array, int mu);
