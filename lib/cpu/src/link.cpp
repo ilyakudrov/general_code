@@ -508,6 +508,7 @@ void link1::get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
 // specializations
 
 // su2
+template const su2 *link1::get_matrix(const std::vector<su2> &array);
 template su2 link1::plaket_left_down(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_left_up(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_right_down(const std::vector<su2> &array, int mu);
@@ -526,6 +527,7 @@ template su2 link1::wilson_line_offaxis(const std::vector<su2> &array,
                                         const std::vector<int> &pattern);
 
 // abelian
+template const abelian *link1::get_matrix(const std::vector<abelian> &array);
 template abelian link1::plaket_left_down(const std::vector<abelian> &array,
                                          int mu);
 template abelian link1::plaket_left_up(const std::vector<abelian> &array,
@@ -550,6 +552,7 @@ template abelian link1::wilson_line_offaxis(const std::vector<abelian> &array,
                                             const std::vector<int> &pattern);
 
 // su3
+template const su3 *link1::get_matrix(const std::vector<su3> &array);
 template su3 link1::plaket_left_down(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_left_up(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_right_down(const std::vector<su3> &array, int mu);
@@ -568,6 +571,8 @@ template su3 link1::wilson_line_offaxis(const std::vector<su3> &array,
                                         const std::vector<int> &pattern);
 
 // su3_abelian
+template const su3_abelian *
+link1::get_matrix(const std::vector<su3_abelian> &array);
 template su3_abelian
 link1::plaket_left_down(const std::vector<su3_abelian> &array, int mu);
 template su3_abelian
