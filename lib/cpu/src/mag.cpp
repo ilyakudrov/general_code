@@ -731,7 +731,7 @@ void make_simulated_annealing(std::vector<su2> &conf_su2,
       overrelaxation_update(spins, conf_su2);
     }
 
-    if (T <= 1.4 && T >= 0.8)
+    if (T <= 1.6 && T >= 1.2)
       T -= T_step / 4;
     else
       T -= T_step;

@@ -4,6 +4,7 @@
 // #define THREADS_PER_BLOCK 256
 // #endif
 
+#include <__clang_cuda_device_functions.h>
 namespace reduction {
 
 // template <unsigned int blockSize>

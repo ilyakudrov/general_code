@@ -150,8 +150,12 @@ int main(int argc, char *argv[]) {
 
   get_data(conf_plaket, conf_path_plaket, conf_format_plaket, bytes_skip_plaket,
            convert_plaket);
+  // vector<float> conf_full = read_full_ml5(conf_path_plaket, 1);
+  // conf_plaket.read_float_ml5(conf_full, 0);
   get_data(conf_wilson, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
            convert_wilson);
+  // conf_full = read_full_ml5(conf_path_wilson, 1);
+  // conf_wilson.read_float_ml5(conf_full, 0);
 
   double plaket_time_average = plaket_time(conf_plaket.array);
   double plaket_space_average = plaket_space(conf_plaket.array);

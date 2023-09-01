@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 20;
+  y_size = 20;
+  z_size = 20;
+  t_size = 20;
 
   std::cout.precision(17);
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
   //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
   string conf_path1 = "../../confs/MA_gauge/su2/qc2dstag/40^4/"
                       "mu0.00/conf_abelian_0201";
+  // string conf_path1 = "../../confs/su2/ml5/beta2.1_1conf.ml5";
   string conf_path2 = "../../confs/su2/qc2dstag/40^4/mu0.00/CONF0201";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
@@ -65,6 +66,8 @@ int main(int argc, char *argv[]) {
   bool convert = 0;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
+  // vector<float> conf_full = read_full_ml5(conf_path1, 1);
+  // conf1.read_float_ml5(conf_full, 0);
   get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
 
   // plakets and polyakov loop

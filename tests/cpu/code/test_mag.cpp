@@ -5,7 +5,10 @@
 
 #include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -20,10 +23,10 @@ int main(int argc, char *argv[]) {
   unsigned int end_time;
   unsigned int search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 48;
+  y_size = 48;
+  z_size = 48;
+  t_size = 48;
 
   std::cout.precision(17);
 
@@ -35,17 +38,23 @@ int main(int argc, char *argv[]) {
   std::vector<spin> spins;
 
   double T_init = 2.5;
-  double T_final = 0.1;
-  double T_step = 0.1;
-  int OR_steps = 6;
+  double T_final = 0.01;
+  double T_step = 0.05;
+  int OR_steps = 4;
   int thermalization_steps = 20;
   int tolerance_digits = 7;
   double tolerance_maximal = 1e-9;
   double tolerance_average = 1e-11;
 
-  string conf_path = "../../confs/qc2dstag/mu0.05/s0/CONF0201";
+  string conf_path = "../../confs/su2/su2_suzuki/48^4/beta2.8/CON_MC_001.LAT";
 
-  conf.read_double_qc2dstag(conf_path);
+  int bytes_skip = 8;
+  bool convert = 0;
+  string conf_format = "double";
+
+  get_data(conf, conf_path, conf_format, bytes_skip, convert);
+
+  cout << "initial plaket " << plaket(conf.array) << endl;
 
   // performance test
 
@@ -147,7 +156,12 @@ int main(int argc, char *argv[]) {
 
   // thermalization test
 
-  /*string path_out = "thermalization";
+  double step = stod(string(argv[1]));
+
+  string path_out = "thermalization_" + to_string(step);
+  path_out.erase(path_out.find_last_not_of('0') + 1, std::string::npos);
+  path_out.erase(path_out.find_last_not_of('.') + 1, std::string::npos);
+  cout << path_out << endl;
   ofstream stream;
   stream.open(path_out);
 
@@ -171,7 +185,12 @@ int main(int argc, char *argv[]) {
 
     functional[T] = MAG_functional_su2_spin(conf.array, spins);
 
-    T -= T_step;
+    if (T <= 1.6 && T >= 1.2)
+      T -= step / 4;
+    else
+      T -= step;
+
+    //     T -= T_step;
   }
 
   stream << "T,functional" << endl;
@@ -186,23 +205,23 @@ int main(int argc, char *argv[]) {
        << endl;
 
   gauge = make_gauge(spins);
-  conf1.array = gauge_tranformation(conf.array, gauge);
+  conf.array = gauge_tranformation(conf.array, gauge);
 
-  cout << "final functional from su2 conf " << MAG_functional_su2(conf1.array)
+  cout << "final functional from su2 conf " << MAG_functional_su2(conf.array)
        << endl;
-  cout << "final plaket " << plaket(conf1.array) << endl;
+  cout << "final plaket " << plaket(conf.array) << endl;
 
-  conf1.array = conf.array;
+  conf.array = conf.array;
 
-  gauge_tranformation_spins(conf1.array, spins);
+  gauge_tranformation_spins(conf.array, spins);
 
-  cout << "final functional from su2 conf " << MAG_functional_su2(conf1.array)
+  cout << "final functional from su2 conf " << MAG_functional_su2(conf.array)
        << endl;
-  cout << "final plaket " << plaket(conf1.array) << endl;*/
+  cout << "final plaket " << plaket(conf.array) << endl;
 
   // simulated annealing and maximization
 
-  spins = generate_spins_uniform();
+  /*spins = generate_spins_uniform();
 
   start_time = clock();
 
@@ -237,5 +256,5 @@ int main(int argc, char *argv[]) {
   make_maximization_approximate(conf.array, spins, OR_steps, tolerance_digits);
 
   make_maximization_final(conf.array, spins, OR_steps, tolerance_maximal,
-                          tolerance_average);
+                          tolerance_average);*/
 }
