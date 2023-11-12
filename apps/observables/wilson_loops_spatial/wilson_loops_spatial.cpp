@@ -115,29 +115,15 @@ int main(int argc, char *argv[]) {
   for (int step = 1; step < APE_steps; step++) {
     smearing_APE_2d(smeared, alpha);
   }
-  // vector<vector<MATRIX>> smeared = vector<vector<MATRIX>>(6);
-  // int count = 0;
-  // for (int i = 0; i < 3; i++) {
-  //   for (int j = 0; j < 3; j++) {
-  //     if (i != j) {
-  //       smeared[count] = conf_separated[j];
-  //       count++;
-  //     }
-  //   }
-  // }
 
   map<tuple<int, int>, double> wilson_loops;
 
   wilson_loops = wilson_spatial_parallel(conf_separated, smeared, R_min, R_max,
                                          T_min, T_max);
 
-  // for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-  //   stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
-  //                 << it->second << endl;
-  // }
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
+    stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
+                  << it->second << endl;
   }
 
   end_time = omp_get_wtime();
