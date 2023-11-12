@@ -12,8 +12,8 @@ T_min=1
 T_max=4
 R_min=1
 R_max=4
-APE_steps=2
-alpha=2
+APE_steps=5
+alpha=0.35
 parameters="-conf_format ${conf_format} -conf_path ${conf_path} -bytes_skip ${bytes_skip}\
     -L_spat ${L_spat} -L_time ${L_time} -path_wilson ${path_wilson} -representation ${representation}\
     -APE_steps ${APE_steps} -alpha ${alpha} -T_min ${T_min} -T_max ${T_max} -R_min ${R_min} -R_max ${R_max}"
