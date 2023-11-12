@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 20;
-  y_size = 20;
-  z_size = 20;
-  t_size = 20;
+  x_size = 32;
+  y_size = 32;
+  z_size = 32;
+  t_size = 8;
 
   std::cout.precision(17);
 
@@ -47,10 +47,9 @@ int main(int argc, char *argv[]) {
 
   // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
   //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
-  string conf_path1 = "../../confs/MA_gauge/su2/qc2dstag/40^4/"
-                      "mu0.00/conf_abelian_0201";
+  string conf_path1 = "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
   // string conf_path1 = "../../confs/su2/ml5/beta2.1_1conf.ml5";
-  string conf_path2 = "../../confs/su2/qc2dstag/40^4/mu0.00/CONF0201";
+  string conf_path2 = "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
   // =
@@ -60,7 +59,7 @@ int main(int argc, char *argv[]) {
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/smeared_0001"
-  string conf_format1 = "double";
+  string conf_format1 = "double_qc2dstag";
   string conf_format2 = "double_qc2dstag";
   int bytes_skip = 0;
   bool convert = 0;
@@ -102,14 +101,15 @@ int main(int argc, char *argv[]) {
        << endl;
 
   // on-axis wilson loops
-  int T_min = 1, T_max = 10;
+  int T_min = 1, T_max = 8;
   int R_min = 1, R_max = 10;
 
-  std::vector<double> vec_wilson;
   start_time = omp_get_wtime();
 
   map<tuple<int, int>, double> wilson_loops =
-      wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+      wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  // map<tuple<int, int>, double> wilson_loops =
+  //     wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;

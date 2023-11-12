@@ -22,12 +22,6 @@ template <class T>
 double wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
                                int mu, int nu, int r1, int r2);
 
-template <class T>
-std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<T> &array,
-               std::map<std::tuple<int, int>, std::vector<T>> smeared,
-               int time_min, int time_max, int r_min, int r_max);
-
 std::vector<double> read_abelian_fortran(std::string path_abelian);
 
 std::vector<double> read_abelian_fortran_double(std::string path_abelian);
@@ -181,3 +175,9 @@ template <class T>
 std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
                         int time_min, int time_max);
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<T>> conf,
+                        std::vector<std::vector<T>> smeared, int r_min,
+                        int r_max, int time_min, int time_max);
