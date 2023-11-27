@@ -1,5 +1,6 @@
 #include "../../lib/cpu/include/decomposition.h"
 #include "../../lib/cpu/include/Landau_U1.h"
+#include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
@@ -17,6 +18,28 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+
+void monopoles_test(vector<double> angles) {
+  vector<double> J = calculate_current(angles);
+  vector<loop *> LL = calculate_clusters(J);
+  map<int, int> lengths_unwrapped;
+  int length;
+  vector<int> lengths_mu;
+
+  for (int i = 0; i < LL.size(); i++) {
+    length = cluster_length(LL[i]);
+    lengths_mu = length_mu(LL[i]);
+    if (lengths_mu[0] == 0 && lengths_mu[1] == 0 && lengths_mu[2] == 0 &&
+        lengths_mu[3] == 0) {
+      lengths_unwrapped[length]++;
+    }
+  }
+
+  for (auto it = lengths_unwrapped.cbegin(); it != lengths_unwrapped.cend();
+       ++it) {
+    cout << it->first << "," << it->second << endl;
+  }
+}
 
 int main(int argc, char **argv) {
 
@@ -86,8 +109,12 @@ int main(int argc, char **argv) {
   double tolerance_average = 1e-7;
   int OR_steps = 4;
 
+  std::vector<double> inverse_laplacian_real;
+  std::vector<double> inverse_laplacian_imag;
+
   vector<complex_t> conf_complex = convert_to_complex(conf_su2.array);
   vector<complex_t> gauge_complex = generate_gauge_complex_uniform();
+  // vector<complex_t> gauge_complex = generate_gauge_complex_unity();
 
   cout << "initial Landau U1 functional "
        << Landau_functional_complex(conf_complex) << endl;
@@ -135,9 +162,17 @@ int main(int argc, char **argv) {
   search_time = end_time - start_time;
   cout << "make_monopole_angles time: " << search_time << endl;
 
+  cout << "monopoles for monopole part:" << endl;
+  monopoles_test(monopole_angles);
+  cout << endl;
+
   write_double_angles(path_conf_monopole, monopole_angles);
 
   get_monopoless_optimized(conf_su2.array, monopole_angles);
+
+  vector<double> monopoless_angles = convert_to_angles(conf_su2.array);
+  cout << "monopoles for monopoless part:" << endl;
+  monopoles_test(monopoless_angles);
 
   write_double_su2(path_conf_monopoless, conf_su2.array);
 }

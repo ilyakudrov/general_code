@@ -102,6 +102,7 @@ void data<su3_abelian>::read_float(std::string &file_name, int bytes_skip) {
   std::vector<float> v(data_size * 4);
 
   array.resize(data_size);
+  stream.ignore(bytes_skip);
 
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))

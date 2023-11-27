@@ -52,9 +52,8 @@ double get_monopole_angle(std::vector<std::vector<int>> &monopole_plaket,
                           link1 &link_tmp, std::vector<double> &laplace,
                           int mu);
 
-std::vector<double>
-make_monopole_angles2(std::vector<std::vector<int>> &dirac_plakets,
-                      std::vector<double> &laplace);
+std::vector<double> make_monopole_angles2(std::vector<double> &angles,
+                                          std::vector<double> &laplace);
 
 void dirac_plaket_difference_nonzero(
     std::vector<std::vector<int>> &dirac_plaket,
@@ -118,3 +117,6 @@ void decomposition_step_parallel2(
 std::vector<double>
 make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
                               std::vector<double> &laplace);
+
+void calculate_inverse_laplacian(std::vector<double> &inverse_laplacian_real,
+                                 std::vector<double> &inverse_laplacian_imag);

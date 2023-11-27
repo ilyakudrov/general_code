@@ -1,4 +1,5 @@
 #include "../../lib/cpu/include/abelian_projection_su3.h"
+#include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
   string path_output_clusters_wrapped;
   string path_output_windings;
   string path_output_monopoles;
+  bool convert = 0;
 
   // read parameters
   for (int i = 1; i < argc; i++) {
@@ -46,6 +48,8 @@ int main(int argc, char **argv) {
       path_output_monopoles = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "-convert") {
+      istringstream(string(argv[++i])) >> convert;
     } else if (string(argv[i]) == "-x_size") {
       x_size = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-y_size") {
@@ -61,6 +65,7 @@ int main(int argc, char **argv) {
   cout << "path_conf " << path_conf << endl;
   cout << "conf_format " << conf_format << endl;
   cout << "bytes_skip " << bytes_skip << endl;
+  cout << "convert " << convert << endl;
 
   cout << "path_output_clusters_unwrapped " << path_output_clusters_unwrapped
        << endl;
@@ -77,8 +82,9 @@ int main(int argc, char **argv) {
   data<abelian> conf;
 
   // read configuration
-  bool convert = 0;
   get_data(conf, path_conf, conf_format, bytes_skip, convert);
+
+  cout << plaket(conf.array) << endl;
 
   cout.precision(17);
 
@@ -110,7 +116,6 @@ int main(int argc, char **argv) {
   map<int, int> space_windings;
   map<int, int> time_windings;
   vector<int> lengths_mu;
-  int length_mu_test;
   vector<int> currents;
 
   int space_currents = 0;

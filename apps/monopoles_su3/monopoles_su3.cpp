@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
   string path_output_clusters_wrapped;
   string path_output_windings;
   string path_output_monopoles;
+  bool convert = 0;
 
   // read parameters
   for (int i = 1; i < argc; i++) {
@@ -46,6 +47,8 @@ int main(int argc, char **argv) {
       path_output_monopoles = argv[++i];
     } else if (string(argv[i]) == "-bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "-convert") {
+      istringstream(string(argv[++i])) >> convert;
     } else if (string(argv[i]) == "-x_size") {
       x_size = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-y_size") {
@@ -61,6 +64,7 @@ int main(int argc, char **argv) {
   cout << "path_conf " << path_conf << endl;
   cout << "conf_format " << conf_format << endl;
   cout << "bytes_skip " << bytes_skip << endl;
+  cout << "convert " << convert << endl;
 
   cout << "path_output_clusters_unwrapped " << path_output_clusters_unwrapped
        << endl;
@@ -76,15 +80,14 @@ int main(int argc, char **argv) {
 
   vector<int> lattice_sizes = {x_size, y_size, z_size, t_size};
 
-  data<su3> conf_su3;
+  data<su3_abelian> conf_su3;
 
   // read configuration
-  bool convert = 0;
   get_data(conf_su3, path_conf, conf_format, bytes_skip, convert);
 
   cout.precision(17);
 
-  vector<vector<double>> angles = make_angles_SU3(conf_su3.array);
+  vector<vector<double>> angles = convert_to_angles(conf_su3.array);
   conf_su3.array.erase(conf_su3.array.begin(), conf_su3.array.end());
 
   vector<vector<vector<double>>> monopole_plakets =

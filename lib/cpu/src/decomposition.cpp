@@ -1,4 +1,5 @@
 #include "../include/decomposition.h"
+#include "../include/link.h"
 #include "../include/monopoles.h"
 
 #include <ctime>
@@ -292,10 +293,10 @@ std::vector<double> read_inverse_laplacian(std::string &file_path) {
 
   int index = 0;
 
-  for (int x = 0; x < x_size / 2 + 1; x++) {
-    for (int y = 0; y < y_size / 2 + 1; y++) {
-      for (int z = 0; z < z_size / 2 + 1; z++) {
-        for (int t = 0; t < t_size / 2 + 1; t++) {
+  for (int t = 0; t < t_size / 2 + 1; t++) {
+    for (int z = 0; z < z_size / 2 + 1; z++) {
+      for (int y = 0; y < y_size / 2 + 1; y++) {
+        for (int x = 0; x < x_size / 2 + 1; x++) {
           link_laplace.go_update(x, y, z, t);
           laplace[link_laplace.place / 4] = v[index];
           index++;
@@ -1243,7 +1244,6 @@ make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
           dirac_coordinate[mu][4 * i + 2], dirac_coordinate[mu][4 * i + 3]};
 
       if (dirac_coordinate[mu][i * 4] > x_size / 2) {
-
         decomposition_step_parallel1(dirac_difference[mu][i], coordinate,
                                      laplace, angles_decomposed[mu]);
       } else {
@@ -1259,4 +1259,64 @@ make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
     }
   }
   return merge_angles(angles_decomposed);
+}
+
+void calculate_inverse_laplacian(std::vector<double> &inverse_laplacian_real,
+                                 std::vector<double> &inverse_laplacian_imag) {
+  int data_size = x_size * y_size * z_size * t_size;
+  std::vector<double> momentum(4);
+  double inv_moment_sum;
+  link1 link(x_size, y_size, z_size, t_size);
+  link1 link_laplacian(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
+                       t_size / 2 + 1);
+  double scalar_mult;
+  inverse_laplacian_real =
+      std::vector<double>((x_size / 2 + 1) * (y_size / 2 + 1) *
+                          (z_size / 2 + 1) * (t_size / 2 + 1));
+  inverse_laplacian_imag =
+      std::vector<double>((x_size / 2 + 1) * (y_size / 2 + 1) *
+                          (z_size / 2 + 1) * (t_size / 2 + 1));
+
+  for (int t1 = 0; t1 < t_size / 2 + 1; t1++) {
+    for (int z1 = 0; z1 < z_size / 2 + 1; z1++) {
+      for (int y1 = 0; y1 < y_size / 2 + 1; y1++) {
+        for (int x1 = 0; x1 < x_size / 2 + 1; x1++) {
+          link_laplacian.go_update(x1, y1, z1, t1);
+
+          for (int t = 0; t < t_size; t++) {
+            for (int z = 0; z < z_size; z++) {
+              for (int y = 0; y < y_size; y++) {
+                for (int x = 0; x < x_size; x++) {
+                  if (x != 0 && y != 0 && z != 0 && t != 0) {
+                    link.go_update(x, y, z, t);
+                    for (int mu = 0; mu < 4; mu++) {
+                      momentum[mu] = 2 * M_PI * link.coordinate[mu] /
+                                     link.lattice_size[mu];
+                    }
+                    inv_moment_sum = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      inv_moment_sum += 2 - 2 * cos(momentum[mu]);
+                    }
+                    inv_moment_sum = 1 / inv_moment_sum;
+                    scalar_mult = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      scalar_mult += link.coordinate[mu] * momentum[mu];
+                    }
+                    inverse_laplacian_real[link_laplacian.place] +=
+                        cos(scalar_mult) * inv_moment_sum;
+                    inverse_laplacian_imag[link_laplacian.place] +=
+                        sin(scalar_mult) * inv_moment_sum;
+                  }
+                }
+              }
+            }
+          }
+          inverse_laplacian_real[link_laplacian.place] =
+              inverse_laplacian_real[link_laplacian.place] / data_size;
+          inverse_laplacian_imag[link_laplacian.place] =
+              inverse_laplacian_imag[link_laplacian.place] / data_size;
+        }
+      }
+    }
+  }
 }
