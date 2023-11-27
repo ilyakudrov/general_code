@@ -120,6 +120,12 @@ template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha);
 
 template <class T>
+std::vector<std::vector<T>>
+smearing_APE_2d_initial(std::vector<std::vector<T>> &conf, double alpha);
+template <class T>
+void smearing_APE_2d(std::vector<std::vector<T>> &conf, double alpha);
+
+template <class T>
 void smearing_plane_HYP_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,
                               std::vector<T> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,

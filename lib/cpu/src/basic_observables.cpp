@@ -210,46 +210,6 @@ double wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
   return wilson;
 }
 
-// spatial wilson_loops
-template <class T>
-std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<T> &array,
-               std::map<std::tuple<int, int>, std::vector<T>> smeared,
-               int time_min, int time_max, int r_min, int r_max) {
-  link1 link(x_size, y_size, z_size, t_size);
-  std::map<std::tuple<int, int>, double> wilson;
-  std::vector<T> space_lines;
-  std::unordered_map<int, std::vector<T>> time_lines;
-
-  for (int i = 0; i < 3; i++) {
-    for (int t = time_min; t <= time_max; t++) {
-      time_lines[t] = wilson_lines(array, i, t);
-    }
-
-    for (int j = 0; j < 3; j++) {
-      if (i != j) {
-        for (int r = r_min; r <= r_max; r++) {
-          space_lines =
-              wilson_lines_single(smeared[std::tuple<int, int>{i, j}], r);
-
-          for (int t = time_min; t <= time_max; t++) {
-            wilson[std::tuple<int, int>{t, r}] +=
-                wilson_loop_single_size(time_lines[t], space_lines, i, j, t, r);
-          }
-        }
-      }
-    }
-  }
-
-  for (int t = time_min; t <= time_max; t++) {
-    for (int r = r_min; r <= r_max; r++) {
-      wilson[std::tuple<int, int>{t, r}] =
-          wilson[std::tuple<int, int>{t, r}] / 6;
-    }
-  }
-  return wilson;
-}
-
 std::vector<double> read_abelian_fortran(std::string path_abelian) {
   std::vector<double> conf_abelian;
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
@@ -1595,7 +1555,6 @@ wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
   std::vector<int> steps = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
-
   std::map<std::tuple<int, int>, double> wilson_loops;
 
   std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
@@ -1603,12 +1562,10 @@ wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
   for (int t = time_min; t <= time_max; t++) {
     time_lines[t - time_min] = wilson_lines(conf[3], t, steps[3], steps[4]);
   }
-  T A;
   for (int r = r_min; r <= r_max; r++) {
     for (int mu = 0; mu < 3; mu++) {
       space_lines = wilson_lines(conf[mu], r, steps[mu], steps[mu + 1]);
       for (int t = time_min; t <= time_max; t++) {
-
         wilson_loops[std::tuple<int, int>(t, r)] +=
             wilson_plane(space_lines, time_lines[t - time_min], steps[mu],
                          steps[mu + 1], steps[3], steps[4], r, t);
@@ -1693,6 +1650,73 @@ wilson_adjoint_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
   return wilson_loops;
 }
 
+std::map<std::tuple<int, int>, int> indices_map_spatial() {
+  std::map<std::tuple<int, int>, int> indices_map;
+
+  int count = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        indices_map[std::tuple<int, int>(i, j)] = count;
+        count++;
+      }
+    }
+  }
+  return indices_map;
+}
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<T>> conf,
+                        std::vector<std::vector<T>> smeared, int r_min,
+                        int r_max, int time_min, int time_max) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::map<std::tuple<int, int>, int> indices_map = indices_map_spatial();
+
+  std::map<std::tuple<int, int>, double> wilson_loops;
+  std::vector<std::vector<T>> quark_lines(time_max - time_min + 1);
+  std::vector<T> space_lines;
+  // i is quark line direction, j is smeared direction, k is parallel to them
+  for (int i = 0; i < 3; i++) {
+    for (int t = time_min; t <= time_max; t++) {
+      quark_lines[t - time_min] =
+          wilson_lines(conf[i], t, steps[i], steps[i + 1]);
+    }
+    for (int t = time_min; t <= time_max; t++) {
+      for (int j = 0; j < 3; j++) {
+        if (i != j) {
+          for (int k = 0; k < 3; k++) {
+            if (i != k && j != k) {
+              for (int r = r_min; r <= r_max; r++) {
+                space_lines = wilson_lines(
+                    smeared[indices_map[std::tuple<int, int>(i, j)]], r,
+                    steps[j], steps[j + 1]);
+                if (i < j) {
+                  wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane(
+                      quark_lines[t - time_min], space_lines, steps[i],
+                      steps[i + 1], steps[j], steps[j + 1], t, r);
+                } else {
+                  wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane(
+                      space_lines, quark_lines[t - time_min], steps[j],
+                      steps[j + 1], steps[i], steps[i + 1], r, t);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    it->second = it->second / 6;
+  }
+
+  return wilson_loops;
+}
+
 // su2
 template double plaket_time(const std::vector<su2> &array);
 template double plaket_space(const std::vector<su2> &array);
@@ -1740,10 +1764,6 @@ polyakov_loop_correlator_singlet(const std::vector<su2> &conf, int D_max);
 template double wilson_loop_single_size(std::vector<su2> lines1,
                                         std::vector<su2> lines2, int mu, int nu,
                                         int r1, int r2);
-template std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<su2> &array,
-               std::map<std::tuple<int, int>, std::vector<su2>> smeared,
-               int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<su2>> separate_wilson(std::vector<su2> &conf);
 
@@ -1784,6 +1804,11 @@ template double wilson_adjoint_plane(std::vector<su2> &wilson_lines_mu,
 
 template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<su2>> conf, int r_min,
+                        int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<su2>> conf,
+                        std::vector<std::vector<su2>> smeared, int r_min,
                         int r_max, int time_min, int time_max);
 
 // abelian
@@ -1837,10 +1862,6 @@ wilson_lines_single(const std::vector<abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<abelian> lines1,
                                         std::vector<abelian> lines2, int mu,
                                         int nu, int r1, int r2);
-template std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<abelian> &array,
-               std::map<std::tuple<int, int>, std::vector<abelian>> smeared,
-               int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<abelian>>
 separate_wilson(std::vector<abelian> &conf);
@@ -1884,6 +1905,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<abelian>> conf, int r_min,
                         int r_max, int time_min, int time_max);
 
+template std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<abelian>> conf,
+                        std::vector<std::vector<abelian>> smeared, int r_min,
+                        int r_max, int time_min, int time_max);
+
 // su3
 template double plaket_time(const std::vector<su3> &array);
 template double plaket_space(const std::vector<su3> &array);
@@ -1925,10 +1951,6 @@ template std::vector<su3> wilson_lines_single(const std::vector<su3> &array,
 template double wilson_loop_single_size(std::vector<su3> lines1,
                                         std::vector<su3> lines2, int mu, int nu,
                                         int r1, int r2);
-template std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<su3> &array,
-               std::map<std::tuple<int, int>, std::vector<su3>> smeared,
-               int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<su3>> separate_wilson(std::vector<su3> &conf);
 
@@ -1969,6 +1991,11 @@ template double wilson_adjoint_plane(std::vector<su3> &wilson_lines_mu,
 
 template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<su3>> conf, int r_min,
+                        int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<su3>> conf,
+                        std::vector<std::vector<su3>> smeared, int r_min,
                         int r_max, int time_min, int time_max);
 
 // su3_abelian
@@ -2019,10 +2046,6 @@ wilson_lines_single(const std::vector<su3_abelian> &array, int length);
 template double wilson_loop_single_size(std::vector<su3_abelian> lines1,
                                         std::vector<su3_abelian> lines2, int mu,
                                         int nu, int r1, int r2);
-template std::map<std::tuple<int, int>, double>
-wilson_spatial(const std::vector<su3_abelian> &array,
-               std::map<std::tuple<int, int>, std::vector<su3_abelian>> smeared,
-               int time_min, int time_max, int r_min, int r_max);
 
 template std::vector<std::vector<su3_abelian>>
 separate_wilson(std::vector<su3_abelian> &conf);
@@ -2068,3 +2091,8 @@ template double wilson_adjoint_plane(std::vector<su3_abelian> &wilson_lines_mu,
 template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(std::vector<std::vector<su3_abelian>> conf, int r_min,
                         int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_spatial_parallel(std::vector<std::vector<su3_abelian>> conf,
+                        std::vector<std::vector<su3_abelian>> smeared,
+                        int r_min, int r_max, int time_min, int time_max);

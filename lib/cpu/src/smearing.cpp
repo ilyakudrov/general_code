@@ -395,143 +395,6 @@ std::vector<T> smearing1_APE(const std::vector<T> &array, double alpha_APE) {
 }
 
 template <class T>
-std::map<std::tuple<int, int>, std::vector<T>>
-smearing_APE_2d(const std::vector<T> &array, double alpha_APE) {
-  std::map<std::tuple<int, int>, std::vector<T>> smeared;
-
-  link1 link(x_size, y_size, z_size, t_size);
-
-  // not smeared direction
-  for (int i = 0; i < 3; i++) {
-    // 2 other smeared directions
-    for (int j = 0; j < 3; j++) {
-
-      if (i != j) {
-        std::vector<T> vec(x_size * y_size * z_size * t_size);
-
-        link.move_dir(j);
-
-        // for (int t = 0; t < t_size; t++) {
-        // link.move_dir(j);
-
-        // SPACE_ITER_START_3D
-
-        SPACE_ITER_START
-
-        vec[link.place / 4] = (1 - alpha_APE) * array[link.place + j];
-
-        for (int d = 0; d < 3; d++) {
-          if (d != i && d != j) {
-            vec[link.place / 4] =
-                vec[link.place / 4] +
-                (alpha_APE / 2.) * staples_first(array, link, d);
-          }
-        }
-        vec[link.place / 4] = vec[link.place / 4].proj();
-
-        SPACE_ITER_END
-
-        // SPACE_ITER_END_3D
-        // }
-        smeared[std::tuple<int, int>{i, j}] = std::move(vec);
-      }
-    }
-  }
-  return smeared;
-}
-
-template <class T>
-void smearing_APE_2d_continue(
-    std::map<std::tuple<int, int>, std::vector<T>> &smeared, double alpha_APE) {
-  for (int i = 0; i < 3; i++) {
-    smearing_APE_2d_continue_plane(smeared, i, alpha_APE);
-  }
-}
-
-template <class T>
-void smearing_APE_2d_continue_plane(
-    std::map<std::tuple<int, int>, std::vector<T>> &smeared, int mu,
-    double alpha_APE) {
-  std::vector<int> directions;
-
-  link1 link(x_size, y_size, z_size, t_size);
-
-  std::vector<std::vector<T>> vec(
-      2, std::vector<T>(x_size * y_size * z_size * t_size));
-
-  int nu1, nu2;
-
-  for (int i = 0; i < 2; i++) {
-    if (i != mu) {
-
-      for (int k = i + 1; k < 3; k++) {
-        if (k != mu) {
-          nu1 = i;
-          nu2 = k;
-        }
-      }
-    }
-  }
-
-  SPACE_ITER_START
-
-  vec[0][link.place / 4] =
-      (1 - alpha_APE) * smeared[std::tuple<int, int>{mu, nu1}][link.place / 4];
-
-  vec[0][link.place / 4] =
-      vec[0][link.place / 4] +
-      (alpha_APE / 2.) *
-          staples_2d_continue(smeared[std::tuple<int, int>{mu, nu1}],
-                              smeared[std::tuple<int, int>{mu, nu2}], link, nu1,
-                              nu2);
-
-  vec[0][link.place / 4] = vec[0][link.place / 4].proj();
-
-  SPACE_ITER_END
-
-  SPACE_ITER_START
-
-  vec[1][link.place / 4] =
-      (1 - alpha_APE) * smeared[std::tuple<int, int>{mu, nu2}][link.place / 4];
-
-  vec[1][link.place / 4] =
-      vec[1][link.place / 4] +
-      (alpha_APE / 2.) *
-          staples_2d_continue(smeared[std::tuple<int, int>{mu, nu2}],
-                              smeared[std::tuple<int, int>{mu, nu1}], link, nu2,
-                              nu1);
-
-  vec[1][link.place / 4] = vec[1][link.place / 4].proj();
-
-  SPACE_ITER_END
-
-  smeared[std::tuple<int, int>{mu, nu1}] = std::move(vec[0]);
-  smeared[std::tuple<int, int>{mu, nu2}] = std::move(vec[1]);
-}
-
-template <class T>
-T staples_2d_continue(std::vector<T> &array1, std::vector<T> &array2,
-                      link1 &link, int i, int j) {
-  T A;
-  T B;
-  A = array2[link.place / 4];
-  link.move(j, 1);
-  A = A * array1[link.place / 4];
-  link.move(i, 1);
-  link.move(j, -1);
-  A = A ^ array2[link.place / 4];
-  link.move(i, -1);
-  link.move(j, -1);
-  B = array2[link.place / 4].conj();
-  B = B * array1[link.place / 4];
-  link.move(i, 1);
-  B = B * array2[link.place / 4];
-  link.move(j, 1);
-  link.move(i, -1);
-  return (A + B);
-}
-
-template <class T>
 T smearing_first_refresh(const std::vector<T> &vec, link1 &link, int nu,
                          int rho, double alpha3) {
   T A;
@@ -786,6 +649,68 @@ void smearing_plane_minor_start(std::vector<T> &smeared,
 }
 
 template <class T>
+void smearing_plane_minor_start_proj(std::vector<T> &smeared,
+                                     const std::vector<T> &conf_mu,
+                                     const std::vector<T> &conf_nu,
+                                     int size_mu1, int size_mu2, int size_nu1,
+                                     int size_nu2, double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  T bracket;
+
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (i < size_nu2 - size_nu1) {
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        } else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (j < size_mu2 - size_mu1) {
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        } else
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+        if (i >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                    .proj();
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (j < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
+                    .proj();
+        }
+      }
+    }
+  }
+}
+
+template <class T>
 void smearing_plane_minor_end(std::vector<T> &smeared,
                               const std::vector<T> &conf_mu,
                               const std::vector<T> &conf_nu, int size_mu1,
@@ -969,6 +894,70 @@ void smearing_plane_major_start(std::vector<T> &smeared,
 }
 
 template <class T>
+void smearing_plane_major_start_proj(std::vector<T> &smeared,
+                                     const std::vector<T> &conf_mu,
+                                     const std::vector<T> &conf_nu,
+                                     int size_mu1, int size_mu2, int size_nu1,
+                                     int size_nu2, double alpha) {
+  int data_size1 = x_size * y_size * z_size * t_size;
+
+  T bracket;
+
+#pragma omp parallel for collapse(3) private(bracket) firstprivate(alpha)
+  for (int k = 0; k < data_size1; k += size_mu2) {
+    for (int i = 0; i < size_mu2; i += size_nu2) {
+      for (int j = 0; j < size_nu2; j++) {
+        if (j < size_nu2 - size_nu1)
+          bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
+        else
+          bracket =
+              conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
+        if (i < size_mu2 - size_mu1)
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+        else
+          smeared[i + k + j] =
+              conf_mu[i + k + j] +
+              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+
+        if (j >= size_nu1) {
+          bracket =
+              conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
+          if (i < size_mu2 - size_mu1) {
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                    .proj();
+
+          } else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                    .proj();
+        } else {
+          bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
+                    conf_mu[i + k + j + size_nu2 - size_nu1];
+          if (i < size_mu2 - size_mu1)
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                    .proj();
+          else
+            smeared[i + k + j] =
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
+                    .proj();
+        }
+      }
+    }
+  }
+}
+
+template <class T>
 void smearing_plane_major_end(std::vector<T> &smeared,
                               const std::vector<T> &conf_mu,
                               const std::vector<T> &conf_nu, int size_mu1,
@@ -1052,6 +1041,96 @@ void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
                            alpha);
 
   for (int i = 0; i < 3; i++) {
+    conf[i] = std::move(smeared[i]);
+  }
+}
+
+std::map<std::tuple<int, int>, int> indices_map_APE_2d() {
+  std::map<std::tuple<int, int>, int> indices_map;
+
+  int count = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        indices_map[std::tuple<int, int>(i, j)] = count;
+        count++;
+      }
+    }
+  }
+  return indices_map;
+}
+
+template <class T>
+std::vector<std::vector<T>>
+smearing_APE_2d_initial(std::vector<std::vector<T>> &conf, double alpha) {
+  int vector_size = x_size * y_size * z_size * t_size;
+  std::vector<std::vector<T>> smeared(6, std::vector<T>(vector_size));
+  std::map<std::tuple<int, int>, int> indices_map = indices_map_APE_2d();
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  // i is quark line direction, j is smeared direction, k is parallel to them
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        for (int k = 0; k < 3; k++) {
+          if (i != k && j != k) {
+            if (j < k) {
+              smearing_plane_minor_start_proj(
+                  smeared[indices_map[std::tuple<int, int>(i, j)]], conf[j],
+                  conf[k], steps[j], steps[j + 1], steps[k], steps[k + 1],
+                  alpha);
+            } else {
+              smearing_plane_major_start_proj(
+                  smeared[indices_map[std::tuple<int, int>(i, j)]], conf[j],
+                  conf[k], steps[j], steps[j + 1], steps[k], steps[k + 1],
+                  alpha);
+            }
+          }
+        }
+      }
+    }
+  }
+  return smeared;
+}
+
+template <class T>
+void smearing_APE_2d(std::vector<std::vector<T>> &conf, double alpha) {
+  int vector_size = x_size * y_size * z_size * t_size;
+  std::vector<std::vector<T>> smeared(6, std::vector<T>(vector_size));
+  std::map<std::tuple<int, int>, int> indices_map = indices_map_APE_2d();
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  // i is quark line direction, j is smeared direction, k is parallel to them
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        for (int k = 0; k < 3; k++) {
+          if (i != k && j != k) {
+            if (j < k) {
+              smearing_plane_minor_start_proj(
+                  smeared[indices_map[std::tuple<int, int>(i, j)]],
+                  conf[indices_map[std::tuple<int, int>(i, j)]],
+                  conf[indices_map[std::tuple<int, int>(i, k)]], steps[j],
+                  steps[j + 1], steps[k], steps[k + 1], alpha);
+            } else {
+              smearing_plane_major_start_proj(
+                  smeared[indices_map[std::tuple<int, int>(i, j)]],
+                  conf[indices_map[std::tuple<int, int>(i, j)]],
+                  conf[indices_map[std::tuple<int, int>(i, k)]], steps[j],
+                  steps[j + 1], steps[k], steps[k + 1], alpha);
+            }
+          }
+        }
+      }
+    }
+  }
+  for (int i = 0; i < 6; i++) {
     conf[i] = std::move(smeared[i]);
   }
 }
@@ -1415,17 +1494,6 @@ template std::vector<su2> smearing_APE(const std::vector<su2> &array,
                                        double alpha_APE);
 template std::vector<su2> smearing1_APE(const std::vector<su2> &array,
                                         double alpha_APE);
-template std::map<std::tuple<int, int>, std::vector<su2>>
-smearing_APE_2d(const std::vector<su2> &array, double alpha_APE);
-template void smearing_APE_2d_continue(
-    std::map<std::tuple<int, int>, std::vector<su2>> &smeared,
-    double alpha_APE);
-template void smearing_APE_2d_continue_plane(
-    std::map<std::tuple<int, int>, std::vector<su2>> &smeared, int mu,
-    double alpha_APE);
-template su2 staples_2d_continue(std::vector<su2> &array1,
-                                 std::vector<su2> &array2, link1 &link, int i,
-                                 int j);
 template su2 smearing_first_refresh(const std::vector<su2> &vec, link1 &link,
                                     int nu, int rho,
                                     double alpha3); // refresh link every step
@@ -1467,6 +1535,10 @@ template void smearing_plane_major_end(std::vector<su2> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su2>> &conf,
                                     double alpha);
+template std::vector<std::vector<su2>>
+smearing_APE_2d_initial(std::vector<std::vector<su2>> &conf, double alpha);
+template void smearing_APE_2d(std::vector<std::vector<su2>> &conf,
+                              double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su2> &smeared,
                                        std::vector<su2> &conf_mu,
@@ -1522,17 +1594,6 @@ template std::vector<abelian> smearing_APE(const std::vector<abelian> &array,
                                            double alpha_APE);
 template std::vector<abelian> smearing1_APE(const std::vector<abelian> &array,
                                             double alpha_APE);
-template std::map<std::tuple<int, int>, std::vector<abelian>>
-smearing_APE_2d(const std::vector<abelian> &array, double alpha_APE);
-template void smearing_APE_2d_continue(
-    std::map<std::tuple<int, int>, std::vector<abelian>> &smeared,
-    double alpha_APE);
-template void smearing_APE_2d_continue_plane(
-    std::map<std::tuple<int, int>, std::vector<abelian>> &smeared, int mu,
-    double alpha_APE);
-template abelian staples_2d_continue(std::vector<abelian> &array1,
-                                     std::vector<abelian> &array2, link1 &link,
-                                     int i, int j);
 template abelian
 smearing_first_refresh(const std::vector<abelian> &vec, link1 &link, int nu,
                        int rho,
@@ -1576,6 +1637,10 @@ template void smearing_plane_major_end(std::vector<abelian> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<abelian>> &conf,
                                     double alpha);
+template std::vector<std::vector<abelian>>
+smearing_APE_2d_initial(std::vector<std::vector<abelian>> &conf, double alpha);
+template void smearing_APE_2d(std::vector<std::vector<abelian>> &conf,
+                              double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<abelian> &smeared,
                                        std::vector<abelian> &conf_mu,
@@ -1629,17 +1694,6 @@ template std::vector<su3> smearing_APE(const std::vector<su3> &array,
                                        double alpha_APE);
 template std::vector<su3> smearing1_APE(const std::vector<su3> &array,
                                         double alpha_APE);
-template std::map<std::tuple<int, int>, std::vector<su3>>
-smearing_APE_2d(const std::vector<su3> &array, double alpha_APE);
-template void smearing_APE_2d_continue(
-    std::map<std::tuple<int, int>, std::vector<su3>> &smeared,
-    double alpha_APE);
-template void smearing_APE_2d_continue_plane(
-    std::map<std::tuple<int, int>, std::vector<su3>> &smeared, int mu,
-    double alpha_APE);
-template su3 staples_2d_continue(std::vector<su3> &array1,
-                                 std::vector<su3> &array2, link1 &link, int i,
-                                 int j);
 template su3 smearing_first_refresh(const std::vector<su3> &vec, link1 &link,
                                     int nu, int rho,
                                     double alpha3); // refresh link every step
@@ -1681,6 +1735,11 @@ template void smearing_plane_major_end(std::vector<su3> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su3>> &conf,
                                     double alpha);
+
+std::vector<std::vector<su3>>
+smearing_APE_2d_initial(std::vector<std::vector<su3>> &conf, double alpha);
+template void smearing_APE_2d(std::vector<std::vector<su3>> &conf,
+                              double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3> &smeared,
                                        std::vector<su3> &conf_mu,
@@ -1737,17 +1796,6 @@ template std::vector<su3_abelian>
 smearing_APE(const std::vector<su3_abelian> &array, double alpha_APE);
 template std::vector<su3_abelian>
 smearing1_APE(const std::vector<su3_abelian> &array, double alpha_APE);
-template std::map<std::tuple<int, int>, std::vector<su3_abelian>>
-smearing_APE_2d(const std::vector<su3_abelian> &array, double alpha_APE);
-template void smearing_APE_2d_continue(
-    std::map<std::tuple<int, int>, std::vector<su3_abelian>> &smeared,
-    double alpha_APE);
-template void smearing_APE_2d_continue_plane(
-    std::map<std::tuple<int, int>, std::vector<su3_abelian>> &smeared, int mu,
-    double alpha_APE);
-template su3_abelian staples_2d_continue(std::vector<su3_abelian> &array1,
-                                         std::vector<su3_abelian> &array2,
-                                         link1 &link, int i, int j);
 template su3_abelian
 smearing_first_refresh(const std::vector<su3_abelian> &vec, link1 &link, int nu,
                        int rho,
@@ -1789,6 +1837,12 @@ template void smearing_plane_major_end(std::vector<su3_abelian> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su3_abelian>> &conf,
                                     double alpha);
+
+std::vector<std::vector<su3_abelian>>
+smearing_APE_2d_initial(std::vector<std::vector<su3_abelian>> &conf,
+                        double alpha);
+template void smearing_APE_2d(std::vector<std::vector<su3_abelian>> &conf,
+                              double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3_abelian> &smeared,
                                        std::vector<su3_abelian> &conf_mu,
