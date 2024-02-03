@@ -229,8 +229,7 @@ int main(int argc, char *argv[]) {
   if (HYP_enabled == 1) {
     start_time = omp_get_wtime();
     for (int HYP_step = 0; HYP_step < HYP_steps; HYP_step++) {
-
-      smearing_HYP_new(conf_separated, HYP_alpha1, HYP_alpha2, HYP_alpha3);
+      smearing_HYP_parallel(conf_separated, HYP_alpha1, HYP_alpha2, HYP_alpha3);
     }
 
     end_time = omp_get_wtime();

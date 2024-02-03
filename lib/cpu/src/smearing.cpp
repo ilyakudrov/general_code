@@ -1857,6 +1857,16 @@ void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
     smeared[i] = smeared[i].proj();
   }
   conf[3] = smeared;
+  for (int i = 0; i < links2.size(); i++) {
+    links2[i].clear();
+    links2[i].shrink_to_fit();
+  }
+  for (int i = 0; i < links1.size(); i++) {
+    links1[i].clear();
+    links1[i].shrink_to_fit();
+  }
+  smeared.clear();
+  smeared.shrink_to_fit();
 }
 
 // specialications
