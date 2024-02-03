@@ -1066,6 +1066,10 @@ void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
   for (int i = 0; i < 3; i++) {
     conf[i] = std::move(smeared[i]);
   }
+  for (int i = 0; i < smeared.size(); i++) {
+    smeared[i].clear();
+    smeared[i].shrink_to_fit();
+  }
 }
 
 std::map<std::tuple<int, int>, int> indices_map_APE_2d() {
