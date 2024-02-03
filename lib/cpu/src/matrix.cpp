@@ -688,8 +688,10 @@ su3 su3::lambda3_mult() {
 
   A.matrix[0][0] = matrix[0][0];
   A.matrix[0][1] = matrix[0][1].negative();
-  A.matrix[1][0] = matrix[1][0].negative();
-  A.matrix[1][1] = matrix[1][1];
+  A.matrix[1][0] = matrix[1][0];
+  A.matrix[1][1] = matrix[1][1].negative();
+  A.matrix[2][0] = A.matrix[2][0];
+  A.matrix[2][1] = A.matrix[2][1].negative();
 
   A.matrix[2][2] = complex_t(0, 0);
 

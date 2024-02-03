@@ -11,12 +11,12 @@
 #include <omp.h>
 #include <stdio.h>
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3
 
-int x_size = 32;
-int y_size = 32;
-int z_size = 32;
-int t_size = 8;
+int x_size = 64;
+int y_size = 64;
+int z_size = 64;
+int t_size = 20;
 
 using namespace std;
 
@@ -33,9 +33,11 @@ int main(int argc, char *argv[]) {
 
   data<MATRIX_TYPE> conf;
   data<MATRIX_TYPE> smeared;
-  string conf_path = "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
+  // string conf_path =
+  //     "../../confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime";
+  string conf_path = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
 
-  string conf_format = "double_qc2dstag";
+  string conf_format = "ildg";
   int bytes_skip = 0;
   bool convert = 0;
 
@@ -54,22 +56,22 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_smearing(conf.array);
 
-  start_time = omp_get_wtime();
+  // start_time = omp_get_wtime();
 
-  for (int i = 0; i < 10; i++) {
-    smearing_APE_parallel(conf_separated, alpha_APE);
-  }
+  // for (int i = 0; i < 10; i++) {
+  //   smearing_APE_parallel(conf_separated, alpha_APE);
+  // }
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "smearing APE time: " << search_time << std::endl;
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // std::cout << "smearing APE time: " << search_time << std::endl;
 
-  std::cout << "plaket after smearing: " << plaket_parallel(conf_separated)
-            << std::endl;
-  std::cout << "plaket_time after smearing: "
-            << plaket_time_parallel(conf_separated) << std::endl;
-  std::cout << "plaket_space after smearing: "
-            << plaket_space_parallel(conf_separated) << std::endl;
+  // std::cout << "plaket after smearing: " << plaket_parallel(conf_separated)
+  //           << std::endl;
+  // std::cout << "plaket_time after smearing: "
+  //           << plaket_time_parallel(conf_separated) << std::endl;
+  // std::cout << "plaket_space after smearing: "
+  //           << plaket_space_parallel(conf_separated) << std::endl;
 
   // conf_separated = separate_smearing(conf.array);
 

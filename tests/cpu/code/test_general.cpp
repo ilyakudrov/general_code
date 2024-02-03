@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 32;
-  y_size = 32;
-  z_size = 32;
-  t_size = 8;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   std::cout.precision(17);
 
@@ -47,9 +47,13 @@ int main(int argc, char *argv[]) {
 
   // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
   //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
-  string conf_path1 = "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
+  // string conf_path1 =
+  // "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
+  string conf_path1 = "../../confs/MAG/su3/gluodynamics/16^4/beta6.0/"
+                      "steps_4000/copies=16/0.1/conf_gaugefixed_01001.lime";
   // string conf_path1 = "../../confs/su2/ml5/beta2.1_1conf.ml5";
-  string conf_path2 = "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
+  string conf_path2 =
+      "../../confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime";
   // string conf_path =
   // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
   // =
@@ -59,8 +63,8 @@ int main(int argc, char *argv[]) {
   // string conf_path =
   // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
   //                    "result/smeared_0001"
-  string conf_format1 = "double_qc2dstag";
-  string conf_format2 = "double_qc2dstag";
+  string conf_format1 = "ildg";
+  string conf_format2 = "ildg";
   int bytes_skip = 0;
   bool convert = 0;
 
@@ -68,6 +72,8 @@ int main(int argc, char *argv[]) {
   // vector<float> conf_full = read_full_ml5(conf_path1, 1);
   // conf1.read_float_ml5(conf_full, 0);
   get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
+
+  cout << "MAG functional: " << mag_functional_su3(conf1.array) << endl;
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();

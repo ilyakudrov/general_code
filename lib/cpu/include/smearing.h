@@ -140,3 +140,7 @@ void smearing_plane_HYP_major(std::vector<T> &smeared, std::vector<T> &conf_mu,
 template <class T>
 void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
                       double alpha2, double alpha3);
+
+template <class T>
+void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
+                           double alpha2, double alpha3);
