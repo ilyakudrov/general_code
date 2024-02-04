@@ -33,13 +33,12 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
-template <class T> data<T>::data() {
-  array.reserve(4 * x_size * y_size * z_size * t_size);
-}
+template <class T> data<T>::data() {}
 
 template <> void data<su2>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
   stream.ignore(bytes_skip);
@@ -60,6 +59,7 @@ template <>
 void data<abelian>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<float> v(data_size);
   stream.ignore(bytes_skip);
@@ -74,6 +74,7 @@ void data<abelian>::read_float(std::string &file_name, int bytes_skip) {
 template <> void data<su3>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 18);
   stream.ignore(bytes_skip);
@@ -101,7 +102,7 @@ void data<su3_abelian>::read_float(std::string &file_name, int bytes_skip) {
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
 
-  array.resize(data_size);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   stream.ignore(bytes_skip);
 
   for (int i = 0; i < 3; i++) {
@@ -118,6 +119,7 @@ template <>
 void data<abelian>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size);
   stream.ignore(bytes_skip);
@@ -154,7 +156,7 @@ void data<su2>::read_double(std::string &file_name, int bytes_skip) {
 template <>
 void data<su3>::read_double(std::string &file_name, int bytes_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.resize(data_size1);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 18);
 
@@ -195,7 +197,7 @@ void data<su3_abelian>::read_double(std::string &file_name, int bytes_skip) {
   std::ifstream stream(file_name);
   std::vector<double> v(data_size);
 
-  array.resize(data_size);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   stream.ignore(bytes_skip);
 
   for (int i = 0; i < 3; i++) {
@@ -228,7 +230,7 @@ template <>
 void data<su3_abelian>::read_double_abelian(std::string &file_name,
                                             int bytes_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.resize(data_size1);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 18);
 
@@ -284,7 +286,7 @@ template <>
 void data<su3>::read_double_offdiagonal(std::string &file_name,
                                         int bytes_skip) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.resize(data_size1);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<double> v(data_size1 * 18);
 
@@ -336,7 +338,7 @@ void data<su3_abelian>::read_double_vitaly(std::string &file_name,
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 3);
 
-  array.resize(lattice_size * 4);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   stream.ignore(bytes_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
@@ -365,7 +367,7 @@ void data<su3>::read_double_vitaly(std::string &file_name, int bytes_skip) {
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
 
-  array.resize(lattice_size * 4);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   stream.ignore(bytes_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
@@ -400,7 +402,7 @@ void data<su3_abelian>::read_double_vitaly_abelian(std::string &file_name,
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
 
-  array.resize(lattice_size * 4);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   stream.ignore(bytes_skip);
 
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
@@ -458,6 +460,7 @@ double reverseValue(const char *data) {
 template <> void data<su3>::read_ildg(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
 
   FILE *fp;
   fp = fopen(file_name.c_str(), "r");
@@ -533,6 +536,7 @@ void data<su2>::read_float_ml5(const std::vector<float> &array_ml5,
                                int conf_num) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   su2 A;
   int i;
   SPACE_ITER_START
@@ -559,7 +563,7 @@ void data<abelian>::read_float_convert_abelian(std::string &file_name,
                                                int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
-  array.reserve(data_size);
+  array.reserve(4 * x_size * y_size * z_size * t_size);
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
   stream.ignore(bytes_skip);
