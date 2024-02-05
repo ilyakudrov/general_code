@@ -11,29 +11,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "sys/sysinfo.h"
-#include "sys/types.h"
 
-// int getValue() { // Note: this value is in KB!
-//   FILE *file = fopen("/proc/self/status", "r");
-//   int result = -1;
-//   char line[128];
-
-//   while (fgets(line, 128, file) != NULL) {
-//     if (strncmp(line, "VmRSS:", 6) == 0) {
-//       result = ParseLine(line);
-//       break;
-//     }
-//   }
-//   fclose(file);
-//   return result;
-// }
-
-struct sysinfo memInfo;
-
-// #define data_size                                                              \
-//   4 * link.lattice_size[0] * link.lattice_size[1] * link.lattice_size[2] *     \
-//       link.lattice_size[3]
 #define data_size 4 * x_size *y_size *z_size *t_size
 #define PLACE1_LINK_NODIR                                                      \
   (link.coordinate[3]) * link.lattice_size[0] * link.lattice_size[1] *         \
@@ -1330,29 +1308,6 @@ std::map<std::tuple<int, int>, int> indices_map_HYP2() {
   return indices_map;
 }
 
-void show_mem_use() {
-  long long totalPhysMem;
-  long long physMemUsed;
-  long long totalVirtualMem;
-  long long virtualMemUsed;
-
-  sysinfo(&memInfo);
-  totalPhysMem = memInfo.totalram;
-  totalPhysMem *= memInfo.mem_unit;
-  std::cout << "total RAM1: " << totalPhysMem << std::endl;
-  physMemUsed = memInfo.totalram - memInfo.freeram;
-  physMemUsed *= memInfo.mem_unit;
-  std::cout << "used RAM1: " << physMemUsed << std::endl;
-  totalVirtualMem = memInfo.totalram;
-  totalVirtualMem += memInfo.totalswap;
-  totalVirtualMem *= memInfo.mem_unit;
-  std::cout << "virtual RAM1: " << totalVirtualMem << std::endl;
-  virtualMemUsed = memInfo.totalram - memInfo.freeram;
-  virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
-  virtualMemUsed *= memInfo.mem_unit;
-  std::cout << "virtual RAM1 used: " << virtualMemUsed << std::endl;
-}
-
 template <class T>
 void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
                       double alpha2, double alpha3) {
@@ -1367,9 +1322,6 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
 
   std::map<std::tuple<int, int, int>, int> indices_map1 = indices_map_HYP1();
   std::vector<std::vector<T>> links1(9);
-
-  std::cout << "before first step" << std::endl;
-  show_mem_use();
 
   // first step
 
@@ -1423,8 +1375,6 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
       }
     }
   }
-  std::cout << "before first step calculations" << std::endl;
-  show_mem_use();
 
   for (int nu = 0; nu < 3; nu++) {
     for (int sigma = 0; sigma < 3; sigma++) {
@@ -1462,15 +1412,6 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
   calculation_time = end_time - start_time;
   std::cout << "projection 1: " << calculation_time << std::endl;
 
-  for (auto it = indices_map1.begin(); it != indices_map1.end(); it++) {
-    std::cout << "matrix at index " << std::get<0>(it->first)
-              << std::get<1>(it->first) << std::get<2>(it->first) << std::endl;
-    std::cout << links1[it->second][0] << std::endl;
-  }
-
-  std::cout << "before second step" << std::endl;
-  show_mem_use();
-
   // second_step
 
   start_time = omp_get_wtime();
@@ -1506,9 +1447,6 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
             steps[3], steps[4], steps[sigma], steps[sigma + 1], alpha2, 4);
     }
   }
-
-  std::cout << "before second step calculations" << std::endl;
-  show_mem_use();
 
   for (int nu = 0; nu < 3; nu++) {
     for (int sigma = 0; sigma < 3; sigma++) {
@@ -1546,14 +1484,6 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
   end_time = omp_get_wtime();
   calculation_time = end_time - start_time;
   std::cout << "projection 2: " << calculation_time << std::endl;
-  // for (int nu = 0; nu < 3; nu++) {
-  //   std::cout << links2[indices_map2[std::tuple<int, int>(nu, 3)]][0]
-  //             << std::endl;
-  //   std::cout << links2[indices_map2[std::tuple<int, int>(3, nu)]][0]
-  //             << std::endl;
-  // }
-  std::cout << "before third step" << std::endl;
-  show_mem_use();
 
   start_time = omp_get_wtime();
 
@@ -1659,39 +1589,15 @@ void make_step1(std::vector<std::vector<T>> &links1,
   std::vector<int> steps = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
-  // for (int i = 0; i < indices.size(); i++) {
-  //   std::cout << "indices full " << std::get<0>(indices[i])
-  //             << std::get<1>(indices[i]) << std::get<2>(indices[i])
-  //             << std::endl;
-  // }
   for (int i = 0; i < indices.size(); i++) {
-    // std::cout << "indices " << i << std::endl;
-    // std::cout << "index " << std::get<0>(indices[i]) <<
-    // std::get<1>(indices[i])
-    //           << std::get<2>(indices[i]);
-    // if (indices_map.count(indices[i]) == 0) {
-    //   std::cout << " not present" << std::endl;
-    // } else {
-    //   std::cout << " present" << std::endl;
-    // }
     if (indices_map.count(indices[i]) == 0) {
-      // std::cout << "calculate indices " << std::get<0>(indices[i])
-      //           << std::get<1>(indices[i]) << std::get<2>(indices[i])
-      //           << std::endl;
       indices_map[indices[i]] = links1.size();
       links1.push_back(
           HYP_initialize_vector(conf[std::get<0>(indices[i])], alpha));
-      // std::cout << "created matrix" << std::endl;
-      // std::cout << links1.back()[0] << std::endl;
       for (int eta = 0; eta < 3; eta++) {
-        // std::cout << "eta " << eta << std::endl;
         if (eta != std::get<0>(indices[i]) && eta != std::get<1>(indices[i]) &&
             eta != std::get<2>(indices[i])) {
-          // std::cout << "calculate with eta " << eta << " indices "
-          //           << std::get<0>(indices[i]) << std::get<1>(indices[i])
-          //           << std::get<2>(indices[i]) << std::endl;
           if (eta > std::get<0>(indices[i])) {
-            // std::cout << "plane minor" << std::endl;
             smearing_plane_HYP_minor(links1.back(),
                                      conf[std::get<0>(indices[i])], conf[eta],
                                      steps[std::get<0>(indices[i])],
@@ -1699,7 +1605,6 @@ void make_step1(std::vector<std::vector<T>> &links1,
                                      steps[eta], steps[eta + 1], alpha, 2);
           }
           if (eta < std::get<0>(indices[i])) {
-            // std::cout << "plane major" << std::endl;
             smearing_plane_HYP_major(links1.back(),
                                      conf[std::get<0>(indices[i])], conf[eta],
                                      steps[std::get<0>(indices[i])],
@@ -1708,19 +1613,12 @@ void make_step1(std::vector<std::vector<T>> &links1,
           }
         }
       }
-      // std::cout << "step1 projection" << std::endl;
 #pragma omp parallel for
       for (int i = 0; i < links1.back().size(); i++) {
         links1.back()[i] = links1.back()[i].proj();
       }
     }
   }
-  // for (auto it = indices_map.begin(); it != indices_map.end(); it++) {
-  //   std::cout << "matrix of index " << std::get<0>(it->first)
-  //             << std::get<1>(it->first) << std::get<2>(it->first) <<
-  //             std::endl;
-  //   std::cout << links1[it->second][0] << std::endl;
-  // }
 }
 
 template <class T>
@@ -1739,21 +1637,9 @@ void make_step2(std::vector<std::vector<T>> &links2,
     if (rho != nu) {
       if (nu < rho) {
         index = indices_map1[std::tuple<int, int, int>(3, nu, rho)];
-        // if (indices_map1.count(std::tuple<int, int, int>(3, nu, rho)) == 0) {
-        //   std::cout << "problem: index not present " << 3 << nu << rho
-        //             << std::endl;
-        // }
       } else {
         index = indices_map1[std::tuple<int, int, int>(3, rho, nu)];
-        // if (indices_map1.count(std::tuple<int, int, int>(3, rho, nu)) == 0) {
-        //   std::cout << "problem: index not present " << 3 << rho << nu
-        //             << std::endl;
-        // }
       }
-      // if (indices_map1.count(std::tuple<int, int, int>(rho, nu, 3)) == 0) {
-      //   std::cout << "problem: index not present " << rho << nu << 3
-      //             << std::endl;
-      // }
       smearing_plane_HYP_major(
           links2[0], links1[index],
           links1[indices_map1[std::tuple<int, int, int>(rho, nu, 3)]], steps[3],
@@ -1767,14 +1653,6 @@ void make_step2(std::vector<std::vector<T>> &links2,
   for (int rho = 0; rho < 3; rho++) {
     if (rho != nu) {
       if (nu < rho) {
-        // if (indices_map1.count(std::tuple<int, int, int>(nu, rho, 3)) == 0) {
-        //   std::cout << "problem: index not present " << nu << rho << 3
-        //             << std::endl;
-        // }
-        // if (indices_map1.count(std::tuple<int, int, int>(rho, nu, 3)) == 0) {
-        //   std::cout << "problem: index not present " << rho << nu << 3
-        //             << std::endl;
-        // }
         smearing_plane_HYP_minor(
             links2[1],
             links1[indices_map1[std::tuple<int, int, int>(nu, rho, 3)]],
@@ -1782,14 +1660,6 @@ void make_step2(std::vector<std::vector<T>> &links2,
             steps[nu], steps[nu + 1], steps[rho], steps[rho + 1], alpha2, 4);
       }
       if (nu > rho) {
-        // if (indices_map1.count(std::tuple<int, int, int>(nu, rho, 3)) == 0) {
-        //   std::cout << "problem: index not present " << nu << rho << 3
-        //             << std::endl;
-        // }
-        // if (indices_map1.count(std::tuple<int, int, int>(rho, nu, 3)) == 0) {
-        //   std::cout << "problem: index not present " << rho << nu << 3
-        //             << std::endl;
-        // }
         smearing_plane_HYP_major(
             links2[1],
             links1[indices_map1[std::tuple<int, int, int>(nu, rho, 3)]],
@@ -1802,9 +1672,6 @@ void make_step2(std::vector<std::vector<T>> &links2,
   for (int i = 0; i < links2[1].size(); i++) {
     links2[1][i] = links2[1][i].proj();
   }
-  // std::cout << "step2 matrices" << std::endl;
-  // std::cout << links2[0][0] << std::endl;
-  // std::cout << links2[1][0] << std::endl;
 }
 
 template <class T>
@@ -1825,15 +1692,6 @@ void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
                             x_size * y_size * z_size * t_size};
   std::vector<std::vector<std::tuple<int, int, int>>> indices3 =
       make_indices3();
-  // for (int i = 0; i < 3; i++) {
-  // std::cout << "indices " << i << ":" << std::endl;
-  // for (int j = 0; j < indices3[i].size(); j++) {
-  //   std::cout << "indices full " << std::get<0>(indices3[i][j])
-  //             << std::get<1>(indices3[i][j]) << std::get<2>(indices3[i][j])
-  //             << std::endl;
-  // }
-  // }
-  // std::cout << "initializing vectors" << std::endl;
   std::vector<T> smeared = HYP_initialize_vector(conf[3], alpha1);
   std::vector<std::vector<T>> links2(2);
   std::vector<std::vector<T>> links1;
@@ -1841,18 +1699,10 @@ void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
   std::vector<std::tuple<int, int, int>> deleted_indices;
   std::vector<std::tuple<int, int, int>> delete_indices;
   for (int nu3 = 0; nu3 < 3; nu3++) {
-    std::cout << "before first step" << std::endl;
-    show_mem_use();
     make_step1(links1, conf, indices3[nu3], indices_map3, alpha3);
-    std::cout << "before second step" << std::endl;
-    show_mem_use();
     make_step2(links2, links1, conf, indices_map3, nu3, alpha2);
-    std::cout << "before deleting vectors" << std::endl;
-    show_mem_use();
     delete_indices = indices_to_delete(indices3, deleted_indices, nu3);
     delete_vectors(delete_indices, indices_map3, links1);
-    std::cout << "before third step" << std::endl;
-    show_mem_use();
     smearing_plane_HYP_major(smeared, links2[0], links2[1], steps[3], steps[4],
                              steps[nu3], steps[nu3 + 1], alpha1, 6);
   }
