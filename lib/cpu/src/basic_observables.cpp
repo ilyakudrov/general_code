@@ -724,6 +724,8 @@ double calculate_wilson_loop_offaxis(const std::vector<T> &time_lines, int time,
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
 
+#pragma omp parallel for collapse(4) private(A, link) \
+    firstprivate(direction) reduction(+:result)
   SPACE_ITER_START;
 
   A = time_lines[link.place / 4];
@@ -761,6 +763,8 @@ double calculate_wilson_loop_offaxis_adjoint(
   double result = 0;
   double trace;
 
+#pragma omp parallel for collapse(4) private(A, link) \
+    firstprivate(direction) reduction(+:result)
   SPACE_ITER_START;
 
   A = time_lines[link.place / 4];

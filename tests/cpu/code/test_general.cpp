@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   // conf1.read_float_ml5(conf_full, 0);
   get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
 
-  cout << "MAG functional: " << mag_functional_su3(conf1.array) << endl;
+  // cout << "MAG functional: " << mag_functional_su3(conf1.array) << endl;
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
@@ -107,24 +107,23 @@ int main(int argc, char *argv[]) {
        << endl;
 
   // on-axis wilson loops
-  int T_min = 1, T_max = 8;
-  int R_min = 1, R_max = 10;
+  // int T_min = 1, T_max = 8;
+  // int R_min = 1, R_max = 10;
 
-  start_time = omp_get_wtime();
+  // start_time = omp_get_wtime();
 
-  map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
   // map<tuple<int, int>, double> wilson_loops =
-  //     wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  //     wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "on-axis wilson time: " << search_time << std::endl;
-  std::cout << "wilson_loops adjoint:" << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
-  }
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // std::cout << "on-axis wilson time: " << search_time << std::endl;
+  // std::cout << "wilson_loops adjoint:" << std::endl;
+  // for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+  //   cout << get<0>(it->first) << "," << get<1>(it->first) << "," <<
+  //   it->second
+  //        << endl;
+  // }
 
   // off-axis wilson loops
   std::vector<std::vector<int>> directions;
