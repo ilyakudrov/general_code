@@ -126,33 +126,18 @@ int main(int argc, char *argv[]) {
   // }
 
   // off-axis wilson loops
-  std::vector<std::vector<int>> directions;
-  directions = generate_directions(4);
 
   start_time = omp_get_wtime();
 
-  std::vector<wilson_result> wilson_offaxis_result =
-      wilson_offaxis(conf1.array, directions, 0.9, 4, 1, 4);
+  map<tuple<int, double>, double> wilson_loops =
+      wilson_offaxis_result(conf1.array, 0.9, 4, 1, 4);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "offaxis wilson loop time: " << search_time << std::endl;
 
-  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
-    std::cout << "wilson loop: " << wilson_offaxis_result[i].wilson_loop
-              << " time size: " << wilson_offaxis_result[i].time_size
-              << " space size: " << wilson_offaxis_result[i].space_size
-              << std::endl;
-  }
-
-  wilson_offaxis_reduce(wilson_offaxis_result);
-
-  std::cout << std::endl << "after reduction" << std::endl;
-
-  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
-    std::cout << "wilson loop: " << wilson_offaxis_result[i].wilson_loop
-              << " time size: " << wilson_offaxis_result[i].time_size
-              << " space size: " << wilson_offaxis_result[i].space_size
-              << std::endl;
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
+              << it->second << endl;
   }
 }

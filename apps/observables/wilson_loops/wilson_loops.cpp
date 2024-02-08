@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
   string conf_path;
   string path_wilson;
   string representation;
+  string axis;
   int L_spat, L_time;
   int T_min, T_max, R_min, R_max;
   int bytes_skip = 0;
@@ -47,6 +48,8 @@ int main(int argc, char *argv[]) {
       path_wilson = argv[++i];
     } else if (string(argv[i]) == "-representation") {
       representation = argv[++i];
+    } else if (string(argv[i]) == "-axis") {
+      axis = argv[++i];
     } else if (string(argv[i]) == "-T_min") {
       T_min = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-T_max") {
@@ -71,6 +74,7 @@ int main(int argc, char *argv[]) {
   cout << "L_time " << L_time << endl;
   cout << "path_wilson " << path_wilson << endl;
   cout << "representation " << representation << endl;
+  cout << "axis " << axis << endl;
   cout << "T_min " << T_min << endl;
   cout << "T_max " << T_max << endl;
   cout << "R_min " << R_min << endl;
@@ -92,29 +96,52 @@ int main(int argc, char *argv[]) {
 
   stream_wilson << "time_size,space_size,wilson_loop" << endl;
 
-  vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
-
-  conf.array.clear();
-  conf.array.shrink_to_fit();
+  vector<vector<MATRIX>> conf_separated;
 
   start_time = omp_get_wtime();
 
-  map<tuple<int, int>, double> wilson_loops;
+  map<tuple<int, int>, double> wilson_loops_onaxis;
+  map<tuple<int, double>, double> wilson_loops_offaxis;
 
-  if (representation.compare("fundamental") == 0) {
-    cout << "fundamental" << endl;
-    wilson_loops = wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
-  } else if (representation.compare("adjoint") == 0) {
-    cout << "adjoint" << endl;
-    wilson_loops =
-        wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  if (axis.compare("on-axis") == 0) {
+    cout << "on-axis" << endl;
+    conf_separated = separate_wilson(conf.array);
+    if (representation.compare("fundamental") == 0) {
+      cout << "fundamental" << endl;
+      wilson_loops_onaxis =
+          wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+    } else if (representation.compare("adjoint") == 0) {
+      cout << "adjoint" << endl;
+      wilson_loops_onaxis =
+          wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+    } else {
+      cout << "wrong representation" << endl;
+    }
+    for (auto it = wilson_loops_onaxis.begin(); it != wilson_loops_onaxis.end();
+         it++) {
+      stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
+                    << it->second << endl;
+    }
+  } else if (axis.compare("off-axis") == 0) {
+    cout << "off-axis" << endl;
+    if (representation.compare("fundamental") == 0) {
+      cout << "fundamental" << endl;
+      wilson_loops_offaxis = wilson_offaxis_result(conf.array, R_min - 0.1,
+                                                   R_max + 0.1, T_min, T_max);
+    } else if (representation.compare("adjoint") == 0) {
+      cout << "adjoint" << endl;
+      wilson_loops_offaxis = wilson_offaxis_adjoint_result(
+          conf.array, R_min - 0.1, R_max + 0.1, T_min, T_max);
+    } else {
+      cout << "wrong representation" << endl;
+    }
+    for (auto it = wilson_loops_offaxis.begin();
+         it != wilson_loops_offaxis.end(); it++) {
+      stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
+                    << it->second << endl;
+    }
   } else {
-    cout << "wrong representation" << endl;
-  }
-
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
-                  << it->second << endl;
+    cout << "wrong axis" << endl;
   }
 
   end_time = omp_get_wtime();

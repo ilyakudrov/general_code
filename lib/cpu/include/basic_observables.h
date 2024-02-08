@@ -52,10 +52,20 @@ wilson_offaxis(const std::vector<T> &array,
                double r_max, int time_min, int time_max);
 
 template <class T>
+std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<T> &array, double r_min, double r_max,
+                      int time_min, int time_max);
+
+template <class T>
 std::vector<wilson_result>
 wilson_offaxis_adjoint(const std::vector<T> &array,
                        const std::vector<std::vector<int>> directions,
                        double r_min, double r_max, int time_min, int time_max);
+
+template <class T>
+std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<T> &array, double r_min,
+                              double r_max, int time_min, int time_max);
 
 std::vector<std::vector<int>>
 generate_permutations(const std::vector<int> &direction);

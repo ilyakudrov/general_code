@@ -427,7 +427,6 @@ wilson_offaxis(const std::vector<T> &array,
           // claculate wilson loop in this direction for different
           // time sizes
           for (int time = time_min; time <= time_max; time++) {
-
             wilson_tmp[length_multiplier - round(r_min / length_initial + 0.5)]
                       [time - time_min]
                           .push_back(calculate_wilson_loop_offaxis(
@@ -470,6 +469,23 @@ wilson_offaxis(const std::vector<T> &array,
     }
   }
   return wilson;
+}
+
+template <class T>
+std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<T> &array, double r_min, double r_max,
+                      int time_min, int time_max) {
+  std::vector<std::vector<int>> directions = generate_directions(4);
+  std::vector<wilson_result> wilson_offaxis_result = wilson_offaxis(
+      array, directions, r_min - 0.1, r_max + 0.1, time_min, time_max);
+  wilson_offaxis_reduce(wilson_offaxis_result);
+  std::map<std::tuple<int, double>, double> result;
+  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
+    result[std::tuple<int, double>(wilson_offaxis_result[i].time_size,
+                                   wilson_offaxis_result[i].space_size)] =
+        wilson_offaxis_result[i].wilson_loop;
+  }
+  return result;
 }
 
 template <class T>
@@ -628,6 +644,23 @@ wilson_offaxis_adjoint(const std::vector<T> &array,
     }
   }
   return wilson;
+}
+
+template <class T>
+std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<T> &array, double r_min,
+                              double r_max, int time_min, int time_max) {
+  std::vector<std::vector<int>> directions = generate_directions(4);
+  std::vector<wilson_result> wilson_offaxis_result = wilson_offaxis_adjoint(
+      array, directions, r_min - 0.1, r_max + 0.1, time_min, time_max);
+  wilson_offaxis_reduce(wilson_offaxis_result);
+  std::map<std::tuple<int, double>, double> result;
+  for (int i = 0; i < wilson_offaxis_result.size(); i++) {
+    result[std::tuple<int, double>(wilson_offaxis_result[i].time_size,
+                                   wilson_offaxis_result[i].space_size)] =
+        wilson_offaxis_result[i].wilson_loop;
+  }
+  return result;
 }
 
 // generate all possible permutations of the  direction std::vector
@@ -1736,10 +1769,16 @@ template std::vector<wilson_result>
 wilson_offaxis(const std::vector<su2> &array,
                const std::vector<std::vector<int>> directions, double r_min,
                double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<su2> &array, double r_min, double r_max,
+                      int time_min, int time_max);
 template std::vector<wilson_result>
 wilson_offaxis_adjoint(const std::vector<su2> &array,
                        const std::vector<std::vector<int>> directions,
                        double r_min, double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<su2> &array, double r_min,
+                              double r_max, int time_min, int time_max);
 template double
 calculate_wilson_loop_offaxis(const std::vector<su2> &time_lines, int time,
                               const std::vector<su2> &space_lines,
@@ -1831,11 +1870,16 @@ template std::vector<wilson_result>
 wilson_offaxis(const std::vector<abelian> &array,
                const std::vector<std::vector<int>> directions, double r_min,
                double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<abelian> &array, double r_min,
+                      double r_max, int time_min, int time_max);
 template std::vector<wilson_result>
 wilson_offaxis_adjoint(const std::vector<abelian> &array,
                        const std::vector<std::vector<int>> directions,
                        double r_min, double r_max, int time_min, int time_max);
-
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<abelian> &array, double r_min,
+                              double r_max, int time_min, int time_max);
 template double
 calculate_wilson_loop_offaxis(const std::vector<abelian> &time_lines, int time,
                               const std::vector<abelian> &space_lines,
@@ -1929,10 +1973,16 @@ template std::vector<wilson_result>
 wilson_offaxis(const std::vector<su3> &array,
                const std::vector<std::vector<int>> directions, double r_min,
                double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<su3> &array, double r_min, double r_max,
+                      int time_min, int time_max);
 template std::vector<wilson_result>
 wilson_offaxis_adjoint(const std::vector<su3> &array,
                        const std::vector<std::vector<int>> directions,
                        double r_min, double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<su3> &array, double r_min,
+                              double r_max, int time_min, int time_max);
 template double
 calculate_wilson_loop_offaxis(const std::vector<su3> &time_lines, int time,
                               const std::vector<su3> &space_lines,
@@ -2018,10 +2068,17 @@ template std::vector<wilson_result>
 wilson_offaxis(const std::vector<su3_abelian> &array,
                const std::vector<std::vector<int>> directions, double r_min,
                double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<su3_abelian> &array, double r_min,
+                      double r_max, int time_min, int time_max);
 template std::vector<wilson_result>
 wilson_offaxis_adjoint(const std::vector<su3_abelian> &array,
                        const std::vector<std::vector<int>> directions,
                        double r_min, double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<su3_abelian> &array,
+                              double r_min, double r_max, int time_min,
+                              int time_max);
 template double
 calculate_wilson_loop_offaxis(const std::vector<su3_abelian> &time_lines,
                               int time,
