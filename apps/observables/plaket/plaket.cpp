@@ -73,17 +73,20 @@ int main(int argc, char *argv[]) {
 
   stream << "plaket,plaket_space,plaket_time" << endl;
 
-  vector<vector<MATRIX>> conf_separated;
-  conf.array.clear();
-  conf.array.shrink_to_fit();
+  // vector<vector<MATRIX>> conf_separated;
+  // conf.array.clear();
+  // conf.array.shrink_to_fit();
 
   start_time = omp_get_wtime();
 
-  double plaket = plaket_parallel(conf_separated);
-  double plaket_space = plaket_space_parallel(conf_separated);
-  double plaket_time = plaket_time_parallel(conf_separated);
+  // double plaket = plaket_parallel(conf_separated);
+  // double plaket_space = plaket_space_parallel(conf_separated);
+  // double plaket_time = plaket_time_parallel(conf_separated);
+  double plaket1 = plaket(conf.array);
+  double plaket_space1 = plaket_space(conf.array);
+  double plaket_time1 = plaket_time(conf.array);
 
-  stream << plaket << "," << plaket_space << "," << plaket_time << endl;
+  stream << plaket1 << "," << plaket_space1 << "," << plaket_time1 << endl;
 
   end_time = omp_get_wtime();
   observables_time = end_time - start_time;
