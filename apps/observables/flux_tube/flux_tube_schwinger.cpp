@@ -353,15 +353,8 @@ int main(int argc, char *argv[]) {
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   cout << "flux_schwinger all: " << search_time << endl;
-
-  // vector<vector<MATRIX_PLAKET>> separated_plaket =
-  //     separate_wilson(conf_plaket.array);
-  // conf_plaket.array.erase(conf_plaket.array.begin(),
-  // conf_plaket.array.end());
   vector<vector<MATRIX_WILSON>> separated_wilson =
       separate_wilson(conf_wilson.array);
-  // conf_wilson.array.erase(conf_wilson.array.begin(),
-  // conf_wilson.array.end());
 
   map<tuple<int, int>, double> wilson_loops =
       wilson_parallel(separated_wilson, R_min, R_max, T_min, T_max);

@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   string conf_format1 = "ildg";
   string conf_format2 = "ildg";
   int bytes_skip = 0;
-  bool convert = 0;
+  bool convert = 1;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
   // vector<float> conf_full = read_full_ml5(conf_path1, 1);

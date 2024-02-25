@@ -50,6 +50,8 @@ flux_schwinger_electric_longitudinal_tr(
     std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,
     int T_min, int T_max, int R_min, int R_max, int d_ouside);
 template <class T>
+double schwinger_electric_long_tr_even_test(std::vector<T> &conf, int t, int r);
+template <class T>
 std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_transversal_l(
     std::vector<T> &array, std::vector<std::vector<T>> &schwinger_lines_short,

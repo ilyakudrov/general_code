@@ -308,6 +308,8 @@ calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
                               std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
                     initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 
+#define __PARALLEL_COLLAPSE__ 4
+
 template <class T>
 std::map<int, double> wilson_plaket_schwinger_longitudinal_l(
     const std::vector<T> &wilson_loops,
@@ -324,9 +326,9 @@ std::map<int, double> wilson_plaket_schwinger_longitudinal_l(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A, S, link, d, place)          \
-    firstprivate(d_ouside) reduction(vec_double_plus                           \
-                                     : correlator)
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A, S, link, d, place) firstprivate(d_ouside) reduction(vec_double_plus  \
+                                                              : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -447,9 +449,9 @@ std::map<int, double> wilson_plaket_schwinger_longitudinal_tr(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A, S, link, d, place)          \
-    firstprivate(d_ouside) reduction(vec_double_plus                           \
-                                     : correlator)
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A, S, link, d, place) firstprivate(d_ouside) reduction(vec_double_plus  \
+                                                              : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -545,6 +547,57 @@ flux_schwinger_electric_longitudinal_tr(
 }
 
 template <class T>
+double schwinger_electric_long_tr_even_test(std::vector<T> &conf, int t,
+                                            int r) {
+  T A;
+  link1 link(x_size, y_size, z_size, t_size);
+  link.go_update(0, 0, 0, 0);
+  T wilson_loop;
+  for (int i = 0; i < t / 2; i++) {
+    wilson_loop = wilson_loop * conf[link.place + 3];
+    link.move(3, 1);
+  }
+  for (int i = 0; i < r; i++) {
+    wilson_loop = wilson_loop * conf[link.place];
+    link.move(0, 1);
+  }
+  for (int i = 0; i < t; i++) {
+    link.move(3, -1);
+    wilson_loop = wilson_loop ^ conf[link.place + 3];
+  }
+  for (int i = 0; i < r; i++) {
+    link.move(0, -1);
+    wilson_loop = wilson_loop ^ conf[link.place];
+  }
+  for (int i = 0; i < t / 2; i++) {
+    wilson_loop = wilson_loop * conf[link.place + 3];
+    link.move(3, 1);
+  }
+  std::cout << "wilson test single:" << wilson_loop << std::endl;
+  A = wilson_loop;
+  for (int i = 0; i < r / 2 - 1; i++) {
+    A = A * conf[link.place];
+    link.move(0, 1);
+  }
+  std::cout << "W * S test single:" << wilson_loop << std::endl;
+  T plaket;
+  plaket = plaket * conf[link.place];
+  link.move(0, 1);
+  plaket = plaket * conf[link.place + 3];
+  link.move(3, 1);
+  link.move(0, -1);
+  plaket = plaket ^ conf[link.place];
+  link.move(3, -1);
+  plaket = plaket ^ conf[link.place + 3];
+  A = A * plaket;
+  for (int i = 0; i < r / 2 - 1; i++) {
+    link.move(0, -1);
+    A = A ^ conf[link.place];
+  }
+  return A.tr();
+}
+
+template <class T>
 std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_even(
     std::vector<T> &wilson_loops, std::vector<T> &wilson_loops_opposite,
     const std::vector<T> &plaket_left, const std::vector<T> &plaket_right,
@@ -561,8 +614,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_even(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A1, A2, S1, S2, link, d,       \
-                                             place) firstprivate(d_max)        \
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
     reduction(vec_double_plus                                                  \
               : correlator)
   SPACE_ITER_START
@@ -609,7 +662,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_even(
         for (int d = -d_max; d < 0; d++) {
           S2 = schwinger_lines[abs(d) - 1][link.place / 4 * 3 + mu];
           A2 = A1 ^ S2;
-          A2 = A2 ^ plaket_right[link.place / 4 * 3 + dir];
+          A2 = A2 * plaket_right[link.place / 4 * 3 + dir];
           A2 = A2 * S2;
           correlator[d + d_max] += A2.multiply_conj_tr(S1);
           link.move(mu, 1);
@@ -620,7 +673,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_even(
           S2 = schwinger_lines[d - 1][link.place / 4 * 3 + mu];
           link.move(mu, d);
           A2 = A1 * S2;
-          A2 = A2 ^ plaket_right[link.place / 4 * 3 + dir];
+          A2 = A2 * plaket_right[link.place / 4 * 3 + dir];
           A2 = A2 ^ S2;
           correlator[d + d_max] += A2.multiply_conj_tr(S1);
           link.move(mu, -d);
@@ -655,8 +708,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_odd(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A1, A2, S1, S2, link, d,       \
-                                             place) firstprivate(d_max)        \
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
     reduction(vec_double_plus                                                  \
               : correlator)
   SPACE_ITER_START
@@ -664,7 +717,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_odd(
   for (int dir = 0; dir < 3; dir++) {
     link.go_update(x, y, z, t);
     W = wilson_loops[link.place / 4 * 3 + dir];
-    S1 = schwinger_lines[r / 2 - 2][link.place / 4 * 3 + dir];
+    S1 = schwinger_lines[r / 2 - 1][link.place / 4 * 3 + dir];
     A1 = W * S1;
     link.move(dir, r / 2);
     for (int mu = 0; mu < 3; mu++) {
@@ -708,6 +761,8 @@ flux_schwinger_electric_transversal_l(
     int T_min, int T_max, int R_min, int R_max, int d_max) {
 
   std::vector<T> plaket_time_left = calculate_plaket_schwinger_time_left(array);
+  // std::vector<T> plaket_time_left = calculate_plaket_time_left_up(array);
+  // std::vector<T> plaket_time_left = calculate_plaket_time_left_down(array);
 
   std::vector<T> plaket_time_right =
       calculate_plaket_schwinger_time_right(array);
@@ -760,8 +815,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_even(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A1, A2, S1, S2, link, d,       \
-                                             place) firstprivate(d_max)        \
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
     reduction(vec_double_plus                                                  \
               : correlator)
   SPACE_ITER_START
@@ -823,8 +878,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_odd(
   int d;
   int place;
 
-#pragma omp parallel for collapse(4) private(W, A1, A2, S1, S2, link, d,       \
-                                             place) firstprivate(d_max)        \
+#pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
+    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
     reduction(vec_double_plus                                                  \
               : correlator)
   SPACE_ITER_START
@@ -832,7 +887,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_odd(
   for (int dir = 0; dir < 3; dir++) {
     link.go_update(x, y, z, t);
     W = wilson_loops[link.place / 4 * 3 + dir];
-    S1 = schwinger_lines[r / 2 - 2][link.place / 4 * 3 + dir];
+    S1 = schwinger_lines[r / 2 - 1][link.place / 4 * 3 + dir];
     A1 = W * S1;
     link.move(dir, r / 2);
     for (int mu = 0; mu < 3; mu++) {
@@ -871,7 +926,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_odd(
         for (int d = -d_max; d < 0; d++) {
           S2 = schwinger_lines[abs(d) - 1][link.place / 4 * 3 + mu];
           A2 = A1 ^ S2;
-          A2 = A2 ^ plaket[link.place / 4 * 3 + dir];
+          A2 = A2 * plaket[link.place / 4 * 3 + dir];
           A2 = A2 * S2;
           correlator[d + d_max] += A2.multiply_conj_tr(S1);
           link.move(mu, 1);
@@ -882,7 +937,7 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_odd(
           S2 = schwinger_lines[d - 1][link.place / 4 * 3 + mu];
           link.move(mu, d);
           A2 = A1 * S2;
-          A2 = A2 ^ plaket[link.place / 4 * 3 + dir];
+          A2 = A2 * plaket[link.place / 4 * 3 + dir];
           A2 = A2 ^ S2;
           correlator[d + d_max] += A2.multiply_conj_tr(S1);
           link.move(mu, -d);
@@ -2132,6 +2187,8 @@ flux_schwinger_electric_longitudinal_tr(
     std::vector<su2> &array,
     std::vector<std::vector<su2>> &schwinger_lines_short, int T_min, int T_max,
     int R_min, int R_max, int d_ouside);
+template double schwinger_electric_long_tr_even_test(std::vector<su2> &conf,
+                                                     int t, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_transversal_l(
     std::vector<su2> &array,
@@ -2258,6 +2315,8 @@ flux_schwinger_electric_longitudinal_tr(
     std::vector<abelian> &array,
     std::vector<std::vector<abelian>> &schwinger_lines_short, int T_min,
     int T_max, int R_min, int R_max, int d_ouside);
+template double schwinger_electric_long_tr_even_test(std::vector<abelian> &conf,
+                                                     int t, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_transversal_l(
     std::vector<abelian> &array,
@@ -2387,6 +2446,8 @@ flux_schwinger_electric_longitudinal_tr(
     std::vector<su3> &array,
     std::vector<std::vector<su3>> &schwinger_lines_short, int T_min, int T_max,
     int R_min, int R_max, int d_ouside);
+template double schwinger_electric_long_tr_even_test(std::vector<su3> &conf,
+                                                     int t, int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_transversal_l(
     std::vector<su3> &array,
@@ -2513,6 +2574,9 @@ flux_schwinger_electric_longitudinal_tr(
     std::vector<su3_abelian> &array,
     std::vector<std::vector<su3_abelian>> &schwinger_lines_short, int T_min,
     int T_max, int R_min, int R_max, int d_ouside);
+template double
+schwinger_electric_long_tr_even_test(std::vector<su3_abelian> &conf, int t,
+                                     int r);
 template std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_transversal_l(
     std::vector<su3_abelian> &array,
