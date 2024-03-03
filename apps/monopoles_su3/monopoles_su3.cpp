@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <tuple>
 
 using namespace std;
 
@@ -99,7 +100,8 @@ int main(int argc, char **argv) {
   ofstream output_stream_monopoles(path_output_monopoles);
 
   output_stream_clusters_unwrapped << "color,length,number" << endl;
-  output_stream_clusters_wrapped << "color,length,number,direction" << endl;
+  output_stream_clusters_wrapped
+      << "color,length,x0_wrap,x1_wrap,x2_wrap,x3_wrap" << endl;
   output_stream_windings << "color,winding_number,cluster_number,direction"
                          << endl;
   output_stream_monopoles << "color,asymmetry" << endl;
@@ -113,9 +115,7 @@ int main(int argc, char **argv) {
     int length;
 
     map<int, int> lengths_unwrapped;
-    map<int, int> lengths_wrapped_time;
-    map<int, int> lengths_wrapped_space;
-    map<int, int> lengths_wrapped_both;
+    vector<tuple<int, int, int, int, int>> lengths_wrapped;
     map<int, int> space_windings;
     map<int, int> time_windings;
     vector<int> lengths_mu;
@@ -140,35 +140,11 @@ int main(int argc, char **argv) {
       if (lengths_mu[0] == 0 && lengths_mu[1] == 0 && lengths_mu[2] == 0 &&
           lengths_mu[3] == 0) {
         lengths_unwrapped[length]++;
-      }
-
-      else {
-
-        for (int mu = 0; mu < 3; mu++) {
-          if (lengths_mu[mu] != 0) {
-            wrappings_space_tmp += abs(lengths_mu[mu]) / lattice_sizes[mu];
-          }
-        }
-
-        if (lengths_mu[3] != 0) {
-          wrappings_time_tmp += abs(lengths_mu[3]) / lattice_sizes[3];
-        }
-
-        if (wrappings_space_tmp != 0) {
-          space_windings[wrappings_space_tmp]++;
-        }
-
-        if (wrappings_time_tmp != 0) {
-          time_windings[wrappings_time_tmp]++;
-        }
-
-        if (wrappings_space_tmp != 0 && wrappings_time_tmp != 0) {
-          lengths_wrapped_both[length]++;
-        } else if (wrappings_space_tmp != 0) {
-          lengths_wrapped_space[length]++;
-        } else if (wrappings_time_tmp != 0) {
-          lengths_wrapped_time[length]++;
-        }
+      } else {
+        lengths_wrapped.push_back(tuple<int, int, int, int, int>(
+            length, lengths_mu[0] / lattice_sizes[0],
+            lengths_mu[1] / lattice_sizes[1], lengths_mu[2] / lattice_sizes[2],
+            lengths_mu[3] / lattice_sizes[3]));
       }
     }
 
@@ -178,20 +154,12 @@ int main(int argc, char **argv) {
                                        << it->second << endl;
     }
 
-    for (auto it = lengths_wrapped_time.cbegin();
-         it != lengths_wrapped_time.cend(); ++it) {
-      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
-                                     << it->second << ",time" << endl;
-    }
-    for (auto it = lengths_wrapped_space.cbegin();
-         it != lengths_wrapped_space.cend(); ++it) {
-      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
-                                     << it->second << ",space" << endl;
-    }
-    for (auto it = lengths_wrapped_both.cbegin();
-         it != lengths_wrapped_both.cend(); ++it) {
-      output_stream_clusters_wrapped << color + 1 << "," << it->first << ","
-                                     << it->second << ",both" << endl;
+    for (int i = 0; i < lengths_wrapped.size(); i++) {
+      output_stream_clusters_wrapped
+          << color + 1 << "," << get<0>(lengths_wrapped[i]) << ","
+          << get<1>(lengths_wrapped[i]) << "," << get<2>(lengths_wrapped[i])
+          << "," << get<3>(lengths_wrapped[i]) << ","
+          << get<4>(lengths_wrapped[i]) << "," << endl;
     }
 
     for (auto it = time_windings.begin(); it != time_windings.end(); ++it) {
