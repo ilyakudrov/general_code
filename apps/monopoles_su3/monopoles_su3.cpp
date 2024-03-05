@@ -3,10 +3,12 @@
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
 
+#include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <tuple>
 
 using namespace std;
@@ -101,7 +103,8 @@ int main(int argc, char **argv) {
 
   output_stream_clusters_unwrapped << "color,length,number" << endl;
   output_stream_clusters_wrapped
-      << "color,length,x0_wrap,x1_wrap,x2_wrap,x3_wrap" << endl;
+      << "color,length,x0_wrap,x1_wrap,x2_wrap,x3_wrap,percolating_group"
+      << endl;
   output_stream_windings << "color,winding_number,cluster_number,direction"
                          << endl;
   output_stream_monopoles << "color,asymmetry" << endl;
@@ -115,7 +118,8 @@ int main(int argc, char **argv) {
     int length;
 
     map<int, int> lengths_unwrapped;
-    vector<tuple<int, int, int, int, int>> lengths_wrapped;
+    vector<vector<int>> wrappings;
+    vector<int> wrapped_lengths;
     map<int, int> space_windings;
     map<int, int> time_windings;
     vector<int> lengths_mu;
@@ -141,11 +145,35 @@ int main(int argc, char **argv) {
           lengths_mu[3] == 0) {
         lengths_unwrapped[length]++;
       } else {
-        lengths_wrapped.push_back(tuple<int, int, int, int, int>(
-            length, lengths_mu[0] / lattice_sizes[0],
-            lengths_mu[1] / lattice_sizes[1], lengths_mu[2] / lattice_sizes[2],
-            lengths_mu[3] / lattice_sizes[3]));
+        wrappings.push_back(vector<int>({lengths_mu[0] / lattice_sizes[0],
+                                         lengths_mu[1] / lattice_sizes[1],
+                                         lengths_mu[2] / lattice_sizes[2],
+                                         lengths_mu[3] / lattice_sizes[3]}));
+        wrapped_lengths.push_back(length);
       }
+    }
+
+    // sort wrapped_lengths and wrappings accordingly
+    std::vector<std::size_t> permutations(wrapped_lengths.size());
+    std::iota(permutations.begin(), permutations.end(), 0);
+    std::sort(permutations.begin(), permutations.end(),
+              [&](std::size_t i, std::size_t j) {
+                return wrapped_lengths[i] > wrapped_lengths[j];
+              });
+    std::vector<int> sorted_lengths(permutations.size());
+    std::transform(permutations.begin(), permutations.end(),
+                   sorted_lengths.begin(),
+                   [&](std::size_t i) { return wrapped_lengths[i]; });
+    wrapped_lengths = sorted_lengths;
+    std::vector<std::vector<int>> sorted_wrappings(permutations.size(),
+                                                   std::vector<int>());
+    std::transform(permutations.begin(), permutations.end(),
+                   sorted_wrappings.begin(),
+                   [&](std::size_t i) { return wrappings[i]; });
+    wrappings = sorted_wrappings;
+    vector<int> positions_percolating;
+    if (wrappings.size() > 1) {
+      positions_percolating = group_percolating(wrappings);
     }
 
     for (auto it = lengths_unwrapped.cbegin(); it != lengths_unwrapped.cend();
@@ -154,12 +182,20 @@ int main(int argc, char **argv) {
                                        << it->second << endl;
     }
 
-    for (int i = 0; i < lengths_wrapped.size(); i++) {
-      output_stream_clusters_wrapped
-          << color + 1 << "," << get<0>(lengths_wrapped[i]) << ","
-          << get<1>(lengths_wrapped[i]) << "," << get<2>(lengths_wrapped[i])
-          << "," << get<3>(lengths_wrapped[i]) << ","
-          << get<4>(lengths_wrapped[i]) << "," << endl;
+    int percolating_group = 1;
+    for (int i = 0; i < wrapped_lengths.size(); i++) {
+      if (std::find(positions_percolating.begin(), positions_percolating.end(),
+                    i) != positions_percolating.end()) {
+        output_stream_clusters_wrapped
+            << color + 1 << "," << wrapped_lengths[i] << "," << wrappings[i][0]
+            << "," << wrappings[i][1] << "," << wrappings[i][2] << ","
+            << wrappings[i][3] << ",percolating" << endl;
+      } else {
+        output_stream_clusters_wrapped
+            << color + 1 << "," << wrapped_lengths[i] << "," << wrappings[i][0]
+            << "," << wrappings[i][1] << "," << wrappings[i][2] << ","
+            << wrappings[i][3] << ",non-percolating" << endl;
+      }
     }
 
     for (auto it = time_windings.begin(); it != time_windings.end(); ++it) {

@@ -80,3 +80,9 @@ int site_number(loop *loop);
 
 void site_number_recurrent(loop *loop, int &link_number,
                            std::unordered_map<int, int> &loop_sites);
+
+bool increment_position(std::vector<int> &positions, int max_position);
+
+void iterate_sum_order(std::vector<std::vector<int>> &wrappings, int sum_order);
+
+std::vector<int> group_percolating(std::vector<std::vector<int>> &wrappings);

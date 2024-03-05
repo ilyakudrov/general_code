@@ -1,16 +1,16 @@
 #!/bin/bash
-path_conf="../../../tests/confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_4000/copies=16/0.1/conf_gaugefixed_01001.lime"
-conf_format=ildg
+path_conf="../../../tests/confs/MAG/su3/gluodynamics/24^4/beta6.0/steps_500/copies=4/conf_gaugefixed_1486"
+conf_format=double_qc2dstag
 convert=1
 bytes_skip=0
-path_output_clusters_unwrapped="./result/clusters_unwrapped_01001"
-path_output_clusters_wrapped="./result/clusters_wrapped_01001"
-path_output_windings="./result/windings_01001"
-path_output_monopoles="./result/monopoles_01001"
-x_size=16
-y_size=16
-z_size=16
-t_size=16
+path_output_clusters_unwrapped="./result/clusters_unwrapped_1486"
+path_output_clusters_wrapped="./result/clusters_wrapped_1486"
+path_output_windings="./result/windings_1486"
+path_output_monopoles="./result/monopoles_1486"
+x_size=24
+y_size=24
+z_size=24
+t_size=24
 
 parameters="-path_conf ${path_conf} -conf_format ${conf_format} -path_output_clusters_unwrapped ${path_output_clusters_unwrapped}\
     -path_output_clusters_wrapped ${path_output_clusters_wrapped} -path_output_windings ${path_output_windings} -path_output_monopoles ${path_output_monopoles} \

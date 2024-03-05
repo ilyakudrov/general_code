@@ -1,6 +1,9 @@
 #include "../include/monopoles.h"
+
+#include <algorithm>
 #include <cmath>
 #include <link.h>
+#include <numeric>
 
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
@@ -728,9 +731,57 @@ void site_number_recurrent(loop *loop, int &link_number,
   }
 }
 
-// bool if_cluster_closed(loop *node) {
+bool check_wrappings_sum(std::vector<std::vector<int>> &wrappings,
+                         std::vector<int> &positions) {
+  std::vector<int> result = {0, 0, 0, 0};
+  for (int i = 0; i < positions.size(); i++) {
+    std::transform(result.begin(), result.end(),
+                   wrappings[positions[i]].begin(), result.begin(),
+                   std::plus<int>());
+  }
+  return std::all_of(result.begin(), result.end(),
+                     [](int i) { return i == 0; });
+}
 
-// }
+bool increment_position(std::vector<int> &positions, int max_position) {
+  if (positions[positions.size() - 1] < max_position) {
+    positions[positions.size() - 1]++;
+    return true;
+  } else {
+    for (int i = positions.size() - 2; i > 0; i--) {
+      if (positions[i + 1] - positions[i] > 2) {
+        positions[i]++;
+        for (int j = i + 1; j < positions.size(); j++) {
+          positions[j] = positions[i] + j - i;
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool iterate_sum_order(std::vector<std::vector<int>> &wrappings,
+                       std::vector<int> &positions) {
+  do {
+    if (check_wrappings_sum(wrappings, positions)) {
+      return true;
+    }
+  } while (increment_position(positions, wrappings.size() - 1));
+  return false;
+}
+
+std::vector<int> group_percolating(std::vector<std::vector<int>> &wrappings) {
+  std::vector<int> percolating_positions;
+  for (int sum_order = 2; sum_order <= wrappings.size(); sum_order++) {
+    percolating_positions = std::vector<int>(sum_order);
+    std::iota(percolating_positions.begin(), percolating_positions.end(), 0);
+    if (iterate_sum_order(wrappings, percolating_positions)) {
+      return percolating_positions;
+    }
+  }
+  return std::vector<int>();
+}
 
 template int find_current(link1 &link, std::vector<double> &J);
 template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
