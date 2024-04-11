@@ -545,6 +545,17 @@ void project_su2(complex_t v[][2]) {
 }
 
 su3 su3::proj() {
+  su3 A;
+  A = (3. / 2) * *this - 0.5 * *this * this->conj() * *this;
+  A = (complex_t(1, 0) - (1. / 3) * (A.determinant() - complex_t(1, 0))) * A;
+  for (int i = 0; i < 5; i++) {
+    A = (3. / 2) * A - 0.5 * A * A.conj() * A;
+    A = (complex_t(1, 0) - (1. / 3) * (A.determinant() - complex_t(1, 0))) * A;
+  }
+  return A;
+}
+
+su3 su3::proj1() {
 
   su3 A;
 

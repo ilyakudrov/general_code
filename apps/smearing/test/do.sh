@@ -1,7 +1,7 @@
 #!/bin/bash
 conf_format_wilson="ildg"
-conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt20/conf.0501"
-# conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
+# conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt20/conf.0501"
+conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
 bytes_skip_wilson=0
 wilson_type="su3"
 conf_format_plaket="ildg"
@@ -14,25 +14,25 @@ convert_plaket=0
 HYP_alpha1=1
 HYP_alpha2=1
 HYP_alpha3=0.5
-APE_alpha=0.5
+APE_alpha=0.2
 APE_enabled=1
 HYP_enabled=1
 APE_steps=10
-calculation_step_APE=10
-calculation_APE_start=0
+calculation_step_APE=1
+calculation_APE_start=1
 HYP_steps=1
-L_spat=64
-L_time=20
+L_spat=16
+L_time=16
 path_wilson=./result/wilson_loops
 path_flux=./result/flux_tube
 wilson_enabled=1
 flux_enabled=0
 T_min=1
-T_max=10
+T_max=4
 R_min=1
-R_max=32
-save_conf=1
-conf_path_output="/home/ilya/soft/lattice/general_code/apps/smearing/test/result/smeared_0501"
+R_max=4
+save_conf=0
+conf_path_output="/home/ilya/soft/lattice/general_code/apps/smearing/test/result/smeared_01001"
 parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson} -bytes_skip_wilson ${bytes_skip_wilson} -convert_wilson ${convert_wilson}\
     -conf_format_plaket ${conf_format_plaket} -conf_path_plaket ${conf_path_plaket} -bytes_skip_plaket ${bytes_skip_plaket} -convert_plaket ${convert_plaket}\
     -HYP_alpha1 ${HYP_alpha1} -HYP_alpha2 ${HYP_alpha2} -HYP_alpha3 ${HYP_alpha3}\

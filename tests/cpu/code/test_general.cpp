@@ -73,7 +73,58 @@ int main(int argc, char *argv[]) {
   // conf1.read_float_ml5(conf_full, 0);
   get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
 
-  // cout << "MAG functional: " << mag_functional_su3(conf1.array) << endl;
+  link1 link(x_size, y_size, z_size, t_size);
+  double a = 0.2;
+  su3 A, B;
+  // staple in dir 1
+  A = conf1.array[link.place + 1];
+  link.move(1, 1);
+  A = A * conf1.array[link.place];
+  link.move(1, -1);
+  link.move(0, 1);
+  B = A ^ conf1.array[link.place + 1];
+  link.move(0, -1);
+  link.move(1, -1);
+  A = conf1.array[link.place + 1].conj();
+  A = A * conf1.array[link.place];
+  link.move(1, 1);
+  B = B + A * conf1.array[link.place + 1];
+  link.move(0, -1);
+  link.move(1, -1);
+  // staple in dir 2
+  A = conf1.array[link.place + 2];
+  link.move(2, 1);
+  A = A * conf1.array[link.place];
+  link.move(2, -1);
+  link.move(0, 1);
+  B = B + A ^ conf1.array[link.place + 2];
+  link.move(0, -1);
+  link.move(2, -1);
+  A = conf1.array[link.place + 2].conj();
+  A = A * conf1.array[link.place];
+  link.move(2, 1);
+  B = B + A * conf1.array[link.place + 2];
+  link.move(0, -1);
+  link.move(2, -1);
+  B = (1 - a) * conf1.array[link.place] + (a / 4) * B;
+
+  cout << B << endl;
+  cout << B.determinant() << endl << endl;
+  cout << B.proj1() << endl;
+  cout << B.proj1().determinant() << endl << endl;
+  cout << B.proj() << endl;
+  cout << B.proj().determinant() << endl << endl;
+  cout << B.proj().proj() << endl;
+  cout << B.proj().proj().determinant() << endl << endl;
+  cout << B.proj().proj().proj() << endl;
+  cout << B.proj().proj().proj().determinant() << endl << endl;
+  cout << B.proj().proj().proj().proj() << endl;
+  cout << B.proj().proj().proj().proj().determinant() << endl << endl;
+  su3 C1 = B.proj1();
+  su3 C2 = B.proj().proj().proj().proj();
+  cout << (C1 ^ C1) << endl;
+  cout << (C2 ^ C2) << endl;
+  cout << (C1 - C2) << endl;
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();

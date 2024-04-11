@@ -171,6 +171,7 @@ public:
 
   su3 mult_by_imag(double x);
 
+  su3 proj1();
   // gets projection onto su3 group
   su3 proj();
 
