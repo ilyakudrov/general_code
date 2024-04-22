@@ -182,6 +182,16 @@ template <class T> T link1::polyakov_loop(const std::vector<T> &array) {
 }
 
 template <class T>
+T link1::polyakov_loop(const std::vector<std::vector<T>> &array) {
+  T A;
+  for (int i = 0; i < lattice_size[3]; i++) {
+    A = A * array[direction][place / 4];
+    move(direction, 1);
+  }
+  return A;
+}
+
+template <class T>
 T link1::wilson_loop(const std::vector<T> &array, int r, int t) {
   int dir = direction;
   T A;
@@ -514,6 +524,7 @@ template su2 link1::plaket_left_up(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_right_down(const std::vector<su2> &array, int mu);
 template su2 link1::plaket_right_up(const std::vector<su2> &array, int mu);
 template su2 link1::polyakov_loop(const std::vector<su2> &array);
+template su2 link1::polyakov_loop(const std::vector<std::vector<su2>> &array);
 template su2 link1::wilson_loop(const std::vector<su2> &array, int r, int t);
 template su2 link1::wilson_loop_schwinger(const std::vector<su2> &array, int r,
                                           int t);
@@ -537,6 +548,8 @@ template abelian link1::plaket_right_down(const std::vector<abelian> &array,
 template abelian link1::plaket_right_up(const std::vector<abelian> &array,
                                         int mu);
 template abelian link1::polyakov_loop(const std::vector<abelian> &array);
+template abelian
+link1::polyakov_loop(const std::vector<std::vector<abelian>> &array);
 template abelian link1::wilson_loop(const std::vector<abelian> &array, int r,
                                     int t);
 template abelian link1::wilson_loop_schwinger(const std::vector<abelian> &array,
@@ -558,6 +571,7 @@ template su3 link1::plaket_left_up(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_right_down(const std::vector<su3> &array, int mu);
 template su3 link1::plaket_right_up(const std::vector<su3> &array, int mu);
 template su3 link1::polyakov_loop(const std::vector<su3> &array);
+template su3 link1::polyakov_loop(const std::vector<std::vector<su3>> &array);
 template su3 link1::wilson_loop(const std::vector<su3> &array, int r, int t);
 template su3 link1::wilson_loop_schwinger(const std::vector<su3> &array, int r,
                                           int t);
@@ -583,6 +597,8 @@ template su3_abelian
 link1::plaket_right_up(const std::vector<su3_abelian> &array, int mu);
 template su3_abelian
 link1::polyakov_loop(const std::vector<su3_abelian> &array);
+template su3_abelian
+link1::polyakov_loop(const std::vector<std::vector<su3_abelian>> &array);
 template su3_abelian link1::wilson_loop(const std::vector<su3_abelian> &array,
                                         int r, int t);
 template su3_abelian

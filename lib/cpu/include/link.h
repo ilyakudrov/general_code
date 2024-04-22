@@ -75,6 +75,7 @@ public:
 
   // calculates polyakov loop in currect direction
   template <class T> T polyakov_loop(const std::vector<T> &array);
+  template <class T> T polyakov_loop(const std::vector<std::vector<T>> &array);
 
   // calculate wilson loop of r*t size in current direction and 4-th direction
   // plane

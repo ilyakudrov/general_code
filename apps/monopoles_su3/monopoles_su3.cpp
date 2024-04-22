@@ -109,6 +109,17 @@ int main(int argc, char **argv) {
                          << endl;
   output_stream_monopoles << "color,asymmetry" << endl;
 
+  vector<vector<double>> J_test;
+  for (int i = 0; i < 3; i++) {
+    J_test.push_back(calculate_current_monopole_plakets(monopole_plakets[i]));
+  }
+  vector<double> J_sum(J_test[0].size());
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < J_test[0].size(); j++) {
+      J_sum[j] += J_test[i][j];
+    }
+  }
+
   for (int color = 0; color < angles.size(); color++) {
 
     vector<double> J =

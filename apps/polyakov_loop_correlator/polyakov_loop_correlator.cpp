@@ -90,13 +90,17 @@ int main(int argc, char **argv) {
 
   std::vector<double> polyakov_correlator_vec;
 
+  vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
+  conf.array.clear();
+  conf.array.shrink_to_fit();
+
   start_time = omp_get_wtime();
 
   if (correlator_type == "singlet") {
     polyakov_correlator_vec =
-        polyakov_loop_correlator_singlet(conf.array, D_max);
+        polyakov_loop_correlator_singlet(conf_separated, D_max);
   } else if (correlator_type == "color_average") {
-    polyakov_correlator_vec = polyakov_loop_correlator(conf.array, D_max);
+    polyakov_correlator_vec = polyakov_loop_correlator(conf_separated, D_max);
   } else {
     cout << "invalid correlator_type" << endl;
   }
@@ -106,8 +110,7 @@ int main(int argc, char **argv) {
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "polyakov_loop_correlator_singlet time: " << search_time
-            << std::endl;
+  std::cout << "polyakov_loop_correlator time: " << search_time << std::endl;
 
   for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
        it++) {
