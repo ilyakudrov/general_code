@@ -92,6 +92,12 @@ void link1::go(int x, int y, int z, int t) {
   coordinate[2] = z;
   coordinate[3] = t;
 }
+void link1::go(std::vector<int> &coordinate) {
+  coordinate[0] = coordinate[0];
+  coordinate[1] = coordinate[1];
+  coordinate[2] = coordinate[2];
+  coordinate[3] = coordinate[3];
+}
 void link1::move_dir(int dir) { direction = dir; }
 
 void link1::go_update(int x, int y, int z, int t) {
@@ -99,6 +105,17 @@ void link1::go_update(int x, int y, int z, int t) {
   coordinate[1] = y;
   coordinate[2] = z;
   coordinate[3] = t;
+
+  update(0);
+  update(1);
+  update(2);
+  update(3);
+}
+void link1::go_update(std::vector<int> &coordinate) {
+  coordinate[0] = coordinate[0];
+  coordinate[1] = coordinate[1];
+  coordinate[2] = coordinate[2];
+  coordinate[3] = coordinate[3];
 
   update(0);
   update(1);

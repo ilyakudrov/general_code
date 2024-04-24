@@ -53,12 +53,14 @@ public:
 
   // goes on site with following coordinates
   void go(int x, int y, int z, int t);
+  void go(std::vector<int> &coordinate);
 
   // changes direction to dir
   void move_dir(int dir);
 
   // go and update
   void go_update(int x, int y, int z, int t);
+  void go_update(std::vector<int> &coordinate);
 
   const spin *get_spin(const std::vector<spin> &vec);
 

@@ -11,3 +11,6 @@ OBJ_FILES=$(OBJ_PATH)/data_$(ARCH).o $(OBJ_PATH)/basic_observables_$(ARCH).o $(O
 
 smearing: smearing.cpp $(OBJ_FILES)
 	$(GCC) smearing.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -o smearing_$(MATRIX_WILSON)_$(MATRIX_PLAKET)_$(ARCH)
+
+smearing_wilson_gevp: smearing_wilson_gevp.cpp $(OBJ_FILES)
+	$(GCC) smearing_wilson_gevp.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -o smearing_wilson_gevp_$(MATRIX_WILSON)_$(ARCH)

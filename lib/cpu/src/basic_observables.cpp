@@ -1092,7 +1092,6 @@ template <class T>
 std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
                                              int D_max) {
   std::vector<double> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1162,7 +1161,6 @@ template <>
 std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
                                              int D_max) {
   std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1233,7 +1231,6 @@ template <>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
   std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1304,7 +1301,6 @@ template <class T>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<std::vector<T>> &conf, int D_max) {
   std::vector<double> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1374,7 +1370,6 @@ template <>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<std::vector<su3>> &conf, int D_max) {
   std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1446,7 +1441,6 @@ std::vector<double>
 polyakov_loop_correlator(const std::vector<std::vector<su3_abelian>> &conf,
                          int D_max) {
   std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::map<double, double> polyakov_loop_correlator;
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1926,6 +1920,41 @@ double wilson_plane(std::vector<T> &wilson_lines_mu,
 }
 
 template <class T>
+double wilson_plane_gevp(std::vector<T> &wilson_lines1_mu,
+                         std::vector<T> &wilson_lines2_mu,
+                         std::vector<T> &wilson_lines_nu, int size_mu1,
+                         int size_mu2, int size_nu1, int size_nu2,
+                         int length_mu, int length_nu) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  T loops;
+  double result = 0;
+
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
+  for (int k = 0; k < data_size; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - length_mu * size_mu1)
+          loops = wilson_lines1_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
+        else
+          loops = wilson_lines1_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
+        if (i + j < size_nu2 - length_nu * size_nu1)
+          loops = loops ^ wilson_lines2_mu[i + k + j + length_nu * size_nu1];
+        else
+          loops = loops ^
+                  wilson_lines2_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+
+        result += loops.multiply_conj_tr(wilson_lines_nu[i + k + j]);
+      }
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T>
 double wilson_loop_test_time(std::vector<std::vector<T>> &wilson_lines,
                              int length_R, int length_T) {
 
@@ -1973,6 +2002,44 @@ wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
 
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
     it->second = it->second / 3;
+  }
+
+  return wilson_loops;
+}
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(std::vector<std::vector<T>> conf1,
+                     std::vector<std::vector<T>> conf2, int r_min, int r_max,
+                     int time_min, int time_max) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::map<std::tuple<int, int>, double> wilson_loops;
+
+  std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
+  std::vector<T> space_lines1, space_lines2;
+  for (int t = time_min; t <= time_max; t++) {
+    time_lines[t - time_min] = wilson_lines(conf1[3], t, steps[3], steps[4]);
+  }
+  for (int r = r_min; r <= r_max; r++) {
+    for (int mu = 0; mu < 3; mu++) {
+      space_lines1 = wilson_lines(conf1[mu], r, steps[mu], steps[mu + 1]);
+      space_lines2 = wilson_lines(conf2[mu], r, steps[mu], steps[mu + 1]);
+      for (int t = time_min; t <= time_max; t++) {
+        wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane_gevp(
+            space_lines1, space_lines2, time_lines[t - time_min], steps[mu],
+            steps[mu + 1], steps[3], steps[4], r, t);
+        wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane_gevp(
+            space_lines2, space_lines1, time_lines[t - time_min], steps[mu],
+            steps[mu + 1], steps[3], steps[4], r, t);
+      }
+    }
+  }
+
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    it->second = it->second / 6;
   }
 
   return wilson_loops;
@@ -2190,6 +2257,11 @@ template double wilson_plane(std::vector<su2> &wilson_lines_mu,
                              std::vector<su2> &wilson_lines_nu, int size_mu1,
                              int size_mu2, int size_nu1, int size_nu2,
                              int length_mu, int length_nu);
+template double wilson_plane_gevp(std::vector<su2> &wilson_lines1_mu,
+                                  std::vector<su2> &wilson_lines2_mu,
+                                  std::vector<su2> &wilson_lines_nu,
+                                  int size_mu1, int size_mu2, int size_nu1,
+                                  int size_nu2, int length_mu, int length_nu);
 
 template double
 wilson_loop_test_time(std::vector<std::vector<su2>> &wilson_lines, int length_R,
@@ -2198,6 +2270,11 @@ wilson_loop_test_time(std::vector<std::vector<su2>> &wilson_lines, int length_R,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<su2>> conf, int r_min, int r_max,
                 int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(std::vector<std::vector<su2>> conf1,
+                     std::vector<std::vector<su2>> conf2, int r_min, int r_max,
+                     int time_min, int time_max);
 
 template double plaket_plane(std::vector<su2> &conf_mu,
                              std::vector<su2> &conf_nu, int size_mu1,
@@ -2304,6 +2381,11 @@ template double wilson_plane(std::vector<abelian> &wilson_lines_mu,
                              std::vector<abelian> &wilson_lines_nu,
                              int size_mu1, int size_mu2, int size_nu1,
                              int size_nu2, int length_mu, int length_nu);
+template double wilson_plane_gevp(std::vector<abelian> &wilson_lines1_mu,
+                                  std::vector<abelian> &wilson_lines2_mu,
+                                  std::vector<abelian> &wilson_lines_nu,
+                                  int size_mu1, int size_mu2, int size_nu1,
+                                  int size_nu2, int length_mu, int length_nu);
 
 template double
 wilson_loop_test_time(std::vector<std::vector<abelian>> &wilson_lines,
@@ -2312,6 +2394,11 @@ wilson_loop_test_time(std::vector<std::vector<abelian>> &wilson_lines,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<abelian>> conf, int r_min, int r_max,
                 int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(std::vector<std::vector<abelian>> conf1,
+                     std::vector<std::vector<abelian>> conf2, int r_min,
+                     int r_max, int time_min, int time_max);
 
 template double plaket_plane(std::vector<abelian> &conf_mu,
                              std::vector<abelian> &conf_nu, int size_mu1,
@@ -2403,6 +2490,11 @@ template double wilson_plane(std::vector<su3> &wilson_lines_mu,
                              std::vector<su3> &wilson_lines_nu, int size_mu1,
                              int size_mu2, int size_nu1, int size_nu2,
                              int length_mu, int length_nu);
+template double wilson_plane_gevp(std::vector<su3> &wilson_lines1_mu,
+                                  std::vector<su3> &wilson_lines2_mu,
+                                  std::vector<su3> &wilson_lines_nu,
+                                  int size_mu1, int size_mu2, int size_nu1,
+                                  int size_nu2, int length_mu, int length_nu);
 
 template double
 wilson_loop_test_time(std::vector<std::vector<su3>> &wilson_lines, int length_R,
@@ -2411,6 +2503,11 @@ wilson_loop_test_time(std::vector<std::vector<su3>> &wilson_lines, int length_R,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<su3>> conf, int r_min, int r_max,
                 int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(std::vector<std::vector<su3>> conf1,
+                     std::vector<std::vector<su3>> conf2, int r_min, int r_max,
+                     int time_min, int time_max);
 
 template double plaket_plane(std::vector<su3> &conf_mu,
                              std::vector<su3> &conf_nu, int size_mu1,
@@ -2511,6 +2608,11 @@ template double wilson_plane(std::vector<su3_abelian> &wilson_lines_mu,
                              std::vector<su3_abelian> &wilson_lines_nu,
                              int size_mu1, int size_mu2, int size_nu1,
                              int size_nu2, int length_mu, int length_nu);
+template double wilson_plane_gevp(std::vector<su3_abelian> &wilson_lines1_mu,
+                                  std::vector<su3_abelian> &wilson_lines2_mu,
+                                  std::vector<su3_abelian> &wilson_lines_nu,
+                                  int size_mu1, int size_mu2, int size_nu1,
+                                  int size_nu2, int length_mu, int length_nu);
 
 template double
 wilson_loop_test_time(std::vector<std::vector<su3_abelian>> &wilson_lines,
@@ -2519,6 +2621,11 @@ wilson_loop_test_time(std::vector<std::vector<su3_abelian>> &wilson_lines,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel(std::vector<std::vector<su3_abelian>> conf, int r_min,
                 int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(std::vector<std::vector<su3_abelian>> conf1,
+                     std::vector<std::vector<su3_abelian>> conf2, int r_min,
+                     int r_max, int time_min, int time_max);
 
 template double plaket_plane(std::vector<su3_abelian> &conf_mu,
                              std::vector<su3_abelian> &conf_nu, int size_mu1,

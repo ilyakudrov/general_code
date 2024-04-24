@@ -66,3 +66,6 @@ void read_file(data<T> &conf_data, std::string file_path,
 template <class T>
 void get_data(data<T> &conf_data, std::string file_path,
               std::string file_format, int bytes_skip, bool convert);
+
+template <class T>
+std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2);

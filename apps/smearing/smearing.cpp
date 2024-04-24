@@ -271,32 +271,33 @@ int main(int argc, char *argv[]) {
       if (polyakov_correlator_enabled &&
           (HYP_step - calculation_HYP_start) % calculation_step_HYP == 0 &&
           HYP_step >= calculation_HYP_start) {
+        polyakov_correlator_vec = std::vector<double>();
+        polyakov_correlator_aver = std ::map<double, double>();
+        polyakov_correlator_singlet = std ::map<double, double>();
+        cout << "ok" << endl;
         polyakov_correlator_vec = polyakov_loop_correlator_singlet(
             conf_separated, polyakov_correlator_D);
+        cout << "ok" << endl;
         polyakov_correlator_singlet = polyakov_average_directions(
             polyakov_correlator_vec, polyakov_correlator_D);
-        polyakov_correlator_vec =
-            polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
-        polyakov_correlator_aver = polyakov_average_directions(
-            polyakov_correlator_vec, polyakov_correlator_D);
-        for (auto it = polyakov_correlator_aver.begin();
-             it != polyakov_correlator_aver.end(); it++) {
-          stream_polyakov_correlator
-              << HYP_step << "," << it->first << "," << it->second << ","
-              << polyakov_correlator_singlet[it->first] << std::endl;
-        }
-        polyakov_correlator_vec.erase(polyakov_correlator_vec.begin(),
-                                      polyakov_correlator_vec.end());
-        polyakov_correlator_aver.erase(polyakov_correlator_aver.begin(),
-                                       polyakov_correlator_aver.end());
-        polyakov_correlator_singlet.erase(polyakov_correlator_singlet.begin(),
-                                          polyakov_correlator_singlet.end());
+        polyakov_correlator_vec = std::vector<double>();
+        cout << "ok" << endl;
+        // polyakov_correlator_vec =
+        //     polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+        // cout << "ok" << endl;
+        // polyakov_correlator_aver = polyakov_average_directions(
+        //     polyakov_correlator_vec, polyakov_correlator_D);
+        // cout << "ok" << endl;
+        // for (auto it = polyakov_correlator_aver.begin();
+        //      it != polyakov_correlator_aver.end(); it++) {
+        //   stream_polyakov_correlator
+        //       << HYP_step << "," << it->first << "," << it->second << ","
+        //       << polyakov_correlator_singlet[it->first] << std::endl;
+        // }
       }
-
       end_time = omp_get_wtime();
       observables_time += end_time - start_time;
     }
-
     cout << "i=" << HYP_steps << " iterations of HYP time: " << smearing_time
          << endl;
     cout << "HYP observables time: " << observables_time << endl;

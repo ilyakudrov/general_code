@@ -873,3 +873,46 @@ void get_data(data<su2> &conf_data, std::string file_path,
     conf_data.array = get_offdiagonal(data_tmp.array);
   }
 }
+
+template <class T>
+std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2) {
+  std::vector<T> conf1 = conf;
+  link1 link2(x_size, y_size, z_size, t_size);
+  link1 link3(x_size, y_size, z_size, t_size);
+  std::vector<int> coordinates(4);
+  std::vector<int> coordinates1(4);
+  int tmp;
+  for (coordinates[3] = 0; coordinates[3] < t_size; coordinates[3]++) {
+    for (coordinates[2] = 0; coordinates[2] < z_size; coordinates[2]++) {
+      for (coordinates[1] = 0; coordinates[1] < y_size; coordinates[1]++) {
+        for (coordinates[0] = 0; coordinates[0] < x_size; coordinates[0]++) {
+          link2.go_update(coordinates);
+          coordinates1 = coordinates;
+          tmp = coordinates1[dir1];
+          coordinates1[dir1] = coordinates1[dir2];
+          coordinates1[dir2] = tmp;
+          link3.go_update(coordinates1);
+          conf1[link2.place + dir1] = conf[link3.place + dir2];
+          conf1[link2.place + dir2] = conf[link3.place + dir1];
+        }
+      }
+    }
+  }
+  return conf1;
+}
+
+// su2
+template std::vector<su2> swap_directions(std::vector<su2> &conf, int dir1,
+                                          int dir2);
+
+// abelian
+template std::vector<abelian> swap_directions(std::vector<abelian> &conf,
+                                              int dir1, int dir2);
+
+// su3
+template std::vector<su3> swap_directions(std::vector<su3> &conf, int dir1,
+                                          int dir2);
+
+// su3_abelian
+template std::vector<su3_abelian>
+swap_directions(std::vector<su3_abelian> &conf, int dir1, int dir2);
