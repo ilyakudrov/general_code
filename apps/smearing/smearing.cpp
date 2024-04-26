@@ -9,16 +9,17 @@
 #include <iostream>
 #include <omp.h>
 
+#include "sys/sysinfo.h"
+#include "sys/types.h"
+
+struct sysinfo memInfo;
+
 #ifndef MATRIX_WILSON
 #define MATRIX_WILSON su2
 #endif
 
 #ifndef MATRIX_PLAKET
 #define MATRIX_PLAKET su2
-#endif
-
-#ifndef MATRIX_AUXILIARY
-#define MATRIX_AUXILIARY su2
 #endif
 
 using namespace std;
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
   string path_wilson;
   string path_flux;
   string path_polyakov_correlator;
+  string correlator_type;
   double HYP_alpha1, HYP_alpha2, HYP_alpha3;
   double APE_alpha;
   bool APE_enabled, HYP_enabled;
@@ -114,6 +116,8 @@ int main(int argc, char *argv[]) {
       path_flux = argv[++i];
     } else if (string(argv[i]) == "-path_polyakov_correlator") {
       path_polyakov_correlator = argv[++i];
+    } else if (string(argv[i]) == "-correlator_type") {
+      correlator_type = argv[++i];
     } else if (string(argv[i]) == "-T_min") {
       T_min = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-T_max") {
@@ -242,15 +246,13 @@ int main(int argc, char *argv[]) {
 
     stream_polyakov_correlator.precision(17);
 
-    stream_polyakov_correlator
-        << "smearing_step,distance,correlator_aver,correlator_singlet" << endl;
+    stream_polyakov_correlator << "smearing_step,distance,correlator" << endl;
   }
 
   map<tuple<int, int>, double> wilson_loops;
   map<tuple<int, int, int>, double> flux_tube;
   std::vector<double> polyakov_correlator_vec;
-  std ::map<double, double> polyakov_correlator_aver;
-  std ::map<double, double> polyakov_correlator_singlet;
+  std ::map<double, double> polyakov_correlator;
 
   vector<vector<MATRIX_WILSON>> conf_separated =
       separate_wilson(conf_wilson.array);
@@ -267,33 +269,27 @@ int main(int argc, char *argv[]) {
       smearing_time += end_time - start_time;
 
       start_time = omp_get_wtime();
-
       if (polyakov_correlator_enabled &&
           (HYP_step - calculation_HYP_start) % calculation_step_HYP == 0 &&
           HYP_step >= calculation_HYP_start) {
-        polyakov_correlator_vec = std::vector<double>();
-        polyakov_correlator_aver = std ::map<double, double>();
-        polyakov_correlator_singlet = std ::map<double, double>();
-        cout << "ok" << endl;
-        polyakov_correlator_vec = polyakov_loop_correlator_singlet(
-            conf_separated, polyakov_correlator_D);
-        cout << "ok" << endl;
-        polyakov_correlator_singlet = polyakov_average_directions(
-            polyakov_correlator_vec, polyakov_correlator_D);
-        polyakov_correlator_vec = std::vector<double>();
-        cout << "ok" << endl;
-        // polyakov_correlator_vec =
-        //     polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
-        // cout << "ok" << endl;
-        // polyakov_correlator_aver = polyakov_average_directions(
-        //     polyakov_correlator_vec, polyakov_correlator_D);
-        // cout << "ok" << endl;
-        // for (auto it = polyakov_correlator_aver.begin();
-        //      it != polyakov_correlator_aver.end(); it++) {
-        //   stream_polyakov_correlator
-        //       << HYP_step << "," << it->first << "," << it->second << ","
-        //       << polyakov_correlator_singlet[it->first] << std::endl;
-        // }
+        if (correlator_type == "singlet") {
+          polyakov_correlator_vec = polyakov_loop_correlator_singlet(
+              conf_separated, polyakov_correlator_D);
+          polyakov_correlator = polyakov_average_directions(
+              polyakov_correlator_vec, polyakov_correlator_D);
+        } else if (correlator_type == "color_average") {
+          polyakov_correlator_vec =
+              polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+          polyakov_correlator = polyakov_average_directions(
+              polyakov_correlator_vec, polyakov_correlator_D);
+        } else {
+          cout << "invalid correlator_type" << endl;
+        }
+        for (auto it = polyakov_correlator.begin();
+             it != polyakov_correlator.end(); it++) {
+          stream_polyakov_correlator << HYP_step << "," << it->first << ","
+                                     << it->second << std::endl;
+        }
       }
       end_time = omp_get_wtime();
       observables_time += end_time - start_time;

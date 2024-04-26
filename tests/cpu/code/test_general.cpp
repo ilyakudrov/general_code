@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
   // cout << "MAG functional " << MAG_functional_su2(conf1.array) << endl;
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
-      separate_wilson(conf1.array);
+      separate_wilson(conf2.array);
   // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
   // separate_3(conf1.array);
 
@@ -158,37 +158,44 @@ int main(int argc, char *argv[]) {
        << endl;
 
   // on-axis wilson loops
-  // int T_min = 1, T_max = 8;
-  // int R_min = 1, R_max = 10;
-
-  // start_time = omp_get_wtime();
-
-  // map<tuple<int, int>, double> wilson_loops =
-  //     wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
-
-  // end_time = omp_get_wtime();
-  // search_time = end_time - start_time;
-  // std::cout << "on-axis wilson time: " << search_time << std::endl;
-  // std::cout << "wilson_loops adjoint:" << std::endl;
-  // for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-  //   cout << get<0>(it->first) << "," << get<1>(it->first) << "," <<
-  //   it->second
-  //        << endl;
-  // }
-
-  // off-axis wilson loops
+  int T_min = 1, T_max = 16;
+  int R_min = 1, R_max = 16;
 
   start_time = omp_get_wtime();
 
-  map<tuple<int, double>, double> wilson_loops =
-      wilson_offaxis_result(conf1.array, 0.9, 4, 1, 4);
+  map<tuple<int, int>, double> wilson_loops =
+      wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "offaxis wilson loop time: " << search_time << std::endl;
-
+  std::cout << "on-axis wilson time: " << search_time << std::endl;
+  std::cout << "wilson_loops adjoint:" << std::endl;
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
-              << it->second << endl;
+    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
+         << endl;
   }
+
+  std::vector<double> wilson_test =
+      wilson(conf2.array, R_min, R_max, T_min, T_max);
+
+  std::cout << std::endl;
+  for (int i = 0; i < wilson_test.size(); i++) {
+    std::cout << wilson_test[i] << std::endl;
+  }
+
+  // off-axis wilson loops
+
+  // start_time = omp_get_wtime();
+
+  // map<tuple<int, double>, double> wilson_loops =
+  //     wilson_offaxis_result(conf1.array, 0.9, 4, 1, 4);
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // std::cout << "offaxis wilson loop time: " << search_time << std::endl;
+
+  // for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+  //   std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //             << it->second << endl;
+  // }
 }
