@@ -153,9 +153,6 @@ int main(int argc, char *argv[]) {
     conf_wilson.array.shrink_to_fit();
     conf_separated2 = conf_separated1;
 
-    cout << "plaket " << plaket_parallel(conf_separated1) << endl;
-    cout << "plaket " << plaket_parallel(conf_separated2) << endl;
-
     if (HYP_enabled == 1) {
       start_time = omp_get_wtime();
       for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
@@ -167,13 +164,9 @@ int main(int argc, char *argv[]) {
       conf_separated2[3] = conf_separated1[3];
     }
 
-    cout << "plaket " << plaket_time_parallel(conf_separated1) << endl;
-    cout << "plaket " << plaket_time_parallel(conf_separated2) << endl;
-
     // wilson loops at (0, 0) APE_steps
     start_time = omp_get_wtime();
     wilson_tmp = wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
-    cout << "wilson loop " << wilson_tmp[tuple<int, int>(1, 1)] << endl;
     write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
     end_time = omp_get_wtime();
     observables_time += end_time - start_time;

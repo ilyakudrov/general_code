@@ -169,6 +169,7 @@ int main(int argc, char *argv[]) {
   cout << "wilson_enabled " << wilson_enabled << endl;
   cout << "flux_enabled " << flux_enabled << endl;
   cout << "polyakov_correlator_enabled " << polyakov_correlator_enabled << endl;
+  cout << "correlator_type " << correlator_type << endl;
   cout << "save_conf " << save_conf << endl;
   cout << "T_min " << T_min << endl;
   cout << "T_max " << T_max << endl;
