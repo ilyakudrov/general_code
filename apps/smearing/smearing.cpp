@@ -261,6 +261,31 @@ int main(int argc, char *argv[]) {
   conf_wilson.array.clear();
   conf_wilson.array.shrink_to_fit();
 
+  observables_time = 0;
+  start_time = omp_get_wtime();
+  if (polyakov_correlator_enabled) {
+    if (correlator_type == "singlet") {
+      polyakov_correlator_vec = polyakov_loop_correlator_singlet(
+          conf_separated, polyakov_correlator_D);
+      polyakov_correlator = polyakov_average_directions(polyakov_correlator_vec,
+                                                        polyakov_correlator_D);
+    } else if (correlator_type == "color_average") {
+      polyakov_correlator_vec =
+          polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+      polyakov_correlator = polyakov_average_directions(polyakov_correlator_vec,
+                                                        polyakov_correlator_D);
+    } else {
+      cout << "invalid correlator_type" << endl;
+    }
+    for (auto it = polyakov_correlator.begin(); it != polyakov_correlator.end();
+         it++) {
+      stream_polyakov_correlator << 0 << "," << it->first << "," << it->second
+                                 << std::endl;
+    }
+  }
+  end_time = omp_get_wtime();
+  observables_time += end_time - start_time;
+
   if (HYP_enabled == 1) {
     smearing_time = 0;
     for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
@@ -301,10 +326,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (APE_enabled == 1) {
-
     smearing_time = 0;
-    observables_time = 0;
-
     for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
 
       start_time = omp_get_wtime();
