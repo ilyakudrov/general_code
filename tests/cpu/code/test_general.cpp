@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su2
 
 using namespace std;
 
@@ -35,96 +35,86 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf1;
   data<MATRIX_TYPE> conf2;
 
-  // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
-  //                    "steps_25/copies=4/conf_Landau_gaugefixed_0001";
+  string conf_path1 = "/home/ilya/soft/lattice/general_code/apps/"
+                      "conf_transform/test/result/conf_monopole_qc2dstag0201";
   // string conf_path1 =
-  // "../../confs/su2/gluodynamics/32^3x8/beta2.542/CONF0001";
-  string conf_path1 = "../../confs/MAG/su3/gluodynamics/16^4/beta6.0/"
-                      "steps_4000/copies=16/0.1/conf_gaugefixed_01001.lime";
-  // string conf_path1 = "../../confs/su2/ml5/beta2.1_1conf.ml5";
+  //     "/home/ilya/soft/lattice/general_code/tests/confs/monopole/su2/"
+  //     "qc2dstag/40^4/mu0.00/conf_monopole_0201";
   string conf_path2 =
-      "../../confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime";
-  // string conf_path =
-  // "../../confs/SU3_conf/gluodynamics/36^4/beta6.3/CONF0001"; string conf_path
-  // =
-  //     "../../confs/MA_gauge/su2/su2_suzuki/48^4/beta2.6/conf_0001";
-  // string conf_path = "../../confs/Landau_U1xU1/gluodynamics/24^4/beta6.0/"
-  //                    "steps_500/copies=3/conf_Landau_gaugefixed_0001";
-  // string conf_path =
-  // "/home/ilya/soft/lattice/general_code/apps/smearing/test/"
-  //                    "result/smeared_0001"
-  string conf_format1 = "ildg";
-  string conf_format2 = "ildg";
+      "/home/ilya/soft/lattice/general_code/tests/confs/"
+      "monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201";
+  string conf_format1 = "double_qc2dstag";
+  string conf_format2 = "double_qc2dstag";
   int bytes_skip = 0;
-  bool convert = 1;
+  bool convert = 0;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
   // vector<float> conf_full = read_full_ml5(conf_path1, 1);
   // conf1.read_float_ml5(conf_full, 0);
-  get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
+  // get_data(conf2, conf_path2, conf_format2, bytes_skip, convert);
 
-  link1 link(x_size, y_size, z_size, t_size);
-  double a = 0.2;
-  su3 A, B;
-  // staple in dir 1
-  A = conf1.array[link.place + 1];
-  link.move(1, 1);
-  A = A * conf1.array[link.place];
-  link.move(1, -1);
-  link.move(0, 1);
-  B = A ^ conf1.array[link.place + 1];
-  link.move(0, -1);
-  link.move(1, -1);
-  A = conf1.array[link.place + 1].conj();
-  A = A * conf1.array[link.place];
-  link.move(1, 1);
-  B = B + A * conf1.array[link.place + 1];
-  link.move(0, -1);
-  link.move(1, -1);
-  // staple in dir 2
-  A = conf1.array[link.place + 2];
-  link.move(2, 1);
-  A = A * conf1.array[link.place];
-  link.move(2, -1);
-  link.move(0, 1);
-  B = B + A ^ conf1.array[link.place + 2];
-  link.move(0, -1);
-  link.move(2, -1);
-  A = conf1.array[link.place + 2].conj();
-  A = A * conf1.array[link.place];
-  link.move(2, 1);
-  B = B + A * conf1.array[link.place + 2];
-  link.move(0, -1);
-  link.move(2, -1);
-  B = (1 - a) * conf1.array[link.place] + (a / 4) * B;
+  // link1 link(x_size, y_size, z_size, t_size);
+  // double a = 0.2;
+  // su3 A, B;
+  // // staple in dir 1
+  // A = conf1.array[link.place + 1];
+  // link.move(1, 1);
+  // A = A * conf1.array[link.place];
+  // link.move(1, -1);
+  // link.move(0, 1);
+  // B = A ^ conf1.array[link.place + 1];
+  // link.move(0, -1);
+  // link.move(1, -1);
+  // A = conf1.array[link.place + 1].conj();
+  // A = A * conf1.array[link.place];
+  // link.move(1, 1);
+  // B = B + A * conf1.array[link.place + 1];
+  // link.move(0, -1);
+  // link.move(1, -1);
+  // // staple in dir 2
+  // A = conf1.array[link.place + 2];
+  // link.move(2, 1);
+  // A = A * conf1.array[link.place];
+  // link.move(2, -1);
+  // link.move(0, 1);
+  // B = B + A ^ conf1.array[link.place + 2];
+  // link.move(0, -1);
+  // link.move(2, -1);
+  // A = conf1.array[link.place + 2].conj();
+  // A = A * conf1.array[link.place];
+  // link.move(2, 1);
+  // B = B + A * conf1.array[link.place + 2];
+  // link.move(0, -1);
+  // link.move(2, -1);
+  // B = (1 - a) * conf1.array[link.place] + (a / 4) * B;
 
-  cout << B << endl;
-  cout << B.determinant() << endl << endl;
-  cout << B.proj1() << endl;
-  cout << B.proj1().determinant() << endl << endl;
-  cout << B.proj() << endl;
-  cout << B.proj().determinant() << endl << endl;
-  cout << B.proj().proj() << endl;
-  cout << B.proj().proj().determinant() << endl << endl;
-  cout << B.proj().proj().proj() << endl;
-  cout << B.proj().proj().proj().determinant() << endl << endl;
-  cout << B.proj().proj().proj().proj() << endl;
-  cout << B.proj().proj().proj().proj().determinant() << endl << endl;
-  su3 C1 = B.proj1();
-  su3 C2 = B.proj().proj().proj().proj();
-  cout << (C1 ^ C1) << endl;
-  cout << (C2 ^ C2) << endl;
-  cout << (C1 - C2) << endl;
+  // cout << B << endl;
+  // cout << B.determinant() << endl << endl;
+  // cout << B.proj1() << endl;
+  // cout << B.proj1().determinant() << endl << endl;
+  // cout << B.proj() << endl;
+  // cout << B.proj().determinant() << endl << endl;
+  // cout << B.proj().proj() << endl;
+  // cout << B.proj().proj().determinant() << endl << endl;
+  // cout << B.proj().proj().proj() << endl;
+  // cout << B.proj().proj().proj().determinant() << endl << endl;
+  // cout << B.proj().proj().proj().proj() << endl;
+  // cout << B.proj().proj().proj().proj().determinant() << endl << endl;
+  // su3 C1 = B.proj1();
+  // su3 C2 = B.proj().proj().proj().proj();
+  // cout << (C1 ^ C1) << endl;
+  // cout << (C2 ^ C2) << endl;
+  // cout << (C1 - C2) << endl;
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
