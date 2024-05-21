@@ -325,6 +325,15 @@ int main(int argc, char *argv[]) {
     cout << "HYP observables time: " << observables_time << endl;
   }
 
+  if (wilson_enabled) {
+    wilson_loops = wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+
+    for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+      stream_wilson << 0 << "," << get<0>(it->first) << "," << get<1>(it->first)
+                    << "," << it->second << endl;
+    }
+  }
+
   if (APE_enabled == 1) {
     smearing_time = 0;
     for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
