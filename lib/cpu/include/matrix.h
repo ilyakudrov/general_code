@@ -270,6 +270,68 @@ su3_abelian operator%(const su3_abelian &A, const su3_abelian &B);
 
 std::ostream &operator<<(std::ostream &os, const su3_abelian &A);
 
+// diagonal su3 angles
+class su3_angles {
+public:
+  double matrix[3];
+  su3_angles(double B[3]);
+  su3_angles();
+
+  // calculate trace of the matrix
+  double tr();
+
+  complex_t tr_complex();
+
+  double multiply_conj_tr(const su3_angles &B);
+
+  double multiply_tr(const su3_angles &B);
+
+  double multiply_conj_tr_adjoint(const su3_angles &B);
+
+  // calculate inverse of the matrix
+  su3_angles inverse();
+
+  // calculate conjugate of the matrix
+  su3_angles conj() const;
+
+  su3_angles mult_by_imag(double x);
+
+  // gets projection onto su3 group
+  su3_angles proj();
+
+  // muliply from left and right by lambda3
+  su3_angles lambda3_mult();
+
+  // muliply from left and right by lambda8
+  su3_angles lambda8_mult();
+
+  // calculates module of vector in sigma matrices representation
+  double module();
+
+  complex_t determinant();
+
+  complex_t unitarity_check();
+};
+
+su3_angles operator+(const su3_angles &A, const su3_angles &B);
+su3_angles operator-(const su3_angles &A, const su3_angles &B);
+su3_angles operator*(const double &x, const su3_angles &A);
+su3_angles operator*(const su3_angles &A, const double &x);
+
+su3_angles operator*(const complex_t &x, const su3_angles &A);
+su3_angles operator*(const su3_angles &A, const complex_t &x);
+
+// matrix multiplication A * B
+su3_angles operator*(const su3_angles &A, const su3_angles &B);
+
+// matrix multiplication A * B.conj()
+su3_angles operator^(const su3_angles &A, const su3_angles &B);
+
+// matrix multiplication A.conj() * B
+su3_angles operator%(const su3_angles &A, const su3_angles &B);
+
+std::ostream &operator<<(std::ostream &os, const su3_angles &A);
+
 // 3D vector realisation for spin model.
 class spin {
 public:

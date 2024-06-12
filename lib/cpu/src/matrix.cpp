@@ -940,13 +940,11 @@ su3_abelian su3_abelian::proj() {
   for (int i = 0; i < 3; i++) {
     A.matrix[i] = complex_t(cos(angles[i] - sum / 3), sin(angles[i] - sum / 3));
   }
-  double phi;
   return A;
 }
 
 su3_abelian operator+(const su3_abelian &A, const su3_abelian &B) {
   su3_abelian C;
-  complex_t a;
   for (int i = 0; i < 3; i++) {
     C.matrix[i] = A.matrix[i] + B.matrix[i];
   }
@@ -1021,6 +1019,179 @@ su3_abelian operator%(const su3_abelian &A, const su3_abelian &B) {
 std::ostream &operator<<(std::ostream &os, const su3_abelian &A) {
   for (int i = 0; i < 3; i++) {
     os << "(" << A.matrix[i].real << ", " << A.matrix[i].imag << ") ";
+  }
+  os << std::endl;
+  return os;
+}
+
+// su3_angles methods
+su3_angles::su3_angles(double B[3]) {
+  for (int i = 0; i < 3; i++) {
+    matrix[i] = B[i];
+  }
+}
+
+su3_angles::su3_angles() {
+  for (int i = 0; i < 3; i++) {
+    matrix[i] = 0;
+  }
+}
+
+double su3_angles::tr() {
+  return (cos(matrix[0]) + cos(matrix[1]) + cos(matrix[2])) / 3;
+}
+
+complex_t su3_angles::tr_complex() {
+  return complex_t((cos(matrix[0]) + cos(matrix[1]) + cos(matrix[2])) / 3,
+                   (sin(matrix[0]) + sin(matrix[1]) + sin(matrix[2])) / 3);
+}
+
+double su3_angles::multiply_conj_tr(const su3_angles &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    trace +=
+        cos(matrix[i]) * cos(B.matrix[i]) + sin(matrix[i]) * sin(B.matrix[i]);
+  }
+  return trace / 3;
+}
+
+double su3_angles::multiply_tr(const su3_angles &B) {
+  double trace = 0;
+  for (int i = 0; i < 3; i++) {
+    trace +=
+        cos(matrix[i]) * cos(B.matrix[i]) - sin(matrix[i]) * sin(B.matrix[i]);
+  }
+  return trace / 3;
+}
+
+double su3_angles::multiply_conj_tr_adjoint(const su3_angles &B) {
+  double trace = 0;
+  double tmp;
+  for (int i = 0; i < 3; i++) {
+    tmp = matrix[i] - B.matrix[i];
+    trace += cos(tmp) * cos(tmp) - sin(tmp) * sin(tmp);
+  }
+  return trace;
+}
+
+su3_angles su3_angles::inverse() {
+  su3_angles B;
+  for (int i = 0; i < 3; i++) {
+    B.matrix[i] = -matrix[i];
+  }
+  return B;
+}
+
+double su3_angles::module() { return 1; }
+
+complex_t su3_angles::determinant() { return complex_t(1, 0); }
+
+su3_angles su3_angles::conj() const {
+  su3_angles B;
+  for (int i = 0; i < 3; i++) {
+    B.matrix[i] = -matrix[i];
+  }
+  return B;
+}
+
+su3_angles su3_angles::mult_by_imag(double x) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = matrix[i] + M_PI;
+  }
+  return C;
+}
+
+su3_angles su3_angles::proj() {
+  su3_angles A;
+  double sum = 0;
+  for (int i = 0; i < 3; i++) {
+    sum += matrix[i];
+  }
+  while (sum >= M_PI) {
+    sum -= 2 * M_PI;
+  }
+  while (sum < -M_PI) {
+    sum += 2 * M_PI;
+  }
+  for (int i = 0; i < 3; i++) {
+    A.matrix[i] = matrix[i] - sum / 3;
+  }
+  return A;
+}
+
+su3_angles operator+(const su3_angles &A, const su3_angles &B) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = atan2(sin(A.matrix[i]) + sin(B.matrix[i]),
+                        cos(A.matrix[i]) + cos(B.matrix[i]));
+  }
+  return C;
+}
+su3_angles operator-(const su3_angles &A, const su3_angles &B) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = atan2(sin(A.matrix[i]) - sin(B.matrix[i]),
+                        cos(A.matrix[i]) - cos(B.matrix[i]));
+  }
+  return C;
+}
+su3_angles operator*(const double &x, const su3_angles &A) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i];
+  }
+  return C;
+}
+su3_angles operator*(const su3_angles &A, const double &x) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i];
+  }
+  return C;
+}
+su3_angles operator*(const complex_t &x, const su3_angles &A) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = atan2(x.imag, x.real) + A.matrix[i];
+  }
+  return C;
+}
+su3_angles operator*(const su3_angles &A, const complex_t &x) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = atan2(x.imag, x.real) + A.matrix[i];
+  }
+  return C;
+}
+
+su3_angles operator*(const su3_angles &A, const su3_angles &B) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i] * B.matrix[i];
+  }
+  return C;
+}
+
+su3_angles operator^(const su3_angles &A, const su3_angles &B) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = A.matrix[i] - B.matrix[i];
+  }
+  return C;
+}
+
+su3_angles operator%(const su3_angles &A, const su3_angles &B) {
+  su3_angles C;
+  for (int i = 0; i < 3; i++) {
+    C.matrix[i] = B.matrix[i] - A.matrix[i];
+  }
+  return C;
+}
+
+std::ostream &operator<<(std::ostream &os, const su3_angles &A) {
+  for (int i = 0; i < 3; i++) {
+    os << A.matrix[i] << " ";
   }
   os << std::endl;
   return os;
