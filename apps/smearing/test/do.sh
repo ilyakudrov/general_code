@@ -1,15 +1,19 @@
 #!/bin/bash
-conf_format_wilson="ildg"
+# conf_format_wilson="ildg"
+conf_format_wilson="double"
 #conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt4/conf.0501"
-conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
+#conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
+# conf_path_wilson="../../../tests/confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_gaugefixed_01001.lime_1"
+# conf_path_wilson="../../../tests/confs/monopoless/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_monopoless_1001_1"
+conf_path_wilson="../../../tests/confs/monopole/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_monopole_1001_1"
 bytes_skip_wilson=0
-wilson_type="su3"
-conf_format_plaket="double_qc2dstag"
+wilson_type="su3_abelian"
 convert_wilson=0
+conf_format_plaket="double_qc2dstag"
 conf_path_plaket="../../../tests/confs/su3/gluodynamics/24^4/beta6.0/CONF0001"
 # conf_path_plaket="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
 bytes_skip_plaket=0
-plaket_type="su3"
+plaket_type="su3_abelian"
 convert_plaket=0
 HYP_alpha1=1
 HYP_alpha2=1
@@ -17,12 +21,12 @@ HYP_alpha3=0.5
 APE_alpha=0.6
 APE_enabled=1
 HYP_enabled=1
-APE_steps=2
-calculation_step_APE=1
-calculation_APE_start=1
+APE_steps=50
+calculation_step_APE=50
+calculation_APE_start=0
 calculation_step_HYP=1
 calculation_HYP_start=1
-HYP_steps=1
+HYP_steps=0
 L_spat=16
 L_time=16
 path_wilson=./result/wilson_loops
@@ -32,9 +36,9 @@ wilson_enabled=1
 flux_enabled=0
 polyakov_correlator_enabled=0
 T_min=1
-T_max=4
+T_max=8
 R_min=1
-R_max=4
+R_max=8
 polyakov_correlator_D=31
 save_conf=0
 conf_path_output="./result/smeared_01001"

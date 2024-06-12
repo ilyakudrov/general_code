@@ -926,17 +926,21 @@ su3_abelian su3_abelian::mult_by_imag(double x) {
 su3_abelian su3_abelian::proj() {
   su3_abelian A;
   std::vector<double> angles(3);
+  double sum = 0;
   for (int i = 0; i < 3; i++) {
     angles[i] = matrix[i].angle();
+    sum += angles[i];
+  }
+  while (sum >= M_PI) {
+    sum -= 2 * M_PI;
+  }
+  while (sum < -M_PI) {
+    sum += 2 * M_PI;
+  }
+  for (int i = 0; i < 3; i++) {
+    A.matrix[i] = complex_t(cos(angles[i] - sum / 3), sin(angles[i] - sum / 3));
   }
   double phi;
-  phi = angles[0] * 2 / 3 - angles[1] / 3 - angles[2] / 3;
-  A.matrix[0] = complex_t(cos(phi), sin(phi));
-  phi = angles[1] * 2 / 3 - angles[0] / 3 - angles[2] / 3;
-  A.matrix[1] = complex_t(cos(phi), sin(phi));
-  phi = angles[2] * 2 / 3 - angles[1] / 3 - angles[0] / 3;
-  A.matrix[2] = complex_t(cos(phi), sin(phi));
-
   return A;
 }
 

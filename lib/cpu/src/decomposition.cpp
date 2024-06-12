@@ -1,5 +1,6 @@
 #include "../include/decomposition.h"
 #include "../include/link.h"
+#include "../include/matrix.h"
 #include "../include/monopoles.h"
 
 #include <ctime>
@@ -102,16 +103,25 @@ std::vector<std::vector<double>> get_angles_su3(std::vector<su3> &conf_su3) {
 
 std::vector<su3_abelian> get_abelian(std::vector<su3> &conf) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
-
   std::vector<su3_abelian> abelian(data_size);
-
   for (int i = 0; i < data_size; i++) {
+    std::vector<double> angles(3);
+    double sum = 0;
+    for (int c = 0; c < 3; c++) {
+      angles[c] = atan2(conf[i].matrix[c][c].imag, conf[i].matrix[c][c].real);
+      sum += angles[c];
+    }
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
     for (int c = 0; c < 3; c++) {
       abelian[i].matrix[c] =
-          conf[i].matrix[c][c] / conf[i].matrix[c][c].module();
+          complex_t(cos(angles[c] - sum / 3), sin(angles[c] - sum / 3));
     }
   }
-
   return abelian;
 }
 

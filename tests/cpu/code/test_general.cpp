@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su2
+#define MATRIX_TYPE su3_abelian
 
 using namespace std;
 
@@ -35,28 +35,28 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 16;
+  y_size = 16;
+  z_size = 16;
+  t_size = 16;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf1;
   data<MATRIX_TYPE> conf2;
 
-  string conf_path1 = "/home/ilya/soft/lattice/general_code/apps/"
-                      "conf_transform/test/result/conf_monopole_qc2dstag0201";
+  string conf_path1 = "../../confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_0/"
+                      "copies=20/conf_gaugefixed_01001.lime_1";
   // string conf_path1 =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/monopole/su2/"
   //     "qc2dstag/40^4/mu0.00/conf_monopole_0201";
   string conf_path2 =
       "/home/ilya/soft/lattice/general_code/tests/confs/"
       "monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201";
-  string conf_format1 = "double_qc2dstag";
+  string conf_format1 = "ildg";
   string conf_format2 = "double_qc2dstag";
   int bytes_skip = 0;
-  bool convert = 0;
+  bool convert = 1;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
   // vector<float> conf_full = read_full_ml5(conf_path1, 1);
