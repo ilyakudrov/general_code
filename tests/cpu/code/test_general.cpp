@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3_abelian
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -35,28 +35,25 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 16;
-  y_size = 16;
-  z_size = 16;
-  t_size = 16;
+  x_size = 64;
+  y_size = 64;
+  z_size = 64;
+  t_size = 20;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf1;
-  data<MATRIX_TYPE> conf2;
+  // data<MATRIX_TYPE> conf2;
 
-  string conf_path1 = "../../confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_0/"
-                      "copies=20/conf_gaugefixed_01001.lime_1";
+  string conf_path1 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
   // string conf_path1 =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/monopole/su2/"
   //     "qc2dstag/40^4/mu0.00/conf_monopole_0201";
-  string conf_path2 =
-      "/home/ilya/soft/lattice/general_code/tests/confs/"
-      "monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201";
+  string conf_path2 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
   string conf_format1 = "ildg";
-  string conf_format2 = "double_qc2dstag";
+  string conf_format2 = "ildg";
   int bytes_skip = 0;
-  bool convert = 1;
+  bool convert = 0;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
   // vector<float> conf_full = read_full_ml5(conf_path1, 1);
@@ -118,26 +115,26 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
-  std::cout << "plaket " << plaket(conf1.array) << std::endl;
-  std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
-  std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
+  // std::cout << "plaket " << plaket(conf1.array) << std::endl;
+  // std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
+  // std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
   std::cout << "polyakov " << polyakov_loop(conf1.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time << std::endl;
-  start_time = omp_get_wtime();
-  std::cout << "plaket " << plaket(conf2.array) << std::endl;
-  std::cout << "plaket_time " << plaket_time(conf2.array) << std::endl;
-  std::cout << "plaket_space " << plaket_space(conf2.array) << std::endl;
-  std::cout << "polyakov " << polyakov_loop(conf2.array) << std::endl;
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "plaket and staff time: " << search_time << std::endl;
+  // start_time = omp_get_wtime();
+  // std::cout << "plaket " << plaket(conf2.array) << std::endl;
+  // std::cout << "plaket_time " << plaket_time(conf2.array) << std::endl;
+  // std::cout << "plaket_space " << plaket_space(conf2.array) << std::endl;
+  // std::cout << "polyakov " << polyakov_loop(conf2.array) << std::endl;
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // std::cout << "plaket and staff time: " << search_time << std::endl;
 
   // cout << "MAG functional " << MAG_functional_su2(conf1.array) << endl;
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
-      separate_wilson(conf2.array);
+      separate_wilson(conf1.array);
   // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
   // separate_3(conf1.array);
 
@@ -148,8 +145,8 @@ int main(int argc, char *argv[]) {
        << endl;
 
   // on-axis wilson loops
-  int T_min = 1, T_max = 16;
-  int R_min = 1, R_max = 16;
+  int T_min = 1, T_max = 5;
+  int R_min = 1, R_max = 5;
 
   start_time = omp_get_wtime();
 
@@ -159,19 +156,19 @@ int main(int argc, char *argv[]) {
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "on-axis wilson time: " << search_time << std::endl;
-  std::cout << "wilson_loops adjoint:" << std::endl;
+  std::cout << "wilson_loops:" << std::endl;
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
     cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
          << endl;
   }
 
-  std::vector<double> wilson_test =
-      wilson(conf2.array, R_min, R_max, T_min, T_max);
+  // std::vector<double> wilson_test =
+  //     wilson(conf2.array, R_min, R_max, T_min, T_max);
 
-  std::cout << std::endl;
-  for (int i = 0; i < wilson_test.size(); i++) {
-    std::cout << wilson_test[i] << std::endl;
-  }
+  // std::cout << std::endl;
+  // for (int i = 0; i < wilson_test.size(); i++) {
+  //   std::cout << wilson_test[i] << std::endl;
+  // }
 
   // off-axis wilson loops
 

@@ -1,8 +1,11 @@
 #!/bin/bash
 # conf_format_wilson="ildg"
 conf_format_wilson="double"
+# conf_format_wilson="double_qc2dstag"
+# conf_path_wilson="../../../tests/confs/MAG/su2/qc2dstag/40^4/mu0.00/conf_abelian_0201"
+# conf_path_wilson="../../../tests/confs/su2/qc2dstag/40^4/mu0.00/CONF0201"
 #conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt4/conf.0501"
-#conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
+# conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
 # conf_path_wilson="../../../tests/confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_gaugefixed_01001.lime_1"
 # conf_path_wilson="../../../tests/confs/monopoless/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_monopoless_1001_1"
 conf_path_wilson="../../../tests/confs/monopole/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_monopole_1001_1"
@@ -21,12 +24,12 @@ HYP_alpha3=0.5
 APE_alpha=0.6
 APE_enabled=1
 HYP_enabled=1
-APE_steps=50
-calculation_step_APE=50
-calculation_APE_start=0
+APE_steps=11
+calculation_step_APE=10
+calculation_APE_start=1
 calculation_step_HYP=1
-calculation_HYP_start=1
-HYP_steps=0
+calculation_HYP_start=0
+HYP_steps=1
 L_spat=16
 L_time=16
 path_wilson=./result/wilson_loops

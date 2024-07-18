@@ -36,7 +36,8 @@ std::vector<double> read_double_angles(std::string &file_name, int bites_skip) {
   return angles;
 }
 
-void write_double_angles(std::string &file_name, std::vector<double> &angles) {
+void write_double_angles(std::string &file_name,
+                         const std::vector<double> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ofstream stream(file_name);
@@ -59,7 +60,7 @@ read_double_angles_su3(std::string &file_name) {
 }
 
 void write_double_angles_su3(std::string &file_name,
-                             std::vector<std::vector<double>> &angles) {
+                             const std::vector<std::vector<double>> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::ofstream stream(file_name);
@@ -69,7 +70,8 @@ void write_double_angles_su3(std::string &file_name,
   }
 }
 
-void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
+void write_double_su2(std::string &file_name,
+                      const std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   std::ofstream stream(file_name);
   if (!stream.write((char *)&conf_su2[0], data_size * 4 * sizeof(double)))
@@ -77,7 +79,8 @@ void write_double_su2(std::string &file_name, std::vector<su2> &conf_su2) {
   stream.close();
 }
 
-void write_double_su3(std::string &file_name, std::vector<su3> &conf_su3) {
+void write_double_su3(std::string &file_name,
+                      const std::vector<su3> &conf_su3) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   std::ofstream stream(file_name);
   if (!stream.write((char *)&conf_su3[0], data_size * 18 * sizeof(double)))
@@ -85,7 +88,8 @@ void write_double_su3(std::string &file_name, std::vector<su3> &conf_su3) {
   stream.close();
 }
 
-std::vector<std::vector<double>> get_angles_su3(std::vector<su3> &conf_su3) {
+std::vector<std::vector<double>>
+get_angles_su3(const std::vector<su3> &conf_su3) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<std::vector<double>> angles =
@@ -184,7 +188,7 @@ std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
   return angles_merged;
 }
 
-std::vector<su2> get_monopoless(std::vector<su2> &conf_su2,
+std::vector<su2> get_monopoless(const std::vector<su2> &conf_su2,
                                 std::vector<double> &angles_monopole) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
@@ -406,7 +410,7 @@ std::vector<double> make_monopole_angles2(std::vector<double> &angles,
 }
 
 void dirac_plaket_difference_nonzero(
-    std::vector<std::vector<int>> &dirac_plaket,
+    const std::vector<std::vector<int>> &dirac_plaket,
     std::vector<std::vector<int>> &dirac_difference,
     std::vector<std::vector<int>> &dirac_coordinate) {
 
@@ -464,10 +468,11 @@ void dirac_plaket_difference_nonzero(
   SPACE_ITER_END
 }
 
-void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
-                        std::vector<std::vector<int>> &monopole_coordinate,
-                        std::vector<double> &laplace,
-                        std::vector<double> &angles_decomposed, int i, int mu) {
+void decomposition_step(
+    const std::vector<std::vector<int>> &monopole_difference,
+    const std::vector<std::vector<int>> &monopole_coordinate,
+    const std::vector<double> &laplace, std::vector<double> &angles_decomposed,
+    int i, int mu) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
   std::vector<int> laplace_coordinate(4);
@@ -514,8 +519,8 @@ void decomposition_step(std::vector<std::vector<int>> &monopole_difference,
 }
 
 std::vector<double>
-make_monopole_angles1(std::vector<std::vector<int>> &dirac_plakets,
-                      std::vector<double> &laplace) {
+make_monopole_angles1(const std::vector<std::vector<int>> &dirac_plakets,
+                      const std::vector<double> &laplace) {
   link1 link(x_size, y_size, z_size, t_size);
 
   int data_size = 4 * x_size * y_size * z_size * t_size;
@@ -552,11 +557,11 @@ make_monopole_angles1(std::vector<std::vector<int>> &dirac_plakets,
   return angles_decomposed;
 }
 
-void decomposition_step3(std::vector<std::vector<int>> &monopole_difference,
-                         std::vector<std::vector<int>> &monopole_coordinate,
-                         std::vector<double> &laplace,
-                         std::vector<std::vector<double>> &angles_decomposed,
-                         int i, int mu) {
+void decomposition_step3(
+    const std::vector<std::vector<int>> &monopole_difference,
+    const std::vector<std::vector<int>> &monopole_coordinate,
+    const std::vector<double> &laplace,
+    std::vector<std::vector<double>> &angles_decomposed, int i, int mu) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
   std::vector<int> laplace_coordinate(4);
@@ -601,8 +606,8 @@ void decomposition_step3(std::vector<std::vector<int>> &monopole_difference,
 }
 
 std::vector<std::vector<double>>
-make_monopole_angles3(std::vector<std::vector<int>> &dirac_plakets,
-                      std::vector<double> &laplace) {
+make_monopole_angles3(const std::vector<std::vector<int>> &dirac_plakets,
+                      const std::vector<double> &laplace) {
   link1 link(x_size, y_size, z_size, t_size);
 
   int data_size = x_size * y_size * z_size * t_size;
@@ -643,8 +648,8 @@ make_monopole_angles3(std::vector<std::vector<int>> &dirac_plakets,
 }
 
 void decomposition_step(int monopole_difference,
-                        std::vector<int> &monopole_coordinate,
-                        std::vector<double> &laplace,
+                        const std::vector<int> &monopole_coordinate,
+                        const std::vector<double> &laplace,
                         std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -738,7 +743,7 @@ void decomposition_step(int monopole_difference,
 
 std::vector<double>
 make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
-                     std::vector<double> &laplace) {
+                     const std::vector<double> &laplace) {
 
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -782,8 +787,8 @@ make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
 }
 
 void decomposition_step_parallel(int monopole_difference,
-                                 std::vector<int> &monopole_coordinate,
-                                 std::vector<double> &laplace,
+                                 const std::vector<int> &monopole_coordinate,
+                                 const std::vector<double> &laplace,
                                  std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -884,7 +889,8 @@ void decomposition_step_parallel(int monopole_difference,
 }
 
 void decomposition_step_parallel3_simple_positive(
-    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    const std::vector<int> &monopole_coordinate,
+    const std::vector<double> &laplace,
     std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -979,7 +985,8 @@ void decomposition_step_parallel3_simple_positive(
 }
 
 void decomposition_step_parallel3_simple_negative(
-    std::vector<int> &monopole_coordinate, std::vector<double> &laplace,
+    const std::vector<int> &monopole_coordinate,
+    const std::vector<double> &laplace,
     std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -1074,8 +1081,8 @@ void decomposition_step_parallel3_simple_negative(
 }
 
 void decomposition_step_parallel1(int monopole_difference,
-                                  std::vector<int> &monopole_coordinate,
-                                  std::vector<double> &laplace,
+                                  const std::vector<int> &monopole_coordinate,
+                                  const std::vector<double> &laplace,
                                   std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -1148,8 +1155,8 @@ void decomposition_step_parallel1(int monopole_difference,
 }
 
 void decomposition_step_parallel2(int monopole_difference,
-                                  std::vector<int> &monopole_coordinate,
-                                  std::vector<double> &laplace,
+                                  const std::vector<int> &monopole_coordinate,
+                                  const std::vector<double> &laplace,
                                   std::vector<double> &angles_decomposed) {
   std::vector<int> laplace_size = {x_size / 2 + 1, y_size / 2 + 1,
                                    z_size / 2 + 1, t_size / 2 + 1};
@@ -1223,7 +1230,7 @@ void decomposition_step_parallel2(int monopole_difference,
 
 std::vector<double>
 make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
-                              std::vector<double> &laplace) {
+                              const std::vector<double> &laplace) {
 
   link1 link(x_size, y_size, z_size, t_size);
 

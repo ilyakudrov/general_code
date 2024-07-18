@@ -19,8 +19,9 @@ std::vector<double> wilson(const std::vector<T> &array, int r_min, int r_max,
 template <class T>
 std::vector<T> wilson_lines_single(const std::vector<T> &array, int length);
 template <class T>
-double wilson_loop_single_size(std::vector<T> lines1, std::vector<T> lines2,
-                               int mu, int nu, int r1, int r2);
+double wilson_loop_single_size(const std::vector<T> &lines1,
+                               const std::vector<T> &lines2, int mu, int nu,
+                               int r1, int r2);
 
 std::vector<double> read_abelian_fortran(std::string path_abelian);
 
@@ -162,56 +163,58 @@ double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
                     int size_mu1, int size_mu2, int size_nu1, int size_nu2);
 
 template <class T>
-double plaket_time_parallel(std::vector<std::vector<T>> conf);
+double plaket_time_parallel(const std::vector<std::vector<T>> &conf);
 
 template <class T>
-double plaket_space_parallel(std::vector<std::vector<T>> conf);
-
-template <class T> double plaket_parallel(std::vector<std::vector<T>> conf);
+double plaket_space_parallel(const std::vector<std::vector<T>> &conf);
 
 template <class T>
-std::vector<std::vector<T>> separate_wilson(std::vector<T> &conf);
+double plaket_parallel(const std::vector<std::vector<T>> &conf);
 
 template <class T>
-std::vector<T> merge_wilson(std::vector<std::vector<T>> &conf_separated);
+std::vector<std::vector<T>> separate_wilson(const std::vector<T> &conf);
 
 template <class T>
-std::vector<T> wilson_lines(std::vector<T> separated, int length, int size1,
-                            int size2);
+std::vector<T> merge_wilson(const std::vector<std::vector<T>> &conf_separated);
 
 template <class T>
-double wilson_plane(std::vector<T> &wilson_lines_mu,
-                    std::vector<T> &wilson_lines_nu, int size_mu1, int size_mu2,
-                    int size_nu1, int size_nu2, int length_mu, int length_nu);
+std::vector<T> wilson_lines(const std::vector<T> &separated, int length,
+                            int size1, int size2);
 
 template <class T>
-double wilson_loop_test_time(std::vector<std::vector<T>> &wilson_lines,
+double wilson_plane(const std::vector<T> &wilson_lines_mu,
+                    const std::vector<T> &wilson_lines_nu, int size_mu1,
+                    int size_mu2, int size_nu1, int size_nu2, int length_mu,
+                    int length_nu);
+
+template <class T>
+double wilson_loop_test_time(const std::vector<std::vector<T>> &wilson_lines,
                              int length_R, int length_T);
 
 template <class T>
 std::map<std::tuple<int, int>, double>
-wilson_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
+wilson_parallel(const std::vector<std::vector<T>> &conf, int r_min, int r_max,
                 int time_min, int time_max);
 
 template <class T>
 std::map<std::tuple<int, int>, double>
-wilson_gevp_parallel(std::vector<std::vector<T>> conf1,
-                     std::vector<std::vector<T>> conf2, int r_min, int r_max,
-                     int time_min, int time_max);
+wilson_gevp_parallel(const std::vector<std::vector<T>> &conf1,
+                     const std::vector<std::vector<T>> &conf2, int r_min,
+                     int r_max, int time_min, int time_max);
 
 template <class T>
-double wilson_adjoint_plane(std::vector<T> &wilson_lines_mu,
-                            std::vector<T> &wilson_lines_nu, int size_mu1,
+double wilson_adjoint_plane(const std::vector<T> &wilson_lines_mu,
+                            const std::vector<T> &wilson_lines_nu, int size_mu1,
                             int size_mu2, int size_nu1, int size_nu2,
                             int length_mu, int length_nu);
 
 template <class T>
 std::map<std::tuple<int, int>, double>
-wilson_adjoint_parallel(std::vector<std::vector<T>> conf, int r_min, int r_max,
-                        int time_min, int time_max);
+wilson_adjoint_parallel(const std::vector<std::vector<T>> &conf, int r_min,
+                        int r_max, int time_min, int time_max);
 
 template <class T>
 std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(std::vector<std::vector<T>> conf,
-                        std::vector<std::vector<T>> smeared, int r_min,
+wilson_spatial_parallel(const std::vector<std::vector<T>> &conf,
+                        const std::vector<std::vector<T>> &smeared, int r_min,
                         int r_max, int time_min, int time_max);

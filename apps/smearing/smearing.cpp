@@ -44,12 +44,14 @@ int main(int argc, char *argv[]) {
   string path_flux;
   string path_polyakov_correlator;
   string correlator_type;
+  string path_polyakov_loop;
   double HYP_alpha1, HYP_alpha2, HYP_alpha3;
   double APE_alpha;
   bool APE_enabled, HYP_enabled;
   int HYP_steps, APE_steps;
   int L_spat, L_time;
-  bool wilson_enabled, flux_enabled, polyakov_correlator_enabled;
+  bool wilson_enabled, flux_enabled, polyakov_correlator_enabled,
+      polyakov_loop_enabled;
   int calculation_APE_start, calculation_step_APE;
   int calculation_HYP_start, calculation_step_HYP;
   int T_min, T_max, R_min, R_max;
@@ -108,6 +110,8 @@ int main(int argc, char *argv[]) {
       istringstream(string(argv[++i])) >> flux_enabled;
     } else if (string(argv[i]) == "-polyakov_correlator_enabled") {
       istringstream(string(argv[++i])) >> polyakov_correlator_enabled;
+    } else if (string(argv[i]) == "-polyakov_loop_enabled") {
+      istringstream(string(argv[++i])) >> polyakov_loop_enabled;
     } else if (string(argv[i]) == "-save_conf") {
       istringstream(string(argv[++i])) >> save_conf;
     } else if (string(argv[i]) == "-path_wilson") {
@@ -116,6 +120,8 @@ int main(int argc, char *argv[]) {
       path_flux = argv[++i];
     } else if (string(argv[i]) == "-path_polyakov_correlator") {
       path_polyakov_correlator = argv[++i];
+    } else if (string(argv[i]) == "-path_polyakov_loop") {
+      path_polyakov_loop = argv[++i];
     } else if (string(argv[i]) == "-correlator_type") {
       correlator_type = argv[++i];
     } else if (string(argv[i]) == "-T_min") {
@@ -166,9 +172,11 @@ int main(int argc, char *argv[]) {
   cout << "path_wilson " << path_wilson << endl;
   cout << "path_flux " << path_flux << endl;
   cout << "path_polyakov_correlator " << path_polyakov_correlator << endl;
+  cout << "path_polyakov_loop " << path_polyakov_loop << endl;
   cout << "wilson_enabled " << wilson_enabled << endl;
   cout << "flux_enabled " << flux_enabled << endl;
   cout << "polyakov_correlator_enabled " << polyakov_correlator_enabled << endl;
+  cout << "polyakov_loop_enabled " << polyakov_loop_enabled << endl;
   cout << "correlator_type " << correlator_type << endl;
   cout << "save_conf " << save_conf << endl;
   cout << "T_min " << T_min << endl;
@@ -244,10 +252,15 @@ int main(int argc, char *argv[]) {
   // open file
   if (polyakov_correlator_enabled) {
     stream_polyakov_correlator.open(path_polyakov_correlator);
-
     stream_polyakov_correlator.precision(17);
-
     stream_polyakov_correlator << "smearing_step,distance,correlator" << endl;
+  }
+  ofstream stream_polyakov_loop;
+  stream_polyakov_correlator.precision(17);
+  if (polyakov_loop_enabled) {
+    stream_polyakov_loop.open(path_polyakov_loop);
+    stream_polyakov_loop.precision(17);
+    stream_polyakov_loop << "smearing_step,polyakov_loop" << endl;
   }
 
   map<tuple<int, int>, double> wilson_loops;
@@ -257,7 +270,6 @@ int main(int argc, char *argv[]) {
 
   vector<vector<MATRIX_WILSON>> conf_separated =
       separate_wilson(conf_wilson.array);
-
   conf_wilson.array.clear();
   conf_wilson.array.shrink_to_fit();
 
@@ -282,6 +294,8 @@ int main(int argc, char *argv[]) {
       stream_polyakov_correlator << 0 << "," << it->first << "," << it->second
                                  << std::endl;
     }
+  }
+  if (polyakov_correlator_enabled) {
   }
   end_time = omp_get_wtime();
   observables_time += end_time - start_time;

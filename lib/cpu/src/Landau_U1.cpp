@@ -24,7 +24,7 @@
   }                                                                            \
   }
 
-std::vector<double> convert_to_angles(std::vector<su2> conf_su2) {
+std::vector<double> convert_to_angles(const std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<double> conf_abelian;
@@ -37,7 +37,7 @@ std::vector<double> convert_to_angles(std::vector<su2> conf_su2) {
   return conf_abelian;
 }
 
-std::vector<abelian> convert_to_abelian(std::vector<su2> conf_su2) {
+std::vector<abelian> convert_to_abelian(const std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<abelian> conf_abelian;
@@ -50,7 +50,7 @@ std::vector<abelian> convert_to_abelian(std::vector<su2> conf_su2) {
   return conf_abelian;
 }
 
-std::vector<complex_t> convert_to_complex(std::vector<su2> conf_su2) {
+std::vector<complex_t> convert_to_complex(const std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<complex_t> conf_complex;
@@ -69,11 +69,11 @@ std::vector<complex_t> convert_to_complex(std::vector<su2> conf_su2) {
 }
 
 std::vector<double>
-convert_complex_to_angles(std::vector<complex_t> conf_complex) {
+convert_complex_to_angles(const std::vector<complex_t> &conf_complex) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<double> conf_angles;
-  conf_complex.reserve(data_size);
+  conf_angles.reserve(data_size);
 
   double module;
 
@@ -190,7 +190,7 @@ std::vector<double> generate_random_numbers1(int vector_size) {
   return random_numbers;
 }
 
-void heat_bath_test1(abelian &g, abelian &K, double temperature,
+void heat_bath_test1(abelian &g, const abelian &K, double temperature,
                      double &random_numbers) {
   double temp_factor;
   long double temp_exponent;
@@ -212,8 +212,8 @@ void heat_bath_test1(abelian &g, abelian &K, double temperature,
   g = abelian(1, acos(x) - K.phi);
 }
 
-abelian contribution_site_test1(std::vector<abelian> &gauge_abelian,
-                                std::vector<abelian> &conf_abelian, int x,
+abelian contribution_site_test1(const std::vector<abelian> &gauge_abelian,
+                                const std::vector<abelian> &conf_abelian, int x,
                                 int y, int z, int t, int position,
                                 std::vector<int> &shift) {
 
@@ -285,7 +285,7 @@ abelian contribution_site_test1(std::vector<abelian> &gauge_abelian,
 }
 
 void heat_bath_update_test1(std::vector<abelian> &gauge_abelian,
-                            std::vector<abelian> &conf_abelian,
+                            const std::vector<abelian> &conf_abelian,
                             double temperature) {
 
   std::vector<double> random_numbers;
@@ -335,8 +335,9 @@ void normalize_complex(std::vector<complex_t> &gauge_complex) {
   }
 }
 
-double Landau_functional_gauge_abelian(std::vector<abelian> &gauge_abelian,
-                                       std::vector<abelian> &conf_abelian) {
+double
+Landau_functional_gauge_abelian(const std::vector<abelian> &gauge_abelian,
+                                const std::vector<abelian> &conf_abelian) {
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
   abelian tmp;
@@ -356,8 +357,9 @@ double Landau_functional_gauge_abelian(std::vector<abelian> &gauge_abelian,
   return result / (x_size * y_size * z_size * t_size * 4);
 }
 
-double Landau_functional_gauge_angles(std::vector<double> &gauge_angles,
-                                      std::vector<abelian> &conf_abelian) {
+double
+Landau_functional_gauge_angles(const std::vector<double> &gauge_angles,
+                               const std::vector<abelian> &conf_abelian) {
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
   abelian tmp;
@@ -380,8 +382,8 @@ double Landau_functional_gauge_angles(std::vector<double> &gauge_angles,
   return result / (x_size * y_size * z_size * t_size * 4);
 }
 
-double Landau_functional_gauge(std::vector<double> &gauge_angles,
-                               std::vector<double> &conf_angles) {
+double Landau_functional_gauge(const std::vector<double> &gauge_angles,
+                               const std::vector<double> &conf_angles) {
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
   double angle_tmp;
@@ -402,8 +404,9 @@ double Landau_functional_gauge(std::vector<double> &gauge_angles,
   return result / (x_size * y_size * z_size * t_size * 4);
 }
 
-double Landau_functional_gauge_complex(std::vector<complex_t> &gauge_complex,
-                                       std::vector<complex_t> &conf_complex) {
+double
+Landau_functional_gauge_complex(const std::vector<complex_t> &gauge_complex,
+                                const std::vector<complex_t> &conf_complex) {
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
   complex_t tmp;
@@ -426,7 +429,7 @@ double Landau_functional_gauge_complex(std::vector<complex_t> &gauge_complex,
   return result / (x_size * y_size * z_size * t_size * 4);
 }
 
-double Landau_functional(std::vector<su2> &conf_su2) {
+double Landau_functional(const std::vector<su2> &conf_su2) {
   double result = 0;
   for (int i = 0; i < conf_su2.size(); i++) {
     result += conf_su2[i].a0 / sqrt(conf_su2[i].a0 * conf_su2[i].a0 +
@@ -443,7 +446,7 @@ double Landau_functional_abelian(std::vector<abelian> &conf_abelian) {
   return result / conf_abelian.size();
 }
 
-double Landau_functional_complex(std::vector<complex_t> &conf_complex) {
+double Landau_functional_complex(const std::vector<complex_t> &conf_complex) {
   double result = 0;
   for (int i = 0; i < conf_complex.size(); i++) {
     result += conf_complex[i].real;

@@ -109,17 +109,25 @@ int main(int argc, char **argv) {
                          << endl;
   output_stream_monopoles << "color,asymmetry" << endl;
 
-  vector<vector<double>> J_test;
-  for (int i = 0; i < 3; i++) {
-    J_test.push_back(calculate_current_monopole_plakets(monopole_plakets[i]));
-  }
-  vector<double> J_sum(J_test[0].size());
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < J_test[0].size(); j++) {
-      J_sum[j] += J_test[i][j];
-    }
-  }
-
+  // vector<vector<double>> J_test;
+  // for (int i = 0; i < 3; i++) {
+  //   J_test.push_back(calculate_current_monopole_plakets(monopole_plakets[i]));
+  // }
+  // vector<double> J_sum(J_test[0].size());
+  // for (int i = 0; i < 3; i++) {
+  //   for (int j = 0; j < J_test[0].size(); j++) {
+  //     J_sum[j] += J_test[i][j];
+  //   }
+  // }
+  // vector<double> J_sum1(3);
+  // for (int i = 0; i < 3; i++) {
+  //   for (int j = 0; j < J_test[0].size(); j++) {
+  //     J_sum1[i] += abs(J_test[i][j]);
+  //   }
+  // }
+  // std::cout << "current sum: " << J_sum1[0] << " " << J_sum1[1] << " "
+  //           << J_sum1[2] << std::endl;
+  int cluster_len_sum = 0;
   for (int color = 0; color < angles.size(); color++) {
 
     vector<double> J =
@@ -140,8 +148,10 @@ int main(int argc, char **argv) {
     int space_currents = 0;
     int time_currents = 0;
 
+    cluster_len_sum = 0;
     for (int i = 0; i < LL.size(); i++) {
       length = cluster_length(LL[i]);
+      cluster_len_sum += length;
       lengths_mu = length_mu(LL[i]);
 
       currents = currents_directions(LL[i]);
@@ -163,6 +173,8 @@ int main(int argc, char **argv) {
         wrapped_lengths.push_back(length);
       }
     }
+    std::cout << "color: " << color
+              << ", sum of cluster lengths: " << cluster_len_sum << std::endl;
 
     // sort wrapped_lengths and wrappings accordingly
     std::vector<std::size_t> permutations(wrapped_lengths.size());
