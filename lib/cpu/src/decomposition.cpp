@@ -189,7 +189,7 @@ std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
 }
 
 std::vector<su2> get_monopoless(const std::vector<su2> &conf_su2,
-                                std::vector<double> &angles_monopole) {
+                                const std::vector<double> &angles_monopole) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<su2> conf_monopoless(data_size);
@@ -206,7 +206,7 @@ std::vector<su2> get_monopoless(const std::vector<su2> &conf_su2,
 }
 
 void get_monopoless_optimized(std::vector<su2> &conf_su2,
-                              std::vector<double> &angles_monopole) {
+                              const std::vector<double> &angles_monopole) {
   su2 A;
 
   for (int i = 0; i < conf_su2.size(); i++) {
@@ -218,7 +218,7 @@ void get_monopoless_optimized(std::vector<su2> &conf_su2,
 
 void get_monopoless_optimized_su3(
     std::vector<su3> &conf_su3,
-    std::vector<std::vector<double>> &angles_monopole) {
+    const std::vector<std::vector<double>> &angles_monopole) {
   su3 A;
 
   double module;

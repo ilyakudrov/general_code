@@ -1847,11 +1847,9 @@ template abelian
 staples_second(const std::vector<std::vector<abelian>> &smearing_first,
                link1 &link, std::unordered_map<int, int> &indexes, int rho,
                int mu, int nu);
-template abelian
-staples_second_refresh(const std::vector<abelian> &vec, link1 &link, int eta,
-                       int nu,
-                       double alpha3); // staples for refreshing
-                                       // algorythm(refresh link every step)
+template abelian staples_second_refresh(const std::vector<abelian> &vec,
+                                        link1 &link, int eta, int nu,
+                                        double alpha3);
 template abelian
 staples_third(const std::vector<std::vector<abelian>> &smearing_second,
               link1 &link, std::unordered_map<int, int> indexes, int nu,
@@ -2023,8 +2021,7 @@ template void smearing_plane_major_end(std::vector<su3> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su3>> &conf,
                                     double alpha);
-
-std::vector<std::vector<su3>>
+template std::vector<std::vector<su3>>
 smearing_APE_2d_initial(std::vector<std::vector<su3>> &conf, double alpha);
 template void smearing_APE_2d(std::vector<std::vector<su3>> &conf,
                               double alpha);
@@ -2129,7 +2126,7 @@ template void smearing_plane_major_end(std::vector<su3_abelian> &smeared,
 template void smearing_APE_parallel(std::vector<std::vector<su3_abelian>> &conf,
                                     double alpha);
 
-std::vector<std::vector<su3_abelian>>
+template std::vector<std::vector<su3_abelian>>
 smearing_APE_2d_initial(std::vector<std::vector<su3_abelian>> &conf,
                         double alpha);
 template void smearing_APE_2d(std::vector<std::vector<su3_abelian>> &conf,
