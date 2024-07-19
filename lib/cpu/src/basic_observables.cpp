@@ -976,19 +976,19 @@ template <class T> double polyakov_loop(const std::vector<T> &array) {
   return polyakov_loop / (x_size * y_size * z_size * t_size);
 }
 
-// template <class T>
-// double polyakov_loop_parallel(const std::vector<T> &separated) {
-//   std::vector<int> steps = {1, x_size, x_size * y_size,
-//                             x_size * y_size * z_size,
-//                             x_size * y_size * z_size * t_size};
-//   std::map<std::tuple<int, int>, double> wilson_loops;
-
-//   std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
-//   std::vector<T> space_lines;
-//   for (int t = time_min; t <= time_max; t++) {
-//     time_lines[t - time_min] = wilson_lines(conf[3], t, steps[3], steps[4]);
-//   }
-// }
+template <class T>
+double polyakov_loop_parallel(const std::vector<std::vector<T>> &array) {
+  link1 link(x_size, y_size, z_size, t_size);
+  int place;
+  double polyakov_loop = 0;
+#pragma omp parallel for collapse(3) private(link, place) reduction(+: polyakov_loop)
+  ITER_START_ZYX
+  link.move_dir(3);
+  place = link.place / 4;
+  polyakov_loop += link.polyakov_loop(array).tr();
+  ITER_END_3
+  return polyakov_loop / (x_size * y_size * z_size);
+}
 
 template <class T>
 std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
@@ -2238,6 +2238,8 @@ template std::vector<su2> wilson_lines_offaxis_increase(
     const std::vector<su2> &array, const std::vector<su2> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su2> &array);
+template double
+polyakov_loop_parallel(const std::vector<std::vector<su2>> &array);
 template std::vector<double>
 calculate_polyakov_loops_tr(const std::vector<su2> &array);
 template std::vector<double>
@@ -2363,6 +2365,8 @@ template std::vector<abelian> wilson_lines_offaxis_increase(
     const std::vector<int> pattern, const std::vector<int> direction);
 
 template double polyakov_loop(const std::vector<abelian> &array);
+template double
+polyakov_loop_parallel(const std::vector<std::vector<abelian>> &array);
 template std::vector<double>
 calculate_polyakov_loops_tr(const std::vector<abelian> &array);
 template std::vector<double>
@@ -2485,6 +2489,8 @@ template std::vector<su3> wilson_lines_offaxis_increase(
     const std::vector<su3> &array, const std::vector<su3> &lines1,
     const std::vector<int> pattern, const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su3> &array);
+template double
+polyakov_loop_parallel(const std::vector<std::vector<su3>> &array);
 template std::vector<su3>
 calculate_polyakov_loops(const std::vector<su3> &array);
 template std::vector<su3>
@@ -2603,6 +2609,8 @@ wilson_lines_offaxis_increase(const std::vector<su3_abelian> &array,
                               const std::vector<int> pattern,
                               const std::vector<int> direction);
 template double polyakov_loop(const std::vector<su3_abelian> &array);
+template double
+polyakov_loop_parallel(const std::vector<std::vector<su3_abelian>> &array);
 template std::vector<su3_abelian>
 calculate_polyakov_loops(const std::vector<su3_abelian> &array);
 template std::vector<su3_abelian>

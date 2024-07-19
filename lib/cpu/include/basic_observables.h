@@ -110,6 +110,8 @@ std::vector<int> make_offaxis_pattern(const std::vector<int> &line_direction);
 
 // Polyakov loop
 template <class T> double polyakov_loop(const std::vector<T> &array);
+template <class T>
+double polyakov_loop_parallel(const std::vector<std::vector<T>> &array);
 
 // Polyakov_correlator
 template <class T>

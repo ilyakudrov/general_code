@@ -135,6 +135,12 @@ int main(int argc, char *argv[]) {
 
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_wilson(conf1.array);
+  start_time = omp_get_wtime();
+  std::cout << "polyakov_parallel " << polyakov_loop_parallel(conf_separated)
+            << endl;
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "polyakov_parallel time: " << search_time << std::endl;
   // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
   // separate_3(conf1.array);
 

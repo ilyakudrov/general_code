@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
   if (polyakov_loop_enabled) {
     stream_polyakov_loop.open(path_polyakov_loop);
     stream_polyakov_loop.precision(17);
-    stream_polyakov_loop << "smearing_step,polyakov_loop" << endl;
+    stream_polyakov_loop << "HYP_step,polyakov_loop" << endl;
   }
 
   map<tuple<int, int>, double> wilson_loops;
@@ -295,7 +295,9 @@ int main(int argc, char *argv[]) {
                                  << std::endl;
     }
   }
-  if (polyakov_correlator_enabled) {
+  if (polyakov_loop_enabled) {
+    stream_polyakov_loop << 0 << "," << polyakov_loop_parallel(conf_separated)
+                         << std::endl;
   }
   end_time = omp_get_wtime();
   observables_time += end_time - start_time;
@@ -309,26 +311,32 @@ int main(int argc, char *argv[]) {
       smearing_time += end_time - start_time;
 
       start_time = omp_get_wtime();
-      if (polyakov_correlator_enabled &&
-          (HYP_step - calculation_HYP_start) % calculation_step_HYP == 0 &&
+      if ((HYP_step - calculation_HYP_start) % calculation_step_HYP == 0 &&
           HYP_step >= calculation_HYP_start) {
-        if (correlator_type == "singlet") {
-          polyakov_correlator_vec = polyakov_loop_correlator_singlet(
-              conf_separated, polyakov_correlator_D);
-          polyakov_correlator = polyakov_average_directions(
-              polyakov_correlator_vec, polyakov_correlator_D);
-        } else if (correlator_type == "color_average") {
-          polyakov_correlator_vec =
-              polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
-          polyakov_correlator = polyakov_average_directions(
-              polyakov_correlator_vec, polyakov_correlator_D);
-        } else {
-          cout << "invalid correlator_type" << endl;
+        if (polyakov_correlator_enabled) {
+          if (correlator_type == "singlet") {
+            polyakov_correlator_vec = polyakov_loop_correlator_singlet(
+                conf_separated, polyakov_correlator_D);
+            polyakov_correlator = polyakov_average_directions(
+                polyakov_correlator_vec, polyakov_correlator_D);
+          } else if (correlator_type == "color_average") {
+            polyakov_correlator_vec =
+                polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+            polyakov_correlator = polyakov_average_directions(
+                polyakov_correlator_vec, polyakov_correlator_D);
+          } else {
+            cout << "invalid correlator_type" << endl;
+          }
+          for (auto it = polyakov_correlator.begin();
+               it != polyakov_correlator.end(); it++) {
+            stream_polyakov_correlator << HYP_step << "," << it->first << ","
+                                       << it->second << std::endl;
+          }
         }
-        for (auto it = polyakov_correlator.begin();
-             it != polyakov_correlator.end(); it++) {
-          stream_polyakov_correlator << HYP_step << "," << it->first << ","
-                                     << it->second << std::endl;
+        if (polyakov_loop_enabled) {
+          stream_polyakov_loop << HYP_step << ","
+                               << polyakov_loop_parallel(conf_separated)
+                               << std::endl;
         }
       }
       end_time = omp_get_wtime();
