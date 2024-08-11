@@ -414,6 +414,9 @@ int main(int argc, char *argv[]) {
   if (polyakov_correlator_enabled) {
     stream_polyakov_correlator.close();
   }
+  if (polyakov_loop_enabled) {
+    stream_polyakov_loop.close();
+  }
 
   if (save_conf) {
     conf_wilson.array = merge_wilson(conf_separated);

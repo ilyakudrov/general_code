@@ -98,17 +98,13 @@ template <> void data<su3>::read_float(std::string &file_name, int bytes_skip) {
 template <>
 void data<su3_abelian>::read_float(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
-
   std::ifstream stream(file_name);
   std::vector<float> v(data_size * 4);
-
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  array = std::vector<su3_abelian>(data_size);
   stream.ignore(bytes_skip);
-
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
       std::cout << "read_float<su3_abelian> error: " << file_name << std::endl;
-
     for (int j = 0; j < data_size; j++) {
       array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
     }
@@ -125,7 +121,6 @@ void data<abelian>::read_double(std::string &file_name, int bytes_skip) {
   stream.ignore(bytes_skip);
   if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
     std::cout << "read_double<abelian> error: " << file_name << std::endl;
-
   for (int i = 0; i < data_size; i++) {
     array.push_back(abelian(1, (double)v[i]));
   }
@@ -155,17 +150,14 @@ void data<su2>::read_double(std::string &file_name, int bytes_skip) {
 
 template <>
 void data<su3>::read_double(std::string &file_name, int bytes_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  array = std::vector<su3>(data_size);
   std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 18);
-
+  std::vector<double> v(data_size * 18);
   stream.ignore(bytes_skip);
-  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+  if (!stream.read((char *)&v[0], data_size * 18 * sizeof(double)))
     std::cout << "data<su3>::read_double error: " << file_name << std::endl;
-
   long int index = 0;
-
   link1 link(x_size, y_size, z_size, t_size);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
@@ -175,10 +167,8 @@ void data<su3>::read_double(std::string &file_name, int bytes_skip) {
             for (int k = 0; k < 3; k++) {
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
-
                 array[link.place + mu].matrix[k][j] =
                     complex_t(v[index], v[index + 1]);
-
                 index += 2;
               }
             }
@@ -193,17 +183,13 @@ void data<su3>::read_double(std::string &file_name, int bytes_skip) {
 template <>
 void data<su3_abelian>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
-
   std::ifstream stream(file_name);
   std::vector<double> v(data_size);
-
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  array = std::vector<su3_abelian>(data_size);
   stream.ignore(bytes_skip);
-
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
       std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
-
     for (int j = 0; j < data_size; j++) {
       array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
     }
@@ -229,19 +215,16 @@ void data<su3>::read_double_abelian(std::string &file_name, int bytes_skip) {
 template <>
 void data<su3_abelian>::read_double_abelian(std::string &file_name,
                                             int bytes_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  array = std::vector<su3_abelian>(data_size);
   std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 18);
-
+  std::vector<double> v(data_size * 18);
   stream.ignore(bytes_skip);
-  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+  if (!stream.read((char *)&v[0], data_size * 18 * sizeof(double)))
     std::cout << "data<su3_abelian>::read_double_abelian error: " << file_name
               << std::endl;
-
   long int index = 0;
   complex_t complex_tmp;
-
   link1 link(x_size, y_size, z_size, t_size);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
@@ -251,13 +234,11 @@ void data<su3_abelian>::read_double_abelian(std::string &file_name,
             for (int k = 0; k < 3; k++) {
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
-
                 if (k == j) {
                   complex_tmp = complex_t(v[index], v[index + 1]);
                   array[link.place + mu].matrix[j] =
                       complex_tmp / complex_tmp.module();
                 }
-
                 index += 2;
               }
             }
@@ -285,19 +266,16 @@ void data<su2>::read_double_offdiagonal(std::string &file_name,
 template <>
 void data<su3>::read_double_offdiagonal(std::string &file_name,
                                         int bytes_skip) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  array = std::vector<su3>(data_size);
   std::ifstream stream(file_name);
-  std::vector<double> v(data_size1 * 18);
-
+  std::vector<double> v(data_size * 18);
   stream.ignore(bytes_skip);
-  if (!stream.read((char *)&v[0], data_size1 * 18 * sizeof(double)))
+  if (!stream.read((char *)&v[0], data_size * 18 * sizeof(double)))
     std::cout << "data<su3>::read_double_offdiagonal error: " << file_name
               << std::endl;
-
   long int index = 0;
   complex_t complex_tmp;
-
   link1 link(x_size, y_size, z_size, t_size);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
@@ -307,10 +285,8 @@ void data<su3>::read_double_offdiagonal(std::string &file_name,
             for (int k = 0; k < 3; k++) {
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
-
                 array[link.place + mu].matrix[k][j] =
                     complex_t(v[index], v[index + 1]);
-
                 index += 2;
               }
             }
@@ -334,16 +310,12 @@ template <>
 void data<su3_abelian>::read_double_vitaly(std::string &file_name,
                                            int bytes_skip) {
   int lattice_size = x_size * y_size * z_size * t_size;
-
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 3);
-
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  array = std::vector<su3_abelian>(lattice_size * 4);
   stream.ignore(bytes_skip);
-
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
     std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
-
   for (int i = 0; i < lattice_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
@@ -363,17 +335,13 @@ void data<su2>::read_double_vitaly(std::string &file_name, int bytes_skip) {
 template <>
 void data<su3>::read_double_vitaly(std::string &file_name, int bytes_skip) {
   int lattice_size = x_size * y_size * z_size * t_size;
-
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
-
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  array = std::vector<su3>(lattice_size * 4);
   stream.ignore(bytes_skip);
-
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
     std::cout << "data<su3>::read_double_vitaly error: " << file_name
               << std::endl;
-
   for (int i = 0; i < lattice_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
@@ -398,19 +366,14 @@ template <>
 void data<su3_abelian>::read_double_vitaly_abelian(std::string &file_name,
                                                    int bytes_skip) {
   int lattice_size = x_size * y_size * z_size * t_size;
-
   std::ifstream stream(file_name);
   std::vector<double> v(lattice_size * 4 * 18);
-
-  array.reserve(4 * x_size * y_size * z_size * t_size);
+  array = std::vector<su3_abelian>(lattice_size * 4);
   stream.ignore(bytes_skip);
-
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
     std::cout << "data<su3>::read_double_vitaly error: " << file_name
               << std::endl;
-
   complex_t complex_tmp;
-
   for (int i = 0; i < lattice_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
@@ -875,7 +838,7 @@ void get_data(data<su2> &conf_data, std::string file_path,
 }
 
 template <class T>
-std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2) {
+std::vector<T> swap_directions(const std::vector<T> &conf, int dir1, int dir2) {
   std::vector<T> conf1 = conf;
   link1 link2(x_size, y_size, z_size, t_size);
   link1 link3(x_size, y_size, z_size, t_size);
@@ -892,8 +855,13 @@ std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2) {
           coordinates1[dir1] = coordinates1[dir2];
           coordinates1[dir2] = tmp;
           link3.go_update(coordinates1);
-          conf1[link2.place + dir1] = conf[link3.place + dir2];
-          conf1[link2.place + dir2] = conf[link3.place + dir1];
+          conf1[link3.place + dir1] = conf[link2.place + dir2];
+          conf1[link3.place + dir2] = conf[link2.place + dir1];
+          for (int mu = 0; mu < 4; mu++) {
+            if (mu != dir1 && mu != dir2) {
+              conf1[link3.place + mu] = conf[link2.place + mu];
+            }
+          }
         }
       }
     }
@@ -902,17 +870,17 @@ std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2) {
 }
 
 // su2
-template std::vector<su2> swap_directions(std::vector<su2> &conf, int dir1,
-                                          int dir2);
+template std::vector<su2> swap_directions(const std::vector<su2> &conf,
+                                          int dir1, int dir2);
 
 // abelian
-template std::vector<abelian> swap_directions(std::vector<abelian> &conf,
+template std::vector<abelian> swap_directions(const std::vector<abelian> &conf,
                                               int dir1, int dir2);
 
 // su3
-template std::vector<su3> swap_directions(std::vector<su3> &conf, int dir1,
-                                          int dir2);
+template std::vector<su3> swap_directions(const std::vector<su3> &conf,
+                                          int dir1, int dir2);
 
 // su3_abelian
 template std::vector<su3_abelian>
-swap_directions(std::vector<su3_abelian> &conf, int dir1, int dir2);
+swap_directions(const std::vector<su3_abelian> &conf, int dir1, int dir2);

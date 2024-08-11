@@ -129,10 +129,6 @@ int main(int argc, char *argv[]) {
   cout.precision(17);
 
   data<MATRIX_WILSON> conf_wilson;
-
-  vector<double> plaket_time_tr;
-  double plaket_unsmeared;
-
   map<tuple<int, int>, double> wilson_tmp;
   map<tuple<int, int, int, int>, double> wilson_loops;
   vector<vector<MATRIX_WILSON>> conf_separated1;
@@ -141,6 +137,8 @@ int main(int argc, char *argv[]) {
   smearing_APE_time = 0;
   smearing_HYP_time = 0;
   observables_time = 0;
+
+  link1 link(x_size, y_size, z_size, t_size);
 
   for (int dir = 0; dir < N_dir; dir++) {
     get_data(conf_wilson, conf_path_wilson, conf_format_wilson,
@@ -151,8 +149,8 @@ int main(int argc, char *argv[]) {
     conf_separated1 = separate_wilson(conf_wilson.array);
     conf_wilson.array.clear();
     conf_wilson.array.shrink_to_fit();
-    conf_separated2 = conf_separated1;
 
+    conf_separated2 = conf_separated1;
     if (HYP_enabled == 1) {
       start_time = omp_get_wtime();
       for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
@@ -181,7 +179,7 @@ int main(int argc, char *argv[]) {
       if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step >= calculation_APE_start) {
         start_time = omp_get_wtime();
-        wilson_tmp = wilson_gevp_parallel(conf_separated2, conf_separated2,
+        wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
                                           R_min, R_max, T_min, T_max);
         write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
         end_time = omp_get_wtime();
@@ -198,7 +196,6 @@ int main(int argc, char *argv[]) {
 
       if ((APE_step1 - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step1 >= calculation_APE_start) {
-
         start_time = omp_get_wtime();
         wilson_tmp =
             wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
@@ -216,8 +213,8 @@ int main(int argc, char *argv[]) {
 
           if ((APE_step2 - APE_step1) % calculation_step_APE == 0) {
             start_time = omp_get_wtime();
-            wilson_tmp =
-                wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+            wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
+                                              R_min, R_max, T_min, T_max);
             write_wilson_loops(wilson_tmp, wilson_loops, APE_step1, APE_step2);
             end_time = omp_get_wtime();
             observables_time += end_time - start_time;

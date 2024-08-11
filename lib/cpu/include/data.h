@@ -67,5 +67,6 @@ template <class T>
 void get_data(data<T> &conf_data, std::string file_path,
               std::string file_format, int bytes_skip, bool convert);
 
+// only for symmetric lattice
 template <class T>
-std::vector<T> swap_directions(std::vector<T> &conf, int dir1, int dir2);
+std::vector<T> swap_directions(const std::vector<T> &conf, int dir1, int dir2);
