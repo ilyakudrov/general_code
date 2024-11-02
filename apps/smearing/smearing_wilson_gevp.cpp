@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
   string conf_format_wilson;
   string conf_path_wilson;
   string path_wilson;
+  string representation;
   double HYP_alpha1, HYP_alpha2, HYP_alpha3;
   double APE_alpha;
   bool HYP_enabled;
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
       bytes_skip_wilson = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "-conf_path_wilson") {
       conf_path_wilson = argv[++i];
+    } else if (string(argv[i]) == "-representation") {
+      representation = argv[++i];
     } else if (string(argv[i]) == "-convert_wilson") {
       istringstream(string(argv[++i])) >> convert_wilson;
     } else if (string(argv[i]) == "-HYP_alpha1") {
@@ -105,6 +108,7 @@ int main(int argc, char *argv[]) {
 
   cout << "conf_format_wilson " << conf_format_wilson << endl;
   cout << "conf_path_wilson " << conf_path_wilson << endl;
+  cout << "representation " << representation << endl;
   cout << "bytes_skip_wilson " << bytes_skip_wilson << endl;
   cout << "convert_wilson " << convert_wilson << endl;
   cout << "HYP_alpha1 " << HYP_alpha1 << endl;
@@ -164,7 +168,14 @@ int main(int argc, char *argv[]) {
 
     // wilson loops at (0, 0) APE_steps
     start_time = omp_get_wtime();
-    wilson_tmp = wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+    if (representation == "fundamental") {
+      wilson_tmp = wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+    } else if (representation == "adjoint") {
+      wilson_tmp =
+          wilson_adjoint_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+    } else {
+      cout << "wrong representation" << endl;
+    }
     write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
     end_time = omp_get_wtime();
     observables_time += end_time - start_time;
@@ -179,8 +190,15 @@ int main(int argc, char *argv[]) {
       if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step >= calculation_APE_start) {
         start_time = omp_get_wtime();
-        wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
-                                          R_min, R_max, T_min, T_max);
+        if (representation == "fundamental") {
+          wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
+                                            R_min, R_max, T_min, T_max);
+        } else if (representation == "adjoint") {
+          wilson_tmp = wilson_gevp_adjoint_parallel(
+              conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+        } else {
+          cout << "wrong representation" << endl;
+        }
         write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
         end_time = omp_get_wtime();
         observables_time += end_time - start_time;
@@ -197,8 +215,15 @@ int main(int argc, char *argv[]) {
       if ((APE_step1 - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step1 >= calculation_APE_start) {
         start_time = omp_get_wtime();
-        wilson_tmp =
-            wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+        if (representation == "fundamental") {
+          wilson_tmp =
+              wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+        } else if (representation == "adjoint") {
+          wilson_tmp = wilson_adjoint_parallel(conf_separated1, R_min, R_max,
+                                               T_min, T_max);
+        } else {
+          cout << "wrong representation" << endl;
+        }
         write_wilson_loops(wilson_tmp, wilson_loops, APE_step1, APE_step1);
         end_time = omp_get_wtime();
         observables_time += end_time - start_time;
@@ -213,8 +238,15 @@ int main(int argc, char *argv[]) {
 
           if ((APE_step2 - APE_step1) % calculation_step_APE == 0) {
             start_time = omp_get_wtime();
-            wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
-                                              R_min, R_max, T_min, T_max);
+            if (representation == "fundamental") {
+              wilson_tmp = wilson_gevp_parallel(
+                  conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+            } else if (representation == "adjoint") {
+              wilson_tmp = wilson_gevp_adjoint_parallel(
+                  conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+            } else {
+              cout << "wrong representation" << endl;
+            }
             write_wilson_loops(wilson_tmp, wilson_loops, APE_step1, APE_step2);
             end_time = omp_get_wtime();
             observables_time += end_time - start_time;

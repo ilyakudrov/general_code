@@ -26,6 +26,11 @@ complex_t complex_t::mult_by_imag(double x) {
   return complex_t(-imag * x, real * x);
 }
 
+void complex_t::add(double r, double i) {
+  real += r;
+  imag += i;
+}
+
 complex_t complex_t::sqrt_complex() {
   double module = sqrt(sqrt(real * real + imag * imag));
 
@@ -215,10 +220,8 @@ su2 &su2::operator+=(const su2 &A) {
 }
 
 std::ostream &operator<<(std::ostream &os, const su2 &A) {
-  os << "a0 = " << A.a0 << " "
-     << "a1 = " << A.a1 << " "
-     << "a2 = " << A.a2 << " "
-     << "a3 = " << A.a3;
+  os << "a0 = " << A.a0 << " " << "a1 = " << A.a1 << " " << "a2 = " << A.a2
+     << " " << "a3 = " << A.a3;
   return os;
 }
 
@@ -287,8 +290,7 @@ abelian operator%(const abelian &A, const abelian &B) {
 }
 
 std::ostream &operator<<(std::ostream &os, const abelian &A) {
-  os << "r = " << A.r << " "
-     << "phi = " << A.phi << " " << std::endl;
+  os << "r = " << A.r << " " << "phi = " << A.phi << " " << std::endl;
   return os;
 }
 
@@ -879,13 +881,11 @@ double su3_abelian::multiply_tr(const su3_abelian &B) {
 }
 
 double su3_abelian::multiply_conj_tr_adjoint(const su3_abelian &B) {
-  double trace = 0;
   complex_t tmp = complex_t(0, 0);
   for (int i = 0; i < 3; i++) {
-    tmp = matrix[i] ^ B.matrix[i];
-    trace += tmp.real * tmp.real - tmp.imag * tmp.imag;
+    tmp += matrix[i] ^ B.matrix[i];
   }
-  return trace;
+  return tmp.norm2() - 1;
 }
 
 su3_abelian su3_abelian::inverse() {
@@ -1049,8 +1049,7 @@ complex_t su3_angles::tr_complex() {
 double su3_angles::multiply_conj_tr(const su3_angles &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
-    trace +=
-        cos(matrix[i]) * cos(B.matrix[i]) + sin(matrix[i]) * sin(B.matrix[i]);
+    trace += cos(matrix[i] - B.matrix[i]);
   }
   return trace / 3;
 }
@@ -1058,20 +1057,17 @@ double su3_angles::multiply_conj_tr(const su3_angles &B) {
 double su3_angles::multiply_tr(const su3_angles &B) {
   double trace = 0;
   for (int i = 0; i < 3; i++) {
-    trace +=
-        cos(matrix[i]) * cos(B.matrix[i]) - sin(matrix[i]) * sin(B.matrix[i]);
+    trace += cos(matrix[i] + B.matrix[i]);
   }
   return trace / 3;
 }
 
 double su3_angles::multiply_conj_tr_adjoint(const su3_angles &B) {
-  double trace = 0;
-  double tmp;
+  complex_t tmp(0, 0);
   for (int i = 0; i < 3; i++) {
-    tmp = matrix[i] - B.matrix[i];
-    trace += cos(tmp) * cos(tmp) - sin(tmp) * sin(tmp);
+    tmp.add(cos(matrix[i] - B.matrix[i]), sin(matrix[i] - B.matrix[i]));
   }
-  return trace;
+  return tmp.norm2() - 1;
 }
 
 su3_angles su3_angles::inverse() {
@@ -1397,9 +1393,8 @@ double operator*(const spin &A, const spin &B) {
 }
 
 std::ostream &operator<<(std::ostream &os, const spin &A) {
-  os << "a1 = " << A.a1 << " "
-     << "a2 = " << A.a2 << " "
-     << "a3 = " << A.a3 << " ";
+  os << "a1 = " << A.a1 << " " << "a2 = " << A.a2 << " " << "a3 = " << A.a3
+     << " ";
   return os;
 }
 

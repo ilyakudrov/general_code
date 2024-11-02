@@ -205,6 +205,12 @@ wilson_gevp_parallel(const std::vector<std::vector<T>> &conf1,
                      int r_max, int time_min, int time_max);
 
 template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<T>> &conf1,
+                             const std::vector<std::vector<T>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
+
+template <class T>
 double wilson_adjoint_plane(const std::vector<T> &wilson_lines_mu,
                             const std::vector<T> &wilson_lines_nu, int size_mu1,
                             int size_mu2, int size_nu1, int size_nu2,

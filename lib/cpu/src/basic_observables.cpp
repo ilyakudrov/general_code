@@ -1,13 +1,13 @@
 #define DATA_SIZE 4 * x_size *y_size *z_size *t_size
 #define PLACE3_DIR                                                             \
-  (t) * 3 * x_size *y_size *z_size + (z)*3 * x_size *y_size + (y)*3 * x_size + \
-      (x)*3 + dir
+  (t) * 3 * x_size *y_size *z_size + (z) * 3 * x_size *y_size +                \
+      (y) * 3 * x_size + (x) * 3 + dir
 #define PLACE3_LINK_NODIR                                                      \
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
       (link.coordinate[1]) * 3 * x_size + (link.coordinate[0]) * 3
 #define PLACE1_NODIR                                                           \
-  (t) * x_size *y_size *z_size + (z)*x_size *y_size + (y)*x_size + (x)
+  (t) * x_size *y_size *z_size + (z) * x_size *y_size + (y) * x_size + (x)
 #define PLACE_PLAKET_TIME                                                      \
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
@@ -761,8 +761,8 @@ double calculate_wilson_loop_offaxis(const std::vector<T> &time_lines, int time,
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
 
-#pragma omp parallel for collapse(4) private(A, link) \
-    firstprivate(direction) reduction(+:result)
+#pragma omp parallel for collapse(4) private(A, link) firstprivate(direction)  \
+    reduction(+ : result)
   SPACE_ITER_START;
 
   A = time_lines[link.place / 4];
@@ -800,8 +800,8 @@ double calculate_wilson_loop_offaxis_adjoint(
   double result = 0;
   double trace;
 
-#pragma omp parallel for collapse(4) private(A, link) \
-    firstprivate(direction) reduction(+:result)
+#pragma omp parallel for collapse(4) private(A, link) firstprivate(direction)  \
+    reduction(+ : result)
   SPACE_ITER_START;
 
   A = time_lines[link.place / 4];
@@ -981,7 +981,8 @@ double polyakov_loop_parallel(const std::vector<std::vector<T>> &array) {
   link1 link(x_size, y_size, z_size, t_size);
   int place;
   double polyakov_loop = 0;
-#pragma omp parallel for collapse(3) private(link, place) reduction(+: polyakov_loop)
+#pragma omp parallel for collapse(3) private(link, place)                      \
+    reduction(+ : polyakov_loop)
   ITER_START_ZYX
   link.move_dir(3);
   place = link.place / 4;
@@ -1099,9 +1100,11 @@ std::vector<complex_t> calculate_polyakov_loops_tr(
   return polyakov_loops;
 }
 
-#pragma omp declare reduction(vec_double_plus : std::vector<double> : \
-                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
-                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
+#pragma omp declare reduction(                                                 \
+        vec_double_plus : std::vector<double> : std::transform(                \
+                omp_out.begin(), omp_out.end(), omp_in.begin(),                \
+                    omp_out.begin(), std::plus<double>()))                     \
+    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 
 template <class T>
 std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
@@ -1119,9 +1122,9 @@ std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1188,9 +1191,9 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1258,9 +1261,9 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1328,9 +1331,9 @@ polyakov_loop_correlator(const std::vector<std::vector<T>> &conf, int D_max) {
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1397,9 +1400,9 @@ polyakov_loop_correlator(const std::vector<std::vector<su3>> &conf, int D_max) {
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1468,9 +1471,9 @@ polyakov_loop_correlator(const std::vector<std::vector<su3_abelian>> &conf,
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1615,9 +1618,9 @@ std::vector<double> polyakov_loop_correlator_singlet(const std::vector<T> &conf,
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1686,9 +1689,9 @@ polyakov_loop_correlator_singlet(const std::vector<std::vector<T>> &conf,
   int Dx_min;
 
 #pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                             Dx_min)                           \
-    firstprivate(result_size, result_size1) reduction(vec_double_plus          \
-                                                      : correlator)
+                                                 Dx_min)                       \
+    firstprivate(result_size, result_size1)                                    \
+    reduction(vec_double_plus : correlator)
   ITER_START_ZYX
 
   polyakov_tmp = polyakov_loops[link.place / 4];
@@ -1972,6 +1975,41 @@ double wilson_plane_gevp(const std::vector<T> &wilson_lines1_mu,
 }
 
 template <class T>
+double wilson_plane_gevp_adjoint(const std::vector<T> &wilson_lines1_mu,
+                                 const std::vector<T> &wilson_lines2_mu,
+                                 const std::vector<T> &wilson_lines_nu,
+                                 int size_mu1, int size_mu2, int size_nu1,
+                                 int size_nu2, int length_mu, int length_nu) {
+  int data_size = x_size * y_size * z_size * t_size;
+
+  T loops;
+  double result = 0;
+
+#pragma omp parallel for collapse(3) private(loops) reduction(+ : result)
+  for (int k = 0; k < data_size; k += size_nu2) {
+    for (int i = 0; i < size_nu2; i += size_mu2) {
+      for (int j = 0; j < size_mu2; j++) {
+        if (j < size_mu2 - length_mu * size_mu1)
+          loops = wilson_lines1_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j + length_mu * size_mu1];
+        else
+          loops = wilson_lines1_mu[i + k + j] *
+                  wilson_lines_nu[i + k + j - size_mu2 + length_mu * size_mu1];
+        if (i + j < size_nu2 - length_nu * size_nu1)
+          loops = loops ^ wilson_lines2_mu[i + k + j + length_nu * size_nu1];
+        else
+          loops = loops ^
+                  wilson_lines2_mu[i + k + j - size_nu2 + length_nu * size_nu1];
+
+        result += loops.multiply_conj_tr_adjoint(wilson_lines_nu[i + k + j]);
+      }
+    }
+  }
+
+  return result / data_size;
+}
+
+template <class T>
 double wilson_loop_test_time(const std::vector<std::vector<T>> &wilson_lines,
                              int length_R, int length_T) {
 
@@ -2049,6 +2087,44 @@ wilson_gevp_parallel(const std::vector<std::vector<T>> &conf1,
             space_lines1, space_lines2, time_lines[t - time_min], steps[mu],
             steps[mu + 1], steps[3], steps[4], r, t);
         wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane_gevp(
+            space_lines2, space_lines1, time_lines[t - time_min], steps[mu],
+            steps[mu + 1], steps[3], steps[4], r, t);
+      }
+    }
+  }
+
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    it->second = it->second / 6;
+  }
+
+  return wilson_loops;
+}
+
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<T>> &conf1,
+                             const std::vector<std::vector<T>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max) {
+
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::map<std::tuple<int, int>, double> wilson_loops;
+
+  std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
+  std::vector<T> space_lines1, space_lines2;
+  for (int t = time_min; t <= time_max; t++) {
+    time_lines[t - time_min] = wilson_lines(conf1[3], t, steps[3], steps[4]);
+  }
+  for (int r = r_min; r <= r_max; r++) {
+    for (int mu = 0; mu < 3; mu++) {
+      space_lines1 = wilson_lines(conf1[mu], r, steps[mu], steps[mu + 1]);
+      space_lines2 = wilson_lines(conf2[mu], r, steps[mu], steps[mu + 1]);
+      for (int t = time_min; t <= time_max; t++) {
+        wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane_gevp_adjoint(
+            space_lines1, space_lines2, time_lines[t - time_min], steps[mu],
+            steps[mu + 1], steps[3], steps[4], r, t);
+        wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane_gevp_adjoint(
             space_lines2, space_lines1, time_lines[t - time_min], steps[mu],
             steps[mu + 1], steps[3], steps[4], r, t);
       }
@@ -2284,6 +2360,13 @@ template double wilson_plane_gevp(const std::vector<su2> &wilson_lines1_mu,
                                   int size_nu2, int length_mu, int length_nu);
 
 template double
+wilson_plane_gevp_adjoint(const std::vector<su2> &wilson_lines1_mu,
+                          const std::vector<su2> &wilson_lines2_mu,
+                          const std::vector<su2> &wilson_lines_nu, int size_mu1,
+                          int size_mu2, int size_nu1, int size_nu2,
+                          int length_mu, int length_nu);
+
+template double
 wilson_loop_test_time(const std::vector<std::vector<su2>> &wilson_lines,
                       int length_R, int length_T);
 
@@ -2295,6 +2378,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_gevp_parallel(const std::vector<std::vector<su2>> &conf1,
                      const std::vector<std::vector<su2>> &conf2, int r_min,
                      int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<su2>> &conf1,
+                             const std::vector<std::vector<su2>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
 
 template double plaket_plane(const std::vector<su2> &conf_mu,
                              const std::vector<su2> &conf_nu, int size_mu1,
@@ -2412,6 +2500,13 @@ template double wilson_plane_gevp(const std::vector<abelian> &wilson_lines1_mu,
                                   int size_nu2, int length_mu, int length_nu);
 
 template double
+wilson_plane_gevp_adjoint(const std::vector<abelian> &wilson_lines1_mu,
+                          const std::vector<abelian> &wilson_lines2_mu,
+                          const std::vector<abelian> &wilson_lines_nu,
+                          int size_mu1, int size_mu2, int size_nu1,
+                          int size_nu2, int length_mu, int length_nu);
+
+template double
 wilson_loop_test_time(const std::vector<std::vector<abelian>> &wilson_lines,
                       int length_R, int length_T);
 
@@ -2423,6 +2518,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_gevp_parallel(const std::vector<std::vector<abelian>> &conf1,
                      const std::vector<std::vector<abelian>> &conf2, int r_min,
                      int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<abelian>> &conf1,
+                             const std::vector<std::vector<abelian>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
 
 template double plaket_plane(const std::vector<abelian> &conf_mu,
                              const std::vector<abelian> &conf_nu, int size_mu1,
@@ -2526,6 +2626,13 @@ template double wilson_plane_gevp(const std::vector<su3> &wilson_lines1_mu,
                                   int size_nu2, int length_mu, int length_nu);
 
 template double
+wilson_plane_gevp_adjoint(const std::vector<su3> &wilson_lines1_mu,
+                          const std::vector<su3> &wilson_lines2_mu,
+                          const std::vector<su3> &wilson_lines_nu, int size_mu1,
+                          int size_mu2, int size_nu1, int size_nu2,
+                          int length_mu, int length_nu);
+
+template double
 wilson_loop_test_time(const std::vector<std::vector<su3>> &wilson_lines,
                       int length_R, int length_T);
 
@@ -2537,6 +2644,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_gevp_parallel(const std::vector<std::vector<su3>> &conf1,
                      const std::vector<std::vector<su3>> &conf2, int r_min,
                      int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<su3>> &conf1,
+                             const std::vector<std::vector<su3>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
 
 template double plaket_plane(const std::vector<su3> &conf_mu,
                              const std::vector<su3> &conf_nu, int size_mu1,
@@ -2648,6 +2760,13 @@ wilson_plane_gevp(const std::vector<su3_abelian> &wilson_lines1_mu,
                   int length_nu);
 
 template double
+wilson_plane_gevp_adjoint(const std::vector<su3_abelian> &wilson_lines1_mu,
+                          const std::vector<su3_abelian> &wilson_lines2_mu,
+                          const std::vector<su3_abelian> &wilson_lines_nu,
+                          int size_mu1, int size_mu2, int size_nu1,
+                          int size_nu2, int length_mu, int length_nu);
+
+template double
 wilson_loop_test_time(const std::vector<std::vector<su3_abelian>> &wilson_lines,
                       int length_R, int length_T);
 
@@ -2659,6 +2778,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_gevp_parallel(const std::vector<std::vector<su3_abelian>> &conf1,
                      const std::vector<std::vector<su3_abelian>> &conf2,
                      int r_min, int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<su3_abelian>> &conf1,
+                             const std::vector<std::vector<su3_abelian>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
 
 template double plaket_plane(const std::vector<su3_abelian> &conf_mu,
                              const std::vector<su3_abelian> &conf_nu,

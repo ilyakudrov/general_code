@@ -23,6 +23,8 @@ struct complex_t {
 
   complex_t mult_by_imag(double x);
 
+  void add(double r, double i);
+
   complex_t sqrt_complex();
 
   complex_t &operator+=(const complex_t &a);

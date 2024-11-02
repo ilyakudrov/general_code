@@ -35,22 +35,24 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 20;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
 
   std::cout.precision(17);
 
   data<MATRIX_TYPE> conf1;
   // data<MATRIX_TYPE> conf2;
 
-  string conf_path1 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
+  //   string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0175";
+  string conf_path1 = "../../confs/MAG/su3/gluodynamics/24^4/beta6.0/steps_0/"
+                      "copies=100/conf_gaugefixed_0175_53";
   // string conf_path1 =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/monopole/su2/"
   //     "qc2dstag/40^4/mu0.00/conf_monopole_0201";
   string conf_path2 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
-  string conf_format1 = "ildg";
+  string conf_format1 = "double_qc2dstag";
   string conf_format2 = "ildg";
   int bytes_skip = 0;
   bool convert = 0;
@@ -115,9 +117,9 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
-  // std::cout << "plaket " << plaket(conf1.array) << std::endl;
-  // std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
-  // std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
+  std::cout << "plaket " << plaket(conf1.array) << std::endl;
+  std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
+  std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
   std::cout << "polyakov " << polyakov_loop(conf1.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
