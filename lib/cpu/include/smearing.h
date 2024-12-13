@@ -1,7 +1,9 @@
 #pragma once
 
+#include "data.h"
 #include "link.h"
-#include <iostream>
+
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -120,10 +122,8 @@ template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha);
 
 template <class T>
-std::vector<std::vector<T>>
-smearing_APE_2d_initial(std::vector<std::vector<T>> &conf, double alpha);
-template <class T>
-void smearing_APE_2d(std::vector<std::vector<T>> &conf, double alpha);
+void smearing_APE_2d_parallel(std::vector<T> &conf1, std::vector<T> &conf2,
+                              int mu, int nu, double alpha);
 
 template <class T>
 void smearing_plane_HYP_minor(std::vector<T> &smeared, std::vector<T> &conf_mu,

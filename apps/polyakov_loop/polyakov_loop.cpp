@@ -2,11 +2,10 @@
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 
-#include <chrono>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <omp.h>
+#include <sstream>
 
 #ifndef MATRIX
 #define MATRIX su2

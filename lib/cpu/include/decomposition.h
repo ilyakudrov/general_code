@@ -23,6 +23,8 @@ get_angles_su3(const std::vector<su3> &conf_su3);
 
 std::vector<su3_abelian> get_abelian(std::vector<su3> &conf);
 
+std::vector<su3_angles> su3_to_su3_angles(std::vector<su3> &conf);
+
 std::vector<abelian> get_abelian(std::vector<su2> &conf);
 
 std::vector<su3> get_offdiagonal(std::vector<su3> &conf);

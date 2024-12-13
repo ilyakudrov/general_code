@@ -1,5 +1,4 @@
 #include "../../../lib/cpu/include/Landau_U1.h"
-#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/matrix.h"
@@ -8,9 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <map>
 #include <omp.h>
-#include <stdio.h>
 #include <vector>
 
 int x_size;

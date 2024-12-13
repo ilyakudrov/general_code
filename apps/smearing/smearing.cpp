@@ -1,18 +1,20 @@
 #include "../../lib/cpu/include/smearing.h"
 #include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
-#include "../../lib/cpu/include/decomposition.h"
+// #include "../../lib/cpu/include/decomposition.h"
 #include "../../lib/cpu/include/flux_tube.h"
 #include "../../lib/cpu/include/matrix.h"
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <omp.h>
+#include <sstream>
 
-#include "sys/sysinfo.h"
-#include "sys/types.h"
+// #include "sys/sysinfo.h"
+// #include "sys/types.h"
 
-struct sysinfo memInfo;
+// struct sysinfo memInfo;
 
 #ifndef MATRIX_WILSON
 #define MATRIX_WILSON su2

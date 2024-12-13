@@ -4,8 +4,10 @@
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <omp.h>
+#include <sstream>
 
 #ifndef MATRIX
 #define MATRIX su2
@@ -28,7 +30,7 @@ int main(int argc, char *argv[]) {
   string path_wilson;
   string representation;
   int L_spat, L_time;
-  int APE_steps;
+  int APE_start, APE_end, APE_step;
   double alpha;
   int T_min, T_max, R_min, R_max;
   int bytes_skip = 0;
@@ -50,8 +52,12 @@ int main(int argc, char *argv[]) {
       path_wilson = argv[++i];
     } else if (string(argv[i]) == "-representation") {
       representation = argv[++i];
-    } else if (string(argv[i]) == "-APE_steps") {
-      APE_steps = stoi(argv[++i]);
+    } else if (string(argv[i]) == "-APE_start") {
+      APE_start = stoi(argv[++i]);
+    } else if (string(argv[i]) == "-APE_end") {
+      APE_end = stoi(argv[++i]);
+    } else if (string(argv[i]) == "-APE_step") {
+      APE_step = stoi(argv[++i]);
     } else if (string(argv[i]) == "-alpha") {
       alpha = atof(argv[++i]);
     } else if (string(argv[i]) == "-T_min") {
@@ -75,7 +81,9 @@ int main(int argc, char *argv[]) {
   cout << "bytes_skip " << bytes_skip << endl;
   cout << "convert " << convert << endl;
   cout << "alpha " << alpha << endl;
-  cout << "APE_steps " << APE_steps << endl;
+  cout << "APE_start " << APE_start << endl;
+  cout << "APE_end " << APE_end << endl;
+  cout << "APE_step " << APE_step << endl;
   cout << "L_spat " << L_spat << endl;
   cout << "L_time " << L_time << endl;
   cout << "path_wilson " << path_wilson << endl;
@@ -99,7 +107,7 @@ int main(int argc, char *argv[]) {
   // open file
   stream_wilson.open(path_wilson);
 
-  stream_wilson << "time_size,space_size,wilson_loop" << endl;
+  stream_wilson << "smearing_steps,time_size,space_size,wilson_loop" << endl;
 
   vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
 
@@ -109,21 +117,13 @@ int main(int argc, char *argv[]) {
 
   start_time = omp_get_wtime();
 
-  vector<vector<MATRIX>> smeared =
-      smearing_APE_2d_initial(conf_separated, alpha);
+  std::map<std::tuple<int, int, int>, double> wilson_loops =
+      wilson_spatial_3d_parallel(conf_separated, R_min, R_max, T_min, T_max,
+                                 alpha, APE_start, APE_end, APE_step);
 
-  for (int step = 1; step < APE_steps; step++) {
-    smearing_APE_2d(smeared, alpha);
-  }
-
-  map<tuple<int, int>, double> wilson_loops;
-
-  wilson_loops = wilson_spatial_parallel(conf_separated, smeared, R_min, R_max,
-                                         T_min, T_max);
-
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    stream_wilson << get<0>(it->first) << "," << get<1>(it->first) << ","
-                  << it->second << endl;
+  for (const auto &pair : wilson_loops) {
+    stream_wilson << get<0>(pair.first) << "," << get<1>(pair.first) << ","
+                  << get<2>(pair.first) << "," << pair.second << endl;
   }
 
   end_time = omp_get_wtime();

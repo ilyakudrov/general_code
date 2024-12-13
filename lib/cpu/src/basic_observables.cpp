@@ -69,10 +69,11 @@
   }
 
 #include "../include/basic_observables.h"
-#include "../include/flux_tube.h"
 #include "../include/link.h"
+#include "../include/smearing.h"
 
 #include <algorithm>
+#include <fstream>
 #include <numeric>
 #include <omp.h>
 
@@ -2275,6 +2276,89 @@ wilson_spatial_parallel(const std::vector<std::vector<T>> &conf,
   return wilson_loops;
 }
 
+template <class T>
+void wilson_spatial_3d_step(
+    std::map<std::tuple<int, int, int>, double> &wilson_loops,
+    const std::vector<T> &conf_nu, const std::vector<T> &conf_eta, int mu,
+    int nu, int eta, std::vector<std::vector<T>> &quark_lines, int r_min,
+    int r_max, int time_min, int time_max, int smearing) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::vector<T> space_lines;
+  for (int t = time_min; t <= time_max; t++) {
+    for (int r = r_min; r <= r_max; r++) {
+      space_lines = wilson_lines(conf_nu, r, steps[nu], steps[nu + 1]);
+      if (mu < nu) {
+        wilson_loops[{smearing, t, r}] +=
+            wilson_plane(quark_lines[t - time_min], space_lines, steps[mu],
+                         steps[mu + 1], steps[nu], steps[nu + 1], t, r);
+      } else {
+        wilson_loops[{smearing, t, r}] +=
+            wilson_plane(space_lines, quark_lines[t - time_min], steps[nu],
+                         steps[nu + 1], steps[mu], steps[mu + 1], r, t);
+      }
+      space_lines = wilson_lines(conf_eta, r, steps[eta], steps[eta + 1]);
+      if (mu < eta) {
+        wilson_loops[{smearing, t, r}] +=
+            wilson_plane(quark_lines[t - time_min], space_lines, steps[mu],
+                         steps[mu + 1], steps[eta], steps[eta + 1], t, r);
+      } else {
+        wilson_loops[{smearing, t, r}] +=
+            wilson_plane(space_lines, quark_lines[t - time_min], steps[eta],
+                         steps[eta + 1], steps[mu], steps[mu + 1], r, t);
+      }
+    }
+  }
+}
+
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<T>> &conf, int r_min,
+                           int r_max, int time_min, int time_max, double alpha,
+                           int smearing_start, int smearing_end,
+                           int smearing_step) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+
+  std::map<std::tuple<int, int, int>, double> wilson_loops;
+  std::vector<T> space_lines;
+  std::vector<std::vector<T>> quark_lines(time_max - time_min + 1);
+  std::vector<T> smeared1, smeared2;
+
+  for (int nu = 0; nu < 2; nu++) {
+    for (int eta = nu + 1; eta < 3; eta++) {
+      smeared1 = conf[nu];
+      smeared2 = conf[eta];
+      for (int mu = 0; mu < 3; mu++) {
+        if (mu != nu && mu != eta) {
+          for (int t = time_min; t <= time_max; t++) {
+            quark_lines[t - time_min] =
+                wilson_lines(conf[mu], t, steps[mu], steps[mu + 1]);
+          }
+          wilson_spatial_3d_step(wilson_loops, conf[nu], conf[eta], mu, nu, eta,
+                                 quark_lines, r_min, r_max, time_min, time_max,
+                                 0);
+          for (int smearing = 1; smearing <= smearing_end; smearing++) {
+            smearing_APE_2d_parallel(smeared1, smeared2, nu, eta, alpha);
+            if ((smearing - smearing_start) % smearing_step == 0 &&
+                smearing_step >= smearing_start) {
+              wilson_spatial_3d_step(wilson_loops, smeared1, smeared2, mu, nu,
+                                     eta, quark_lines, r_min, r_max, time_min,
+                                     time_max, smearing);
+            }
+          }
+        }
+      }
+    }
+  }
+  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+    it->second = it->second / 6;
+  }
+  return wilson_loops;
+}
+
 // su2
 template double plaket_time(const std::vector<su2> &array);
 template double plaket_space(const std::vector<su2> &array);
@@ -2405,10 +2489,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(const std::vector<std::vector<su2>> &conf, int r_min,
                         int r_max, int time_min, int time_max);
 
-template std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<su2>> &conf,
-                        const std::vector<std::vector<su2>> &smeared, int r_min,
-                        int r_max, int time_min, int time_max);
+template std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<su2>> &conf, int r_min,
+                           int r_max, int time_min, int time_max, double alpha,
+                           int smearing_start, int smearing_end,
+                           int smearing_step);
 
 // abelian
 template double plaket_time(const std::vector<abelian> &array);
@@ -2546,10 +2631,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(const std::vector<std::vector<abelian>> &conf,
                         int r_min, int r_max, int time_min, int time_max);
 
-template std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<abelian>> &conf,
-                        const std::vector<std::vector<abelian>> &smeared,
-                        int r_min, int r_max, int time_min, int time_max);
+template std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<abelian>> &conf,
+                           int r_min, int r_max, int time_min, int time_max,
+                           double alpha, int smearing_start, int smearing_end,
+                           int smearing_step);
 
 // su3
 template double plaket_time(const std::vector<su3> &array);
@@ -2671,10 +2757,11 @@ template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(const std::vector<std::vector<su3>> &conf, int r_min,
                         int r_max, int time_min, int time_max);
 
-template std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<su3>> &conf,
-                        const std::vector<std::vector<su3>> &smeared, int r_min,
-                        int r_max, int time_min, int time_max);
+template std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<su3>> &conf, int r_min,
+                           int r_max, int time_min, int time_max, double alpha,
+                           int smearing_start, int smearing_end,
+                           int smearing_step);
 
 // su3_abelian
 template double plaket_time(const std::vector<su3_abelian> &array);
@@ -2808,7 +2895,138 @@ template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(const std::vector<std::vector<su3_abelian>> &conf,
                         int r_min, int r_max, int time_min, int time_max);
 
+template std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<su3_abelian>> &conf,
+                           int r_min, int r_max, int time_min, int time_max,
+                           double alpha, int smearing_start, int smearing_end,
+                           int smearing_step);
+
+// su3_angles
+template double plaket_time(const std::vector<su3_angles> &array);
+template double plaket_space(const std::vector<su3_angles> &array);
+template double plaket(const std::vector<su3_angles> &array);
+template std::vector<double> wilson(const std::vector<su3_angles> &array,
+                                    int r_min, int r_max, int time_min,
+                                    int time_max);
+template std::vector<su3_angles>
+wilson_lines(const std::vector<su3_angles> &array, int mu, int length);
+template std::vector<su3_angles>
+wilson_line_increase(const std::vector<su3_angles> &array,
+                     const std::vector<su3_angles> &lines, int mu, int length);
+template std::vector<wilson_result>
+wilson_offaxis(const std::vector<su3_angles> &array,
+               const std::vector<std::vector<int>> directions, double r_min,
+               double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_result(const std::vector<su3_angles> &array, double r_min,
+                      double r_max, int time_min, int time_max);
+template std::vector<wilson_result>
+wilson_offaxis_adjoint(const std::vector<su3_angles> &array,
+                       const std::vector<std::vector<int>> directions,
+                       double r_min, double r_max, int time_min, int time_max);
+template std::map<std::tuple<int, double>, double>
+wilson_offaxis_adjoint_result(const std::vector<su3_angles> &array,
+                              double r_min, double r_max, int time_min,
+                              int time_max);
+template double
+calculate_wilson_loop_offaxis(const std::vector<su3_angles> &time_lines,
+                              int time,
+                              const std::vector<su3_angles> &space_lines,
+                              const std::vector<int> &direction);
+template double calculate_wilson_loop_offaxis_adjoint(
+    const std::vector<su3_angles> &time_lines, int time,
+    const std::vector<su3_angles> &space_lines,
+    const std::vector<int> &direction);
+template std::vector<su3_angles>
+wilson_lines_offaxis(const std::vector<su3_angles> &array,
+                     const std::vector<int> pattern);
+template std::vector<su3_angles> wilson_lines_offaxis_increase(
+    const std::vector<su3_angles> &array, const std::vector<su3_angles> &lines1,
+    const std::vector<int> pattern, const std::vector<int> direction);
+template double polyakov_loop(const std::vector<su3_angles> &array);
+template double
+polyakov_loop_parallel(const std::vector<std::vector<su3_angles>> &array);
+template std::vector<su3_angles>
+calculate_polyakov_loops(const std::vector<su3_angles> &array);
+template std::vector<su3_angles>
+calculate_polyakov_loops(const std::vector<std::vector<su3_angles>> &array);
+template std::vector<double>
+polyakov_loop_correlator_singlet(const std::vector<su3_angles> &conf,
+                                 int D_max);
+template std::vector<double> polyakov_loop_correlator_singlet(
+    const std::vector<std::vector<su3_angles>> &conf, int D_max);
+template std::vector<su3_angles>
+wilson_lines_single(const std::vector<su3_angles> &array, int length);
+template double wilson_loop_single_size(const std::vector<su3_angles> &lines1,
+                                        const std::vector<su3_angles> &lines2,
+                                        int mu, int nu, int r1, int r2);
+
+template std::vector<std::vector<su3_angles>>
+separate_wilson(const std::vector<su3_angles> &conf);
+
+template std::vector<su3_angles>
+merge_wilson(const std::vector<std::vector<su3_angles>> &conf_separated);
+
+template std::vector<su3_angles>
+wilson_lines(const std::vector<su3_angles> &separated, int length, int size1,
+             int size2);
+
+template double wilson_plane(const std::vector<su3_angles> &wilson_lines_mu,
+                             const std::vector<su3_angles> &wilson_lines_nu,
+                             int size_mu1, int size_mu2, int size_nu1,
+                             int size_nu2, int length_mu, int length_nu);
+template double
+wilson_plane_gevp(const std::vector<su3_angles> &wilson_lines1_mu,
+                  const std::vector<su3_angles> &wilson_lines2_mu,
+                  const std::vector<su3_angles> &wilson_lines_nu, int size_mu1,
+                  int size_mu2, int size_nu1, int size_nu2, int length_mu,
+                  int length_nu);
+
+template double
+wilson_plane_gevp_adjoint(const std::vector<su3_angles> &wilson_lines1_mu,
+                          const std::vector<su3_angles> &wilson_lines2_mu,
+                          const std::vector<su3_angles> &wilson_lines_nu,
+                          int size_mu1, int size_mu2, int size_nu1,
+                          int size_nu2, int length_mu, int length_nu);
+
+template double
+wilson_loop_test_time(const std::vector<std::vector<su3_angles>> &wilson_lines,
+                      int length_R, int length_T);
+
 template std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<su3_abelian>> &conf,
-                        const std::vector<std::vector<su3_abelian>> &smeared,
+wilson_parallel(const std::vector<std::vector<su3_angles>> &conf, int r_min,
+                int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_parallel(const std::vector<std::vector<su3_angles>> &conf1,
+                     const std::vector<std::vector<su3_angles>> &conf2,
+                     int r_min, int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_parallel(const std::vector<std::vector<su3_angles>> &conf1,
+                             const std::vector<std::vector<su3_angles>> &conf2,
+                             int r_min, int r_max, int time_min, int time_max);
+
+template double plaket_plane(const std::vector<su3_angles> &conf_mu,
+                             const std::vector<su3_angles> &conf_nu,
+                             int size_mu1, int size_mu2, int size_nu1,
+                             int size_nu2);
+
+template double
+plaket_time_parallel(const std::vector<std::vector<su3_angles>> &conf);
+
+template double
+plaket_space_parallel(const std::vector<std::vector<su3_angles>> &conf);
+
+template double
+plaket_parallel(const std::vector<std::vector<su3_angles>> &conf);
+
+template double
+wilson_adjoint_plane(const std::vector<su3_angles> &wilson_lines_mu,
+                     const std::vector<su3_angles> &wilson_lines_nu,
+                     int size_mu1, int size_mu2, int size_nu1, int size_nu2,
+                     int length_mu, int length_nu);
+
+template std::map<std::tuple<int, int>, double>
+wilson_adjoint_parallel(const std::vector<std::vector<su3_angles>> &conf,
                         int r_min, int r_max, int time_min, int time_max);

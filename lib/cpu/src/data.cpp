@@ -1,20 +1,20 @@
 #include "../include/data.h"
+#include "../include/c-lime/lime_fixed_types.h"
+#include "../include/c-lime/lime_reader.h"
 #include "../include/decomposition.h"
 #include "../include/link.h"
-#include <cstring>
 
-#include "../include/c-lime/lime.h"
-#include "../include/c-lime/lime_config.h"
-#include "../include/c-lime/lime_fixed_types.h"
+#include <cstring>
+#include <fstream>
 
 #define PLACE_DATA                                                             \
-  (t) * 4 * x_size *y_size *z_size + (z)*4 * x_size *y_size + (y)*4 * x_size + \
-      (x)*4 + dir - 1
+  (t) * 4 * x_size *y_size *z_size + (z) * 4 * x_size *y_size +                \
+      (y) * 4 * x_size + (x) * 4 + dir - 1
 
 #define PLACE_QC2DSTAG                                                         \
   (dir - 1) * x_size *y_size *z_size *t_size * 4 +                             \
-      (t)*x_size *y_size *z_size * 4 + (z)*x_size *y_size * 4 +                \
-      (y)*x_size * 4 + (x)*4
+      (t) * x_size *y_size *z_size * 4 + (z) * x_size *y_size * 4 +            \
+      (y) * x_size * 4 + (x) * 4
 
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
@@ -112,6 +112,22 @@ void data<su3_abelian>::read_float(std::string &file_name, int bytes_skip) {
 }
 
 template <>
+void data<su3_angles>::read_float(std::string &file_name, int bytes_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ifstream stream(file_name);
+  std::vector<float> v(data_size * 4);
+  array = std::vector<su3_angles>(data_size);
+  stream.ignore(bytes_skip);
+  for (int i = 0; i < 3; i++) {
+    if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
+      std::cout << "read_float<su3_angles> error: " << file_name << std::endl;
+    for (int j = 0; j < data_size; j++) {
+      array[j].matrix[i] = v[j];
+    }
+  }
+}
+
+template <>
 void data<abelian>::read_double(std::string &file_name, int bytes_skip) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   array.clear();
@@ -192,6 +208,22 @@ void data<su3_abelian>::read_double(std::string &file_name, int bytes_skip) {
       std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
     for (int j = 0; j < data_size; j++) {
       array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
+    }
+  }
+}
+
+template <>
+void data<su3_angles>::read_double(std::string &file_name, int bytes_skip) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::ifstream stream(file_name);
+  std::vector<double> v(data_size);
+  array = std::vector<su3_angles>(data_size);
+  stream.ignore(bytes_skip);
+  for (int i = 0; i < 3; i++) {
+    if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
+      std::cout << "read_double<su3_angles> error: " << file_name << std::endl;
+    for (int j = 0; j < data_size; j++) {
+      array[j].matrix[i] = v[j];
     }
   }
 }
@@ -322,6 +354,26 @@ void data<su3_abelian>::read_double_vitaly(std::string &file_name,
         array[i * 4 + mu].matrix[j] =
             complex_t(cos(v[mu * lattice_size * 3 + j * lattice_size + i]),
                       sin(v[mu * lattice_size * 3 + j * lattice_size + i]));
+      }
+    }
+  }
+}
+
+template <>
+void data<su3_angles>::read_double_vitaly(std::string &file_name,
+                                          int bytes_skip) {
+  int lattice_size = x_size * y_size * z_size * t_size;
+  std::ifstream stream(file_name);
+  std::vector<double> v(lattice_size * 4 * 3);
+  array = std::vector<su3_angles>(lattice_size * 4);
+  stream.ignore(bytes_skip);
+  if (!stream.read((char *)&v[0], (lattice_size * 4 * 3) * sizeof(double)))
+    std::cout << "read_double<su3_angles> error: " << file_name << std::endl;
+  for (int i = 0; i < lattice_size; i++) {
+    for (int mu = 0; mu < 4; mu++) {
+      for (int j = 0; j < 3; j++) {
+        array[i * 4 + mu].matrix[j] =
+            v[mu * lattice_size * 3 + j * lattice_size + i];
       }
     }
   }
@@ -482,6 +534,10 @@ template <> void data<abelian>::read_ildg(std::string &file_name) {
 
 template <> void data<su3_abelian>::read_ildg(std::string &file_name) {
   std::cout << "read_ildg<su3_abelian> is not implemented" << std::endl;
+}
+
+template <> void data<su3_angles>::read_ildg(std::string &file_name) {
+  std::cout << "read_ildg<su3_angles> is not implemented" << std::endl;
 }
 
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num) {
@@ -663,14 +719,17 @@ template <> void data<su3>::read_double_qc2dstag(std::string &file_name) {
 }
 
 template <> void data<abelian>::read_double_qc2dstag(std::string &file_name) {
-  std::cout << "there's no implementation implementation for abelian"
-            << std::endl;
+  std::cout << "there's no implementation for abelian" << std::endl;
 }
 
 template <>
 void data<su3_abelian>::read_double_qc2dstag(std::string &file_name) {
-  std::cout << "there's no implementation implementation for su3_abelian"
-            << std::endl;
+  std::cout << "there's no implementation for su3_abelian" << std::endl;
+}
+
+template <>
+void data<su3_angles>::read_double_qc2dstag(std::string &file_name) {
+  std::cout << "there's no implementation for su3_angles" << std::endl;
 }
 
 template <> void data<su2>::write_float(std::string &file_name) {
@@ -770,6 +829,7 @@ template class data<su2>;
 template class data<abelian>;
 template class data<su3>;
 template class data<su3_abelian>;
+template class data<su3_angles>;
 
 template <class T>
 void read_file(data<T> &conf_data, std::string file_path,
@@ -798,6 +858,18 @@ void get_data(data<su3_abelian> &conf_data, std::string file_path,
     data<su3> data_tmp;
     read_file(data_tmp, file_path, file_format, bytes_skip);
     conf_data.array = get_abelian(data_tmp.array);
+  }
+}
+
+template <>
+void get_data(data<su3_angles> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  if (!convert) {
+    read_file(conf_data, file_path, file_format, bytes_skip);
+  } else {
+    data<su3> data_tmp;
+    read_file(data_tmp, file_path, file_format, bytes_skip);
+    conf_data.array = su3_to_su3_angles(data_tmp.array);
   }
 }
 

@@ -1,4 +1,5 @@
 #include "../include/matrix.h"
+
 #include <cmath>
 #include <vector>
 
@@ -1164,7 +1165,7 @@ su3_angles operator*(const su3_angles &A, const complex_t &x) {
 su3_angles operator*(const su3_angles &A, const su3_angles &B) {
   su3_angles C;
   for (int i = 0; i < 3; i++) {
-    C.matrix[i] = A.matrix[i] * B.matrix[i];
+    C.matrix[i] = A.matrix[i] + B.matrix[i];
   }
   return C;
 }

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "math.h"
-#include "matrix.h"
-#include <fstream>
-#include <iostream>
+
+#include <string>
 #include <vector>
 
 // Class which contains array of matrices of type T

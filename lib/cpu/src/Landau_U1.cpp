@@ -2,9 +2,9 @@
 #include "../include/link.h"
 #include "../include/matrix.h"
 
-#include <fstream>
 #include <math.h>
 #include <random>
+#include <tuple>
 #include <vector>
 
 #define SPACE_ITER_START                                                       \

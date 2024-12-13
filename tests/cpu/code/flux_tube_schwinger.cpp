@@ -1,18 +1,16 @@
-#include "../../../lib/cpu/include/basic_observables.h"
+// #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/cpu/include/flux_tube.h"
+// #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <iostream>
-#include <map>
+// #include <iostream>
+// #include <map>
 #include <omp.h>
-#include <stdio.h>
-#include <unordered_map>
-#include <vector>
+// #include <vector>
 
 using namespace std;
 
@@ -55,66 +53,69 @@ int main(int argc, char *argv[]) {
   int T_min = 2;
   int T_max = 4;
 
-  cout << "schwinger wilson flux tube test" << endl;
+  // cout << "schwinger wilson flux tube test" << endl;
 
-  start_time = omp_get_wtime();
+  // start_time = omp_get_wtime();
 
-  std::map<std::tuple<int, int, int>, double> flux_tube_schwinger =
-      flux_schwinger_electric_longitudinal(conf_qc2dstag.array,
-                                           conf_smeared.array, T_min, T_max,
-                                           R_min, R_max, 5);
+  // std::map<std::tuple<int, int, int>, double> flux_tube_schwinger =
+  //     flux_schwinger_electric_longitudinal(conf_qc2dstag.array,
+  //                                          conf_smeared.array, T_min, T_max,
+  //                                          R_min, R_max, 5);
 
-  end_time = clock();
-  search_time = end_time - start_time;
-  cout << "flux_schwinger_electric_longitudinal: "
-       << search_time * 1. / CLOCKS_PER_SEC << endl;
+  // end_time = clock();
+  // search_time = end_time - start_time;
+  // cout << "flux_schwinger_electric_longitudinal: "
+  //      << search_time * 1. / CLOCKS_PER_SEC << endl;
 
-  for (auto it = flux_tube_schwinger.begin(); it != flux_tube_schwinger.end();
-       it++) {
-    cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
-         << ", d = " << get<2>(it->first)
-         << ", longitudinal electric flux_tube schwinger = " << it->second
-         << endl;
-  }
+  // for (auto it = flux_tube_schwinger.begin(); it !=
+  // flux_tube_schwinger.end();
+  //      it++) {
+  //   cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
+  //        << ", d = " << get<2>(it->first)
+  //        << ", longitudinal electric flux_tube schwinger = " << it->second
+  //        << endl;
+  // }
 
-  vector<vector<MATRIX_TYPE>> separated_smeared =
-      separate_wilson(conf_smeared.array);
+  // vector<vector<MATRIX_TYPE>> separated_smeared =
+  //     separate_wilson(conf_smeared.array);
 
-  map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(separated_smeared, R_min, R_max, T_min, T_max);
+  // map<tuple<int, int>, double> wilson_loops =
+  //     wilson_parallel(separated_smeared, R_min, R_max, T_min, T_max);
 
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
-         << ", wilson_loop = " << it->second << endl;
-  }
+  // for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
+  //   cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
+  //        << ", wilson_loop = " << it->second << endl;
+  // }
 
-  map<tuple<int, int, int>, double> flux_tube_wilson;
+  // map<tuple<int, int, int>, double> flux_tube_wilson;
 
-  start_time = omp_get_wtime();
+  // start_time = omp_get_wtime();
 
-  vector<vector<MATRIX_TYPE>> separated_plaket =
-      separate_wilson(conf_qc2dstag.array);
+  // vector<vector<MATRIX_TYPE>> separated_plaket =
+  //     separate_wilson(conf_qc2dstag.array);
 
-  vector<double> plaket_time_tr = plaket_aver_tr_time(separated_plaket);
-  double plaket_time_aver = 0;
-  for (int i = 0; i < plaket_time_tr.size(); i++) {
-    plaket_time_aver += plaket_time_tr[i];
-  }
-  plaket_time_aver = plaket_time_aver / plaket_time_tr.size();
+  // vector<double> plaket_time_tr = plaket_aver_tr_time(separated_plaket);
+  // double plaket_time_aver = 0;
+  // for (int i = 0; i < plaket_time_tr.size(); i++) {
+  //   plaket_time_aver += plaket_time_tr[i];
+  // }
+  // plaket_time_aver = plaket_time_aver / plaket_time_tr.size();
 
-  cout << "plaket time " << plaket_time_aver << endl;
+  // cout << "plaket time " << plaket_time_aver << endl;
 
-  flux_tube_wilson =
-      wilson_plaket_correlator(plaket_time_tr, separated_smeared, T_min, T_max,
-                               R_min, R_max, 5, 0, "longitudinal");
+  // flux_tube_wilson =
+  //     wilson_plaket_correlator(plaket_time_tr, separated_smeared, T_min,
+  //     T_max,
+  //                              R_min, R_max, 5, 0, "longitudinal");
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube longitudinal electric time: " << search_time << endl;
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube longitudinal electric time: " << search_time << endl;
 
-  for (auto it = flux_tube_wilson.begin(); it != flux_tube_wilson.end(); it++) {
-    cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
-         << ", d = " << get<2>(it->first)
-         << ", longitudinal electric flux_tube = " << it->second << endl;
-  }
+  // for (auto it = flux_tube_wilson.begin(); it != flux_tube_wilson.end();
+  // it++) {
+  //   cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)
+  //        << ", d = " << get<2>(it->first)
+  //        << ", longitudinal electric flux_tube = " << it->second << endl;
+  // }
 }

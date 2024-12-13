@@ -5,9 +5,10 @@
 
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <iostream>
-#include <numeric>
 #include <omp.h>
+#include <sstream>
 #include <vector>
 
 #ifndef MATRIX_PLAKET

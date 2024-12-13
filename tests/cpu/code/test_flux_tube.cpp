@@ -10,8 +10,6 @@
 #include <iostream>
 #include <map>
 #include <omp.h>
-#include <stdio.h>
-#include <unordered_map>
 #include <vector>
 
 using namespace std;

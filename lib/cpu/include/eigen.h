@@ -1,7 +1,6 @@
 #pragma once
 
 #include "link.h"
-#include <cmath>
 
 typedef struct scomplex_number {
   double re;

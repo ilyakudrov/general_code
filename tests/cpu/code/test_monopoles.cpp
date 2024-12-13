@@ -1,5 +1,3 @@
-#include "../../../lib/cpu/include/Landau_U1.h"
-#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/loop.h"

@@ -1,15 +1,13 @@
 #include "../../../lib/cpu/include/Landau_U1.h"
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/cpu/include/decomposition.h"
+// #include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/monopoles.h"
+// #include "../../../lib/cpu/include/monopoles.h"
 
 #include <ctime>
-#include <fstream>
 #include <iostream>
 #include <math.h>
-#include <tuple>
 #include <vector>
 
 using namespace std;
@@ -161,24 +159,24 @@ int main(int argc, char *argv[]) {
        << Landau_functional_gauge_complex(gauge_complex, conf_complex) <<
   endl;*/
 
-  conf_angles = convert_to_angles(conf.array);
+  //   conf_angles = convert_to_angles(conf.array);
 
-  std::vector<std::vector<int>> monopole_plaket =
-      calculate_monopole_plaket_singular(conf_angles);
+  //   std::vector<std::vector<int>> monopole_plaket =
+  //       calculate_monopole_plaket_singular(conf_angles);
 
-  std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
-  std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
+  //   std::vector<std::vector<int>> monopole_difference(4, std::vector<int>());
+  //   std::vector<std::vector<int>> monopole_coordinate(4, std::vector<int>());
 
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
+  //   monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
+  //                                      monopole_coordinate);
 
-  for (int mu = 0; mu < 4; mu++) {
-    cout << "monopole difference number " << mu << " "
-         << monopole_difference[mu].size() << endl;
-  }
+  //   for (int mu = 0; mu < 4; mu++) {
+  //     cout << "monopole difference number " << mu << " "
+  //          << monopole_difference[mu].size() << endl;
+  //   }
 
-  gauge_complex = generate_gauge_complex_uniform();
-  conf_complex = convert_to_complex(conf.array);
+  //   gauge_complex = generate_gauge_complex_uniform();
+  //   conf_complex = convert_to_complex(conf.array);
 
   //   start_time = clock();
 
@@ -232,24 +230,24 @@ int main(int argc, char *argv[]) {
 
   conf_angles = convert_complex_to_angles(conf_complex);
 
-  monopole_plaket = calculate_monopole_plaket_singular(conf_angles);
+  //   monopole_plaket = calculate_monopole_plaket_singular(conf_angles);
 
-  for (int mu = 0; mu < 4; mu++) {
+  //   for (int mu = 0; mu < 4; mu++) {
 
-    monopole_difference[mu].clear();
-    monopole_difference[mu].shrink_to_fit();
+  //     monopole_difference[mu].clear();
+  //     monopole_difference[mu].shrink_to_fit();
 
-    monopole_coordinate[mu].clear();
-    monopole_coordinate[mu].shrink_to_fit();
-  }
+  //     monopole_coordinate[mu].clear();
+  //     monopole_coordinate[mu].shrink_to_fit();
+  //   }
 
-  monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
-                                     monopole_coordinate);
+  //   monopole_plaket_difference_nonzero(monopole_plaket, monopole_difference,
+  //                                      monopole_coordinate);
 
-  for (int mu = 0; mu < 4; mu++) {
-    cout << "monopole difference number " << mu << " "
-         << monopole_difference[mu].size() << endl;
-  }
+  //   for (int mu = 0; mu < 4; mu++) {
+  //     cout << "monopole difference number " << mu << " "
+  //          << monopole_difference[mu].size() << endl;
+  //   }
 
   // thermalization digram test
 

@@ -2,15 +2,11 @@
 #include "../include/link.h"
 #include "../include/matrix.h"
 
+#include "stdlib.h"
 #include <algorithm>
-#include <execution>
 #include <omp.h>
 #include <utility>
 #include <vector>
-
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
 
 #define data_size 4 * x_size *y_size *z_size *t_size
 #define PLACE1_LINK_NODIR                                                      \
@@ -681,33 +677,29 @@ void smearing_plane_minor_start_proj(std::vector<T> &smeared,
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                        size_mu2 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
                     .proj();
         }
       }
@@ -748,33 +740,29 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                        size_mu2 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
                     .proj();
         }
       }
@@ -935,34 +923,30 @@ void smearing_plane_major_start_proj(std::vector<T> &smeared,
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (i < size_mu2 - size_mu1) {
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
 
           } else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (i < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                        size_mu2 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
                     .proj();
         }
       }
@@ -1003,34 +987,30 @@ void smearing_plane_major_end(std::vector<T> &smeared,
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (i < size_mu2 - size_mu1) {
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
 
           } else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (i < size_mu2 - size_mu1)
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket *
-                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket *
+                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
           else
             smeared[i + k + j] =
-                ((1 - alpha) * smeared[i + k + j] +
-                 (alpha / 4) *
-                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                        size_mu2 + size_mu1]))
+                (smeared[i + k + j] +
+                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                            size_mu2 + size_mu1]))
                     .proj();
         }
       }
@@ -1066,94 +1046,31 @@ void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
   }
 }
 
-std::map<std::tuple<int, int>, int> indices_map_APE_2d() {
-  std::map<std::tuple<int, int>, int> indices_map;
-
-  int count = 0;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      if (i != j) {
-        indices_map[std::tuple<int, int>(i, j)] = count;
-        count++;
-      }
-    }
-  }
-  return indices_map;
-}
-
 template <class T>
-std::vector<std::vector<T>>
-smearing_APE_2d_initial(std::vector<std::vector<T>> &conf, double alpha) {
-  int vector_size = x_size * y_size * z_size * t_size;
-  std::vector<std::vector<T>> smeared(6, std::vector<T>(vector_size));
-  std::map<std::tuple<int, int>, int> indices_map = indices_map_APE_2d();
-
+void smearing_APE_2d_parallel(std::vector<T> &conf1, std::vector<T> &conf2,
+                              int mu, int nu, double alpha) {
+  std::vector<T> smeared1(conf1.size());
+  std::vector<T> smeared2(conf2.size());
   std::vector<int> steps = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
-
-  // i is quark line direction, j is smeared direction, k is parallel to them
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      if (i != j) {
-        for (int k = 0; k < 3; k++) {
-          if (i != k && j != k) {
-            if (j < k) {
-              smearing_plane_minor_start_proj(
-                  smeared[indices_map[std::tuple<int, int>(i, j)]], conf[j],
-                  conf[k], steps[j], steps[j + 1], steps[k], steps[k + 1],
-                  alpha);
-            } else {
-              smearing_plane_major_start_proj(
-                  smeared[indices_map[std::tuple<int, int>(i, j)]], conf[j],
-                  conf[k], steps[j], steps[j + 1], steps[k], steps[k + 1],
-                  alpha);
-            }
-          }
-        }
-      }
-    }
+  if (mu < nu) {
+    smearing_plane_minor_start_proj(smeared1, conf1, conf2, steps[mu],
+                                    steps[mu + 1], steps[nu], steps[nu + 1],
+                                    alpha);
+    smearing_plane_major_start_proj(smeared2, conf2, conf1, steps[nu],
+                                    steps[nu + 1], steps[mu], steps[mu + 1],
+                                    alpha);
+  } else {
+    smearing_plane_major_start_proj(smeared1, conf1, conf2, steps[mu],
+                                    steps[mu + 1], steps[nu], steps[nu + 1],
+                                    alpha);
+    smearing_plane_minor_start_proj(smeared2, conf2, conf1, steps[nu],
+                                    steps[nu + 1], steps[mu], steps[mu + 1],
+                                    alpha);
   }
-  return smeared;
-}
-
-template <class T>
-void smearing_APE_2d(std::vector<std::vector<T>> &conf, double alpha) {
-  int vector_size = x_size * y_size * z_size * t_size;
-  std::vector<std::vector<T>> smeared(6, std::vector<T>(vector_size));
-  std::map<std::tuple<int, int>, int> indices_map = indices_map_APE_2d();
-
-  std::vector<int> steps = {1, x_size, x_size * y_size,
-                            x_size * y_size * z_size,
-                            x_size * y_size * z_size * t_size};
-
-  // i is quark line direction, j is smeared direction, k is parallel to them
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      if (i != j) {
-        for (int k = 0; k < 3; k++) {
-          if (i != k && j != k) {
-            if (j < k) {
-              smearing_plane_minor_start_proj(
-                  smeared[indices_map[std::tuple<int, int>(i, j)]],
-                  conf[indices_map[std::tuple<int, int>(i, j)]],
-                  conf[indices_map[std::tuple<int, int>(i, k)]], steps[j],
-                  steps[j + 1], steps[k], steps[k + 1], alpha);
-            } else {
-              smearing_plane_major_start_proj(
-                  smeared[indices_map[std::tuple<int, int>(i, j)]],
-                  conf[indices_map[std::tuple<int, int>(i, j)]],
-                  conf[indices_map[std::tuple<int, int>(i, k)]], steps[j],
-                  steps[j + 1], steps[k], steps[k + 1], alpha);
-            }
-          }
-        }
-      }
-    }
-  }
-  for (int i = 0; i < 6; i++) {
-    conf[i] = std::move(smeared[i]);
-  }
+  conf1 = std::move(smeared1);
+  conf2 = std::move(smeared2);
 }
 
 template <class T>
@@ -1817,10 +1734,9 @@ template void smearing_plane_major_end(std::vector<su2> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su2>> &conf,
                                     double alpha);
-template std::vector<std::vector<su2>>
-smearing_APE_2d_initial(std::vector<std::vector<su2>> &conf, double alpha);
-template void smearing_APE_2d(std::vector<std::vector<su2>> &conf,
-                              double alpha);
+template void smearing_APE_2d_parallel(std::vector<su2> &conf1,
+                                       std::vector<su2> &conf2, int mu, int nu,
+                                       double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su2> &smeared,
                                        std::vector<su2> &conf_mu,
@@ -1920,10 +1836,9 @@ template void smearing_plane_major_end(std::vector<abelian> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<abelian>> &conf,
                                     double alpha);
-template std::vector<std::vector<abelian>>
-smearing_APE_2d_initial(std::vector<std::vector<abelian>> &conf, double alpha);
-template void smearing_APE_2d(std::vector<std::vector<abelian>> &conf,
-                              double alpha);
+template void smearing_APE_2d_parallel(std::vector<abelian> &conf1,
+                                       std::vector<abelian> &conf2, int mu,
+                                       int nu, double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<abelian> &smeared,
                                        std::vector<abelian> &conf_mu,
@@ -2021,10 +1936,9 @@ template void smearing_plane_major_end(std::vector<su3> &smeared,
 
 template void smearing_APE_parallel(std::vector<std::vector<su3>> &conf,
                                     double alpha);
-template std::vector<std::vector<su3>>
-smearing_APE_2d_initial(std::vector<std::vector<su3>> &conf, double alpha);
-template void smearing_APE_2d(std::vector<std::vector<su3>> &conf,
-                              double alpha);
+template void smearing_APE_2d_parallel(std::vector<su3> &conf1,
+                                       std::vector<su3> &conf2, int mu, int nu,
+                                       double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3> &smeared,
                                        std::vector<su3> &conf_mu,
@@ -2126,11 +2040,9 @@ template void smearing_plane_major_end(std::vector<su3_abelian> &smeared,
 template void smearing_APE_parallel(std::vector<std::vector<su3_abelian>> &conf,
                                     double alpha);
 
-template std::vector<std::vector<su3_abelian>>
-smearing_APE_2d_initial(std::vector<std::vector<su3_abelian>> &conf,
-                        double alpha);
-template void smearing_APE_2d(std::vector<std::vector<su3_abelian>> &conf,
-                              double alpha);
+template void smearing_APE_2d_parallel(std::vector<su3_abelian> &conf1,
+                                       std::vector<su3_abelian> &conf2, int mu,
+                                       int nu, double alpha);
 
 template void smearing_plane_HYP_minor(std::vector<su3_abelian> &smeared,
                                        std::vector<su3_abelian> &conf_mu,

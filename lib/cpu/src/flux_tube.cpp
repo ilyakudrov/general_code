@@ -1,13 +1,13 @@
 #define data_size 4 * x_size *y_size *z_size *t_size
 #define PLACE3_DIR                                                             \
-  (t) * 3 * x_size *y_size *z_size + (z)*3 * x_size *y_size + (y)*3 * x_size + \
-      (x)*3 + dir
+  (t) * 3 * x_size *y_size *z_size + (z) * 3 * x_size *y_size +                \
+      (y) * 3 * x_size + (x) * 3 + dir
 #define PLACE3_LINK_NODIR                                                      \
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
       (link.coordinate[1]) * 3 * x_size + (link.coordinate[0]) * 3
 #define PLACE1_NODIR                                                           \
-  (t) * x_size *y_size *z_size + (z)*x_size *y_size + (y)*x_size + (x)
+  (t) * x_size *y_size *z_size + (z) * x_size *y_size + (y) * x_size + (x)
 #define PLACE_PLAKET_TIME                                                      \
   (link.coordinate[3]) * 3 * x_size *y_size *z_size +                          \
       (link.coordinate[2]) * 3 * x_size *y_size +                              \
@@ -57,8 +57,6 @@
 #include "../include/basic_observables.h"
 #include "../include/link.h"
 #include <omp.h>
-
-#include <algorithm>
 
 template <class T>
 std::vector<T> calculate_plaket_time_left_down(const std::vector<T> &array) {
@@ -304,9 +302,11 @@ calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
   return vec;
 }
 
-#pragma omp declare reduction(vec_double_plus : std::vector<double> : \
-                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
-                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
+#pragma omp declare reduction(                                                 \
+        vec_double_plus : std::vector<double> : std::transform(                \
+                omp_out.begin(), omp_out.end(), omp_in.begin(),                \
+                    omp_out.begin(), std::plus<double>()))                     \
+    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 
 #define __PARALLEL_COLLAPSE__ 4
 
@@ -327,8 +327,8 @@ std::map<int, double> wilson_plaket_schwinger_longitudinal_l(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A, S, link, d, place) firstprivate(d_ouside) reduction(vec_double_plus  \
-                                                              : correlator)
+        W, A, S, link, d, place) firstprivate(d_ouside)                        \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -450,8 +450,8 @@ std::map<int, double> wilson_plaket_schwinger_longitudinal_tr(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A, S, link, d, place) firstprivate(d_ouside) reduction(vec_double_plus  \
-                                                              : correlator)
+        W, A, S, link, d, place) firstprivate(d_ouside)                        \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -617,9 +617,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_even(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
-    reduction(vec_double_plus                                                  \
-              : correlator)
+        W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                 \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -711,9 +710,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_l_odd(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
-    reduction(vec_double_plus                                                  \
-              : correlator)
+        W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                 \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -819,9 +817,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_even(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
-    reduction(vec_double_plus                                                  \
-              : correlator)
+        W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                 \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {
@@ -882,9 +879,8 @@ std::map<int, double> wilson_plaket_schwinger_electric_transversal_tr_odd(
   int place;
 
 #pragma omp parallel for collapse(__PARALLEL_COLLAPSE__) private(              \
-    W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                     \
-    reduction(vec_double_plus                                                  \
-              : correlator)
+        W, A1, A2, S1, S2, link, d, place) firstprivate(d_max)                 \
+    reduction(vec_double_plus : correlator)
   SPACE_ITER_START
 
   for (int dir = 0; dir < 3; dir++) {

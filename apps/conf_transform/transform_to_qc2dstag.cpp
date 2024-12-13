@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <sstream>
 #include <vector>
 
 #define SPACE_ITER_START                                                       \
@@ -18,8 +19,8 @@
   }
 
 #define PLACE_QC2DSTAG                                                         \
-  dir *x_size *y_size *z_size *t_size + (t)*x_size *y_size *z_size +           \
-      (z)*x_size *y_size + (y)*x_size + x
+  dir *x_size *y_size *z_size *t_size + (t) * x_size *y_size *z_size +         \
+      (z) * x_size *y_size + (y) * x_size + x
 
 #ifndef MATRIX
 #define MATRIX su2

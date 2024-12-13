@@ -1,24 +1,24 @@
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/cpu/include/decomposition.h"
-#include "../../../lib/cpu/include/flux_tube.h"
+// #include "../../../lib/cpu/include/decomposition.h"
+// #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
-#include "../../../lib/cpu/include/mag.h"
+// #include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/monopoles.h"
+// #include "../../../lib/cpu/include/monopoles.h"
 #include "../../../lib/cpu/include/smearing.h"
 
-#include <algorithm>
+// #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <map>
-#include <numeric>
+// #include <numeric>
 #include <omp.h>
-#include <stdio.h>
+// #include <stdio.h>
 #include <tuple>
-#include <unordered_map>
+// #include <unordered_map>
 #include <vector>
 
 int x_size;
@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3
+#define MATRIX_TYPE su3_angles
 
 using namespace std;
 
@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 24;
-  y_size = 24;
-  z_size = 24;
-  t_size = 24;
+  x_size = 40;
+  y_size = 40;
+  z_size = 40;
+  t_size = 40;
 
   std::cout.precision(17);
 
@@ -46,13 +46,13 @@ int main(int argc, char *argv[]) {
   // data<MATRIX_TYPE> conf2;
 
   //   string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0175";
-  string conf_path1 = "../../confs/MAG/su3/gluodynamics/24^4/beta6.0/steps_0/"
-                      "copies=100/conf_gaugefixed_0175_53";
+  string conf_path1 = "../../confs/MAG/su3/gluodynamics/40^4/beta6.4/steps_0/"
+                      "copies=20/s1/conf_gaugefixed_0002_1";
   // string conf_path1 =
   //     "/home/ilya/soft/lattice/general_code/tests/confs/monopole/su2/"
   //     "qc2dstag/40^4/mu0.00/conf_monopole_0201";
   string conf_path2 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
-  string conf_format1 = "double_qc2dstag";
+  string conf_format1 = "double";
   string conf_format2 = "ildg";
   int bytes_skip = 0;
   bool convert = 0;
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
        << endl;
 
   // on-axis wilson loops
-  int T_min = 1, T_max = 5;
-  int R_min = 1, R_max = 5;
+  int T_min = 1, T_max = 20;
+  int R_min = 1, R_max = 20;
 
   start_time = omp_get_wtime();
 

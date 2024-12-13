@@ -9,7 +9,6 @@
 #include <ctime>
 #include <iostream>
 #include <omp.h>
-#include <stdio.h>
 
 #define MATRIX_TYPE su3
 

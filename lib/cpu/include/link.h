@@ -5,13 +5,11 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
-#include "data.h"
 #include "math.h"
 #include "matrix.h"
 #include "stdlib.h"
+
 #include <iostream>
-#include <map>
-#include <unordered_map>
 #include <vector>
 
 // Class link1 goes on a periodic 4D lattice and calculates some obseervables

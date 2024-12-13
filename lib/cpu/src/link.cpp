@@ -1,5 +1,5 @@
 #include "../include/link.h"
-#include "../include/data.h"
+
 #include <cmath>
 
 #define Pi 3.141592653589793238462643383279502884
@@ -630,4 +630,34 @@ template su3_abelian
 link1::wilson_line_single(const std::vector<su3_abelian> &array, int length);
 template su3_abelian
 link1::wilson_line_offaxis(const std::vector<su3_abelian> &array,
+                           const std::vector<int> &pattern);
+
+// su3_angles
+template const su3_angles *
+link1::get_matrix(const std::vector<su3_angles> &array);
+template su3_angles
+link1::plaket_left_down(const std::vector<su3_angles> &array, int mu);
+template su3_angles link1::plaket_left_up(const std::vector<su3_angles> &array,
+                                          int mu);
+template su3_angles
+link1::plaket_right_down(const std::vector<su3_angles> &array, int mu);
+template su3_angles link1::plaket_right_up(const std::vector<su3_angles> &array,
+                                           int mu);
+template su3_angles link1::polyakov_loop(const std::vector<su3_angles> &array);
+template su3_angles
+link1::polyakov_loop(const std::vector<std::vector<su3_angles>> &array);
+template su3_angles link1::wilson_loop(const std::vector<su3_angles> &array,
+                                       int r, int t);
+template su3_angles
+link1::wilson_loop_schwinger(const std::vector<su3_angles> &array, int r,
+                             int t);
+template su3_angles
+link1::wilson_loop_schwinger_opposite(const std::vector<su3_angles> &array,
+                                      int r, int t);
+template su3_angles link1::wilson_line(const std::vector<su3_angles> &array,
+                                       int length);
+template su3_angles
+link1::wilson_line_single(const std::vector<su3_angles> &array, int length);
+template su3_angles
+link1::wilson_line_offaxis(const std::vector<su3_angles> &array,
                            const std::vector<int> &pattern);

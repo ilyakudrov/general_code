@@ -1,16 +1,12 @@
-#include "../../lib/cpu/include/Landau_U1.h"
 #include "../../lib/cpu/include/abelian_projection_su3.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/decomposition.h"
-#include "../../lib/cpu/include/loop.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
 
-#include <chrono>
-#include <fstream>
 #include <iostream>
-#include <map>
 #include <omp.h>
+#include <sstream>
 
 using namespace std;
 

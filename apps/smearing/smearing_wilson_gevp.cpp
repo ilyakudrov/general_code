@@ -1,13 +1,13 @@
 #include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
-#include "../../lib/cpu/include/decomposition.h"
-#include "../../lib/cpu/include/flux_tube.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/smearing.h"
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <omp.h>
+#include <sstream>
 
 #ifndef MATRIX_WILSON
 #define MATRIX_WILSON su2

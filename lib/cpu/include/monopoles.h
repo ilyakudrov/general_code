@@ -3,6 +3,8 @@
 #include "../include/link.h"
 #include "../include/loop.h"
 
+#include <unordered_map>
+
 std::vector<double> read_angles_double_fortran(std::string &file_path);
 std::vector<double> read_angles_double_fortran(std::string &file_path);
 std::vector<double> read_double_fortran_convet_abelian(std::string &file_path);

@@ -1,8 +1,6 @@
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/link.h"
-#include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/smearing.h"
 
@@ -11,12 +9,7 @@
 #include <ctime>
 #include <iostream>
 #include <map>
-#include <numeric>
 #include <omp.h>
-#include <sstream>
-#include <stdio.h>
-#include <tuple>
-#include <unordered_map>
 #include <vector>
 
 int x_size;

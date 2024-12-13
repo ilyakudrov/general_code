@@ -1,8 +1,8 @@
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/gpu/include/general/reduction.h"
+// #include "../../../lib/gpu/include/general/reduction.h"
 #include "../../../lib/gpu/include/observables/plaket.h"
 
-#include "cuda_profiler_api.h"
+// #include "cuda_profiler_api.h"
 
 #define gpuErrchk(ans)                                                         \
   { gpuAssert((ans), __FILE__, __LINE__); }

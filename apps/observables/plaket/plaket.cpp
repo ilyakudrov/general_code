@@ -3,8 +3,10 @@
 #include "../../../lib/cpu/include/matrix.h"
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <omp.h>
+#include <sstream>
 
 #ifndef MATRIX
 #define MATRIX su2

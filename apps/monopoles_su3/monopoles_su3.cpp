@@ -1,15 +1,13 @@
-#include "../../lib/cpu/include/abelian_projection_su3.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
 
 #include <algorithm>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <numeric>
-#include <tuple>
+#include <sstream>
 
 using namespace std;
 

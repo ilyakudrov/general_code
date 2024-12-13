@@ -1,10 +1,9 @@
 #pragma once
 
-#include "data.h"
-#include "link.h"
 #include "matrix.h"
+
+#include <algorithm>
 #include <map>
-#include <unordered_map>
 
 // Plaket
 template <class T> double plaket_time(const std::vector<T> &array);
@@ -222,7 +221,8 @@ wilson_adjoint_parallel(const std::vector<std::vector<T>> &conf, int r_min,
                         int r_max, int time_min, int time_max);
 
 template <class T>
-std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<T>> &conf,
-                        const std::vector<std::vector<T>> &smeared, int r_min,
-                        int r_max, int time_min, int time_max);
+std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_parallel(const std::vector<std::vector<T>> &conf, int r_min,
+                           int r_max, int time_min, int time_max, double alpha,
+                           int smearing_start, int smearing_end,
+                           int smearing_step);

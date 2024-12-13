@@ -3,10 +3,8 @@
 #include "../../lib/cpu/include/decomposition.h"
 #include "../../lib/cpu/include/matrix.h"
 
-#include <chrono>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <omp.h>
 
 using namespace std;

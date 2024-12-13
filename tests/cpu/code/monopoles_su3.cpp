@@ -1,10 +1,8 @@
 #include "../../../lib/cpu/include/abelian_projection_su3.h"
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
-#include "../../../lib/cpu/include/decomposition.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/loop.h"
-#include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/monopoles.h"
 

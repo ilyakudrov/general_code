@@ -4,6 +4,7 @@
 #include "../include/monopoles.h"
 
 #include <ctime>
+#include <fstream>
 #include <math.h>
 #include <omp.h>
 
@@ -127,6 +128,29 @@ std::vector<su3_abelian> get_abelian(std::vector<su3> &conf) {
     }
   }
   return abelian;
+}
+
+std::vector<su3_angles> su3_to_su3_angles(std::vector<su3> &conf) {
+  int data_size = 4 * x_size * y_size * z_size * t_size;
+  std::vector<su3_angles> su3_angles(data_size);
+  for (int i = 0; i < data_size; i++) {
+    std::vector<double> angles(3);
+    double sum = 0;
+    for (int c = 0; c < 3; c++) {
+      angles[c] = atan2(conf[i].matrix[c][c].imag, conf[i].matrix[c][c].real);
+      sum += angles[c];
+    }
+    while (sum >= M_PI) {
+      sum -= 2 * M_PI;
+    }
+    while (sum < -M_PI) {
+      sum += 2 * M_PI;
+    }
+    for (int c = 0; c < 3; c++) {
+      su3_angles[i].matrix[c] = angles[c] - sum / 3;
+    }
+  }
+  return su3_angles;
 }
 
 std::vector<abelian> get_abelian(std::vector<su2> &conf) {
@@ -805,8 +829,8 @@ void decomposition_step_parallel(int monopole_difference,
   angles_place = 0;
 
 #pragma omp parallel for collapse(2) firstprivate(                             \
-    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
-    angles_shift, x_size, monopole_difference, monopole_coordinate)
+        angles_place, laplace_place, laplace_coordinate, laplace_shift,        \
+            angles_shift, x_size, monopole_difference, monopole_coordinate)
   for (int t = 0; t < t_size; t++) {
 
     for (int z = 0; z < z_size; z++) {
@@ -908,7 +932,7 @@ void decomposition_step_parallel3_simple_positive(
 
 #pragma omp parallel for collapse(2)                                           \
     firstprivate(angles_place, laplace_place, laplace_coordinate,              \
-                 laplace_shift, angles_shift, x_size, monopole_coordinate)
+                     laplace_shift, angles_shift, x_size, monopole_coordinate)
   for (int t = 0; t < t_size; t++) {
 
     for (int z = 0; z < z_size; z++) {
@@ -1004,7 +1028,7 @@ void decomposition_step_parallel3_simple_negative(
 
 #pragma omp parallel for collapse(2)                                           \
     firstprivate(angles_place, laplace_place, laplace_coordinate,              \
-                 laplace_shift, angles_shift, x_size, monopole_coordinate)
+                     laplace_shift, angles_shift, x_size, monopole_coordinate)
   for (int t = 0; t < t_size; t++) {
 
     for (int z = 0; z < z_size; z++) {
@@ -1099,8 +1123,8 @@ void decomposition_step_parallel1(int monopole_difference,
   angles_place = 0;
 
 #pragma omp parallel for collapse(2) firstprivate(                             \
-    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
-    angles_shift, x_size, monopole_difference, monopole_coordinate)
+        angles_place, laplace_place, laplace_coordinate, laplace_shift,        \
+            angles_shift, x_size, monopole_difference, monopole_coordinate)
   for (int t = 0; t < t_size; t++) {
 
     for (int z = 0; z < z_size; z++) {
@@ -1173,8 +1197,8 @@ void decomposition_step_parallel2(int monopole_difference,
   angles_place = 0;
 
 #pragma omp parallel for collapse(2) firstprivate(                             \
-    angles_place, laplace_place, laplace_coordinate, laplace_shift,            \
-    angles_shift, x_size, monopole_difference, monopole_coordinate)
+        angles_place, laplace_place, laplace_coordinate, laplace_shift,        \
+            angles_shift, x_size, monopole_difference, monopole_coordinate)
   for (int t = 0; t < t_size; t++) {
 
     for (int z = 0; z < z_size; z++) {

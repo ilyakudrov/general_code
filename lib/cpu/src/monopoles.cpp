@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <link.h>
 #include <numeric>
 
@@ -35,8 +36,8 @@
 
 #define PLACE_QC2DSTAG                                                         \
   (dir - 1) * x_size *y_size *z_size *t_size * 4 +                             \
-      (t)*x_size *y_size *z_size * 4 + (z)*x_size *y_size * 4 +                \
-      (y)*x_size * 4 + (x)*4
+      (t) * x_size *y_size *z_size * 4 + (z) * x_size *y_size * 4 +            \
+      (y) * x_size * 4 + (x) * 4
 
 // read configuration of angles
 std::vector<double> read_angles_float_fortran(std::string &file_path) {
