@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   t_size = 40;
 
   link1 link(x_size, y_size, z_size, t_size);
-  data<su2> conf_qc2dstag;
+  Data::data<su2> conf_qc2dstag;
   std::string path_qc2dstag = "../../confs/qc2dstag/40^4/mu0.05/s0/CONF0201";
 
   double mu_q = 0.05;

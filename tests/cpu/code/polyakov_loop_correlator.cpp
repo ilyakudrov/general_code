@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   std::cout.precision(17);
 
-  data<MATRIX_TYPE> conf;
+  Data::data<MATRIX_TYPE> conf;
   string conf_path =
       "../../confs/Coulomb_su3/QCD/140MeV/nt4/conf_Coulomb_gaugefixed_0501";
   // string conf_path = "../../confs/smeared/QCD/140MeV/nt4/smeared_0501";

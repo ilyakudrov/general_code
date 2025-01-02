@@ -117,8 +117,8 @@ int main(int argc, char *argv[]) {
   z_size = L_spat;
   t_size = L_time;
 
-  data<MATRIX_PLAKET> conf_plaket;
-  data<MATRIX_WILSON> conf_wilson;
+  Data::data<MATRIX_PLAKET> conf_plaket;
+  Data::data<MATRIX_WILSON> conf_wilson;
 
   get_data(conf_plaket, conf_path_plaket, conf_format_plaket, bytes_skip_plaket,
            convert_plaket);

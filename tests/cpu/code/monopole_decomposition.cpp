@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   // std::string path_conf =
   //     "../../confs/su2/mag/qc2dstag/40^4/mu0.00/conf_abelian_0201";
 
-  data<su2> conf_su2;
+  Data::data<su2> conf_su2;
   conf_su2.read_double(path_conf, 0);
 
   string laplacian_path = "../../confs/su2/inverse_laplacian/ALPHA24x24_d.LAT";

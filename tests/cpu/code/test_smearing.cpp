@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
   double alpha_APE = 0.5;
   double stout_rho = 0.15;
 
-  data<MATRIX_TYPE> conf;
-  data<MATRIX_TYPE> smeared;
+  Data::data<MATRIX_TYPE> conf;
+  Data::data<MATRIX_TYPE> smeared;
   // string conf_path =
   //     "../../confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime";
   string conf_path = "../../confs/su3/QCD/140MeV/nt20/conf.0501";

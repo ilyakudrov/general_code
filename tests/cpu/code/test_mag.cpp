@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
 
   std::cout.precision(17);
 
-  data<su2> conf;
+  Data::data<su2> conf;
 
   vector<su2> gauge;
-  data<su2> conf1;
+  Data::data<su2> conf1;
 
   std::vector<spin> spins;
 

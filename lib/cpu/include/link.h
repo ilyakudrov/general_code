@@ -1,16 +1,16 @@
 #pragma once
 
-extern int x_size;
-extern int y_size;
-extern int z_size;
-extern int t_size;
-
 #include "math.h"
 #include "matrix.h"
 #include "stdlib.h"
 
 #include <iostream>
 #include <vector>
+
+extern int x_size;
+extern int y_size;
+extern int z_size;
+extern int t_size;
 
 // Class link1 goes on a periodic 4D lattice and calculates some obseervables
 // can take matrices from vector of matrices in usual order (see data.h)

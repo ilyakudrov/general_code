@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   std::string path_abelian =
       "../../confs/MA_gauge/su2/su2_suzuki/24^4/beta2.4/CON_fxd_MAG_001.LAT";
 
-  data<abelian> conf;
+  Data::data<abelian> conf;
   // data<su2> conf;
   // conf.read_double_convert_abelian(path_abelian, 0);
   // conf.read_double(path_abelian, 0);

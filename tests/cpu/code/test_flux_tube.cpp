@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  data<MATRIX_TYPE> conf_qc2dstag;
-  data<MATRIX_TYPE> conf_smeared;
+  Data::data<MATRIX_TYPE> conf_qc2dstag;
+  Data::data<MATRIX_TYPE> conf_smeared;
   string path_qc2dstag = "../../confs/su2/qc2dstag/40^4/mu0.00/CONF0201";
   string path_smeared = "../../confs/smeared/qc2dstag/40^4/mu0.00/"
                         "HYP0_alpha=1_1_0.5_APE_alpha=0.5/smeared_0201";

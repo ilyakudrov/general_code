@@ -420,8 +420,8 @@ T smearing_second_refresh(const std::vector<T> &vec, link1 &link, int nu,
 }
 
 template <class T>
-std::vector<T> smearing_HYP_refresh(data<T> &conf, double alpha1, double alpha2,
-                                    double alpha3) {
+std::vector<T> smearing_HYP_refresh(Data::data<T> &conf, double alpha1,
+                                    double alpha2, double alpha3) {
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<T> vec(data_size);
   vec = conf.array;
@@ -438,7 +438,7 @@ std::vector<T> smearing_HYP_refresh(data<T> &conf, double alpha1, double alpha2,
 }
 
 template <class T>
-std::vector<T> smearing_APE_refresh(data<T> &conf, double alpha_APE) {
+std::vector<T> smearing_APE_refresh(Data::data<T> &conf, double alpha_APE) {
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<T> vec(data_size);
   vec = conf.array;
@@ -457,7 +457,7 @@ std::vector<T> smearing_APE_refresh(data<T> &conf, double alpha_APE) {
   return vec;
 }
 
-std::vector<su2> smearing_stout(data<su2> &conf, double rho) {
+std::vector<su2> smearing_stout(Data::data<su2> &conf, double rho) {
   link1 link(x_size, y_size, z_size, t_size);
   std::vector<su2> vec(data_size);
   vec = conf.array;
@@ -471,7 +471,7 @@ std::vector<su2> smearing_stout(data<su2> &conf, double rho) {
   return vec;
 }
 
-su2 stout_factor(data<su2> &conf, link1 &link, double rho) {
+su2 stout_factor(Data::data<su2> &conf, link1 &link, double rho) {
   su2 A;
   su2 B;
   su2 C;
@@ -495,7 +495,7 @@ su2 stout_factor(data<su2> &conf, link1 &link, double rho) {
   return B;
 }
 
-su2 stout_omega(data<su2> &conf, link1 &link, double rho) {
+su2 stout_omega(Data::data<su2> &conf, link1 &link, double rho) {
   int dir = link.direction;
   su2 A;
   su2 B(0., 0., 0., 0.);
@@ -722,14 +722,30 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
         if (i < size_nu2 - size_nu1) {
+          if (i == 0 && k == 0 && j == 0) {
+            std::cout << "plane 0" << std::endl;
+            std::cout << size_nu1 << std::endl;
+            std::cout << conf_nu[i + k + j] << std::endl;
+            std::cout << "conf_mu[i + k + j + size_nu1]" << std::endl;
+            std::cout << conf_mu[i + k + j + size_nu1] << std::endl;
+          }
           bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
         } else
           bracket =
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
         if (j < size_mu2 - size_mu1) {
+          if (i == 0 && k == 0 && j == 0) {
+            std::cout << "plane 1" << std::endl;
+            std::cout << alpha << std::endl;
+            std::cout << bracket << std::endl;
+            std::cout << conf_nu[i + k + j + size_mu1] << std::endl;
+          }
           smeared[i + k + j] =
               smeared[i + k + j] +
               alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+          if (i == 0 && k == 0 && j == 0) {
+            std::cout << smeared[i + k + j] << std::endl;
+          }
         } else
           smeared[i + k + j] =
               smeared[i + k + j] +
@@ -738,12 +754,32 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
         if (i >= size_nu1) {
           bracket =
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
-          if (j < size_mu2 - size_mu1)
+          if (j < size_mu2 - size_mu1) {
+            if (i + k + j == x_size * y_size) {
+              std::cout << "plane 2 0" << std::endl;
+              std::cout << smeared[i + k + j] << std::endl;
+              std::cout << bracket << std::endl;
+              std::cout << conf_nu[i + k + j + size_mu1 - size_nu1]
+                        << std::endl;
+              std::cout << smeared[i + k + j] +
+                               alpha *
+                                   (bracket *
+                                    conf_nu[i + k + j + size_mu1 - size_nu1])
+                        << std::endl;
+              std::cout << (smeared[i + k + j] +
+                            alpha * (bracket *
+                                     conf_nu[i + k + j + size_mu1 - size_nu1]))
+                               .proj()
+                        << std::endl;
+            }
             smeared[i + k + j] =
                 (smeared[i + k + j] +
                  alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
-          else
+            if (i + k + j == x_size * y_size) {
+              std::cout << smeared[i + k + j] << std::endl;
+            }
+          } else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
                  alpha * (bracket *
@@ -752,13 +788,17 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
-          if (j < size_mu2 - size_mu1)
+          if (j < size_mu2 - size_mu1) {
             smeared[i + k + j] =
                 (smeared[i + k + j] +
                  alpha * (bracket *
                           conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
-          else
+            if (i + k + j == x_size * y_size) {
+              std::cout << "plane 2 1" << std::endl;
+              std::cout << smeared[i + k + j] << std::endl;
+            }
+          } else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
                  alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
@@ -768,6 +808,8 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
       }
     }
   }
+  std::cout << "minor_end" << std::endl;
+  std::cout << smeared[x_size * y_size] << std::endl;
 }
 
 template <class T>
@@ -1022,20 +1064,35 @@ template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
   std::vector<std::vector<T>> smeared(3, std::vector<T>(conf[0].size()));
 
+  std::cout << 0 << std::endl;
+  std::cout << conf[0][0] << std::endl;
   smearing_plane_minor_start(smeared[0], conf[0], conf[1], 1, x_size, x_size,
                              x_size * y_size, alpha);
+  std::cout << 1 << std::endl;
+  std::cout << smeared[0][x_size * y_size] << std::endl;
   smearing_plane_minor_end(smeared[0], conf[0], conf[2], 1, x_size,
                            x_size * y_size, x_size * y_size * z_size, alpha);
+  std::cout << 2 << std::endl;
+  std::cout << "smeared[0][x_size * y_size]" << std::endl;
+  std::cout << smeared[0][x_size * y_size] << std::endl;
   smearing_plane_major_start(smeared[1], conf[1], conf[0], x_size,
                              x_size * y_size, 1, x_size, alpha);
+  // std::cout << 3 << std::endl;
+  // std::cout << smeared[1][0] << std::endl;
   smearing_plane_minor_end(smeared[1], conf[1], conf[2], x_size,
                            x_size * y_size, x_size * y_size,
                            x_size * y_size * z_size, alpha);
+  // std::cout << 4 << std::endl;
+  // std::cout << smeared[1][0] << std::endl;
   smearing_plane_major_start(smeared[2], conf[2], conf[0], x_size * y_size,
                              x_size * y_size * z_size, 1, x_size, alpha);
+  // std::cout << 5 << std::endl;
+  // std::cout << smeared[2][0] << std::endl;
   smearing_plane_major_end(smeared[2], conf[2], conf[1], x_size * y_size,
                            x_size * y_size * z_size, x_size, x_size * y_size,
                            alpha);
+  // std::cout << 6 << std::endl;
+  // std::cout << smeared[2][0] << std::endl;
 
   for (int i = 0; i < 3; i++) {
     conf[i] = std::move(smeared[i]);
@@ -1700,10 +1757,10 @@ template su2 smearing_second_refresh(const std::vector<su2> &vec, link1 &link,
                                      int nu, double alpha2,
                                      double alpha3); // refresh link every step
 template std::vector<su2>
-smearing_HYP_refresh(data<su2> &conf, double alpha1, double alpha2,
+smearing_HYP_refresh(Data::data<su2> &conf, double alpha1, double alpha2,
                      double alpha3); // refresh link every step
 template std::vector<su2>
-smearing_APE_refresh(data<su2> &conf,
+smearing_APE_refresh(Data::data<su2> &conf,
                      double alpha_APE); // refresh link every step
 
 template std::vector<std::vector<su2>>
@@ -1802,10 +1859,10 @@ smearing_second_refresh(const std::vector<abelian> &vec, link1 &link, int nu,
                         double alpha2,
                         double alpha3); // refresh link every step
 template std::vector<abelian>
-smearing_HYP_refresh(data<abelian> &conf, double alpha1, double alpha2,
+smearing_HYP_refresh(Data::data<abelian> &conf, double alpha1, double alpha2,
                      double alpha3); // refresh link every step
 template std::vector<abelian>
-smearing_APE_refresh(data<abelian> &conf,
+smearing_APE_refresh(Data::data<abelian> &conf,
                      double alpha_APE); // refresh link every step
 
 template std::vector<std::vector<abelian>>
@@ -1902,10 +1959,10 @@ template su3 smearing_second_refresh(const std::vector<su3> &vec, link1 &link,
                                      int nu, double alpha2,
                                      double alpha3); // refresh link every step
 template std::vector<su3>
-smearing_HYP_refresh(data<su3> &conf, double alpha1, double alpha2,
+smearing_HYP_refresh(Data::data<su3> &conf, double alpha1, double alpha2,
                      double alpha3); // refresh link every step
 template std::vector<su3>
-smearing_APE_refresh(data<su3> &conf,
+smearing_APE_refresh(Data::data<su3> &conf,
                      double alpha_APE); // refresh link every step
 
 template std::vector<std::vector<su3>>
@@ -2007,10 +2064,11 @@ smearing_second_refresh(const std::vector<su3_abelian> &vec, link1 &link,
                         int nu, double alpha2,
                         double alpha3); // refresh link every step
 template std::vector<su3_abelian>
-smearing_HYP_refresh(data<su3_abelian> &conf, double alpha1, double alpha2,
+smearing_HYP_refresh(Data::data<su3_abelian> &conf, double alpha1,
+                     double alpha2,
                      double alpha3); // refresh link every step
 template std::vector<su3_abelian>
-smearing_APE_refresh(data<su3_abelian> &conf,
+smearing_APE_refresh(Data::data<su3_abelian> &conf,
                      double alpha_APE); // refresh link every step
 
 template std::vector<std::vector<su3_abelian>>

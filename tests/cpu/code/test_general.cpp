@@ -26,7 +26,7 @@ int y_size;
 int z_size;
 int t_size;
 
-#define MATRIX_TYPE su3_angles
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
   std::cout.precision(17);
 
-  data<MATRIX_TYPE> conf1;
+  Data::data<MATRIX_TYPE> conf1;
   // data<MATRIX_TYPE> conf2;
 
   //   string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0175";

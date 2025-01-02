@@ -130,9 +130,9 @@ int main(int argc, char *argv[]) {
   cout << "L_time " << L_time << endl;
   cout << endl;
 
-  data<MATRIX> conf;
+  Data::data<MATRIX> conf;
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
-  data<su2> conf_qc2dstag;
+  Data::data<su2> conf_qc2dstag;
   conf_qc2dstag.array = conf_transform_qc2dstag(conf.array);
   conf_qc2dstag.write_double(conf_path_output);
 }

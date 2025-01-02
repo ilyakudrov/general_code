@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
 
-  data<abelian> conf;
+  Data::data<abelian> conf;
 
   // read configuration
   get_data(conf, path_conf, conf_format, bytes_skip, convert);

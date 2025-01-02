@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
 
-  data<su2> conf_su2;
+  Data::data<su2> conf_su2;
 
   // read configuration
   get_data(conf_su2, path_conf, conf_format, bytes_skip, 0);

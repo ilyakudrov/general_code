@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   cout << "t_size " << t_size << endl;
   cout << "ml5_conf_num " << ml5_conf_num << endl;
 
-  data<su3> conf_su3;
+  Data::data<su3> conf_su3;
 
   // read configuration
   if (std::string(conf_format) == "float") {

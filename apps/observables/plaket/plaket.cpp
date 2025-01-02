@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  data<MATRIX> conf;
+  Data::data<MATRIX> conf;
 
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
 

@@ -74,15 +74,16 @@ T smearing_second_refresh(const std::vector<T> &vec, link1 &link, int nu,
                           double alpha2,
                           double alpha3); // refresh link every step
 template <class T>
-std::vector<T> smearing_HYP_refresh(data<T> &conf, double alpha1, double alpha2,
+std::vector<T> smearing_HYP_refresh(Data::data<T> &conf, double alpha1,
+                                    double alpha2,
                                     double alpha3); // refresh link every step
 template <class T>
 std::vector<T>
-smearing_APE_refresh(data<T> &conf,
+smearing_APE_refresh(Data::data<T> &conf,
                      double alpha_APE); // refresh link every step
-std::vector<su2> smearing_stout(data<su2> &conf, double rho);
-su2 stout_factor(data<su2> &conf, link1 &link, double rho);
-su2 stout_omega(data<su2> &conf, link1 &link, double rho);
+std::vector<su2> smearing_stout(Data::data<su2> &conf, double rho);
+su2 stout_factor(Data::data<su2> &conf, link1 &link, double rho);
+su2 stout_omega(Data::data<su2> &conf, link1 &link, double rho);
 
 void make_map_first(std::unordered_map<int, int> &indexes);
 void make_map_second(std::unordered_map<int, int> &indexes);

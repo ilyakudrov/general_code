@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
 
-  data<su3> conf_su3;
+  Data::data<su3> conf_su3;
 
   // read configuration
   bool convert = 0;

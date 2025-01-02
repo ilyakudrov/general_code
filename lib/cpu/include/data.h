@@ -12,6 +12,8 @@
 // x, y, z, t - lattice coordinates
 // D - dimension of the lattice (4)
 // mu - link direction
+
+namespace Data {
 template <class T> class data {
 public:
   // array of matrices
@@ -55,15 +57,17 @@ public:
   void read_double_convert_abelian(std::string &file_name, int bytes_skip);
   void read_double_qc2dstag_convert_abelian(std::string &file_name);
 };
+} // namespace Data
+
 // read conf_num configurations from ml5 file and write them to vector in order
 std::vector<float> read_full_ml5(std::string &file_name, int conf_num);
 
 template <class T>
-void read_file(data<T> &conf_data, std::string file_path,
+void read_file(Data::data<T> &conf_data, std::string file_path,
                std::string file_format, int bytes_skip);
 
 template <class T>
-void get_data(data<T> &conf_data, std::string file_path,
+void get_data(Data::data<T> &conf_data, std::string file_path,
               std::string file_format, int bytes_skip, bool convert);
 
 // only for symmetric lattice

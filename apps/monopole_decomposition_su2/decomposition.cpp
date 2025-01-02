@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
   cout << "t_size " << t_size << endl;
   cout << "ml5_conf_num " << ml5_conf_num << endl;
 
-  data<su2> conf_su2;
+  Data::data<su2> conf_su2;
 
   // read configuration
   bool convert = 0;

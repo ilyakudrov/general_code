@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 
   vector<int> lattice_sizes = {x_size, y_size, z_size, t_size};
 
-  data<su3_abelian> conf_su3;
+  Data::data<su3_abelian> conf_su3;
 
   // read configuration
   get_data(conf_su3, path_conf, conf_format, bytes_skip, convert);

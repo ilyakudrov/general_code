@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   cout << "is_compare_spins " << is_compare_spins << endl;
   cout << "is_functional_save " << is_functional_save << endl;
 
-  data<su2> conf_su2;
+  Data::data<su2> conf_su2;
 
   // for ml5 configuration
   vector<float> ml5_data;
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 
           functional_old = MAG_functional_su2_spin(conf_su2.array, spins_old);
         } else {
-          data<su2> conf_old;
+          Data::data<su2> conf_old;
           conf_old.read_double(path_previous, 0);
 
           functional_old = MAG_functional_su2(conf_old.array);

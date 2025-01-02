@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                         "36^4/beta6.3/steps_25/copies=4/conf_monopole_0001";
 
   // data<su3_abelian> conf;
-  data<su3> conf;
+  Data::data<su3> conf;
   // conf.read_double_convert_abelian(path_abelian, 8);
   // conf.read_double_qc2dstag(path_abelian);
   conf.read_double(path_abelian, 0);

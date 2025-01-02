@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  data<MATRIX_WILSON> conf_wilson;
+  Data::data<MATRIX_WILSON> conf_wilson;
   map<tuple<int, int>, double> wilson_tmp;
   map<tuple<int, int, int, int>, double> wilson_loops;
   vector<vector<MATRIX_WILSON>> conf_separated1;
