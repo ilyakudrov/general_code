@@ -608,37 +608,41 @@ void smearing_plane_minor_start(std::vector<T> &smeared,
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
         if (j < size_mu2 - size_mu1) {
           smeared[i + k + j] =
-              conf_mu[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+              (1 - alpha) * conf_mu[i + k + j] +
+              alpha / 4 * (bracket ^ conf_nu[i + k + j + size_mu1]);
         } else
           smeared[i + k + j] =
-              conf_mu[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+              (1 - alpha) * conf_mu[i + k + j] +
+              alpha / 4 * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
         if (i >= size_nu1) {
           bracket =
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
+                alpha / 4 *
+                    (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
           else
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket *
-                         conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
+                alpha / 4 *
+                    (bracket *
+                     conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (j < size_mu2 - size_mu1)
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket *
-                         conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
+                alpha / 4 *
+                    (bracket *
+                     conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
           else
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                           size_mu2 + size_mu1]);
+                alpha / 4 *
+                    (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                       size_mu2 + size_mu1]);
         }
       }
     }
@@ -722,68 +726,34 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
     for (int i = 0; i < size_nu2; i += size_mu2) {
       for (int j = 0; j < size_mu2; j++) {
         if (i < size_nu2 - size_nu1) {
-          if (i == 0 && k == 0 && j == 0) {
-            std::cout << "plane 0" << std::endl;
-            std::cout << size_nu1 << std::endl;
-            std::cout << conf_nu[i + k + j] << std::endl;
-            std::cout << "conf_mu[i + k + j + size_nu1]" << std::endl;
-            std::cout << conf_mu[i + k + j + size_nu1] << std::endl;
-          }
           bracket = conf_nu[i + k + j] * conf_mu[i + k + j + size_nu1];
         } else
           bracket =
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
         if (j < size_mu2 - size_mu1) {
-          if (i == 0 && k == 0 && j == 0) {
-            std::cout << "plane 1" << std::endl;
-            std::cout << alpha << std::endl;
-            std::cout << bracket << std::endl;
-            std::cout << conf_nu[i + k + j + size_mu1] << std::endl;
-          }
           smeared[i + k + j] =
               smeared[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
-          if (i == 0 && k == 0 && j == 0) {
-            std::cout << smeared[i + k + j] << std::endl;
-          }
+              alpha / 4 * (bracket ^ conf_nu[i + k + j + size_mu1]);
         } else
           smeared[i + k + j] =
               smeared[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+              alpha / 4 * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
 
         if (i >= size_nu1) {
           bracket =
               conf_nu[i + k + j - size_nu1] % conf_mu[i + k + j - size_nu1];
           if (j < size_mu2 - size_mu1) {
-            if (i + k + j == x_size * y_size) {
-              std::cout << "plane 2 0" << std::endl;
-              std::cout << smeared[i + k + j] << std::endl;
-              std::cout << bracket << std::endl;
-              std::cout << conf_nu[i + k + j + size_mu1 - size_nu1]
-                        << std::endl;
-              std::cout << smeared[i + k + j] +
-                               alpha *
-                                   (bracket *
-                                    conf_nu[i + k + j + size_mu1 - size_nu1])
-                        << std::endl;
-              std::cout << (smeared[i + k + j] +
-                            alpha * (bracket *
-                                     conf_nu[i + k + j + size_mu1 - size_nu1]))
-                               .proj()
-                        << std::endl;
-            }
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                 alpha / 4 *
+                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
-            if (i + k + j == x_size * y_size) {
-              std::cout << smeared[i + k + j] << std::endl;
-            }
           } else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket *
-                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                 alpha / 4 *
+                     (bracket *
+                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
@@ -791,25 +761,21 @@ void smearing_plane_minor_end(std::vector<T> &smeared,
           if (j < size_mu2 - size_mu1) {
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket *
-                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                 alpha / 4 *
+                     (bracket *
+                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
-            if (i + k + j == x_size * y_size) {
-              std::cout << "plane 2 1" << std::endl;
-              std::cout << smeared[i + k + j] << std::endl;
-            }
           } else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                            size_mu2 + size_mu1]))
+                 alpha / 4 *
+                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                        size_mu2 + size_mu1]))
                     .proj();
         }
       }
     }
   }
-  std::cout << "minor_end" << std::endl;
-  std::cout << smeared[x_size * y_size] << std::endl;
 }
 
 template <class T>
@@ -893,12 +859,12 @@ void smearing_plane_major_start(std::vector<T> &smeared,
               conf_nu[i + k + j] * conf_mu[i + k + j - size_nu2 + size_nu1];
         if (i < size_mu2 - size_mu1)
           smeared[i + k + j] =
-              conf_mu[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+              (1 - alpha) * conf_mu[i + k + j] +
+              alpha / 4 * (bracket ^ conf_nu[i + k + j + size_mu1]);
         else
           smeared[i + k + j] =
-              conf_mu[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+              (1 - alpha) * conf_mu[i + k + j] +
+              alpha / 4 * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
 
         if (j >= size_nu1) {
           bracket =
@@ -906,26 +872,30 @@ void smearing_plane_major_start(std::vector<T> &smeared,
           if (i < size_mu2 - size_mu1) {
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
+                alpha / 4 *
+                    (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]);
 
           } else
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket *
-                         conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
+                alpha / 4 *
+                    (bracket *
+                     conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]);
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
                     conf_mu[i + k + j + size_nu2 - size_nu1];
           if (i < size_mu2 - size_mu1)
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket *
-                         conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
+                alpha / 4 *
+                    (bracket *
+                     conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]);
           else
             smeared[i + k + j] =
                 smeared[i + k + j] +
-                alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                           size_mu2 + size_mu1]);
+                alpha / 4 *
+                    (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                       size_mu2 + size_mu1]);
         }
       }
     }
@@ -1018,11 +988,11 @@ void smearing_plane_major_end(std::vector<T> &smeared,
         if (i < size_mu2 - size_mu1)
           smeared[i + k + j] =
               smeared[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j + size_mu1]);
+              alpha / 4 * (bracket ^ conf_nu[i + k + j + size_mu1]);
         else
           smeared[i + k + j] =
               smeared[i + k + j] +
-              alpha * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
+              alpha / 4 * (bracket ^ conf_nu[i + k + j - size_mu2 + size_mu1]);
 
         if (j >= size_nu1) {
           bracket =
@@ -1030,14 +1000,16 @@ void smearing_plane_major_end(std::vector<T> &smeared,
           if (i < size_mu2 - size_mu1) {
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
+                 alpha / 4 *
+                     (bracket * conf_nu[i + k + j + size_mu1 - size_nu1]))
                     .proj();
 
           } else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket *
-                          conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
+                 alpha / 4 *
+                     (bracket *
+                      conf_nu[i + k + j - size_mu2 + size_mu1 - size_nu1]))
                     .proj();
         } else {
           bracket = conf_nu[i + k + j + size_nu2 - size_nu1] %
@@ -1045,14 +1017,16 @@ void smearing_plane_major_end(std::vector<T> &smeared,
           if (i < size_mu2 - size_mu1)
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket *
-                          conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
+                 alpha / 4 *
+                     (bracket *
+                      conf_nu[i + k + j + size_nu2 - size_nu1 + size_mu1]))
                     .proj();
           else
             smeared[i + k + j] =
                 (smeared[i + k + j] +
-                 alpha * (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
-                                            size_mu2 + size_mu1]))
+                 alpha / 4 *
+                     (bracket * conf_nu[i + k + j + size_nu2 - size_nu1 -
+                                        size_mu2 + size_mu1]))
                     .proj();
         }
       }
@@ -1064,35 +1038,20 @@ template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
   std::vector<std::vector<T>> smeared(3, std::vector<T>(conf[0].size()));
 
-  std::cout << 0 << std::endl;
-  std::cout << conf[0][0] << std::endl;
   smearing_plane_minor_start(smeared[0], conf[0], conf[1], 1, x_size, x_size,
                              x_size * y_size, alpha);
-  std::cout << 1 << std::endl;
-  std::cout << smeared[0][x_size * y_size] << std::endl;
   smearing_plane_minor_end(smeared[0], conf[0], conf[2], 1, x_size,
                            x_size * y_size, x_size * y_size * z_size, alpha);
-  std::cout << 2 << std::endl;
-  std::cout << "smeared[0][x_size * y_size]" << std::endl;
-  std::cout << smeared[0][x_size * y_size] << std::endl;
   smearing_plane_major_start(smeared[1], conf[1], conf[0], x_size,
                              x_size * y_size, 1, x_size, alpha);
-  // std::cout << 3 << std::endl;
-  // std::cout << smeared[1][0] << std::endl;
   smearing_plane_minor_end(smeared[1], conf[1], conf[2], x_size,
                            x_size * y_size, x_size * y_size,
                            x_size * y_size * z_size, alpha);
-  // std::cout << 4 << std::endl;
-  // std::cout << smeared[1][0] << std::endl;
   smearing_plane_major_start(smeared[2], conf[2], conf[0], x_size * y_size,
                              x_size * y_size * z_size, 1, x_size, alpha);
-  // std::cout << 5 << std::endl;
-  // std::cout << smeared[2][0] << std::endl;
   smearing_plane_major_end(smeared[2], conf[2], conf[1], x_size * y_size,
                            x_size * y_size * z_size, x_size, x_size * y_size,
                            alpha);
-  // std::cout << 6 << std::endl;
-  // std::cout << smeared[2][0] << std::endl;
 
   for (int i = 0; i < 3; i++) {
     conf[i] = std::move(smeared[i]);

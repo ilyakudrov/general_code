@@ -194,27 +194,27 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  MATRIX_WILSON A;
-  A.matrix[0][0] = complex_t(0.35035698103234469, -1.6630557265774293);
-  A.matrix[0][1] = complex_t(-0.46749464740787827, -0.74398941338992597);
-  A.matrix[0][2] = complex_t(-0.99972108717033048, 0.44976186240826144);
-  A.matrix[1][0] = complex_t(-0.087007093006583103, -0.32516527020918684);
-  A.matrix[1][1] = complex_t(-0.2044920464568383, 0.15083355900456979);
-  A.matrix[1][2] = complex_t(0.044110015551082127, 0.39157539161638633);
-  A.matrix[2][0] = complex_t(0.50102765358470691, -0.52252003894935606);
-  A.matrix[2][1] = complex_t(-0.11400765728062581, 0.14459284287651428);
-  A.matrix[2][2] = complex_t(1.3305288999391762, 0.3651906657996804);
+  // MATRIX_WILSON A;
+  // A.matrix[0][0] = complex_t(0.35035698103234469, -1.6630557265774293);
+  // A.matrix[0][1] = complex_t(-0.46749464740787827, -0.74398941338992597);
+  // A.matrix[0][2] = complex_t(-0.99972108717033048, 0.44976186240826144);
+  // A.matrix[1][0] = complex_t(-0.087007093006583103, -0.32516527020918684);
+  // A.matrix[1][1] = complex_t(-0.2044920464568383, 0.15083355900456979);
+  // A.matrix[1][2] = complex_t(0.044110015551082127, 0.39157539161638633);
+  // A.matrix[2][0] = complex_t(0.50102765358470691, -0.52252003894935606);
+  // A.matrix[2][1] = complex_t(-0.11400765728062581, 0.14459284287651428);
+  // A.matrix[2][2] = complex_t(1.3305288999391762, 0.3651906657996804);
 
-  cout << A << endl;
-  cout << A.determinant() << endl;
-  cout << A.unitarity_check() << endl;
-  cout << A.proj() << endl;
-  A = A.proj1();
-  cout << A << endl;
-  cout << A.determinant() << endl;
-  cout << A.unitarity_check() << endl;
+  // cout << A << endl;
+  // cout << A.determinant() << endl;
+  // cout << A.unitarity_check() << endl;
+  // cout << A.proj() << endl;
+  // A = A.proj1();
+  // cout << A << endl;
+  // cout << A.determinant() << endl;
+  // cout << A.unitarity_check() << endl;
 
-  return 0;
+  // return 0;
 
   Data::data<MATRIX_WILSON> conf_wilson;
   Data::data<MATRIX_PLAKET> conf_plaket;
