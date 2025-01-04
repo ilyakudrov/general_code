@@ -3,7 +3,7 @@
 #include "../include/c-lime/lime_reader.h"
 #include "../include/decomposition.h"
 #include "../include/link.h"
-// #include "../include/matrix_test.h"
+#include "../include/matrix_test.h"
 
 #include <cstring>
 #include <fstream>
@@ -536,162 +536,162 @@ template <> void Data::data<su3>::read_ildg(std::string &file_name) {
   }
 }
 
-// template <> void Data::data<su3_test>::read_ildg(std::string &file_name) {
-//   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-//   array.clear();
-//   array.reserve(4 * x_size * y_size * z_size * t_size);
+template <> void Data::data<su3_test>::read_ildg(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
 
-//   FILE *fp;
-//   fp = fopen(file_name.c_str(), "r");
+  FILE *fp;
+  fp = fopen(file_name.c_str(), "r");
 
-//   LimeReader *reader;
-//   reader = limeCreateReader(fp);
+  LimeReader *reader;
+  reader = limeCreateReader(fp);
 
-//   int status;
-//   char *lime_type;
-//   n_uint64_t nbytes;
-//   while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
+  int status;
+  char *lime_type;
+  n_uint64_t nbytes;
+  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
 
-//     if (status != LIME_SUCCESS) {
-//       fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-//     }
+    if (status != LIME_SUCCESS) {
+      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
+    }
 
-//     lime_type = limeReaderType(reader);
-//     nbytes = limeReaderBytes(reader);
+    lime_type = limeReaderType(reader);
+    nbytes = limeReaderBytes(reader);
 
-//     if (strcmp(lime_type, "ildg-binary-data") == 0) {
+    if (strcmp(lime_type, "ildg-binary-data") == 0) {
 
-//       std::vector<double> v(nbytes / sizeof(double));
+      std::vector<double> v(nbytes / sizeof(double));
 
-//       status = limeReaderReadData((char *)&v[0], &nbytes, reader);
+      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
 
-//       for (int i = 0; i < nbytes / sizeof(double); i++) {
-//         v[i] = reverseValue((char *)&v[i]);
-//       }
+      for (int i = 0; i < nbytes / sizeof(double); i++) {
+        v[i] = reverseValue((char *)&v[i]);
+      }
 
-//       if (status != LIME_SUCCESS) {
-//         fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-//       }
+      if (status != LIME_SUCCESS) {
+        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
+      }
 
-//       su3_test A;
-//       int place;
-//       for (int i = 0; i < data_size1; i++) {
-//         for (int j = 0; j < 3; j++) {
-//           for (int k = 0; k < 3; k++) {
-//             place = i * 18 + j * 6 + k * 2;
-//             A.matrix[j][k] = complex_test(v[place], v[place + 1]);
-//           }
-//         }
-//         array.push_back(A);
-//       }
-//     }
-//   }
-// }
+      su3_test A;
+      int place;
+      for (int i = 0; i < data_size1; i++) {
+        for (int j = 0; j < 3; j++) {
+          for (int k = 0; k < 3; k++) {
+            place = i * 18 + j * 6 + k * 2;
+            A.matrix[j][k] = complex_test(v[place], v[place + 1]);
+          }
+        }
+        array.push_back(A);
+      }
+    }
+  }
+}
 
-// template <> void Data::data<su3_eigen>::read_ildg(std::string &file_name) {
-//   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-//   array.clear();
-//   array.reserve(4 * x_size * y_size * z_size * t_size);
+template <> void Data::data<su3_eigen>::read_ildg(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
 
-//   FILE *fp;
-//   fp = fopen(file_name.c_str(), "r");
+  FILE *fp;
+  fp = fopen(file_name.c_str(), "r");
 
-//   LimeReader *reader;
-//   reader = limeCreateReader(fp);
+  LimeReader *reader;
+  reader = limeCreateReader(fp);
 
-//   int status;
-//   char *lime_type;
-//   n_uint64_t nbytes;
-//   while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
+  int status;
+  char *lime_type;
+  n_uint64_t nbytes;
+  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
 
-//     if (status != LIME_SUCCESS) {
-//       fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-//     }
+    if (status != LIME_SUCCESS) {
+      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
+    }
 
-//     lime_type = limeReaderType(reader);
-//     nbytes = limeReaderBytes(reader);
+    lime_type = limeReaderType(reader);
+    nbytes = limeReaderBytes(reader);
 
-//     if (strcmp(lime_type, "ildg-binary-data") == 0) {
+    if (strcmp(lime_type, "ildg-binary-data") == 0) {
 
-//       std::vector<double> v(nbytes / sizeof(double));
+      std::vector<double> v(nbytes / sizeof(double));
 
-//       status = limeReaderReadData((char *)&v[0], &nbytes, reader);
+      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
 
-//       for (int i = 0; i < nbytes / sizeof(double); i++) {
-//         v[i] = reverseValue((char *)&v[i]);
-//       }
+      for (int i = 0; i < nbytes / sizeof(double); i++) {
+        v[i] = reverseValue((char *)&v[i]);
+      }
 
-//       if (status != LIME_SUCCESS) {
-//         fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-//       }
+      if (status != LIME_SUCCESS) {
+        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
+      }
 
-//       su3_eigen A;
-//       int place;
-//       for (int i = 0; i < data_size1; i++) {
-//         for (int j = 0; j < 3; j++) {
-//           for (int k = 0; k < 3; k++) {
-//             place = i * 18 + j * 6 + k * 2;
-//             A.matrix(j, k) = std::complex<double>(v[place], v[place + 1]);
-//           }
-//         }
-//         array.push_back(A);
-//       }
-//     }
-//   }
-// }
+      su3_eigen A;
+      int place;
+      for (int i = 0; i < data_size1; i++) {
+        for (int j = 0; j < 3; j++) {
+          for (int k = 0; k < 3; k++) {
+            place = i * 18 + j * 6 + k * 2;
+            A.matrix(j, k) = std::complex<double>(v[place], v[place + 1]);
+          }
+        }
+        array.push_back(A);
+      }
+    }
+  }
+}
 
-// template <>
-// void Data::data<Eigen::Matrix3cd>::read_ildg(std::string &file_name) {
-//   int data_size1 = 4 * x_size * y_size * z_size * t_size;
-//   array.clear();
-//   array.reserve(4 * x_size * y_size * z_size * t_size);
+template <>
+void Data::data<Eigen::Matrix3cd>::read_ildg(std::string &file_name) {
+  int data_size1 = 4 * x_size * y_size * z_size * t_size;
+  array.clear();
+  array.reserve(4 * x_size * y_size * z_size * t_size);
 
-//   FILE *fp;
-//   fp = fopen(file_name.c_str(), "r");
+  FILE *fp;
+  fp = fopen(file_name.c_str(), "r");
 
-//   LimeReader *reader;
-//   reader = limeCreateReader(fp);
+  LimeReader *reader;
+  reader = limeCreateReader(fp);
 
-//   int status;
-//   char *lime_type;
-//   n_uint64_t nbytes;
-//   while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
+  int status;
+  char *lime_type;
+  n_uint64_t nbytes;
+  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
 
-//     if (status != LIME_SUCCESS) {
-//       fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-//     }
+    if (status != LIME_SUCCESS) {
+      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
+    }
 
-//     lime_type = limeReaderType(reader);
-//     nbytes = limeReaderBytes(reader);
+    lime_type = limeReaderType(reader);
+    nbytes = limeReaderBytes(reader);
 
-//     if (strcmp(lime_type, "ildg-binary-data") == 0) {
+    if (strcmp(lime_type, "ildg-binary-data") == 0) {
 
-//       std::vector<double> v(nbytes / sizeof(double));
+      std::vector<double> v(nbytes / sizeof(double));
 
-//       status = limeReaderReadData((char *)&v[0], &nbytes, reader);
+      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
 
-//       for (int i = 0; i < nbytes / sizeof(double); i++) {
-//         v[i] = reverseValue((char *)&v[i]);
-//       }
+      for (int i = 0; i < nbytes / sizeof(double); i++) {
+        v[i] = reverseValue((char *)&v[i]);
+      }
 
-//       if (status != LIME_SUCCESS) {
-//         fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-//       }
+      if (status != LIME_SUCCESS) {
+        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
+      }
 
-//       Eigen::Matrix3cd A;
-//       int place;
-//       for (int i = 0; i < data_size1; i++) {
-//         for (int j = 0; j < 3; j++) {
-//           for (int k = 0; k < 3; k++) {
-//             place = i * 18 + j * 6 + k * 2;
-//             A(j, k) = std::complex<double>(v[place], v[place + 1]);
-//           }
-//         }
-//         array.push_back(A);
-//       }
-//     }
-//   }
-// }
+      Eigen::Matrix3cd A;
+      int place;
+      for (int i = 0; i < data_size1; i++) {
+        for (int j = 0; j < 3; j++) {
+          for (int k = 0; k < 3; k++) {
+            place = i * 18 + j * 6 + k * 2;
+            A(j, k) = std::complex<double>(v[place], v[place + 1]);
+          }
+        }
+        array.push_back(A);
+      }
+    }
+  }
+}
 
 template <> void Data::data<su2>::read_ildg(std::string &file_name) {
   std::cout << "read_ildg<su2> is not implemented" << std::endl;
@@ -1003,29 +1003,29 @@ template class Data::data<su3>;
 template class Data::data<su3_abelian>;
 template class Data::data<su3_angles>;
 
-// template <class T>
-// void read_file(Data::data<T> &conf_data, std::string file_path,
-//                std::string file_format, int bytes_skip) {
-//   conf_data.read_ildg(file_path);
-// }
-
 template <class T>
 void read_file(Data::data<T> &conf_data, std::string file_path,
                std::string file_format, int bytes_skip) {
-  if (std::string(file_format) == "float") {
-    conf_data.read_float(file_path, bytes_skip);
-  } else if (std::string(file_format) == "double") {
-    conf_data.read_double(file_path, bytes_skip);
-  } else if (std::string(file_format) == "double_vitaly") {
-    conf_data.read_double_vitaly(file_path, bytes_skip);
-  } else if (std::string(file_format) == "double_qc2dstag") {
-    conf_data.read_double_qc2dstag(file_path);
-  } else if (std::string(file_format) == "ildg") {
-    conf_data.read_ildg(file_path);
-  } else {
-    std::cout << "wrong conf format: " << file_format << std::endl;
-  }
+  conf_data.read_ildg(file_path);
 }
+
+// template <class T>
+// void read_file(Data::data<T> &conf_data, std::string file_path,
+//                std::string file_format, int bytes_skip) {
+//   if (std::string(file_format) == "float") {
+//     conf_data.read_float(file_path, bytes_skip);
+//   } else if (std::string(file_format) == "double") {
+//     conf_data.read_double(file_path, bytes_skip);
+//   } else if (std::string(file_format) == "double_vitaly") {
+//     conf_data.read_double_vitaly(file_path, bytes_skip);
+//   } else if (std::string(file_format) == "double_qc2dstag") {
+//     conf_data.read_double_qc2dstag(file_path);
+//   } else if (std::string(file_format) == "ildg") {
+//     conf_data.read_ildg(file_path);
+//   } else {
+//     std::cout << "wrong conf format: " << file_format << std::endl;
+//   }
+// }
 
 template <>
 void get_data(Data::data<su3_abelian> &conf_data, std::string file_path,
@@ -1063,23 +1063,23 @@ void get_data(Data::data<su3> &conf_data, std::string file_path,
   }
 }
 
-// template <>
-// void get_data(Data::data<su3_test> &conf_data, std::string file_path,
-//               std::string file_format, int bytes_skip, bool convert) {
-//   read_file(conf_data, file_path, file_format, bytes_skip);
-// }
+template <>
+void get_data(Data::data<su3_test> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  read_file(conf_data, file_path, file_format, bytes_skip);
+}
 
-// template <>
-// void get_data(Data::data<su3_eigen> &conf_data, std::string file_path,
-//               std::string file_format, int bytes_skip, bool convert) {
-//   read_file(conf_data, file_path, file_format, bytes_skip);
-// }
+template <>
+void get_data(Data::data<su3_eigen> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  read_file(conf_data, file_path, file_format, bytes_skip);
+}
 
-// template <>
-// void get_data(Data::data<Eigen::Matrix3cd> &conf_data, std::string file_path,
-//               std::string file_format, int bytes_skip, bool convert) {
-//   read_file(conf_data, file_path, file_format, bytes_skip);
-// }
+template <>
+void get_data(Data::data<Eigen::Matrix3cd> &conf_data, std::string file_path,
+              std::string file_format, int bytes_skip, bool convert) {
+  read_file(conf_data, file_path, file_format, bytes_skip);
+}
 
 template <>
 void get_data(Data::data<abelian> &conf_data, std::string file_path,
@@ -1153,6 +1153,6 @@ template std::vector<su3> swap_directions(const std::vector<su3> &conf,
 template std::vector<su3_abelian>
 swap_directions(const std::vector<su3_abelian> &conf, int dir1, int dir2);
 
-// template class Data::data<su3_test>;
-// template class Data::data<su3_eigen>;
-// template class Data::data<Eigen::Matrix3cd>;
+template class Data::data<su3_test>;
+template class Data::data<su3_eigen>;
+template class Data::data<Eigen::Matrix3cd>;

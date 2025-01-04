@@ -208,9 +208,9 @@ double wilson_plane_indexed_single_rxt(
   std::vector<int> lat_coord(4);
   int index1;
   int index2;
-  // #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
-//                                                  index2)                       \
-//     firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
+#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
+                                                 index2)                       \
+    firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
@@ -249,9 +249,9 @@ double wilson_plane_indexed_single_rxt(
   std::vector<int> lat_coord(4);
   int index1;
   int index2;
-  // #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
-//                                                  index2)                       \
-//     firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
+#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
+                                                 index2)                       \
+    firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
@@ -263,25 +263,14 @@ double wilson_plane_indexed_single_rxt(
           lat_coord[mu] =
               (lat_coord[mu] + lat_dim[mu] - length_mu) % lat_dim[mu];
           for (int nu = 0; nu < 3; nu++) {
-            // wilson_loop = wilson_lines_mu[index1] *
-            // wilson_lines_nu[nu][index2]; lat_coord[nu] = (lat_coord[nu] +
-            // length_nu) % lat_dim[nu]; wilson_loop =
-            //     wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
-            // lat_coord[nu] =
-            //     (lat_coord[nu] + lat_dim[nu] - length_nu) % lat_dim[nu];
-            // result += wilson_loop.multiply_conj_tr(
-            //     wilson_lines_nu[nu][get_index_site(lat_coord)]);
-
-            // wilson_loop = wilson_lines_mu[index1] *
-            // wilson_lines_nu[nu][index2]; lat_coord[nu] = (lat_coord[nu] +
-            // length_nu) % lat_dim[nu]; wilson_loop =
-            //     wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
-
-            result += (wilson_lines_mu[index1] * wilson_lines_nu[nu][index2])
-                          .multiply_conj_tr(
-                              wilson_lines_mu[get_index_site(lat_coord)]);
-            // result += wilson_lines_mu[index1].multiply_conj_tr(
-            //     wilson_lines_nu[nu][index2]);
+            wilson_loop = wilson_lines_mu[index1] * wilson_lines_nu[nu][index2];
+            lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
+            wilson_loop =
+                wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
+            lat_coord[nu] =
+                (lat_coord[nu] + lat_dim[nu] - length_nu) % lat_dim[nu];
+            result += wilson_loop.multiply_conj_tr(
+                wilson_lines_nu[nu][get_index_site(lat_coord)]);
           }
         }
       }
@@ -300,11 +289,9 @@ double wilson_plane_indexed_single_rxt(
   std::vector<int> lat_coord(4);
   int index1;
   int index2;
-  int index3;
-  int index4;
-  // #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
-//                                                  index2, index3, index4)       \
-//     firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
+#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
+                                                 index2)                       \
+    firstprivate(lat_dim, mu, length_mu, length_nu) reduction(+ : result)
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
@@ -315,37 +302,19 @@ double wilson_plane_indexed_single_rxt(
           index2 = get_index_site(lat_coord);
           lat_coord[mu] =
               (lat_coord[mu] + lat_dim[mu] - length_mu) % lat_dim[mu];
-          index3 = get_index_site(lat_coord);
-
           for (int nu = 0; nu < 3; nu++) {
-            result += (wilson_lines_mu[index1] * wilson_lines_nu[nu][index2] *
-                       wilson_lines_mu[get_index_site(lat_coord)].adjoint())
+            wilson_loop = wilson_lines_mu[index1] * wilson_lines_nu[nu][index2];
+            lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
+            wilson_loop =
+                wilson_loop *
+                wilson_lines_mu[get_index_site(lat_coord)].adjoint().eval();
+            lat_coord[nu] =
+                (lat_coord[nu] + lat_dim[nu] - length_nu) % lat_dim[nu];
+            result += (wilson_loop *
+                       wilson_lines_nu[nu][get_index_site(lat_coord)].adjoint())
                           .trace()
                           .real() /
                       3;
-            // lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
-            // index3 = get_index_site(lat_coord);
-            // lat_coord[nu] =
-            //     (lat_coord[nu] + lat_dim[nu] - length_nu) % lat_dim[nu];
-            // index4 = get_index_site(lat_coord);
-            // wilson_loop.noalias() =
-            //     wilson_lines_mu[index1] * wilson_lines_nu[nu][index2];
-            // lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
-            // wilson_loop *=
-            // wilson_lines_mu[get_index_site(lat_coord)].adjoint();
-            // lat_coord[nu] =
-            //     (lat_coord[nu] + lat_dim[nu] - length_nu) % lat_dim[nu];
-            // result += (wilson_loop *
-            //            wilson_lines_nu[nu][get_index_site(lat_coord)].adjoint())
-            //               .trace()
-            //               .real() /
-            //           3;
-            // result += (wilson_lines_mu[index1] * wilson_lines_nu[nu][index2]
-            // *
-            //            wilson_lines_mu[index3].adjoint() *
-            //            wilson_lines_nu[nu][index4].adjoint())
-            //               .trace()
-            //               .real();
           }
         }
       }
