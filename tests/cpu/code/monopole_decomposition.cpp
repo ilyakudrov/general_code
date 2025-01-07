@@ -46,8 +46,9 @@ int main(int argc, char *argv[]) {
 
   vector<double> inverse_laplacian = read_inverse_laplacian(laplacian_path);
 
-  vector<complex_t> conf_complex = convert_to_complex(conf_su2.array);
-  vector<complex_t> gauge_complex = generate_gauge_complex_unity();
+  vector<std::complex<double>> conf_complex =
+      convert_to_complex(conf_su2.array);
+  vector<std::complex<double>> gauge_complex = generate_gauge_complex_unity();
 
   start_time = omp_get_wtime();
 

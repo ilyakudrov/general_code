@@ -116,18 +116,18 @@ double polyakov_loop_parallel(const std::vector<std::vector<T>> &array);
 template <class T>
 std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array);
 
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3> &array);
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3_abelian> &array);
 
 template <class T>
 std::vector<double>
 calculate_polyakov_loops_tr(const std::vector<std::vector<T>> &array);
 
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<std::vector<su3>> &array);
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<std::vector<su3_abelian>> &array);
 
 template <class T>

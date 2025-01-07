@@ -70,6 +70,7 @@
 
 #include "../include/basic_observables.h"
 #include "../include/link.h"
+#include "../include/matrix.h"
 #include "../include/smearing.h"
 
 #include <algorithm>
@@ -1010,10 +1011,10 @@ std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
   return polyakov_loops;
 }
 
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<complex_t> polyakov_loops(x_size * y_size * z_size);
+  std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
   link.move_dir(3);
   int place;
 
@@ -1028,10 +1029,10 @@ calculate_polyakov_loops_tr(const std::vector<su3> &array) {
   return polyakov_loops;
 }
 
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3_abelian> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<complex_t> polyakov_loops(x_size * y_size * z_size);
+  std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
   link.move_dir(3);
   int place;
 
@@ -1065,10 +1066,10 @@ calculate_polyakov_loops_tr(const std::vector<std::vector<T>> &array) {
   return polyakov_loops;
 }
 
-std::vector<complex_t>
+std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<std::vector<su3>> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<complex_t> polyakov_loops(x_size * y_size * z_size);
+  std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
   link.move_dir(3);
   int place;
 
@@ -1083,10 +1084,10 @@ calculate_polyakov_loops_tr(const std::vector<std::vector<su3>> &array) {
   return polyakov_loops;
 }
 
-std::vector<complex_t> calculate_polyakov_loops_tr(
+std::vector<std::complex<double>> calculate_polyakov_loops_tr(
     const std::vector<std::vector<su3_abelian>> &array) {
   link1 link(x_size, y_size, z_size, t_size);
-  std::vector<complex_t> polyakov_loops(x_size * y_size * z_size);
+  std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
   link.move_dir(3);
   int place;
 
@@ -1179,7 +1180,8 @@ std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
 template <>
 std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
                                              int D_max) {
-  std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
+  std::vector<std::complex<double>> polyakov_loops =
+      calculate_polyakov_loops_tr(conf);
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1187,7 +1189,7 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
 
   std::vector<double> correlator(result_size * result_size * result_size);
 
-  complex_t polyakov_tmp;
+  std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
 
@@ -1217,8 +1219,8 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
 
           correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
                      Dx + D_max] +=
-              polyakov_tmp.real * polyakov_loops[link.place / 4].real +
-              polyakov_tmp.imag * polyakov_loops[link.place / 4].imag;
+              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
+              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
         }
 
         link.move(0, 1);
@@ -1249,7 +1251,8 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
 template <>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
-  std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
+  std::vector<std::complex<double>> polyakov_loops =
+      calculate_polyakov_loops_tr(conf);
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1257,7 +1260,7 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
 
   std::vector<double> correlator(result_size * result_size * result_size);
 
-  complex_t polyakov_tmp;
+  std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
 
@@ -1287,8 +1290,8 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
 
           correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
                      Dx + D_max] +=
-              polyakov_tmp.real * polyakov_loops[link.place / 4].real +
-              polyakov_tmp.imag * polyakov_loops[link.place / 4].imag;
+              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
+              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
         }
 
         link.move(0, 1);
@@ -1388,7 +1391,8 @@ polyakov_loop_correlator(const std::vector<std::vector<T>> &conf, int D_max) {
 template <>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<std::vector<su3>> &conf, int D_max) {
-  std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
+  std::vector<std::complex<double>> polyakov_loops =
+      calculate_polyakov_loops_tr(conf);
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1396,7 +1400,7 @@ polyakov_loop_correlator(const std::vector<std::vector<su3>> &conf, int D_max) {
 
   std::vector<double> correlator(result_size * result_size * result_size);
 
-  complex_t polyakov_tmp;
+  std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
 
@@ -1426,8 +1430,8 @@ polyakov_loop_correlator(const std::vector<std::vector<su3>> &conf, int D_max) {
 
           correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
                      Dx + D_max] +=
-              polyakov_tmp.real * polyakov_loops[link.place / 4].real +
-              polyakov_tmp.imag * polyakov_loops[link.place / 4].imag;
+              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
+              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
         }
 
         link.move(0, 1);
@@ -1459,7 +1463,8 @@ template <>
 std::vector<double>
 polyakov_loop_correlator(const std::vector<std::vector<su3_abelian>> &conf,
                          int D_max) {
-  std::vector<complex_t> polyakov_loops = calculate_polyakov_loops_tr(conf);
+  std::vector<std::complex<double>> polyakov_loops =
+      calculate_polyakov_loops_tr(conf);
   link1 link(x_size, y_size, z_size, t_size);
 
   int result_size = 2 * D_max + 1;
@@ -1467,7 +1472,7 @@ polyakov_loop_correlator(const std::vector<std::vector<su3_abelian>> &conf,
 
   std::vector<double> correlator(result_size * result_size * result_size);
 
-  complex_t polyakov_tmp;
+  std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
 
@@ -1497,8 +1502,8 @@ polyakov_loop_correlator(const std::vector<std::vector<su3_abelian>> &conf,
 
           correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
                      Dx + D_max] +=
-              polyakov_tmp.real * polyakov_loops[link.place / 4].real +
-              polyakov_tmp.imag * polyakov_loops[link.place / 4].imag;
+              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
+              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
         }
 
         link.move(0, 1);

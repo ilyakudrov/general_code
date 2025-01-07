@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
   std::vector<abelian> gauge_abelian;
   std::vector<double> gauge_angles;
   std::vector<double> conf_angles;
-  std::vector<complex_t> gauge_complex;
-  std::vector<complex_t> conf_complex;
+  std::vector<std::complex<double>> gauge_complex;
+  std::vector<std::complex<double>> conf_complex;
 
   double T_init = 4;
   double T_final = 0.2;
@@ -209,8 +209,8 @@ int main(int argc, char *argv[]) {
   double tmp = 0;
 
   for (int i = 0; i < gauge_complex.size(); i++) {
-    tmp = 1 - sqrt(gauge_complex[i].imag * gauge_complex[i].imag +
-                   gauge_complex[i].real * gauge_complex[i].real);
+    tmp = 1 - sqrt(gauge_complex[i].imag() * gauge_complex[i].imag() +
+                   gauge_complex[i].real() * gauge_complex[i].real());
     if (tmp > unitarity_test_max) {
       unitarity_test_max = tmp;
     }

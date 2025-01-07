@@ -72,8 +72,9 @@ int main(int argc, char **argv) {
 
   cout.precision(17);
 
-  vector<complex_t> conf_complex = convert_to_complex(conf_su2.array);
-  vector<complex_t> gauge_complex = generate_gauge_complex_uniform();
+  vector<std::complex<double>> conf_complex =
+      convert_to_complex(conf_su2.array);
+  vector<std::complex<double>> gauge_complex = generate_gauge_complex_uniform();
 
   cout << "initial Landau U1 functional "
        << Landau_functional_complex(conf_complex) << endl;

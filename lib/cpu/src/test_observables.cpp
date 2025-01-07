@@ -1,6 +1,5 @@
 #include "../include/indexing.h"
 #include "../include/matrix.h"
-#include "../include/matrix_test.h"
 #include <Eigen/Dense>
 
 #include <map>
@@ -12,7 +11,8 @@ extern int y_size;
 extern int z_size;
 extern int t_size;
 
-double plaket_site(const std::vector<su3> &conf, std::vector<int> &lat_dim,
+template <class T>
+double plaket_site(const std::vector<T> &conf, std::vector<int> &lat_dim,
                    std::vector<int> &lat_coord) {
   su3 A;
   double plaket = 0;
@@ -32,7 +32,7 @@ double plaket_site(const std::vector<su3> &conf, std::vector<int> &lat_dim,
   return plaket / 6;
 }
 
-double plaket_indexed(const std::vector<su3> &conf) {
+template <class T> double plaket_indexed(const std::vector<su3> &conf) {
   double plaket;
   std::vector<int> lat_coord(4);
   std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
@@ -240,11 +240,11 @@ double wilson_plane_indexed_single_rxt(
 
 template <>
 double wilson_plane_indexed_single_rxt(
-    const std::vector<su3_eigen> &wilson_lines_mu,
-    const std::vector<std::vector<su3_eigen>> &wilson_lines_nu, int mu,
-    int length_mu, int length_nu) {
+    const std::vector<su3> &wilson_lines_mu,
+    const std::vector<std::vector<su3>> &wilson_lines_nu, int mu, int length_mu,
+    int length_nu) {
   std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  su3_eigen wilson_loop;
+  su3 wilson_loop;
   double result = 0;
   std::vector<int> lat_coord(4);
   int index1;
@@ -449,18 +449,3 @@ wilson_parallel_indexed(const std::vector<su3> &conf, int r_min, int r_max,
 template std::map<std::tuple<int, int>, double>
 wilson_parallel_indexed_single_rxt(const std::vector<su3> &conf, int r_min,
                                    int r_max, int time_min, int time_max);
-
-template std::map<std::tuple<int, int>, double>
-wilson_parallel_indexed(const std::vector<su3_test> &conf, int r_min, int r_max,
-                        int time_min, int time_max);
-template std::map<std::tuple<int, int>, double>
-wilson_parallel_indexed_single_rxt(const std::vector<su3_test> &conf, int r_min,
-                                   int r_max, int time_min, int time_max);
-
-template std::map<std::tuple<int, int>, double>
-wilson_parallel_indexed(const std::vector<su3_eigen> &conf, int r_min,
-                        int r_max, int time_min, int time_max);
-template std::map<std::tuple<int, int>, double>
-wilson_parallel_indexed_single_rxt(const std::vector<su3_eigen> &conf,
-                                   int r_min, int r_max, int time_min,
-                                   int time_max);

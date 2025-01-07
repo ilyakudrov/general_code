@@ -142,7 +142,7 @@ convert_to_angles(std::vector<su3_abelian> &conf) {
 
   for (int i = 0; i < conf.size(); i++) {
     for (int j = 0; j < 3; j++) {
-      angles[j][i] = atan2(conf[i].matrix[j].imag, conf[i].matrix[j].real);
+      angles[j][i] = atan2(conf[i].matrix[j].imag(), conf[i].matrix[j].real());
     }
   }
 
@@ -155,7 +155,7 @@ std::vector<std::vector<double>> convert_to_angles(std::vector<su3> &conf) {
   for (int i = 0; i < conf.size(); i++) {
     for (int j = 0; j < 3; j++) {
       angles[j][i] =
-          atan2(conf[i].matrix[j][j].imag, conf[i].matrix[j][j].real);
+          atan2(conf[i].matrix(j, j).imag(), conf[i].matrix(j, j).real());
     }
   }
 

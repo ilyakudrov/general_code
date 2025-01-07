@@ -98,8 +98,8 @@ get_angles_su3(const std::vector<su3> &conf_su3) {
 
   for (int i = 0; i < data_size; i++) {
     for (int c = 0; c < 3; c++) {
-      angles[c][i] =
-          atan2(conf_su3[i].matrix[c][c].imag, conf_su3[i].matrix[c][c].real);
+      angles[c][i] = atan2(conf_su3[i].matrix(c, c).imag(),
+                           conf_su3[i].matrix(c, c).real());
     }
   }
 
@@ -113,7 +113,8 @@ std::vector<su3_abelian> get_abelian(std::vector<su3> &conf) {
     std::vector<double> angles(3);
     double sum = 0;
     for (int c = 0; c < 3; c++) {
-      angles[c] = atan2(conf[i].matrix[c][c].imag, conf[i].matrix[c][c].real);
+      angles[c] =
+          atan2(conf[i].matrix(c, c).imag(), conf[i].matrix(c, c).real());
       sum += angles[c];
     }
     while (sum >= M_PI) {
@@ -123,8 +124,8 @@ std::vector<su3_abelian> get_abelian(std::vector<su3> &conf) {
       sum += 2 * M_PI;
     }
     for (int c = 0; c < 3; c++) {
-      abelian[i].matrix[c] =
-          complex_t(cos(angles[c] - sum / 3), sin(angles[c] - sum / 3));
+      abelian[i].matrix[c] = std::complex<double>(cos(angles[c] - sum / 3),
+                                                  sin(angles[c] - sum / 3));
     }
   }
   return abelian;
@@ -137,7 +138,8 @@ std::vector<su3_angles> su3_to_su3_angles(std::vector<su3> &conf) {
     std::vector<double> angles(3);
     double sum = 0;
     for (int c = 0; c < 3; c++) {
-      angles[c] = atan2(conf[i].matrix[c][c].imag, conf[i].matrix[c][c].real);
+      angles[c] =
+          atan2(conf[i].matrix(c, c).imag(), conf[i].matrix(c, c).real());
       sum += angles[c];
     }
     while (sum >= M_PI) {
@@ -173,7 +175,8 @@ std::vector<su3> get_offdiagonal(std::vector<su3> &conf) {
 
   for (int i = 0; i < data_size; i++) {
     for (int c = 0; c < 3; c++) {
-      A.matrix[c][c] = conf[i].matrix[c][c] / conf[i].matrix[c][c].module();
+      A.matrix(c, c) =
+          conf[i].matrix(c, c) / std::sqrt(std::norm(conf[i].matrix(c, c)));
     }
     conf_offdiagonal[i] = conf[i] ^ A;
   }
@@ -250,8 +253,8 @@ void get_monopoless_optimized_su3(
   for (int i = 0; i < conf_su3.size(); i++) {
     A = su3();
     for (int j = 0; j < 3; j++) {
-      A.matrix[j][j] =
-          complex_t(cos(angles_monopole[j][i]), sin(angles_monopole[j][i]));
+      A.matrix(j, j) = std::complex<double>(cos(angles_monopole[j][i]),
+                                            sin(angles_monopole[j][i]));
     }
 
     conf_su3[i] = conf_su3[i] * A;

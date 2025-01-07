@@ -3,8 +3,10 @@
 #include "../include/c-lime/lime_reader.h"
 #include "../include/decomposition.h"
 #include "../include/link.h"
-#include "../include/matrix_test.h"
+#include "../include/matrix.h"
 
+#include <cmath>
+#include <complex>
 #include <cstring>
 #include <fstream>
 
@@ -88,9 +90,8 @@ void Data::data<su3>::read_float(std::string &file_name, int bytes_skip) {
 
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-
-        A.matrix[i][j].real = v[i * 18 + (i * 3 + j) * 2];
-        A.matrix[i][j].imag = v[i * 18 + (i * 3 + j) * 2 + 1];
+        A.matrix(i, j) = std::complex<double>(v[i * 18 + (i * 3 + j) * 2],
+                                              v[i * 18 + (i * 3 + j) * 2 + 1]);
       }
     }
     array.push_back(A);
@@ -110,7 +111,7 @@ void Data::data<su3_abelian>::read_float(std::string &file_name,
     if (!stream.read((char *)&v[0], (data_size) * sizeof(float)))
       std::cout << "read_float<su3_abelian> error: " << file_name << std::endl;
     for (int j = 0; j < data_size; j++) {
-      array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
+      array[j].matrix[i] = std::complex<double>(cos(v[j]), sin(v[j]));
     }
   }
 }
@@ -188,8 +189,8 @@ void Data::data<su3>::read_double(std::string &file_name, int bytes_skip) {
             for (int k = 0; k < 3; k++) {
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
-                array[link.place + mu].matrix[k][j] =
-                    complex_t(v[index], v[index + 1]);
+                array[link.place + mu].matrix(k, j) =
+                    std::complex<double>(v[index], v[index + 1]);
                 index += 2;
               }
             }
@@ -213,7 +214,7 @@ void Data::data<su3_abelian>::read_double(std::string &file_name,
     if (!stream.read((char *)&v[0], (data_size) * sizeof(double)))
       std::cout << "read_double<su3_abelian> error: " << file_name << std::endl;
     for (int j = 0; j < data_size; j++) {
-      array[j].matrix[i] = complex_t(cos(v[j]), sin(v[j]));
+      array[j].matrix[i] = std::complex<double>(cos(v[j]), sin(v[j]));
     }
   }
 }
@@ -265,7 +266,7 @@ void Data::data<su3_abelian>::read_double_abelian(std::string &file_name,
     std::cout << "data<su3_abelian>::read_double_abelian error: " << file_name
               << std::endl;
   long int index = 0;
-  complex_t complex_tmp;
+  std::complex<double> complex_tmp;
   link1 link(x_size, y_size, z_size, t_size);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
@@ -276,9 +277,9 @@ void Data::data<su3_abelian>::read_double_abelian(std::string &file_name,
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
                 if (k == j) {
-                  complex_tmp = complex_t(v[index], v[index + 1]);
+                  complex_tmp = std::complex<double>(v[index], v[index + 1]);
                   array[link.place + mu].matrix[j] =
-                      complex_tmp / complex_tmp.module();
+                      complex_tmp / std::sqrt(std::norm(complex_tmp));
                 }
                 index += 2;
               }
@@ -316,7 +317,7 @@ void Data::data<su3>::read_double_offdiagonal(std::string &file_name,
     std::cout << "data<su3>::read_double_offdiagonal error: " << file_name
               << std::endl;
   long int index = 0;
-  complex_t complex_tmp;
+  std::complex<double> complex_tmp;
   link1 link(x_size, y_size, z_size, t_size);
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {
@@ -326,8 +327,8 @@ void Data::data<su3>::read_double_offdiagonal(std::string &file_name,
             for (int k = 0; k < 3; k++) {
               for (int j = 0; j < 3; j++) {
                 link.go_update(x, y, z, t);
-                array[link.place + mu].matrix[k][j] =
-                    complex_t(v[index], v[index + 1]);
+                array[link.place + mu].matrix(k, j) =
+                    std::complex<double>(v[index], v[index + 1]);
                 index += 2;
               }
             }
@@ -360,9 +361,9 @@ void Data::data<su3_abelian>::read_double_vitaly(std::string &file_name,
   for (int i = 0; i < lattice_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
-        array[i * 4 + mu].matrix[j] =
-            complex_t(cos(v[mu * lattice_size * 3 + j * lattice_size + i]),
-                      sin(v[mu * lattice_size * 3 + j * lattice_size + i]));
+        array[i * 4 + mu].matrix[j] = std::complex<double>(
+            cos(v[mu * lattice_size * 3 + j * lattice_size + i]),
+            sin(v[mu * lattice_size * 3 + j * lattice_size + i]));
       }
     }
   }
@@ -409,11 +410,11 @@ void Data::data<su3>::read_double_vitaly(std::string &file_name,
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
         for (int k = 0; k < 3; k++) {
-          array[i * 4 + mu].matrix[j][k] =
-              complex_t(v[mu * lattice_size * 18 + k * lattice_size * 6 +
-                          j * lattice_size * 2 + i * 2],
-                        v[mu * lattice_size * 18 + k * lattice_size * 6 +
-                          j * lattice_size * 2 + i * 2 + 1]);
+          array[i * 4 + mu].matrix(j, k) = std::complex<double>(
+              v[mu * lattice_size * 18 + k * lattice_size * 6 +
+                j * lattice_size * 2 + i * 2],
+              v[mu * lattice_size * 18 + k * lattice_size * 6 +
+                j * lattice_size * 2 + i * 2 + 1]);
         }
       }
     }
@@ -437,16 +438,17 @@ void Data::data<su3_abelian>::read_double_vitaly_abelian(std::string &file_name,
   if (!stream.read((char *)&v[0], (lattice_size * 4 * 18) * sizeof(double)))
     std::cout << "data<su3>::read_double_vitaly error: " << file_name
               << std::endl;
-  complex_t complex_tmp;
+  std::complex<double> complex_tmp;
   for (int i = 0; i < lattice_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       for (int j = 0; j < 3; j++) {
-        complex_tmp =
-            complex_t(v[mu * lattice_size * 18 + j * lattice_size * 6 +
-                        j * lattice_size * 2 + i * 2],
-                      v[mu * lattice_size * 18 + j * lattice_size * 6 +
-                        j * lattice_size * 2 + i * 2 + 1]);
-        array[i * 4 + mu].matrix[j] = complex_tmp / complex_tmp.module();
+        complex_tmp = std::complex<double>(
+            v[mu * lattice_size * 18 + j * lattice_size * 6 +
+              j * lattice_size * 2 + i * 2],
+            v[mu * lattice_size * 18 + j * lattice_size * 6 +
+              j * lattice_size * 2 + i * 2 + 1]);
+        array[i * 4 + mu].matrix[j] =
+            complex_tmp / std::sqrt(std::norm(complex_tmp));
       }
     }
   }
@@ -522,110 +524,6 @@ template <> void Data::data<su3>::read_ildg(std::string &file_name) {
       }
 
       su3 A;
-      int place;
-      for (int i = 0; i < data_size1; i++) {
-        for (int j = 0; j < 3; j++) {
-          for (int k = 0; k < 3; k++) {
-            place = i * 18 + j * 6 + k * 2;
-            A.matrix[j][k] = complex_t(v[place], v[place + 1]);
-          }
-        }
-        array.push_back(A);
-      }
-    }
-  }
-}
-
-template <> void Data::data<su3_test>::read_ildg(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  array.reserve(4 * x_size * y_size * z_size * t_size);
-
-  FILE *fp;
-  fp = fopen(file_name.c_str(), "r");
-
-  LimeReader *reader;
-  reader = limeCreateReader(fp);
-
-  int status;
-  char *lime_type;
-  n_uint64_t nbytes;
-  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
-
-    if (status != LIME_SUCCESS) {
-      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-    }
-
-    lime_type = limeReaderType(reader);
-    nbytes = limeReaderBytes(reader);
-
-    if (strcmp(lime_type, "ildg-binary-data") == 0) {
-
-      std::vector<double> v(nbytes / sizeof(double));
-
-      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
-
-      for (int i = 0; i < nbytes / sizeof(double); i++) {
-        v[i] = reverseValue((char *)&v[i]);
-      }
-
-      if (status != LIME_SUCCESS) {
-        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-      }
-
-      su3_test A;
-      int place;
-      for (int i = 0; i < data_size1; i++) {
-        for (int j = 0; j < 3; j++) {
-          for (int k = 0; k < 3; k++) {
-            place = i * 18 + j * 6 + k * 2;
-            A.matrix[j][k] = complex_test(v[place], v[place + 1]);
-          }
-        }
-        array.push_back(A);
-      }
-    }
-  }
-}
-
-template <> void Data::data<su3_eigen>::read_ildg(std::string &file_name) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  array.clear();
-  array.reserve(4 * x_size * y_size * z_size * t_size);
-
-  FILE *fp;
-  fp = fopen(file_name.c_str(), "r");
-
-  LimeReader *reader;
-  reader = limeCreateReader(fp);
-
-  int status;
-  char *lime_type;
-  n_uint64_t nbytes;
-  while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
-
-    if (status != LIME_SUCCESS) {
-      fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
-    }
-
-    lime_type = limeReaderType(reader);
-    nbytes = limeReaderBytes(reader);
-
-    if (strcmp(lime_type, "ildg-binary-data") == 0) {
-
-      std::vector<double> v(nbytes / sizeof(double));
-
-      status = limeReaderReadData((char *)&v[0], &nbytes, reader);
-
-      for (int i = 0; i < nbytes / sizeof(double); i++) {
-        v[i] = reverseValue((char *)&v[i]);
-      }
-
-      if (status != LIME_SUCCESS) {
-        fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
-      }
-
-      su3_eigen A;
       int place;
       for (int i = 0; i < data_size1; i++) {
         for (int j = 0; j < 3; j++) {
@@ -878,8 +776,8 @@ template <> void Data::data<su3>::read_double_qc2dstag(std::string &file_name) {
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
 
-        A.matrix[i][j].real = v[place + (i * 3 + j) * 2];
-        A.matrix[i][j].imag = v[place + (i * 3 + j) * 2 + 1];
+        A.matrix(i, j) = std::complex<double>(v[place + (i * 3 + j) * 2],
+                                              v[place + (i * 3 + j) * 2 + 1]);
       }
     }
     array.push_back(A);
@@ -986,7 +884,7 @@ template <> void Data::data<su3_abelian>::write_double(std::string &file_name) {
   for (int i = 0; i < 3; i++) {
     std::vector<double> angles(data_size);
     for (int j = 0; j < data_size; j++) {
-      angles[j] = atan2(array[j].matrix[i].imag, array[j].matrix[i].real);
+      angles[j] = atan2(array[j].matrix[i].imag(), array[j].matrix[i].real());
     }
 
     if (!stream.write((char *)&angles[0], data_size * sizeof(double)))
@@ -1006,26 +904,20 @@ template class Data::data<su3_angles>;
 template <class T>
 void read_file(Data::data<T> &conf_data, std::string file_path,
                std::string file_format, int bytes_skip) {
-  conf_data.read_ildg(file_path);
+  if (std::string(file_format) == "float") {
+    conf_data.read_float(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double") {
+    conf_data.read_double(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double_vitaly") {
+    conf_data.read_double_vitaly(file_path, bytes_skip);
+  } else if (std::string(file_format) == "double_qc2dstag") {
+    conf_data.read_double_qc2dstag(file_path);
+  } else if (std::string(file_format) == "ildg") {
+    conf_data.read_ildg(file_path);
+  } else {
+    std::cout << "wrong conf format: " << file_format << std::endl;
+  }
 }
-
-// template <class T>
-// void read_file(Data::data<T> &conf_data, std::string file_path,
-//                std::string file_format, int bytes_skip) {
-//   if (std::string(file_format) == "float") {
-//     conf_data.read_float(file_path, bytes_skip);
-//   } else if (std::string(file_format) == "double") {
-//     conf_data.read_double(file_path, bytes_skip);
-//   } else if (std::string(file_format) == "double_vitaly") {
-//     conf_data.read_double_vitaly(file_path, bytes_skip);
-//   } else if (std::string(file_format) == "double_qc2dstag") {
-//     conf_data.read_double_qc2dstag(file_path);
-//   } else if (std::string(file_format) == "ildg") {
-//     conf_data.read_ildg(file_path);
-//   } else {
-//     std::cout << "wrong conf format: " << file_format << std::endl;
-//   }
-// }
 
 template <>
 void get_data(Data::data<su3_abelian> &conf_data, std::string file_path,
@@ -1061,24 +953,6 @@ void get_data(Data::data<su3> &conf_data, std::string file_path,
     read_file(data_tmp, file_path, file_format, bytes_skip);
     conf_data.array = get_offdiagonal(data_tmp.array);
   }
-}
-
-template <>
-void get_data(Data::data<su3_test> &conf_data, std::string file_path,
-              std::string file_format, int bytes_skip, bool convert) {
-  read_file(conf_data, file_path, file_format, bytes_skip);
-}
-
-template <>
-void get_data(Data::data<su3_eigen> &conf_data, std::string file_path,
-              std::string file_format, int bytes_skip, bool convert) {
-  read_file(conf_data, file_path, file_format, bytes_skip);
-}
-
-template <>
-void get_data(Data::data<Eigen::Matrix3cd> &conf_data, std::string file_path,
-              std::string file_format, int bytes_skip, bool convert) {
-  read_file(conf_data, file_path, file_format, bytes_skip);
 }
 
 template <>
@@ -1152,7 +1026,3 @@ template std::vector<su3> swap_directions(const std::vector<su3> &conf,
 // su3_abelian
 template std::vector<su3_abelian>
 swap_directions(const std::vector<su3_abelian> &conf, int dir1, int dir2);
-
-template class Data::data<su3_test>;
-template class Data::data<su3_eigen>;
-template class Data::data<Eigen::Matrix3cd>;

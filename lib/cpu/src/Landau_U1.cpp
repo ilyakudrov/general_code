@@ -50,10 +50,11 @@ std::vector<abelian> convert_to_abelian(const std::vector<su2> &conf_su2) {
   return conf_abelian;
 }
 
-std::vector<complex_t> convert_to_complex(const std::vector<su2> &conf_su2) {
+std::vector<std::complex<double>>
+convert_to_complex(const std::vector<su2> &conf_su2) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
-  std::vector<complex_t> conf_complex;
+  std::vector<std::complex<double>> conf_complex;
   conf_complex.reserve(data_size);
 
   double module;
@@ -62,14 +63,14 @@ std::vector<complex_t> convert_to_complex(const std::vector<su2> &conf_su2) {
     module =
         sqrt(conf_su2[i].a0 * conf_su2[i].a0 + conf_su2[i].a3 * conf_su2[i].a3);
     conf_complex.push_back(
-        complex_t(conf_su2[i].a0 / module, conf_su2[i].a3 / module));
+        std::complex<double>(conf_su2[i].a0 / module, conf_su2[i].a3 / module));
   }
 
   return conf_complex;
 }
 
-std::vector<double>
-convert_complex_to_angles(const std::vector<complex_t> &conf_complex) {
+std::vector<double> convert_complex_to_angles(
+    const std::vector<std::complex<double>> &conf_complex) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
   std::vector<double> conf_angles;
@@ -78,7 +79,8 @@ convert_complex_to_angles(const std::vector<complex_t> &conf_complex) {
   double module;
 
   for (int i = 0; i < data_size; i++) {
-    conf_angles.push_back(atan2(conf_complex[i].imag, conf_complex[i].real));
+    conf_angles.push_back(
+        atan2(conf_complex[i].imag(), conf_complex[i].real()));
   }
 
   return conf_angles;
@@ -127,7 +129,7 @@ std::vector<abelian> generate_gauge_abelian_uniform() {
   return gauge_abelian;
 }
 
-std::vector<complex_t> generate_gauge_complex_uniform() {
+std::vector<std::complex<double>> generate_gauge_complex_uniform() {
 
   unsigned seed = time(NULL);
   // unsigned seed = 123;
@@ -136,7 +138,7 @@ std::vector<complex_t> generate_gauge_complex_uniform() {
 
   int data_size = x_size * y_size * z_size * t_size;
 
-  std::vector<complex_t> gauge_complex;
+  std::vector<std::complex<double>> gauge_complex;
   gauge_complex.reserve(data_size);
 
   double angle_tmp;
@@ -146,21 +148,22 @@ std::vector<complex_t> generate_gauge_complex_uniform() {
     angle_tmp =
         (2 * (double)random_generator() / random_generator.max() - 1) * M_PI;
 
-    gauge_complex.push_back(complex_t(cos(angle_tmp), sin(angle_tmp)));
+    gauge_complex.push_back(
+        std::complex<double>(cos(angle_tmp), sin(angle_tmp)));
   }
 
   return gauge_complex;
 }
 
-std::vector<complex_t> generate_gauge_complex_unity() {
+std::vector<std::complex<double>> generate_gauge_complex_unity() {
 
   int data_size = x_size * y_size * z_size * t_size;
 
-  std::vector<complex_t> gauge_complex;
+  std::vector<std::complex<double>> gauge_complex;
   gauge_complex.reserve(data_size);
 
   for (int i = 0; i < data_size; i++) {
-    gauge_complex.push_back(complex_t(1, 0));
+    gauge_complex.push_back(std::complex<double>(1, 0));
   }
 
   return gauge_complex;
@@ -326,11 +329,11 @@ void normalize_abelian(std::vector<abelian> &abelian) {
   }
 }
 
-void normalize_complex(std::vector<complex_t> &gauge_complex) {
+void normalize_complex(std::vector<std::complex<double>> &gauge_complex) {
   double norm;
   for (int i = 0; i < gauge_complex.size(); i++) {
-    norm = sqrt(gauge_complex[i].real * gauge_complex[i].real +
-                gauge_complex[i].imag * gauge_complex[i].imag);
+    norm = sqrt(gauge_complex[i].real() * gauge_complex[i].real() +
+                gauge_complex[i].imag() * gauge_complex[i].imag());
     gauge_complex[i] = gauge_complex[i] / norm;
   }
 }
@@ -404,12 +407,12 @@ double Landau_functional_gauge(const std::vector<double> &gauge_angles,
   return result / (x_size * y_size * z_size * t_size * 4);
 }
 
-double
-Landau_functional_gauge_complex(const std::vector<complex_t> &gauge_complex,
-                                const std::vector<complex_t> &conf_complex) {
+double Landau_functional_gauge_complex(
+    const std::vector<std::complex<double>> &gauge_complex,
+    const std::vector<std::complex<double>> &conf_complex) {
   link1 link(x_size, y_size, z_size, t_size);
   double result = 0;
-  complex_t tmp;
+  std::complex<double> tmp;
 
   SPACE_ITER_START
 
@@ -419,7 +422,7 @@ Landau_functional_gauge_complex(const std::vector<complex_t> &gauge_complex,
 
     link.move(mu, 1);
 
-    result += (tmp ^ gauge_complex[link.place / 4]).real;
+    result += (tmp * std::conj(gauge_complex[link.place / 4])).real();
 
     link.move(mu, -1);
   }
@@ -446,10 +449,11 @@ double Landau_functional_abelian(std::vector<abelian> &conf_abelian) {
   return result / conf_abelian.size();
 }
 
-double Landau_functional_complex(const std::vector<complex_t> &conf_complex) {
+double Landau_functional_complex(
+    const std::vector<std::complex<double>> &conf_complex) {
   double result = 0;
   for (int i = 0; i < conf_complex.size(); i++) {
-    result += conf_complex[i].real;
+    result += conf_complex[i].real();
   }
   return result / conf_complex.size();
 }
@@ -676,154 +680,160 @@ abelian contribution_site_test2(std::vector<double> &gauge_abelian,
                                 int y, int z, int t, int position,
                                 std::vector<int> &shift) {
 
-  complex_t complex_tmp(0, 0);
+  std::complex<double> complex_tmp(0, 0);
 
   // mu = 0
   if (x < x_size - 1) {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         conf_abelian[position * 4].r * cos(conf_abelian[position * 4].phi -
-                                           gauge_abelian[position + shift[0]]);
-    complex_tmp.imag +=
+                                           gauge_abelian[position + shift[0]]),
         conf_abelian[position * 4].r * sin(conf_abelian[position * 4].phi -
-                                           gauge_abelian[position + shift[0]]);
+                                           gauge_abelian[position + shift[0]]));
   } else {
-    complex_tmp.real += conf_abelian[position * 4].r *
-                        cos(conf_abelian[position * 4].phi -
-                            gauge_abelian[position + shift[0] - shift[1]]);
-    complex_tmp.imag += conf_abelian[position * 4].r *
-                        sin(conf_abelian[position * 4].phi -
-                            gauge_abelian[position + shift[0] - shift[1]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[position * 4].r *
+            cos(conf_abelian[position * 4].phi -
+                gauge_abelian[position + shift[0] - shift[1]]),
+        conf_abelian[position * 4].r *
+            sin(conf_abelian[position * 4].phi -
+                gauge_abelian[position + shift[0] - shift[1]]));
   }
 
   if (x > 0) {
-    complex_tmp.real += conf_abelian[(position - shift[0]) * 4].r *
-                        cos(-conf_abelian[(position - shift[0]) * 4].phi -
-                            gauge_abelian[position - shift[0]]);
-    complex_tmp.imag += conf_abelian[(position - shift[0]) * 4].r *
-                        sin(-conf_abelian[(position - shift[0]) * 4].phi -
-                            gauge_abelian[position - shift[0]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[(position - shift[0]) * 4].r *
+            cos(-conf_abelian[(position - shift[0]) * 4].phi -
+                gauge_abelian[position - shift[0]]),
+        conf_abelian[(position - shift[0]) * 4].r *
+            sin(-conf_abelian[(position - shift[0]) * 4].phi -
+                gauge_abelian[position - shift[0]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         conf_abelian[(position - shift[0] + shift[1]) * 4].r *
-        cos(-conf_abelian[(position - shift[0] + shift[1]) * 4].phi -
-            gauge_abelian[position - shift[0] + shift[1]]);
-    complex_tmp.imag +=
+            cos(-conf_abelian[(position - shift[0] + shift[1]) * 4].phi -
+                gauge_abelian[position - shift[0] + shift[1]]),
         conf_abelian[(position - shift[0] + shift[1]) * 4].r *
-        sin(-conf_abelian[(position - shift[0] + shift[1]) * 4].phi -
-            gauge_abelian[position - shift[0] + shift[1]]);
+            sin(-conf_abelian[(position - shift[0] + shift[1]) * 4].phi -
+                gauge_abelian[position - shift[0] + shift[1]]));
   }
 
   // mu = 1
 
   if (y < y_size - 1) {
-    complex_tmp.real += conf_abelian[position * 4 + 1].r *
-                        cos(conf_abelian[position * 4 + 1].phi -
-                            gauge_abelian[position + shift[1]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 1].r *
-                        sin(conf_abelian[position * 4 + 1].phi -
-                            gauge_abelian[position + shift[1]]);
+    complex_tmp +=
+        std::complex<double>(conf_abelian[position * 4 + 1].r *
+                                 cos(conf_abelian[position * 4 + 1].phi -
+                                     gauge_abelian[position + shift[1]]),
+                             conf_abelian[position * 4 + 1].r *
+                                 sin(conf_abelian[position * 4 + 1].phi -
+                                     gauge_abelian[position + shift[1]]));
   } else {
-    complex_tmp.real += conf_abelian[position * 4 + 1].r *
-                        cos(conf_abelian[position * 4 + 1].phi -
-                            gauge_abelian[position + shift[1] - shift[2]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 1].r *
-                        sin(conf_abelian[position * 4 + 1].phi -
-                            gauge_abelian[position + shift[1] - shift[2]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[position * 4 + 1].r *
+            cos(conf_abelian[position * 4 + 1].phi -
+                gauge_abelian[position + shift[1] - shift[2]]),
+        conf_abelian[position * 4 + 1].r *
+            sin(conf_abelian[position * 4 + 1].phi -
+                gauge_abelian[position + shift[1] - shift[2]]));
   }
 
   if (y > 0) {
-    complex_tmp.real += conf_abelian[(position - shift[1]) * 4 + 1].r *
-                        cos(-conf_abelian[(position - shift[1]) * 4 + 1].phi -
-                            gauge_abelian[position - shift[1]]);
-    complex_tmp.imag += conf_abelian[(position - shift[1]) * 4 + 1].r *
-                        sin(-conf_abelian[(position - shift[1]) * 4 + 1].phi -
-                            gauge_abelian[position - shift[1]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[(position - shift[1]) * 4 + 1].r *
+            cos(-conf_abelian[(position - shift[1]) * 4 + 1].phi -
+                gauge_abelian[position - shift[1]]),
+        conf_abelian[(position - shift[1]) * 4 + 1].r *
+            sin(-conf_abelian[(position - shift[1]) * 4 + 1].phi -
+                gauge_abelian[position - shift[1]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].r *
-        cos(-conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].phi -
-            gauge_abelian[position - shift[1] + shift[2]]);
-    complex_tmp.imag +=
+            cos(-conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].phi -
+                gauge_abelian[position - shift[1] + shift[2]]),
         conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].r *
-        sin(-conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].phi -
-            gauge_abelian[position - shift[1] + shift[2]]);
+            sin(-conf_abelian[(position - shift[1] + shift[2]) * 4 + 1].phi -
+                gauge_abelian[position - shift[1] + shift[2]]));
   }
 
   // mu = 2
 
   if (z < z_size - 1) {
-    complex_tmp.real += conf_abelian[position * 4 + 2].r *
-                        cos(conf_abelian[position * 4 + 2].phi -
-                            gauge_abelian[position + shift[2]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 2].r *
-                        sin(conf_abelian[position * 4 + 2].phi -
-                            gauge_abelian[position + shift[2]]);
+    complex_tmp +=
+        std::complex<double>(conf_abelian[position * 4 + 2].r *
+                                 cos(conf_abelian[position * 4 + 2].phi -
+                                     gauge_abelian[position + shift[2]]),
+                             conf_abelian[position * 4 + 2].r *
+                                 sin(conf_abelian[position * 4 + 2].phi -
+                                     gauge_abelian[position + shift[2]]));
   } else {
-    complex_tmp.real += conf_abelian[position * 4 + 2].r *
-                        cos(conf_abelian[position * 4 + 2].phi -
-                            gauge_abelian[position + shift[2] - shift[3]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 2].r *
-                        sin(conf_abelian[position * 4 + 2].phi -
-                            gauge_abelian[position + shift[2] - shift[3]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[position * 4 + 2].r *
+            cos(conf_abelian[position * 4 + 2].phi -
+                gauge_abelian[position + shift[2] - shift[3]]),
+        conf_abelian[position * 4 + 2].r *
+            sin(conf_abelian[position * 4 + 2].phi -
+                gauge_abelian[position + shift[2] - shift[3]]));
   }
 
   if (z > 0) {
-    complex_tmp.real += conf_abelian[(position - shift[2]) * 4 + 2].r *
-                        cos(-conf_abelian[(position - shift[2]) * 4 + 2].phi -
-                            gauge_abelian[position - shift[2]]);
-    complex_tmp.imag += conf_abelian[(position - shift[2]) * 4 + 2].r *
-                        sin(-conf_abelian[(position - shift[2]) * 4 + 2].phi -
-                            gauge_abelian[position - shift[2]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[(position - shift[2]) * 4 + 2].r *
+            cos(-conf_abelian[(position - shift[2]) * 4 + 2].phi -
+                gauge_abelian[position - shift[2]]),
+        conf_abelian[(position - shift[2]) * 4 + 2].r *
+            sin(-conf_abelian[(position - shift[2]) * 4 + 2].phi -
+                gauge_abelian[position - shift[2]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].r *
-        cos(-conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].phi -
-            gauge_abelian[position - shift[2] + shift[3]]);
-    complex_tmp.imag +=
+            cos(-conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].phi -
+                gauge_abelian[position - shift[2] + shift[3]]),
         conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].r *
-        sin(-conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].phi -
-            gauge_abelian[position - shift[2] + shift[3]]);
+            sin(-conf_abelian[(position - shift[2] + shift[3]) * 4 + 2].phi -
+                gauge_abelian[position - shift[2] + shift[3]]));
   }
 
   // mu = 3
 
   if (t < t_size - 1) {
-    complex_tmp.real += conf_abelian[position * 4 + 3].r *
-                        cos(conf_abelian[position * 4 + 3].phi -
-                            gauge_abelian[position + shift[3]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 3].r *
-                        sin(conf_abelian[position * 4 + 3].phi -
-                            gauge_abelian[position + shift[3]]);
+    complex_tmp +=
+        std::complex<double>(conf_abelian[position * 4 + 3].r *
+                                 cos(conf_abelian[position * 4 + 3].phi -
+                                     gauge_abelian[position + shift[3]]),
+                             conf_abelian[position * 4 + 3].r *
+                                 sin(conf_abelian[position * 4 + 3].phi -
+                                     gauge_abelian[position + shift[3]]));
   } else {
-    complex_tmp.real += conf_abelian[position * 4 + 3].r *
-                        cos(conf_abelian[position * 4 + 3].phi -
-                            gauge_abelian[position + shift[3] - shift[4]]);
-    complex_tmp.imag += conf_abelian[position * 4 + 3].r *
-                        sin(conf_abelian[position * 4 + 3].phi -
-                            gauge_abelian[position + shift[3] - shift[4]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[position * 4 + 3].r *
+            cos(conf_abelian[position * 4 + 3].phi -
+                gauge_abelian[position + shift[3] - shift[4]]),
+        conf_abelian[position * 4 + 3].r *
+            sin(conf_abelian[position * 4 + 3].phi -
+                gauge_abelian[position + shift[3] - shift[4]]));
   }
 
   if (t > 0) {
-    complex_tmp.real += conf_abelian[(position - shift[3]) * 4 + 3].r *
-                        cos(-conf_abelian[(position - shift[3]) * 4 + 3].phi -
-                            gauge_abelian[position - shift[3]]);
-    complex_tmp.imag += conf_abelian[(position - shift[3]) * 4 + 3].r *
-                        sin(-conf_abelian[(position - shift[3]) * 4 + 3].phi -
-                            gauge_abelian[position - shift[3]]);
+    complex_tmp += std::complex<double>(
+        conf_abelian[(position - shift[3]) * 4 + 3].r *
+            cos(-conf_abelian[(position - shift[3]) * 4 + 3].phi -
+                gauge_abelian[position - shift[3]]),
+        conf_abelian[(position - shift[3]) * 4 + 3].r *
+            sin(-conf_abelian[(position - shift[3]) * 4 + 3].phi -
+                gauge_abelian[position - shift[3]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].r *
-        cos(-conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].phi -
-            gauge_abelian[position - shift[3] + shift[4]]);
-    complex_tmp.imag +=
+            cos(-conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].phi -
+                gauge_abelian[position - shift[3] + shift[4]]),
         conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].r *
-        sin(-conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].phi -
-            gauge_abelian[position - shift[3] + shift[4]]);
+            sin(-conf_abelian[(position - shift[3] + shift[4]) * 4 + 3].phi -
+                gauge_abelian[position - shift[3] + shift[4]]));
   }
 
-  return abelian(sqrt(complex_tmp.real * complex_tmp.real +
-                      complex_tmp.imag * complex_tmp.imag),
-                 atan2(complex_tmp.imag, complex_tmp.real));
+  return abelian(sqrt(complex_tmp.real() * complex_tmp.real() +
+                      complex_tmp.imag() * complex_tmp.imag()),
+                 atan2(complex_tmp.imag(), complex_tmp.real()));
 }
 
 void heat_bath_update_test2(std::vector<double> &gauge_angles,
@@ -865,121 +875,117 @@ abelian contribution_site_test3(std::vector<double> &gauge_angles,
                                 int z, int t, int position,
                                 std::vector<int> &shift) {
 
-  complex_t complex_tmp(0, 0);
+  std::complex<double> complex_tmp(0, 0);
 
   // mu = 0
   if (x < x_size - 1) {
-    complex_tmp.real +=
-        cos(conf_angles[position * 4] - gauge_angles[position + shift[0]]);
-    complex_tmp.imag +=
-        sin(conf_angles[position * 4] - gauge_angles[position + shift[0]]);
+    complex_tmp += std::complex<double>(
+        cos(conf_angles[position * 4] - gauge_angles[position + shift[0]]),
+        sin(conf_angles[position * 4] - gauge_angles[position + shift[0]]));
   } else {
-    complex_tmp.real += cos(conf_angles[position * 4] -
-                            gauge_angles[position + shift[0] - shift[1]]);
-    complex_tmp.imag += sin(conf_angles[position * 4] -
-                            gauge_angles[position + shift[0] - shift[1]]);
+    complex_tmp +=
+        std::complex<double>(cos(conf_angles[position * 4] -
+                                 gauge_angles[position + shift[0] - shift[1]]),
+                             sin(conf_angles[position * 4] -
+                                 gauge_angles[position + shift[0] - shift[1]]));
   }
 
   if (x > 0) {
-    complex_tmp.real += cos(-conf_angles[(position - shift[0]) * 4] -
-                            gauge_angles[position - shift[0]]);
-    complex_tmp.imag += sin(-conf_angles[(position - shift[0]) * 4] -
-                            gauge_angles[position - shift[0]]);
-  } else {
-    complex_tmp.real += cos(-conf_angles[(position - shift[0] + shift[1]) * 4] -
-                            gauge_angles[position - shift[0] + shift[1]]);
-    complex_tmp.imag += sin(-conf_angles[(position - shift[0] + shift[1]) * 4] -
-                            gauge_angles[position - shift[0] + shift[1]]);
+    complex_tmp +=
+        std::complex<double>(cos(-conf_angles[(position - shift[0]) * 4] -
+                                 gauge_angles[position - shift[0]]),
+                             sin(-conf_angles[(position - shift[0]) * 4] -
+                                 gauge_angles[position - shift[0]]));
   }
 
   // mu = 1
 
   if (y < y_size - 1) {
-    complex_tmp.real +=
-        cos(conf_angles[position * 4 + 1] - gauge_angles[position + shift[1]]);
-    complex_tmp.imag +=
-        sin(conf_angles[position * 4 + 1] - gauge_angles[position + shift[1]]);
+    complex_tmp += std::complex<double>(
+        cos(conf_angles[position * 4 + 1] - gauge_angles[position + shift[1]]),
+        sin(conf_angles[position * 4 + 1] - gauge_angles[position + shift[1]]));
   } else {
-    complex_tmp.real += cos(conf_angles[position * 4 + 1] -
-                            gauge_angles[position + shift[1] - shift[2]]);
-    complex_tmp.imag += sin(conf_angles[position * 4 + 1] -
-                            gauge_angles[position + shift[1] - shift[2]]);
+    complex_tmp +=
+        std::complex<double>(cos(conf_angles[position * 4 + 1] -
+                                 gauge_angles[position + shift[1] - shift[2]]),
+                             sin(conf_angles[position * 4 + 1] -
+                                 gauge_angles[position + shift[1] - shift[2]]));
   }
 
   if (y > 0) {
-    complex_tmp.real += cos(-conf_angles[(position - shift[1]) * 4 + 1] -
-                            gauge_angles[position - shift[1]]);
-    complex_tmp.imag += sin(-conf_angles[(position - shift[1]) * 4 + 1] -
-                            gauge_angles[position - shift[1]]);
+    complex_tmp +=
+        std::complex<double>(cos(-conf_angles[(position - shift[1]) * 4 + 1] -
+                                 gauge_angles[position - shift[1]]),
+                             sin(-conf_angles[(position - shift[1]) * 4 + 1] -
+                                 gauge_angles[position - shift[1]]));
 
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         cos(-conf_angles[(position - shift[1] + shift[2]) * 4 + 1] -
-            gauge_angles[position - shift[1] + shift[2]]);
-    complex_tmp.imag +=
+            gauge_angles[position - shift[1] + shift[2]]),
         sin(-conf_angles[(position - shift[1] + shift[2]) * 4 + 1] -
-            gauge_angles[position - shift[1] + shift[2]]);
+            gauge_angles[position - shift[1] + shift[2]]));
   }
 
   // mu = 2
 
   if (z < z_size - 1) {
-    complex_tmp.real +=
-        cos(conf_angles[position * 4 + 2] - gauge_angles[position + shift[2]]);
-    complex_tmp.imag +=
-        sin(conf_angles[position * 4 + 2] - gauge_angles[position + shift[2]]);
+    complex_tmp += std::complex<double>(
+        cos(conf_angles[position * 4 + 2] - gauge_angles[position + shift[2]]),
+        sin(conf_angles[position * 4 + 2] - gauge_angles[position + shift[2]]));
   } else {
-    complex_tmp.real += cos(conf_angles[position * 4 + 2] -
-                            gauge_angles[position + shift[2] - shift[3]]);
-    complex_tmp.imag += sin(conf_angles[position * 4 + 2] -
-                            gauge_angles[position + shift[2] - shift[3]]);
+    complex_tmp +=
+        std::complex<double>(cos(conf_angles[position * 4 + 2] -
+                                 gauge_angles[position + shift[2] - shift[3]]),
+                             sin(conf_angles[position * 4 + 2] -
+                                 gauge_angles[position + shift[2] - shift[3]]));
   }
 
   if (z > 0) {
-    complex_tmp.real += cos(-conf_angles[(position - shift[2]) * 4 + 2] -
-                            gauge_angles[position - shift[2]]);
-    complex_tmp.imag += sin(-conf_angles[(position - shift[2]) * 4 + 2] -
-                            gauge_angles[position - shift[2]]);
+    complex_tmp +=
+        std::complex<double>(cos(-conf_angles[(position - shift[2]) * 4 + 2] -
+                                 gauge_angles[position - shift[2]]),
+                             sin(-conf_angles[(position - shift[2]) * 4 + 2] -
+                                 gauge_angles[position - shift[2]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         cos(-conf_angles[(position - shift[2] + shift[3]) * 4 + 2] -
-            gauge_angles[position - shift[2] + shift[3]]);
-    complex_tmp.imag +=
+            gauge_angles[position - shift[2] + shift[3]]),
         sin(-conf_angles[(position - shift[2] + shift[3]) * 4 + 2] -
-            gauge_angles[position - shift[2] + shift[3]]);
+            gauge_angles[position - shift[2] + shift[3]]));
   }
 
   // mu = 3
 
   if (t < t_size - 1) {
-    complex_tmp.real +=
-        cos(conf_angles[position * 4 + 3] - gauge_angles[position + shift[3]]);
-    complex_tmp.imag +=
-        sin(conf_angles[position * 4 + 3] - gauge_angles[position + shift[3]]);
+    complex_tmp += std::complex<double>(
+        cos(conf_angles[position * 4 + 3] - gauge_angles[position + shift[3]]),
+        sin(conf_angles[position * 4 + 3] - gauge_angles[position + shift[3]]));
   } else {
-    complex_tmp.real += cos(conf_angles[position * 4 + 3] -
-                            gauge_angles[position + shift[3] - shift[4]]);
-    complex_tmp.imag += sin(conf_angles[position * 4 + 3] -
-                            gauge_angles[position + shift[3] - shift[4]]);
+    complex_tmp +=
+        std::complex<double>(cos(conf_angles[position * 4 + 3] -
+                                 gauge_angles[position + shift[3] - shift[4]]),
+                             sin(conf_angles[position * 4 + 3] -
+                                 gauge_angles[position + shift[3] - shift[4]]));
   }
 
   if (t > 0) {
-    complex_tmp.real += cos(-conf_angles[(position - shift[3]) * 4 + 3] -
-                            gauge_angles[position - shift[3]]);
-    complex_tmp.imag += sin(-conf_angles[(position - shift[3]) * 4 + 3] -
-                            gauge_angles[position - shift[3]]);
+    complex_tmp +=
+        std::complex<double>(cos(-conf_angles[(position - shift[3]) * 4 + 3] -
+                                 gauge_angles[position - shift[3]]),
+                             sin(-conf_angles[(position - shift[3]) * 4 + 3] -
+                                 gauge_angles[position - shift[3]]));
   } else {
-    complex_tmp.real +=
+    complex_tmp += std::complex<double>(
         cos(-conf_angles[(position - shift[3] + shift[4]) * 4 + 3] -
-            gauge_angles[position - shift[3] + shift[4]]);
-    complex_tmp.imag +=
+            gauge_angles[position - shift[3] + shift[4]]),
         sin(-conf_angles[(position - shift[3] + shift[4]) * 4 + 3] -
-            gauge_angles[position - shift[3] + shift[4]]);
+            gauge_angles[position - shift[3] + shift[4]]));
   }
 
-  return abelian(sqrt(complex_tmp.real * complex_tmp.real +
-                      complex_tmp.imag * complex_tmp.imag),
-                 atan2(complex_tmp.imag, complex_tmp.real));
+  return abelian(sqrt(complex_tmp.real() * complex_tmp.real() +
+                      complex_tmp.imag() * complex_tmp.imag()),
+                 atan2(complex_tmp.imag(), complex_tmp.real()));
 }
 
 void heat_bath_update_test3(std::vector<double> &gauge_angles,
@@ -1016,14 +1022,14 @@ void heat_bath_update_test3(std::vector<double> &gauge_angles,
   }
 }
 
-void heat_bath(complex_t &g, complex_t &K, double temperature,
-               double *random_numbers) {
+void heat_bath(std::complex<double> &g, std::complex<double> &K,
+               double temperature, double *random_numbers) {
   double temp_factor;
   long double temp_exponent;
   spin spin_new;
 
   // generation of new spin variable
-  temp_factor = sqrt(K.real * K.real + K.imag * K.imag) / temperature;
+  temp_factor = sqrt(K.real() * K.real() + K.imag() * K.imag()) / temperature;
   double x;
   if (temp_factor < 700) {
     temp_exponent = exp(temp_factor);
@@ -1038,100 +1044,111 @@ void heat_bath(complex_t &g, complex_t &K, double temperature,
   double angle_new;
 
   if (random_numbers[1] > 0)
-    angle_new = acos(x) - atan2(K.imag, K.real);
+    angle_new = acos(x) - atan2(K.imag(), K.real());
   else
-    angle_new = -acos(x) - atan2(K.imag, K.real);
+    angle_new = -acos(x) - atan2(K.imag(), K.real());
 
-  g = complex_t(cos(angle_new), sin(angle_new));
+  g = std::complex<double>(cos(angle_new), sin(angle_new));
 }
 
-complex_t contribution_site(std::vector<complex_t> &gauge_complex,
-                            std::vector<complex_t> &conf_complex, int x, int y,
-                            int z, int t, int position,
-                            std::vector<int> &shift) {
+std::complex<double>
+contribution_site(std::vector<std::complex<double>> &gauge_complex,
+                  std::vector<std::complex<double>> &conf_complex, int x, int y,
+                  int z, int t, int position, std::vector<int> &shift) {
 
-  complex_t complex_tmp(0, 0);
+  std::complex<double> complex_tmp(0, 0);
 
   // mu = 0
   if (x < x_size - 1) {
-    complex_tmp = complex_tmp + (conf_complex[position * 4] ^
-                                 gauge_complex[position + shift[0]]);
+    complex_tmp = complex_tmp + (conf_complex[position * 4] *
+                                 std::conj(gauge_complex[position + shift[0]]));
   } else {
-    complex_tmp = complex_tmp + (conf_complex[position * 4] ^
-                                 gauge_complex[position + shift[0] - shift[1]]);
+    complex_tmp = complex_tmp +
+                  (conf_complex[position * 4] *
+                   std::conj(gauge_complex[position + shift[0] - shift[1]]));
   }
 
   if (x > 0) {
-    complex_tmp = complex_tmp + (conf_complex[(position - shift[0]) * 4] &
-                                 gauge_complex[position - shift[0]]);
-  } else {
     complex_tmp =
-        complex_tmp + (conf_complex[(position - shift[0] + shift[1]) * 4] &
-                       gauge_complex[position - shift[0] + shift[1]]);
+        complex_tmp + std::conj(conf_complex[(position - shift[0]) * 4] *
+                                gauge_complex[position - shift[0]]);
+  } else {
+    complex_tmp = complex_tmp +
+                  std::conj(conf_complex[(position - shift[0] + shift[1]) * 4] *
+                            gauge_complex[position - shift[0] + shift[1]]);
   }
 
   // mu = 1
 
   if (y < y_size - 1) {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 1] ^
-                                 gauge_complex[position + shift[1]]);
+    complex_tmp = complex_tmp + (conf_complex[position * 4 + 1] *
+                                 std::conj(gauge_complex[position + shift[1]]));
   } else {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 1] ^
-                                 gauge_complex[position + shift[1] - shift[2]]);
+    complex_tmp = complex_tmp +
+                  (conf_complex[position * 4 + 1] *
+                   std::conj(gauge_complex[position + shift[1] - shift[2]]));
   }
 
   if (y > 0) {
-    complex_tmp = complex_tmp + (conf_complex[(position - shift[1]) * 4 + 1] &
-                                 gauge_complex[position - shift[1]]);
+    complex_tmp =
+        complex_tmp + std::conj(conf_complex[(position - shift[1]) * 4 + 1] *
+                                gauge_complex[position - shift[1]]);
   } else {
     complex_tmp =
-        complex_tmp + (conf_complex[(position - shift[1] + shift[2]) * 4 + 1] &
-                       gauge_complex[position - shift[1] + shift[2]]);
+        complex_tmp +
+        std::conj(conf_complex[(position - shift[1] + shift[2]) * 4 + 1] *
+                  gauge_complex[position - shift[1] + shift[2]]);
   }
 
   // mu = 2
 
   if (z < z_size - 1) {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 2] ^
-                                 gauge_complex[position + shift[2]]);
+    complex_tmp = complex_tmp + (conf_complex[position * 4 + 2] *
+                                 std::conj(gauge_complex[position + shift[2]]));
   } else {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 2] ^
-                                 gauge_complex[position + shift[2] - shift[3]]);
+    complex_tmp = complex_tmp +
+                  (conf_complex[position * 4 + 2] *
+                   std::conj(gauge_complex[position + shift[2] - shift[3]]));
   }
 
   if (z > 0) {
-    complex_tmp = complex_tmp + (conf_complex[(position - shift[2]) * 4 + 2] &
-                                 gauge_complex[position - shift[2]]);
+    complex_tmp =
+        complex_tmp + std::conj(conf_complex[(position - shift[2]) * 4 + 2] *
+                                gauge_complex[position - shift[2]]);
   } else {
     complex_tmp =
-        complex_tmp + (conf_complex[(position - shift[2] + shift[3]) * 4 + 2] &
-                       gauge_complex[position - shift[2] + shift[3]]);
+        complex_tmp +
+        std::conj(conf_complex[(position - shift[2] + shift[3]) * 4 + 2] *
+                  gauge_complex[position - shift[2] + shift[3]]);
   }
 
   // mu = 3
 
   if (t < t_size - 1) {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 3] ^
-                                 gauge_complex[position + shift[3]]);
+    complex_tmp = complex_tmp + (conf_complex[position * 4 + 3] *
+                                 std::conj(gauge_complex[position + shift[3]]));
   } else {
-    complex_tmp = complex_tmp + (conf_complex[position * 4 + 3] ^
-                                 gauge_complex[position + shift[3] - shift[4]]);
+    complex_tmp = complex_tmp +
+                  (conf_complex[position * 4 + 3] *
+                   std::conj(gauge_complex[position + shift[3] - shift[4]]));
   }
 
   if (t > 0) {
-    complex_tmp = complex_tmp + (conf_complex[(position - shift[3]) * 4 + 3] &
-                                 gauge_complex[position - shift[3]]);
+    complex_tmp =
+        complex_tmp + std::conj(conf_complex[(position - shift[3]) * 4 + 3] *
+                                gauge_complex[position - shift[3]]);
   } else {
     complex_tmp =
-        complex_tmp + (conf_complex[(position - shift[3] + shift[4]) * 4 + 3] &
-                       gauge_complex[position - shift[3] + shift[4]]);
+        complex_tmp +
+        std::conj(conf_complex[(position - shift[3] + shift[4]) * 4 + 3] *
+                  gauge_complex[position - shift[3] + shift[4]]);
   }
 
   return complex_tmp;
 }
 
-void heat_bath_update(std::vector<complex_t> &gauge_complex,
-                      std::vector<complex_t> &conf_complex,
+void heat_bath_update(std::vector<std::complex<double>> &gauge_complex,
+                      std::vector<std::complex<double>> &conf_complex,
                       double temperature) {
 
   std::vector<double> random_numbers;
@@ -1144,7 +1161,7 @@ void heat_bath_update(std::vector<complex_t> &gauge_complex,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
 
-  complex_t A;
+  std::complex<double> A;
   int position = 0;
 
   for (int t = 0; t < t_size; t++) {
@@ -1165,14 +1182,14 @@ void heat_bath_update(std::vector<complex_t> &gauge_complex,
   }
 }
 
-void overrelaxation_update(std::vector<complex_t> &gauge_complex,
-                           std::vector<complex_t> &conf_complex) {
+void overrelaxation_update(std::vector<std::complex<double>> &gauge_complex,
+                           std::vector<std::complex<double>> &conf_complex) {
 
   std::vector<int> shift = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
 
-  complex_t A;
+  std::complex<double> A;
   int position = 0;
   double A_phi;
   double gauge_phi;
@@ -1185,14 +1202,13 @@ void overrelaxation_update(std::vector<complex_t> &gauge_complex,
           A = contribution_site(gauge_complex, conf_complex, x, y, z, t,
                                 position, shift);
 
-          A_phi = atan2(A.imag, A.real);
-          gauge_phi = -atan2(gauge_complex[position].imag,
-                             gauge_complex[position].real) -
+          A_phi = atan2(A.imag(), A.real());
+          gauge_phi = -atan2(gauge_complex[position].imag(),
+                             gauge_complex[position].real()) -
                       2 * A_phi;
 
-          gauge_complex[position].real = cos(gauge_phi);
-          gauge_complex[position].imag = sin(gauge_phi);
-
+          gauge_complex[position] =
+              std::complex<double>(cos(gauge_phi), sin(gauge_phi));
           position++;
         }
       }
@@ -1201,14 +1217,14 @@ void overrelaxation_update(std::vector<complex_t> &gauge_complex,
 }
 
 std::tuple<double, double>
-relaxation_update(std::vector<complex_t> &gauge_complex,
-                  std::vector<complex_t> &conf_complex) {
+relaxation_update(std::vector<std::complex<double>> &gauge_complex,
+                  std::vector<std::complex<double>> &conf_complex) {
 
   std::vector<int> shift = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
 
-  complex_t A;
+  std::complex<double> A;
   int position = 0;
 
   double diff_average = 0;
@@ -1226,13 +1242,12 @@ relaxation_update(std::vector<complex_t> &gauge_complex,
           A = contribution_site(gauge_complex, conf_complex, x, y, z, t,
                                 position, shift);
 
-          gauge_phi =
-              atan2(gauge_complex[position].imag, gauge_complex[position].real);
-          A_phi = atan2(A.imag, A.real);
+          gauge_phi = atan2(gauge_complex[position].imag(),
+                            gauge_complex[position].real());
+          A_phi = atan2(A.imag(), A.real());
 
-          gauge_complex[position].real = cos(A_phi);
-          gauge_complex[position].imag = -sin(A_phi);
-
+          gauge_complex[position] =
+              std::complex<double>(cos(A_phi), -sin(A_phi));
           diff_tmp = 1 - cos(A_phi + gauge_phi);
 
           if (diff_tmp > diff_maximal)
@@ -1250,8 +1265,8 @@ relaxation_update(std::vector<complex_t> &gauge_complex,
   return std::tuple<double, double>(diff_maximal, diff_average);
 }
 
-void make_simulated_annealing(std::vector<complex_t> &gauge_complex,
-                              std::vector<complex_t> &conf_complex,
+void make_simulated_annealing(std::vector<std::complex<double>> &gauge_complex,
+                              std::vector<std::complex<double>> &conf_complex,
                               double T_init, double T_final, double T_step,
                               int OR_steps, int thermalization_steps) {
 
@@ -1273,9 +1288,9 @@ void make_simulated_annealing(std::vector<complex_t> &gauge_complex,
   }
 }
 
-void make_maximization_final(std::vector<complex_t> &gauge_complex,
-                             std::vector<complex_t> &conf_complex, int OR_steps,
-                             double tolerance_maximal,
+void make_maximization_final(std::vector<std::complex<double>> &gauge_complex,
+                             std::vector<std::complex<double>> &conf_complex,
+                             int OR_steps, double tolerance_maximal,
                              double tolerance_average) {
 
   bool is_converged = false;
@@ -1295,32 +1310,12 @@ void make_maximization_final(std::vector<complex_t> &gauge_complex,
   } while (!is_converged);
 }
 
-// int get_dirac_plaket_number(std::vector<complex_t> &gauge_complex,
-//                             std::vector<complex_t> &conf_complex) {
-//   int data_size = x_size * y_size * z_size * t_size;
-//   std::vector<std::vector<int>> singular(6, std::vector<int>(data_size));
-//   link1 link(x_size, y_size, z_size, t_size);
-
-//   int number = 0;
-
-//   SPACE_ITER_START
-//   for (int mu = 0; mu < 4; mu++) {
-//     link.move_dir(mu);
-//     for (int nu = mu + 1; nu < 4; nu++) {
-
-//       if (link.monopole_plaket_singular_mu(angles, nu) != 0)
-//         number++;
-//     }
-//   }
-//   SPACE_ITER_END
-//   return number;
-// }
-
-void apply_gauge_Landau_complex(std::vector<complex_t> &gauge_complex,
-                                std::vector<complex_t> &conf_complex) {
+void apply_gauge_Landau_complex(
+    std::vector<std::complex<double>> &gauge_complex,
+    std::vector<std::complex<double>> &conf_complex) {
   link1 link(x_size, y_size, z_size, t_size);
 
-  complex_t complex_tmp;
+  std::complex<double> complex_tmp;
   double norm;
 
   SPACE_ITER_START
@@ -1331,7 +1326,7 @@ void apply_gauge_Landau_complex(std::vector<complex_t> &gauge_complex,
 
     link.move(mu, 1);
 
-    complex_tmp = complex_tmp ^ gauge_complex[link.place / 4];
+    complex_tmp = complex_tmp * std::conj(gauge_complex[link.place / 4]);
 
     link.move(mu, -1);
 
@@ -1341,7 +1336,7 @@ void apply_gauge_Landau_complex(std::vector<complex_t> &gauge_complex,
   SPACE_ITER_END
 }
 
-void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
+void apply_gauge_Landau(std::vector<std::complex<double>> &gauge_complex,
                         std::vector<su2> &conf_su2) {
   link1 link(x_size, y_size, z_size, t_size);
 
@@ -1349,8 +1344,8 @@ void apply_gauge_Landau(std::vector<complex_t> &gauge_complex,
 
   SPACE_ITER_START
 
-  A = su2(gauge_complex[link.place / 4].real, 0, 0,
-          gauge_complex[link.place / 4].imag);
+  A = su2(gauge_complex[link.place / 4].real(), 0, 0,
+          gauge_complex[link.place / 4].imag());
 
   for (int mu = 0; mu < 4; mu++) {
 

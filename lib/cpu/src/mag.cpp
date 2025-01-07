@@ -808,8 +808,8 @@ double mag_functional_su3(std::vector<su3> &conf_su3) {
     //     .tr();
     for (int j = 0; j < 3; j++) {
       functional +=
-          conf_su3[i].matrix[j][j].real * conf_su3[i].matrix[j][j].real +
-          conf_su3[i].matrix[j][j].imag * conf_su3[i].matrix[j][j].imag;
+          conf_su3[i].matrix(j, j).real() * conf_su3[i].matrix(j, j).real() +
+          conf_su3[i].matrix(j, j).imag() * conf_su3[i].matrix(j, j).imag();
     }
   }
   return functional / (x_size * y_size * z_size * t_size * 3 * 4);

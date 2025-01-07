@@ -16,7 +16,7 @@ std::vector<std::vector<double>> make_angles_SU3(std::vector<su3> &conf) {
 
     for (int j = 0; j < 3; j++) {
       angle_tmp[j] =
-          atan2(conf[i].matrix[j][j].imag, conf[i].matrix[j][j].real);
+          atan2(conf[i].matrix(j, j).imag(), conf[i].matrix(j, j).real());
       sum += angle_tmp[j];
     }
 
