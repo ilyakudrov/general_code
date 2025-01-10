@@ -24,6 +24,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char *argv[]) {
   double start_time;
@@ -116,6 +118,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   Data::data<MATRIX_PLAKET> conf_plaket;
   Data::data<MATRIX_WILSON> conf_wilson;
@@ -154,15 +158,15 @@ int main(int argc, char *argv[]) {
   stream_electric_trans << "T,R,d,correlator,wilson_loop,plaket" << endl;
   stream_magnetic_trans << "T,R,d,correlator,wilson_loop,plaket" << endl;
 
+  map<tuple<int, int>, double> wilson_loops =
+      wilson_loop(conf_wilson.array, R_min, R_max, T_min, T_max);
+
   vector<vector<MATRIX_PLAKET>> separated_plaket =
       separate_wilson(conf_plaket.array);
   conf_plaket.array.erase(conf_plaket.array.begin(), conf_plaket.array.end());
   vector<vector<MATRIX_WILSON>> separated_wilson =
       separate_wilson(conf_wilson.array);
   conf_wilson.array.erase(conf_wilson.array.begin(), conf_wilson.array.end());
-
-  map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(separated_wilson, R_min, R_max, T_min, T_max);
 
   map<tuple<int, int, int>, double> flux_tube;
 

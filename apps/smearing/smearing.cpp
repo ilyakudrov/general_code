@@ -30,6 +30,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char *argv[]) {
   double start_time;
@@ -151,6 +153,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout << "conf_format_wilson " << conf_format_wilson << endl;
   cout << "conf_path_wilson " << conf_path_wilson << endl;
@@ -194,26 +198,6 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  // MATRIX_WILSON A;
-  // A.matrix[0][0] = complex_t(0.35035698103234469, -1.6630557265774293);
-  // A.matrix[0][1] = complex_t(-0.46749464740787827, -0.74398941338992597);
-  // A.matrix[0][2] = complex_t(-0.99972108717033048, 0.44976186240826144);
-  // A.matrix[1][0] = complex_t(-0.087007093006583103, -0.32516527020918684);
-  // A.matrix[1][1] = complex_t(-0.2044920464568383, 0.15083355900456979);
-  // A.matrix[1][2] = complex_t(0.044110015551082127, 0.39157539161638633);
-  // A.matrix[2][0] = complex_t(0.50102765358470691, -0.52252003894935606);
-  // A.matrix[2][1] = complex_t(-0.11400765728062581, 0.14459284287651428);
-  // A.matrix[2][2] = complex_t(1.3305288999391762, 0.3651906657996804);
-
-  // cout << A << endl;
-  // cout << A.determinant() << endl;
-  // cout << A.unitarity_check() << endl;
-  // cout << A.proj() << endl;
-  // A = A.proj1();
-  // cout << A << endl;
-  // cout << A.determinant() << endl;
-  // cout << A.unitarity_check() << endl;
-
   // return 0;
 
   Data::data<MATRIX_WILSON> conf_wilson;
@@ -254,9 +238,7 @@ int main(int argc, char *argv[]) {
   // open file
   if (wilson_enabled) {
     stream_wilson.open(path_wilson);
-
     stream_wilson.precision(17);
-
     stream_wilson << "smearing_step,time_size,space_size,wilson_loop" << endl;
   }
   ofstream stream_flux;
@@ -264,9 +246,7 @@ int main(int argc, char *argv[]) {
   // open file
   if (flux_enabled) {
     stream_flux.open(path_flux);
-
     stream_flux.precision(17);
-
     stream_flux << "smearing_step,time_size,space_size,x_long,correlator,"
                    "wilson_loop,plaket"
                 << endl;
@@ -292,10 +272,11 @@ int main(int argc, char *argv[]) {
   std::vector<double> polyakov_correlator_vec;
   std ::map<double, double> polyakov_correlator;
 
-  vector<vector<MATRIX_WILSON>> conf_separated =
-      separate_wilson(conf_wilson.array);
-  conf_wilson.array.clear();
-  conf_wilson.array.shrink_to_fit();
+  vector<vector<MATRIX_WILSON>> conf_separated;
+  // vector<vector<MATRIX_WILSON>> conf_separated =
+  //     separate_wilson(conf_wilson.array);
+  // conf_wilson.array.clear();
+  // conf_wilson.array.shrink_to_fit();
 
   observables_time = 0;
   start_time = omp_get_wtime();
@@ -330,7 +311,8 @@ int main(int argc, char *argv[]) {
     smearing_time = 0;
     for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
       start_time = omp_get_wtime();
-      smearing_HYP_parallel(conf_separated, HYP_alpha1, HYP_alpha2, HYP_alpha3);
+      smearing_HYP_indexed(conf_wilson.array, HYP_alpha1, HYP_alpha2,
+                           HYP_alpha3);
       end_time = omp_get_wtime();
       smearing_time += end_time - start_time;
 
@@ -372,7 +354,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (wilson_enabled) {
-    wilson_loops = wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+    wilson_loops = wilson_loop(conf_wilson.array, R_min, R_max, T_min, T_max);
 
     for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
       stream_wilson << 0 << "," << get<0>(it->first) << "," << get<1>(it->first)
@@ -386,7 +368,7 @@ int main(int argc, char *argv[]) {
 
       start_time = omp_get_wtime();
 
-      smearing_APE_parallel(conf_separated, APE_alpha);
+      smearing_APE_indexed(conf_wilson.array, APE_alpha);
 
       end_time = omp_get_wtime();
       smearing_time += end_time - start_time;
@@ -398,7 +380,7 @@ int main(int argc, char *argv[]) {
 
         if (wilson_enabled) {
           wilson_loops =
-              wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+              wilson_loop(conf_wilson.array, R_min, R_max, T_min, T_max);
 
           for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
             stream_wilson << APE_step << "," << get<0>(it->first) << ","

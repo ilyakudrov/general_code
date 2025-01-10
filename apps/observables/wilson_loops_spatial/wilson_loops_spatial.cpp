@@ -19,6 +19,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char *argv[]) {
   double start_time;
@@ -75,6 +77,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout << "conf_format " << conf_format << endl;
   cout << "conf_path " << conf_path << endl;
@@ -110,10 +114,10 @@ int main(int argc, char *argv[]) {
   stream_wilson << "smearing_steps,time_size,space_size,wilson_loop" << endl;
 
   vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
+  cout << "plaket space " << plaket_space(conf.array) << endl;
 
   conf.array.clear();
   conf.array.shrink_to_fit();
-  cout << "plaket space " << plaket_space_parallel(conf_separated) << endl;
 
   start_time = omp_get_wtime();
 

@@ -23,6 +23,13 @@ public:
     a3 = b3;
   }
 
+  su2(double a) {
+    a0 = a;
+    a1 = a;
+    a2 = a;
+    a3 = a;
+  }
+
   double tr() { return a0; }
 
   double multiply_conj_tr(const su2 &B) const {
@@ -102,6 +109,11 @@ public:
     phi = phi1;
   }
 
+  abelian(double a) {
+    r = a;
+    phi = 0;
+  }
+
   double tr() const { return r * cos(phi); }
 
   double multiply_conj_tr(const abelian &B) const {
@@ -176,6 +188,14 @@ public:
   }
 
   su3(const Eigen::Matrix3cd &B) { matrix = B; }
+
+  su3(double a) {
+    matrix << std::complex<double>(a, 0), std::complex<double>(a, 0),
+        std::complex<double>(a, 0), std::complex<double>(a, 0),
+        std::complex<double>(a, 0), std::complex<double>(a, 0),
+        std::complex<double>(a, 0), std::complex<double>(a, 0),
+        std::complex<double>(a, 0);
+  }
 
   double tr() const { return matrix.trace().real() / 3.; }
 
@@ -294,12 +314,23 @@ public:
       matrix[i] = B[i];
     }
   }
+  su3_abelian(std::vector<std::complex<double>> &B) {
+    for (int i = 0; i < 3; i++) {
+      matrix[i] = B[i];
+    }
+  }
 
   su3_abelian() {
     for (int i = 0; i < 3; i++) {
       matrix[i] = std::complex<double>(1, 0);
     }
   }
+
+  su3_abelian(double a) {
+    matrix[0] = std::complex<double>(a, 0);
+    matrix[1] = std::complex<double>(a, 0);
+    matrix[2] = std::complex<double>(a, 0);
+  };
 
   double tr() const {
     return (matrix[0].real() + matrix[1].real() + matrix[2].real()) / 3;
@@ -480,6 +511,16 @@ public:
     for (int i = 0; i < 3; i++) {
       matrix[i] = 0;
     }
+  }
+  su3_angles(std::vector<double> B) {
+    for (int i = 0; i < 3; i++) {
+      matrix[i] = B[i];
+    }
+  }
+  su3_angles(double a) {
+    matrix[0] = 0;
+    matrix[1] = 0;
+    matrix[2] = 0;
   }
 
   double tr() const {

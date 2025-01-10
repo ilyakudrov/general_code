@@ -18,6 +18,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char *argv[]) {
   double start_time;
@@ -67,6 +69,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout << "conf_format " << conf_format << endl;
   cout << "conf_path " << conf_path << endl;
@@ -107,15 +111,13 @@ int main(int argc, char *argv[]) {
 
   if (axis.compare("on-axis") == 0) {
     cout << "on-axis" << endl;
-    conf_separated = separate_wilson(conf.array);
     if (representation.compare("fundamental") == 0) {
       cout << "fundamental" << endl;
-      wilson_loops_onaxis =
-          wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+      wilson_loops_onaxis = wilson_loop(conf.array, R_min, R_max, T_min, T_max);
     } else if (representation.compare("adjoint") == 0) {
       cout << "adjoint" << endl;
       wilson_loops_onaxis =
-          wilson_adjoint_parallel(conf_separated, R_min, R_max, T_min, T_max);
+          wilson_loop_adjoint(conf.array, R_min, R_max, T_min, T_max);
     } else {
       cout << "wrong representation" << endl;
     }

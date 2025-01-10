@@ -1,4 +1,5 @@
 #include "../include/smearing.h"
+#include "../include/indexing.h"
 #include "../include/link.h"
 #include "../include/matrix.h"
 
@@ -1035,6 +1036,54 @@ void smearing_plane_major_end(std::vector<T> &smeared,
 }
 
 template <class T>
+void smearing_APE_indexed(std::vector<T> &conf, double alpha) {
+  std::vector<T> smeared = conf;
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord(4);
+  T staple;
+  T staple_sum;
+  int index;
+#pragma omp parallel for collapse(4) private(                                  \
+        lat_coord, index, staple, staple_sum) firstprivate(lat_dim)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          for (int mu = 0; mu < 3; mu++) {
+            staple_sum = (1 - alpha) * smeared[get_index_matrix(lat_coord, mu)];
+            for (int nu = 0; nu < 3; nu++) {
+              if (mu != nu) {
+                index = get_index_matrix(lat_coord, nu);
+                lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
+                staple = conf[index] * conf[get_index_matrix(lat_coord, mu)];
+                lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+                staple_sum =
+                    staple_sum + ((alpha / 4) * staple ^
+                                  conf[get_index_matrix(lat_coord, nu)]);
+                lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+                staple = conf[get_index_matrix(lat_coord, nu)] %
+                         conf[get_index_matrix(lat_coord, mu)];
+                lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+                staple_sum =
+                    staple_sum + ((alpha / 4) * staple *
+                                  conf[get_index_matrix(lat_coord, nu)]);
+                lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+              }
+            }
+            smeared[get_index_matrix(lat_coord, mu)] = staple_sum.proj();
+          }
+        }
+      }
+    }
+  }
+  conf = smeared;
+}
+
+template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha) {
   std::vector<std::vector<T>> smeared(3, std::vector<T>(conf[0].size()));
 
@@ -1672,6 +1721,176 @@ void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
   smeared.shrink_to_fit();
 }
 
+template <class T>
+void smearing_plane_HYP_indexed(std::vector<T> &smeared,
+                                std::vector<T> &conf_mu,
+                                std::vector<T> &conf_nu, int mu, int nu,
+                                double alpha, double divisor) {
+  T staple;
+  int index;
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord(4);
+#pragma omp parallel for collapse(4) private(lat_coord, index, staple)         \
+    firstprivate(lat_dim)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          index = get_index_site(lat_coord);
+          lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
+          staple = conf_nu[index] * conf_mu[get_index_site(lat_coord)];
+          lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+          lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+          smeared[index] =
+              smeared[index] +
+              ((alpha / divisor) * staple ^ conf_nu[get_index_site(lat_coord)]);
+          lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+          lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+          staple = conf_nu[get_index_site(lat_coord)] %
+                   conf_mu[get_index_site(lat_coord)];
+          lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+          smeared[index] =
+              smeared[index] +
+              ((alpha / divisor) * staple * conf_nu[get_index_site(lat_coord)]);
+        }
+      }
+    }
+  }
+}
+
+template <class T>
+void make_step1_indexed(std::vector<std::vector<T>> &links1,
+                        std::vector<std::vector<T>> &conf,
+                        std::vector<std::tuple<int, int, int>> &indices,
+                        std::map<std::tuple<int, int, int>, int> &indices_map,
+                        double alpha) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  for (int i = 0; i < indices.size(); i++) {
+    if (indices_map.count(indices[i]) == 0) {
+      indices_map[indices[i]] = links1.size();
+      links1.push_back(
+          HYP_initialize_vector(conf[std::get<0>(indices[i])], alpha));
+      for (int eta = 0; eta < 3; eta++) {
+        if (eta != std::get<0>(indices[i]) && eta != std::get<1>(indices[i]) &&
+            eta != std::get<2>(indices[i])) {
+          smearing_plane_HYP_indexed(links1.back(),
+                                     conf[std::get<0>(indices[i])], conf[eta],
+                                     std::get<0>(indices[i]), eta, alpha, 2);
+        }
+      }
+#pragma omp parallel for
+      for (int i = 0; i < links1.back().size(); i++) {
+        links1.back()[i] = links1.back()[i].proj();
+      }
+    }
+  }
+}
+
+template <class T>
+void make_step2_indexed(std::vector<std::vector<T>> &links2,
+                        std::vector<std::vector<T>> &links1,
+                        std::vector<std::vector<T>> &conf,
+                        std::map<std::tuple<int, int, int>, int> &indices_map1,
+                        int nu, double alpha2) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  links2[0] = HYP_initialize_vector(conf[3], alpha2);
+  links2[1] = HYP_initialize_vector(conf[nu], alpha2);
+  int index = 0;
+  for (int rho = 0; rho < 3; rho++) {
+    if (rho != nu) {
+      if (nu < rho) {
+        index = indices_map1[std::tuple<int, int, int>(3, nu, rho)];
+      } else {
+        index = indices_map1[std::tuple<int, int, int>(3, rho, nu)];
+      }
+      smearing_plane_HYP_indexed(
+          links2[0], links1[index],
+          links1[indices_map1[std::tuple<int, int, int>(rho, nu, 3)]], 3, rho,
+          alpha2, 4);
+    }
+  }
+#pragma omp parallel for
+  for (int i = 0; i < links2[0].size(); i++) {
+    links2[0][i] = links2[0][i].proj();
+  }
+  for (int rho = 0; rho < 3; rho++) {
+    if (rho != nu) {
+      smearing_plane_HYP_indexed(
+          links2[1],
+          links1[indices_map1[std::tuple<int, int, int>(nu, rho, 3)]],
+          links1[indices_map1[std::tuple<int, int, int>(rho, nu, 3)]], nu, rho,
+          alpha2, 4);
+    }
+  }
+#pragma omp parallel for
+  for (int i = 0; i < links2[1].size(); i++) {
+    links2[1][i] = links2[1][i].proj();
+  }
+}
+
+template <class T>
+void smearing_HYP_indexed(std::vector<T> &array, double alpha1, double alpha2,
+                          double alpha3) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::vector<std::vector<T>> conf = separate_smearing(array);
+  array.clear();
+  array.shrink_to_fit();
+  std::vector<std::vector<std::tuple<int, int, int>>> indices3 =
+      make_indices3();
+  std::vector<T> smeared = HYP_initialize_vector(conf[3], alpha1);
+  std::vector<std::vector<T>> links2(2);
+  std::vector<std::vector<T>> links1;
+  std::map<std::tuple<int, int, int>, int> indices_map3;
+  std::vector<std::tuple<int, int, int>> deleted_indices;
+  std::vector<std::tuple<int, int, int>> delete_indices;
+  for (int nu3 = 0; nu3 < 3; nu3++) {
+    make_step1_indexed(links1, conf, indices3[nu3], indices_map3, alpha3);
+    make_step2_indexed(links2, links1, conf, indices_map3, nu3, alpha2);
+    delete_indices = indices_to_delete(indices3, deleted_indices, nu3);
+    delete_vectors(delete_indices, indices_map3, links1);
+    smearing_plane_HYP_indexed(smeared, links2[0], links2[1], 3, nu3, alpha1,
+                               6);
+  }
+#pragma omp parallel for
+  for (int i = 0; i < smeared.size(); i++) {
+    smeared[i] = smeared[i].proj();
+  }
+  conf[3] = smeared;
+  for (int i = 0; i < links2.size(); i++) {
+    links2[i].clear();
+    links2[i].shrink_to_fit();
+  }
+  for (int i = 0; i < links1.size(); i++) {
+    links1[i].clear();
+    links1[i].shrink_to_fit();
+  }
+  smeared.clear();
+  smeared.shrink_to_fit();
+  array = std::vector<T>(4 * conf[3].size());
+  std::vector<int> lat_coord(4);
+#pragma omp parallel for collapse(4) private(lat_coord)
+  for (int t = 0; t < t_size; t++) {
+    for (int z = 0; z < z_size; z++) {
+      for (int y = 0; y < y_size; y++) {
+        for (int x = 0; x < x_size; x++) {
+          lat_coord = {x, y, z, t};
+          for (int mu = 0; mu < 4; mu++) {
+            array[get_index_matrix(lat_coord, mu)] =
+                conf[mu][get_index_site(lat_coord)];
+          }
+        }
+      }
+    }
+  }
+}
+
 // specialications
 
 // su2
@@ -1747,7 +1966,7 @@ template void smearing_plane_major_end(std::vector<su2> &smeared,
                                        const std::vector<su2> &conf_nu,
                                        int size_mu1, int size_mu2, int size_nu1,
                                        int size_nu2, double alpha);
-
+template void smearing_APE_indexed(std::vector<su2> &conf, double alpha);
 template void smearing_APE_parallel(std::vector<std::vector<su2>> &conf,
                                     double alpha);
 template void smearing_APE_2d_parallel(std::vector<su2> &conf1,
@@ -1771,6 +1990,8 @@ template void smearing_HYP_new(std::vector<std::vector<su2>> &conf,
 template void smearing_HYP_parallel(std::vector<std::vector<su2>> &conf,
                                     double alpha1, double alpha2,
                                     double alpha3);
+template void smearing_HYP_indexed(std::vector<su2> &array, double alpha1,
+                                   double alpha2, double alpha3);
 
 // abelian
 template abelian staples_first(const std::vector<abelian> &vec, link1 &link,
@@ -1849,7 +2070,7 @@ template void smearing_plane_major_end(std::vector<abelian> &smeared,
                                        const std::vector<abelian> &conf_nu,
                                        int size_mu1, int size_mu2, int size_nu1,
                                        int size_nu2, double alpha);
-
+template void smearing_APE_indexed(std::vector<abelian> &conf, double alpha);
 template void smearing_APE_parallel(std::vector<std::vector<abelian>> &conf,
                                     double alpha);
 template void smearing_APE_2d_parallel(std::vector<abelian> &conf1,
@@ -1875,6 +2096,8 @@ template void smearing_HYP_new(std::vector<std::vector<abelian>> &conf,
 template void smearing_HYP_parallel(std::vector<std::vector<abelian>> &conf,
                                     double alpha1, double alpha2,
                                     double alpha3);
+template void smearing_HYP_indexed(std::vector<abelian> &array, double alpha1,
+                                   double alpha2, double alpha3);
 
 // su3
 template su3 staples_first(const std::vector<su3> &vec, link1 &link, int eta);
@@ -1949,7 +2172,7 @@ template void smearing_plane_major_end(std::vector<su3> &smeared,
                                        const std::vector<su3> &conf_nu,
                                        int size_mu1, int size_mu2, int size_nu1,
                                        int size_nu2, double alpha);
-
+template void smearing_APE_indexed(std::vector<su3> &conf, double alpha);
 template void smearing_APE_parallel(std::vector<std::vector<su3>> &conf,
                                     double alpha);
 template void smearing_APE_2d_parallel(std::vector<su3> &conf1,
@@ -1973,6 +2196,8 @@ template void smearing_HYP_new(std::vector<std::vector<su3>> &conf,
 template void smearing_HYP_parallel(std::vector<std::vector<su3>> &conf,
                                     double alpha1, double alpha2,
                                     double alpha3);
+template void smearing_HYP_indexed(std::vector<su3> &array, double alpha1,
+                                   double alpha2, double alpha3);
 
 // su3_abelian
 template su3_abelian staples_first(const std::vector<su3_abelian> &vec,
@@ -2053,7 +2278,8 @@ template void smearing_plane_major_end(std::vector<su3_abelian> &smeared,
                                        const std::vector<su3_abelian> &conf_nu,
                                        int size_mu1, int size_mu2, int size_nu1,
                                        int size_nu2, double alpha);
-
+template void smearing_APE_indexed(std::vector<su3_abelian> &conf,
+                                   double alpha);
 template void smearing_APE_parallel(std::vector<std::vector<su3_abelian>> &conf,
                                     double alpha);
 
@@ -2080,3 +2306,5 @@ template void smearing_HYP_new(std::vector<std::vector<su3_abelian>> &conf,
 template void smearing_HYP_parallel(std::vector<std::vector<su3_abelian>> &conf,
                                     double alpha1, double alpha2,
                                     double alpha3);
+template void smearing_HYP_indexed(std::vector<su3_abelian> &array,
+                                   double alpha1, double alpha2, double alpha3);

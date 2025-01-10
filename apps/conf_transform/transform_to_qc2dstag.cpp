@@ -32,6 +32,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 template <class T> vector<su2> conf_transform_qc2dstag(vector<T> &conf);
 
@@ -121,6 +123,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout << "conf_format " << conf_format << endl;
   cout << "conf_path " << conf_path << endl;

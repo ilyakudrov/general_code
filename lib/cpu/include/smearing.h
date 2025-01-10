@@ -118,7 +118,8 @@ void smearing_plane_major_end(std::vector<T> &smeared,
                               const std::vector<T> &conf_nu, int size_mu1,
                               int size_mu2, int size_nu1, int size_nu2,
                               double alpha);
-
+template <class T>
+void smearing_APE_indexed(std::vector<T> &conf, double alpha);
 template <class T>
 void smearing_APE_parallel(std::vector<std::vector<T>> &conf, double alpha);
 
@@ -145,3 +146,7 @@ void smearing_HYP_new(std::vector<std::vector<T>> &conf, double alpha1,
 template <class T>
 void smearing_HYP_parallel(std::vector<std::vector<T>> &conf, double alpha1,
                            double alpha2, double alpha3);
+
+template <class T>
+void smearing_HYP_indexed(std::vector<T> &array, double alpha1, double alpha2,
+                          double alpha3);

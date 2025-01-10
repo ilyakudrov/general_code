@@ -16,6 +16,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char **argv) {
 
@@ -78,6 +80,9 @@ int main(int argc, char **argv) {
   cout << "y_size " << y_size << endl;
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
+
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   vector<int> lattice_sizes = {x_size, y_size, z_size, t_size};
 

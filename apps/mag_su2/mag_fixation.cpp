@@ -14,6 +14,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char **argv) {
 
@@ -135,6 +137,9 @@ int main(int argc, char **argv) {
   cout << "is_compare " << is_compare << endl;
   cout << "is_compare_spins " << is_compare_spins << endl;
   cout << "is_functional_save " << is_functional_save << endl;
+
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   Data::data<su2> conf_su2;
 

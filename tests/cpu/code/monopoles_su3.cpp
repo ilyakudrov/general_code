@@ -16,6 +16,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 using namespace std;
 
@@ -131,6 +133,8 @@ int main(int argc, char *argv[]) {
   y_size = 16;
   z_size = 16;
   t_size = 16;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout.precision(17);
 

@@ -15,6 +15,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char *argv[]) {
   unsigned int start_time;
@@ -25,6 +27,8 @@ int main(int argc, char *argv[]) {
   y_size = 48;
   z_size = 48;
   t_size = 48;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   std::cout.precision(17);
 

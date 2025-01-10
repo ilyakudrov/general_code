@@ -5,29 +5,9 @@
 #include <algorithm>
 #include <map>
 
-// Plaket
-template <class T> double plaket_time(const std::vector<T> &array);
-template <class T> double plaket_space(const std::vector<T> &array);
-template <class T> double plaket(const std::vector<T> &array);
-
-// Wilson loop
-template <class T>
-std::vector<double> wilson(const std::vector<T> &array, int r_min, int r_max,
-                           int time_min, int time_max);
-
-template <class T>
-std::vector<T> wilson_lines_single(const std::vector<T> &array, int length);
-template <class T>
-double wilson_loop_single_size(const std::vector<T> &lines1,
-                               const std::vector<T> &lines2, int mu, int nu,
-                               int r1, int r2);
-
-std::vector<double> read_abelian_fortran(std::string path_abelian);
-
-std::vector<double> read_abelian_fortran_double(std::string path_abelian);
-
-double wilson_abelian(const std::vector<double> &array, int r, int t);
-
+template <class T> double plaket(const std::vector<T> &conf);
+template <class T> double plaket_time(const std::vector<T> &conf);
+template <class T> double plaket_space(const std::vector<T> &conf);
 template <class T>
 std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length);
 template <class T>
@@ -160,19 +140,6 @@ std::vector<double> polyakov_loop_correlator_singlet(const std::vector<T> &conf,
                                                      int D_max);
 
 template <class T>
-double plaket_plane(std::vector<T> &conf_mu, std::vector<T> &conf_nu,
-                    int size_mu1, int size_mu2, int size_nu1, int size_nu2);
-
-template <class T>
-double plaket_time_parallel(const std::vector<std::vector<T>> &conf);
-
-template <class T>
-double plaket_space_parallel(const std::vector<std::vector<T>> &conf);
-
-template <class T>
-double plaket_parallel(const std::vector<std::vector<T>> &conf);
-
-template <class T>
 std::vector<std::vector<T>> separate_wilson(const std::vector<T> &conf);
 
 template <class T>
@@ -191,12 +158,23 @@ double wilson_plane(const std::vector<T> &wilson_lines_mu,
 template <class T>
 double wilson_loop_test_time(const std::vector<std::vector<T>> &wilson_lines,
                              int length_R, int length_T);
-
+template <class T>
+std::map<std::tuple<int, int>, double> wilson_loop(const std::vector<T> &conf,
+                                                   int r_min, int r_max,
+                                                   int time_min, int time_max);
 template <class T>
 std::map<std::tuple<int, int>, double>
-wilson_parallel(const std::vector<std::vector<T>> &conf, int r_min, int r_max,
-                int time_min, int time_max);
-
+wilson_loop_adjoint(const std::vector<T> &conf, int r_min, int r_max,
+                    int time_min, int time_max);
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_gevp_indexed(const std::vector<T> &conf1, const std::vector<T> &conf2,
+                    int r_min, int r_max, int time_min, int time_max);
+template <class T>
+std::map<std::tuple<int, int>, double>
+wilson_gevp_adjoint_indexed(const std::vector<T> &conf1,
+                            const std::vector<T> &conf2, int r_min, int r_max,
+                            int time_min, int time_max);
 template <class T>
 std::map<std::tuple<int, int>, double>
 wilson_gevp_parallel(const std::vector<std::vector<T>> &conf1,

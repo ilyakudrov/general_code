@@ -12,14 +12,23 @@
 
 #define MATRIX_TYPE su3
 
-int x_size = 64;
-int y_size = 64;
-int z_size = 64;
-int t_size = 20;
+int x_size;
+int y_size;
+int z_size;
+int t_size;
+int size1;
+int size2;
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
+  int x_size = 64;
+  int y_size = 64;
+  int z_size = 64;
+  int t_size = 20;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
+
   double start_time;
   double end_time;
   double search_time;
@@ -55,37 +64,39 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_smearing(conf.array);
 
-  // start_time = omp_get_wtime();
+  start_time = omp_get_wtime();
 
-  // for (int i = 0; i < 10; i++) {
-  //   smearing_APE_parallel(conf_separated, alpha_APE);
-  // }
+  for (int i = 0; i < 10; i++) {
+    smearing_APE_indexed(conf.array, alpha_APE);
+  }
 
-  // end_time = omp_get_wtime();
-  // search_time = end_time - start_time;
-  // std::cout << "smearing APE time: " << search_time << std::endl;
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "smearing APE time: " << search_time << std::endl;
 
-  // std::cout << "plaket after smearing: " << plaket_parallel(conf_separated)
-  //           << std::endl;
-  // std::cout << "plaket_time after smearing: "
-  //           << plaket_time_parallel(conf_separated) << std::endl;
-  // std::cout << "plaket_space after smearing: "
-  //           << plaket_space_parallel(conf_separated) << std::endl;
+  std::cout << "plaket after smearing: " << plaket(conf.array) << std::endl;
+  std::cout << "plaket_time after smearing: " << plaket_time(conf.array)
+            << std::endl;
+  std::cout << "plaket_space after smearing: " << plaket_space(conf.array)
+            << std::endl;
+  std::cout << "polyakov_loop after smearing: " << polyakov_loop(conf.array)
+            << std::endl;
 
-  // conf_separated = separate_smearing(conf.array);
+  conf_separated = separate_smearing(conf.array);
 
   start_time = omp_get_wtime();
 
-  smearing_HYP_new(conf_separated, alpha1, alpha2, alpha3);
+  smearing_HYP_indexed(conf.array, alpha1, alpha2, alpha3);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "smearing HYP time: " << search_time << std::endl;
 
-  std::cout << "plaket after smearing: " << plaket_parallel(conf_separated)
+  std::cout << "plaket after smearing: " << plaket(conf.array) << std::endl;
+  std::cout << "plaket_time after smearing: " << plaket_time(conf.array)
             << std::endl;
-  std::cout << "plaket_time after smearing: "
-            << plaket_time_parallel(conf_separated) << std::endl;
-  std::cout << "plaket_space after smearing: "
-            << plaket_space_parallel(conf_separated) << std::endl;
+  std::cout << "plaket_space after smearing: " << plaket_space(conf.array)
+            << std::endl;
+  std::cout << "polyakov_loop after smearing: " << polyakov_loop(conf.array)
+            << std::endl;
 }

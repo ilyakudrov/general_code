@@ -13,6 +13,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 int main(int argc, char **argv) {
 
@@ -65,6 +67,9 @@ int main(int argc, char **argv) {
   cout << "z_size " << z_size << endl;
   cout << "t_size " << t_size << endl;
   cout << "ml5_conf_num " << ml5_conf_num << endl;
+
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   Data::data<su3> conf_su3;
 

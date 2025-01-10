@@ -4,7 +4,6 @@
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/smearing.h"
-#include "../../../lib/cpu/include/test_observables.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -31,100 +30,116 @@ int main(int argc, char *argv[]) {
   x_size = 64;
   y_size = 64;
   z_size = 64;
-  t_size = 20;
+  t_size = 4;
   size1 = x_size * y_size;
   size2 = x_size * y_size * z_size;
 
   std::cout.precision(17);
 
   Data::data<MATRIX_TYPE> conf1;
-  Data::data<Eigen::Matrix3cd> conf4;
+  Data::data<MATRIX_TYPE> conf2;
 
-  string conf_path1 = "../../confs/su3/QCD/140MeV/nt20/conf.0501";
+  string conf_path1 = "../../confs/su3/QCD/140MeV/nt4/conf.0501";
   string conf_format1 = "ildg";
+  // string conf_path1 =
+  // "../../confs/MAG/su3/gluodynamics/40^4/beta6.4/steps_0/"
+  //                     "copies=20/s1/conf_gaugefixed_0002_1";
+  // string conf_format1 = "double";
+  // string conf_path1 = "../../confs/su2/qc2dstag/40^4/mu0.00/CONF0201";
+  // string conf_format1 = "double_qc2dstag";
   int bytes_skip = 0;
   bool convert = 0;
 
   int R_min = 1;
-  int R_max = 32;
+  int R_max = 4;
   int T_min = 1;
-  int T_max = 2;
+  int T_max = 4;
 
   map<tuple<int, int>, double> wilson_loops;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
+  conf2.array = conf1.array;
 
   start_time = omp_get_wtime();
-  cout << "plaket indexed " << plaket_indexed(conf1.array) << endl;
+  smearing_HYP_indexed(conf1.array, 1, 1, 0.5);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "plaket indexed su3 time: " << search_time << std::endl;
+  std::cout << "smearing_HYP_parallel time: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+  for (int i = 0; i < 10; i++) {
+    smearing_APE_indexed(conf1.array, 0.5);
+    smearing_APE_indexed(conf2.array, 0.5);
+  }
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "smearing_APE_indexed time: " << search_time << std::endl;
+  std::cout << conf1.array[4] << std::endl;
+  std::cout << conf1.array[5] << std::endl;
+  std::cout << conf1.array[6] << std::endl;
+  std::cout << conf1.array[7] << std::endl;
+  double trace_sum = 0;
+  for (int i = 0; i < conf1.array.size(); i++) {
+    trace_sum += conf1.array[i].tr();
+  }
+  std::cout << "trace " << trace_sum << std::endl;
 
   start_time = omp_get_wtime();
   wilson_loops =
-      wilson_parallel_indexed(conf1.array, R_min, R_max, T_min, T_max);
+      wilson_gevp_indexed(conf1.array, conf2.array, R_min, R_max, T_min, T_max);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "wilson loop parallel indexed su3 time: " << search_time
-            << std::endl;
-  std::cout << "wilson_loops:" << std::endl;
+  std::cout << "wilson_gevp_indexed time: " << search_time << std::endl;
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
+    std::cout << get<0>(it->first) << ", " << get<1>(it->first) << ", "
+              << it->second << endl;
   }
 
-  start_time = omp_get_wtime();
-  wilson_loops = wilson_parallel_indexed_single_rxt(conf1.array, R_min, R_max,
-                                                    T_min, T_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "wilson loop parallel indexed single_rxt su3 time: "
-            << search_time << std::endl;
-  std::cout << "wilson_loops:" << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
-  }
-
-  std::vector<std::vector<MATRIX_TYPE>> conf_separated =
+  get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
+  conf2.array = conf1.array;
+  std::vector<std::vector<MATRIX_TYPE>> conf_separated1 =
       separate_wilson(conf1.array);
   conf1.array.clear();
   conf1.array.shrink_to_fit();
-  start_time = omp_get_wtime();
-  cout << "plaket parallel " << plaket_parallel(conf_separated) << endl;
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "plaket parallel su3 time: " << search_time << std::endl;
+  std::vector<std::vector<MATRIX_TYPE>> conf_separated2 =
+      separate_wilson(conf2.array);
+  conf2.array.clear();
+  conf2.array.shrink_to_fit();
 
   start_time = omp_get_wtime();
-  wilson_loops = wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
+  smearing_HYP_parallel(conf_separated1, 1, 1, 0.5);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "wilson loop parallel su3 time: " << search_time << std::endl;
-  std::cout << "wilson_loops:" << std::endl;
+  std::cout << "smearing_HYP_parallel time: " << search_time << std::endl;
+
+  start_time = omp_get_wtime();
+  for (int i = 0; i < 10; i++) {
+    smearing_APE_parallel(conf_separated1, 0.5);
+    smearing_APE_parallel(conf_separated2, 0.5);
+  }
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "smearing_APE_parallel time: " << search_time << std::endl;
+  std::cout << conf_separated1[0][1] << std::endl;
+  std::cout << conf_separated1[1][1] << std::endl;
+  std::cout << conf_separated1[2][1] << std::endl;
+  std::cout << conf_separated1[3][1] << std::endl;
+  trace_sum = 0;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int i = 0; i < conf_separated1[mu].size(); i++) {
+      trace_sum += conf_separated1[mu][i].tr();
+    }
+  }
+  std::cout << "trace " << trace_sum << std::endl;
+
+  start_time = omp_get_wtime();
+  wilson_loops = wilson_gevp_parallel(conf_separated1, conf_separated2, R_min,
+                                      R_max, T_min, T_max);
+  end_time = omp_get_wtime();
+  search_time = end_time - start_time;
+  std::cout << "wilson_gevp_parallel time: " << search_time << std::endl;
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
+    std::cout << get<0>(it->first) << ", " << get<1>(it->first) << ", "
+              << it->second << endl;
   }
-  for (int i = 0; i < 4; i++) {
-    conf_separated[i].clear();
-    conf_separated[i].shrink_to_fit();
-  }
-
-  get_data(conf4, conf_path1, conf_format1, bytes_skip, convert);
-
-  start_time = omp_get_wtime();
-  wilson_loops = wilson_parallel_indexed_single_rxt(conf4.array, R_min, R_max,
-                                                    T_min, T_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "wilson loop parallel indexed single_rxt Eigen::Matrix3cd time: "
-            << search_time << std::endl;
-  std::cout << "wilson_loops:" << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
-  }
-  conf4.array.clear();
-  conf4.array.shrink_to_fit();
 }

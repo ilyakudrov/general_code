@@ -16,6 +16,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 #define MATRIX_TYPE su3
 
@@ -30,6 +32,8 @@ int main(int argc, char *argv[]) {
   y_size = 64;
   z_size = 64;
   t_size = 4;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   std::cout.precision(17);
 

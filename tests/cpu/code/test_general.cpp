@@ -13,18 +13,15 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
-#include <map>
-// #include <numeric>
 #include <omp.h>
-// #include <stdio.h>
-#include <tuple>
-// #include <unordered_map>
 #include <vector>
 
 int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 #define MATRIX_TYPE su3
 
@@ -39,6 +36,8 @@ int main(int argc, char *argv[]) {
   y_size = 40;
   z_size = 40;
   t_size = 40;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   std::cout.precision(17);
 
@@ -146,29 +145,9 @@ int main(int argc, char *argv[]) {
   // std::vector<std::vector<MATRIX_TYPE>> conf_separated =
   // separate_3(conf1.array);
 
-  cout << "plaket parallel " << plaket_parallel(conf_separated) << endl;
-  cout << "plaket time parallel " << plaket_time_parallel(conf_separated)
-       << endl;
-  cout << "plaket space parallel " << plaket_space_parallel(conf_separated)
-       << endl;
-
   // on-axis wilson loops
   int T_min = 1, T_max = 20;
   int R_min = 1, R_max = 20;
-
-  start_time = omp_get_wtime();
-
-  map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(conf_separated, R_min, R_max, T_min, T_max);
-
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "on-axis wilson time: " << search_time << std::endl;
-  std::cout << "wilson_loops:" << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    cout << get<0>(it->first) << "," << get<1>(it->first) << "," << it->second
-         << endl;
-  }
 
   // std::vector<double> wilson_test =
   //     wilson(conf2.array, R_min, R_max, T_min, T_max);

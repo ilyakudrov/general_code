@@ -18,6 +18,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 #define MATRIX_TYPE su2
 
@@ -26,6 +28,8 @@ int main(int argc, char *argv[]) {
   y_size = 40;
   z_size = 40;
   t_size = 40;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   double start_time;
   double end_time;
@@ -140,7 +144,7 @@ int main(int argc, char *argv[]) {
   vector<double> plaket_space_tr = plaket_aver_tr_space(separated_unchanged);
 
   map<tuple<int, int>, double> wilson_loops =
-      wilson_parallel(separated_smeared, R_min, R_max, T_min, T_max);
+      wilson_loop(conf_smeared.array, R_min, R_max, T_min, T_max);
 
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
     cout << "T = " << get<0>(it->first) << ", R = " << get<1>(it->first)

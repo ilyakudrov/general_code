@@ -15,6 +15,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 void monopoles_test(vector<double> angles) {
   vector<double> J = calculate_current(angles);
@@ -94,6 +96,9 @@ int main(int argc, char **argv) {
   cout << "t_size " << t_size << endl;
   cout << "ml5_conf_num " << ml5_conf_num << endl;
 
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
+
   Data::data<su2> conf_su2;
 
   // read configuration
@@ -109,8 +114,9 @@ int main(int argc, char **argv) {
   std::vector<double> inverse_laplacian_real;
   std::vector<double> inverse_laplacian_imag;
 
-  vector<complex_t> conf_complex = convert_to_complex(conf_su2.array);
-  vector<complex_t> gauge_complex = generate_gauge_complex_uniform();
+  vector<std::complex<double>> conf_complex =
+      convert_to_complex(conf_su2.array);
+  vector<std::complex<double>> gauge_complex = generate_gauge_complex_uniform();
   // vector<complex_t> gauge_complex = generate_gauge_complex_unity();
 
   cout << "initial Landau U1 functional "

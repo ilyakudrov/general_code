@@ -19,6 +19,8 @@ int x_size;
 int y_size;
 int z_size;
 int t_size;
+int size1;
+int size2;
 
 void write_wilson_loops(map<tuple<int, int>, double> &wilson_tmp,
                         map<tuple<int, int, int, int>, double> &wilson_loops,
@@ -105,6 +107,8 @@ int main(int argc, char *argv[]) {
   y_size = L_spat;
   z_size = L_spat;
   t_size = L_time;
+  size1 = x_size * y_size;
+  size2 = x_size * y_size * z_size;
 
   cout << "conf_format_wilson " << conf_format_wilson << endl;
   cout << "conf_path_wilson " << conf_path_wilson << endl;
@@ -132,11 +136,12 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  Data::data<MATRIX_WILSON> conf_wilson;
+  Data::data<MATRIX_WILSON> conf1;
+  Data::data<MATRIX_WILSON> conf2;
   map<tuple<int, int>, double> wilson_tmp;
   map<tuple<int, int, int, int>, double> wilson_loops;
-  vector<vector<MATRIX_WILSON>> conf_separated1;
-  vector<vector<MATRIX_WILSON>> conf_separated2;
+  // vector<vector<MATRIX_WILSON>> conf_separated1;
+  // vector<vector<MATRIX_WILSON>> conf_separated2;
 
   smearing_APE_time = 0;
   smearing_HYP_time = 0;
@@ -145,34 +150,31 @@ int main(int argc, char *argv[]) {
   link1 link(x_size, y_size, z_size, t_size);
 
   for (int dir = 0; dir < N_dir; dir++) {
-    get_data(conf_wilson, conf_path_wilson, conf_format_wilson,
-             bytes_skip_wilson, convert_wilson);
+    get_data(conf1, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
+             convert_wilson);
     if (dir > 0) {
-      conf_wilson.array = swap_directions(conf_wilson.array, dir - 1, 3);
+      conf1.array = swap_directions(conf1.array, dir - 1, 3);
     }
-    conf_separated1 = separate_wilson(conf_wilson.array);
-    conf_wilson.array.clear();
-    conf_wilson.array.shrink_to_fit();
+    conf2.array = conf1.array;
+    // conf_separated1 = separate_wilson(conf_wilson.array);
+    // conf_wilson.array.clear();
+    // conf_wilson.array.shrink_to_fit();
 
-    conf_separated2 = conf_separated1;
     if (HYP_enabled == 1) {
       start_time = omp_get_wtime();
       for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
-        smearing_HYP_parallel(conf_separated1, HYP_alpha1, HYP_alpha2,
-                              HYP_alpha3);
+        smearing_HYP_indexed(conf1.array, HYP_alpha1, HYP_alpha2, HYP_alpha3);
       }
       end_time = omp_get_wtime();
       smearing_HYP_time += end_time - start_time;
-      conf_separated2[3] = conf_separated1[3];
     }
 
     // wilson loops at (0, 0) APE_steps
     start_time = omp_get_wtime();
     if (representation == "fundamental") {
-      wilson_tmp = wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+      wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
     } else if (representation == "adjoint") {
-      wilson_tmp =
-          wilson_adjoint_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+      wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min, T_max);
     } else {
       cout << "wrong representation" << endl;
     }
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]) {
     // wilson loops at (0, APE_step2) APE_steps
     for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
       start_time = omp_get_wtime();
-      smearing_APE_parallel(conf_separated2, APE_alpha);
+      smearing_APE_indexed(conf2.array, APE_alpha);
       end_time = omp_get_wtime();
       smearing_APE_time += end_time - start_time;
 
@@ -191,11 +193,11 @@ int main(int argc, char *argv[]) {
           APE_step >= calculation_APE_start) {
         start_time = omp_get_wtime();
         if (representation == "fundamental") {
-          wilson_tmp = wilson_gevp_parallel(conf_separated1, conf_separated2,
-                                            R_min, R_max, T_min, T_max);
+          wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
+                                           R_max, T_min, T_max);
         } else if (representation == "adjoint") {
-          wilson_tmp = wilson_gevp_adjoint_parallel(
-              conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+          wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
+                                                   R_min, R_max, T_min, T_max);
         } else {
           cout << "wrong representation" << endl;
         }
@@ -208,7 +210,7 @@ int main(int argc, char *argv[]) {
     // wilson loops at (APE_step1, APE_step2) APE_steps, APE_step1 < APE_step2
     for (int APE_step1 = 1; APE_step1 <= APE_steps; APE_step1++) {
       start_time = omp_get_wtime();
-      smearing_APE_parallel(conf_separated1, APE_alpha);
+      smearing_APE_indexed(conf1.array, APE_alpha);
       end_time = omp_get_wtime();
       smearing_APE_time += end_time - start_time;
 
@@ -216,11 +218,10 @@ int main(int argc, char *argv[]) {
           APE_step1 >= calculation_APE_start) {
         start_time = omp_get_wtime();
         if (representation == "fundamental") {
-          wilson_tmp =
-              wilson_parallel(conf_separated1, R_min, R_max, T_min, T_max);
+          wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
         } else if (representation == "adjoint") {
-          wilson_tmp = wilson_adjoint_parallel(conf_separated1, R_min, R_max,
-                                               T_min, T_max);
+          wilson_tmp =
+              wilson_loop_adjoint(conf1.array, R_min, R_max, T_min, T_max);
         } else {
           cout << "wrong representation" << endl;
         }
@@ -228,22 +229,22 @@ int main(int argc, char *argv[]) {
         end_time = omp_get_wtime();
         observables_time += end_time - start_time;
 
-        conf_separated2 = conf_separated1;
+        conf2.array = conf1.array;
         for (int APE_step2 = APE_step1 + 1; APE_step2 <= APE_steps;
              APE_step2++) {
           start_time = omp_get_wtime();
-          smearing_APE_parallel(conf_separated2, APE_alpha);
+          smearing_APE_indexed(conf2.array, APE_alpha);
           end_time = omp_get_wtime();
           smearing_APE_time += end_time - start_time;
 
           if ((APE_step2 - APE_step1) % calculation_step_APE == 0) {
             start_time = omp_get_wtime();
             if (representation == "fundamental") {
-              wilson_tmp = wilson_gevp_parallel(
-                  conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+              wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
+                                               R_max, T_min, T_max);
             } else if (representation == "adjoint") {
-              wilson_tmp = wilson_gevp_adjoint_parallel(
-                  conf_separated1, conf_separated2, R_min, R_max, T_min, T_max);
+              wilson_tmp = wilson_gevp_adjoint_indexed(
+                  conf1.array, conf2.array, R_min, R_max, T_min, T_max);
             } else {
               cout << "wrong representation" << endl;
             }
