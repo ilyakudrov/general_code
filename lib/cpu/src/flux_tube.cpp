@@ -1,4 +1,3 @@
-#define data_size 4 * x_size *y_size *z_size *t_size
 #define PLACE3_DIR                                                             \
   (t) * 3 * x_size *y_size *z_size + (z) * 3 * x_size *y_size +                \
       (y) * 3 * x_size + (x) * 3 + dir
@@ -60,7 +59,7 @@
 
 template <class T>
 std::vector<T> calculate_plaket_time_left_down(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -74,7 +73,7 @@ std::vector<T> calculate_plaket_time_left_down(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_plaket_time_left_up(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -88,7 +87,7 @@ std::vector<T> calculate_plaket_time_left_up(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_plaket_time_right_down(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -102,7 +101,7 @@ std::vector<T> calculate_plaket_time_right_down(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_plaket_time_right_up(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -117,7 +116,7 @@ std::vector<T> calculate_plaket_time_right_up(const std::vector<T> &array) {
 template <class T>
 std::vector<T>
 calculate_plaket_schwinger_time_left(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -133,7 +132,7 @@ calculate_plaket_schwinger_time_left(const std::vector<T> &array) {
 template <class T>
 std::vector<T>
 calculate_plaket_schwinger_time_right(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -149,7 +148,7 @@ calculate_plaket_schwinger_time_right(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_plaket_schwinger_time_tr(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -172,7 +171,7 @@ std::vector<T> calculate_plaket_schwinger_time_tr(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_plaket_schwinger_space_l(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -200,7 +199,7 @@ std::vector<T> calculate_plaket_schwinger_space_l(const std::vector<T> &array) {
 template <class T>
 std::vector<T>
 calculate_plaket_schwinger_space_tr(const std::vector<T> &array) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -232,7 +231,7 @@ calculate_plaket_schwinger_space_tr(const std::vector<T> &array) {
 
 template <class T>
 std::vector<T> calculate_polyakov_loop(const std::vector<T> &array) {
-  std::vector<T> vec((data_size) / 4);
+  std::vector<T> vec(x_size * y_size * z_size * t_size);
   link1 link(x_size, y_size, z_size, t_size);
   link.move_dir(3);
   SPACE_ITER_START;
@@ -244,7 +243,7 @@ std::vector<T> calculate_polyakov_loop(const std::vector<T> &array) {
 template <class T>
 std::vector<T> calculate_wilson_loop(const std::vector<T> &array, int r,
                                      int time) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
   for (int dir = 0; dir < 3; dir++) {
     link.move_dir(dir);
@@ -258,7 +257,7 @@ std::vector<T> calculate_wilson_loop(const std::vector<T> &array, int r,
 template <class T>
 std::vector<T> calculate_schwinger_lines_short(const std::vector<T> &array,
                                                int d) {
-  std::vector<T> vec(data_size * 3 / 4);
+  std::vector<T> vec(x_size * y_size * z_size * t_size / 4);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START
@@ -273,7 +272,7 @@ std::vector<T> calculate_schwinger_lines_short(const std::vector<T> &array,
 template <class T>
 std::vector<T> calculate_wilson_loops_schwinger(const std::vector<T> &array,
                                                 int r, int time) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -289,7 +288,7 @@ template <class T>
 std::vector<T>
 calculate_wilson_loops_schwinger_opposite(const std::vector<T> &array, int r,
                                           int time) {
-  std::vector<T> vec(data_size / 4 * 3);
+  std::vector<T> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1318,7 +1317,7 @@ double wilson_plaket_electric_longitudinal(const std::vector<T> &array,
 
 template <class T>
 std::vector<double> calculate_plaket_time_trace_l(const std::vector<T> &array) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1335,7 +1334,7 @@ std::vector<double> calculate_plaket_time_trace_l(const std::vector<T> &array) {
 template <class T>
 std::vector<double>
 calculate_plaket_time_trace_tr(const std::vector<T> &array) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1358,7 +1357,7 @@ calculate_plaket_time_trace_tr(const std::vector<T> &array) {
 
 template <class T>
 std::vector<double> calculate_plaket_space_trace_l(const std::vector<T> array) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1382,7 +1381,7 @@ std::vector<double> calculate_plaket_space_trace_l(const std::vector<T> array) {
 template <class T>
 std::vector<double>
 calculate_plaket_space_trace_tr(const std::vector<T> &array) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1410,7 +1409,7 @@ calculate_plaket_space_trace_tr(const std::vector<T> &array) {
 
 template <class T>
 std::vector<double> calculate_plaket_space_tr(const std::vector<T> &array) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1452,7 +1451,7 @@ double plaket4_space(const std::vector<double> &plaket_tr, link1 &link,
 template <class T>
 std::vector<double> calculate_wilson_loop_tr(const std::vector<T> &array, int r,
                                              int time) {
-  std::vector<double> vec(data_size / 4 * 3);
+  std::vector<double> vec(x_size * y_size * z_size * t_size * 3);
   link1 link(x_size, y_size, z_size, t_size);
 #pragma omp parallel for collapse(4) private(link)
   SPACE_ITER_START;
@@ -1483,7 +1482,7 @@ std::map<int, double> wilson_plaket_correlator_electric_longitudinal(
   }
   SPACE_ITER_END
   int count;
-  count = data_size / 4 * 3;
+  count = x_size * y_size * z_size * t_size * 3;
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i - d_ouside - r / 2] = correlator[i] / count;
@@ -1516,7 +1515,7 @@ std::map<int, double> wilson_plaket_correlator_electric_transversal(
   }
   SPACE_ITER_END
   int count;
-  count = data_size / 4 * 6;
+  count = x_size * y_size * z_size * t_size * 6;
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i - d_max] = correlator[i] / count;
@@ -1623,9 +1622,9 @@ wilson_plaket_correlator_electric(const std::vector<double> &wilson_loop_tr,
   }
   int count;
   if (x_trans == 0)
-    count = data_size / 4 * 9;
+    count = x_size * y_size * z_size * t_size * 9;
   else
-    count = data_size / 4 * 36;
+    count = x_size * y_size * z_size * t_size * 36;
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i + d_min] = correlator[i] / count;
@@ -1729,9 +1728,9 @@ wilson_plaket_correlator_magnetic(const std::vector<double> &wilson_loop_tr,
   }
   int count;
   if (x_trans == 0)
-    count = data_size / 4 * 9;
+    count = x_size * y_size * z_size * t_size * 9;
   else
-    count = data_size / 4 * 36;
+    count = x_size * y_size * z_size * t_size * 36;
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
     result[i + d_min] = correlator[i] / count;

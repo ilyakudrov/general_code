@@ -8,6 +8,7 @@
 // su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
 class su2 {
 public:
+  inline static int data_size = 4;
   double a0, a1, a2, a3;
   su2() {
     a0 = 1.;
@@ -28,6 +29,22 @@ public:
     a1 = a;
     a2 = a;
     a3 = a;
+  }
+
+  su2(const std::vector<double> &data) {
+    a0 = data[0];
+    a1 = data[1];
+    a2 = data[2];
+    a3 = data[3];
+  }
+
+  std::vector<double> get_data() {
+    std::vector<double> data(4);
+    data[0] = a0;
+    data[1] = a1;
+    data[2] = a2;
+    data[3] = a3;
+    return data;
   }
 
   double tr() { return a0; }
@@ -98,6 +115,7 @@ public:
 
 class abelian {
 public:
+  inline static int data_size = 2;
   double r, phi;
   abelian() {
     r = 1;
@@ -112,6 +130,18 @@ public:
   abelian(double a) {
     r = a;
     phi = 0;
+  }
+
+  abelian(const std::vector<double> &data) {
+    r = data[0];
+    phi = data[1];
+  }
+
+  std::vector<double> get_data() {
+    std::vector<double> data(2);
+    data[0] = r;
+    data[1] = phi;
+    return data;
   }
 
   double tr() const { return r * cos(phi); }
@@ -175,6 +205,7 @@ public:
 
 class su3 {
 public:
+  inline static int data_size = 18;
   Eigen::Matrix3cd matrix;
   su3() {
     for (int i = 0; i < 3; i++) {
@@ -195,6 +226,26 @@ public:
         std::complex<double>(a, 0), std::complex<double>(a, 0),
         std::complex<double>(a, 0), std::complex<double>(a, 0),
         std::complex<double>(a, 0);
+  }
+
+  su3(const std::vector<double> &data) {
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        matrix(i, j) = std::complex<double>(data[(j + i * 3) * 2],
+                                            data[(j + i * 3) * 2 + 1]);
+      }
+    }
+  }
+
+  std::vector<double> get_data() {
+    std::vector<double> data(18);
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        data[(j + i * 3) * 2] = matrix(i, j).real();
+        data[(j + i * 3) * 2 + 1] = matrix(i, j).imag();
+      }
+    }
+    return data;
   }
 
   double tr() const { return matrix.trace().real() / 3.; }
@@ -308,6 +359,7 @@ public:
 
 class su3_abelian {
 public:
+  inline static int data_size = 6;
   std::complex<double> matrix[3];
   su3_abelian(std::complex<double> B[3]) {
     for (int i = 0; i < 3; i++) {
@@ -330,7 +382,22 @@ public:
     matrix[0] = std::complex<double>(a, 0);
     matrix[1] = std::complex<double>(a, 0);
     matrix[2] = std::complex<double>(a, 0);
-  };
+  }
+
+  su3_abelian(const std::vector<double> &data) {
+    for (int i = 0; i < 3; i++) {
+      matrix[i] = std::complex<double>(data[i * 2], data[i * 2 + 1]);
+    }
+  }
+
+  std::vector<double> get_data() {
+    std::vector<double> data(6);
+    for (int i = 0; i < 3; i++) {
+      data[i * 2] = matrix[i].real();
+      data[i * 2 + 1] = matrix[i].imag();
+    }
+    return data;
+  }
 
   double tr() const {
     return (matrix[0].real() + matrix[1].real() + matrix[2].real()) / 3;
@@ -500,6 +567,7 @@ public:
 
 class su3_angles {
 public:
+  inline static int data_size = 3;
   double matrix[3];
   su3_angles(double B[3]) {
     for (int i = 0; i < 3; i++) {
@@ -521,6 +589,14 @@ public:
     matrix[0] = 0;
     matrix[1] = 0;
     matrix[2] = 0;
+  }
+
+  std::vector<double> get_data() {
+    std::vector<double> data(3);
+    for (int i = 0; i < 3; i++) {
+      data[i] = matrix[i];
+    }
+    return data;
   }
 
   double tr() const {

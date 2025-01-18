@@ -3,6 +3,7 @@
 #include "../../../lib/cpu/include/indexing.h"
 #include "../../../lib/cpu/include/link.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/polyakov_loops.h"
 #include "../../../lib/cpu/include/smearing.h"
 
 #include <cstdlib>
@@ -27,10 +28,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 64;
-  y_size = 64;
-  z_size = 64;
-  t_size = 4;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
   size1 = x_size * y_size;
   size2 = x_size * y_size * z_size;
 
@@ -39,8 +40,10 @@ int main(int argc, char *argv[]) {
   Data::data<MATRIX_TYPE> conf1;
   Data::data<MATRIX_TYPE> conf2;
 
-  string conf_path1 = "../../confs/su3/QCD/140MeV/nt4/conf.0501";
-  string conf_format1 = "ildg";
+  // string conf_path1 = "../../confs/su3/QCD/140MeV/nt4/conf.0501";
+  // string conf_format1 = "ildg";
+  string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0001";
+  string conf_format1 = "double_qc2dstag";
   // string conf_path1 =
   // "../../confs/MAG/su3/gluodynamics/40^4/beta6.4/steps_0/"
   //                     "copies=20/s1/conf_gaugefixed_0002_1";
@@ -58,88 +61,50 @@ int main(int argc, char *argv[]) {
   map<tuple<int, int>, double> wilson_loops;
 
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
-  conf2.array = conf1.array;
 
   start_time = omp_get_wtime();
-  smearing_HYP_indexed(conf1.array, 1, 1, 0.5);
+  std::cout << polyakov_loop(conf1.array) << std::endl;
+  std::cout << plaket(conf1.array) << std::endl;
+  std::cout << plaket_space(conf1.array) << std::endl;
+  std::cout << plaket_time(conf1.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "smearing_HYP_parallel time: " << search_time << std::endl;
+  std::cout << "observables time: " << search_time << std::endl;
 
-  start_time = omp_get_wtime();
-  for (int i = 0; i < 10; i++) {
-    smearing_APE_indexed(conf1.array, 0.5);
-    smearing_APE_indexed(conf2.array, 0.5);
-  }
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "smearing_APE_indexed time: " << search_time << std::endl;
-  std::cout << conf1.array[4] << std::endl;
-  std::cout << conf1.array[5] << std::endl;
-  std::cout << conf1.array[6] << std::endl;
-  std::cout << conf1.array[7] << std::endl;
-  double trace_sum = 0;
-  for (int i = 0; i < conf1.array.size(); i++) {
-    trace_sum += conf1.array[i].tr();
-  }
-  std::cout << "trace " << trace_sum << std::endl;
-
-  start_time = omp_get_wtime();
-  wilson_loops =
-      wilson_gevp_indexed(conf1.array, conf2.array, R_min, R_max, T_min, T_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "wilson_gevp_indexed time: " << search_time << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    std::cout << get<0>(it->first) << ", " << get<1>(it->first) << ", "
-              << it->second << endl;
-  }
-
-  get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
-  conf2.array = conf1.array;
-  std::vector<std::vector<MATRIX_TYPE>> conf_separated1 =
-      separate_wilson(conf1.array);
   conf1.array.clear();
   conf1.array.shrink_to_fit();
-  std::vector<std::vector<MATRIX_TYPE>> conf_separated2 =
-      separate_wilson(conf2.array);
-  conf2.array.clear();
-  conf2.array.shrink_to_fit();
+
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  DataPatternLexicographical<4> data_pattern(lat_dim);
+  Data::Data1<DataPatternLexicographical<4>, su3> data_indexed(
+      (DataPatternLexicographical<4>(lat_dim)));
+  FilePatternQCDSTAG<4> file_pattern;
+  data_indexed.read_data(conf_path1, file_pattern, 0, "double");
 
   start_time = omp_get_wtime();
-  smearing_HYP_parallel(conf_separated1, 1, 1, 0.5);
+  std::cout << polyakov_loop(data_indexed.array) << std::endl;
+  std::cout << plaket(data_indexed.array) << std::endl;
+  std::cout << plaket_space(data_indexed.array) << std::endl;
+  std::cout << plaket_time(data_indexed.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "smearing_HYP_parallel time: " << search_time << std::endl;
+  std::cout << "observables data_indexed time: " << search_time << std::endl;
+
+  FilePatternLexicographical<4> file_pattern_lexicographical;
+  data_indexed.write_data("../../confs/test/conf_test",
+                          file_pattern_lexicographical);
+
+  data_pattern = DataPatternLexicographical<4>(lat_dim);
+  data_indexed.read_data("../../confs/test/conf_test",
+                         file_pattern_lexicographical, 0, "double");
 
   start_time = omp_get_wtime();
-  for (int i = 0; i < 10; i++) {
-    smearing_APE_parallel(conf_separated1, 0.5);
-    smearing_APE_parallel(conf_separated2, 0.5);
-  }
+  std::cout << polyakov_loop(data_indexed.array) << std::endl;
+  std::cout << plaket(data_indexed.array) << std::endl;
+  std::cout << plaket_space(data_indexed.array) << std::endl;
+  std::cout << plaket_time(data_indexed.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
-  std::cout << "smearing_APE_parallel time: " << search_time << std::endl;
-  std::cout << conf_separated1[0][1] << std::endl;
-  std::cout << conf_separated1[1][1] << std::endl;
-  std::cout << conf_separated1[2][1] << std::endl;
-  std::cout << conf_separated1[3][1] << std::endl;
-  trace_sum = 0;
-  for (int mu = 0; mu < 4; mu++) {
-    for (int i = 0; i < conf_separated1[mu].size(); i++) {
-      trace_sum += conf_separated1[mu][i].tr();
-    }
-  }
-  std::cout << "trace " << trace_sum << std::endl;
-
-  start_time = omp_get_wtime();
-  wilson_loops = wilson_gevp_parallel(conf_separated1, conf_separated2, R_min,
-                                      R_max, T_min, T_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  std::cout << "wilson_gevp_parallel time: " << search_time << std::endl;
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    std::cout << get<0>(it->first) << ", " << get<1>(it->first) << ", "
-              << it->second << endl;
-  }
+  std::cout << "observables file pattern lexicographical time: " << search_time
+            << std::endl;
 }

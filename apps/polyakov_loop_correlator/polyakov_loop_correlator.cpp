@@ -1,6 +1,7 @@
 #include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
+#include "../../lib/cpu/include/polyakov_loops.h"
 
 #include <fstream>
 #include <map>

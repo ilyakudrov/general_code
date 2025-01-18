@@ -87,7 +87,6 @@ void Data::data<su3>::read_float(std::string &file_name, int bytes_skip) {
     std::cout << "read_float<su3> error: " << file_name << std::endl;
   su3 A;
   for (int i = 0; i < data_size; i++) {
-
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         A.matrix(i, j) = std::complex<double>(v[i * 18 + (i * 3 + j) * 2],
