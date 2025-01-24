@@ -115,7 +115,7 @@ public:
 
 class abelian {
 public:
-  inline static int data_size = 2;
+  inline static int data_size = 1;
   double r, phi;
   abelian() {
     r = 1;
@@ -133,14 +133,13 @@ public:
   }
 
   abelian(const std::vector<double> &data) {
-    r = data[0];
-    phi = data[1];
+    r = 1;
+    phi = data[0];
   }
 
   std::vector<double> get_data() {
-    std::vector<double> data(2);
-    data[0] = r;
-    data[1] = phi;
+    std::vector<double> data(1);
+    data[0] = phi;
     return data;
   }
 
@@ -359,7 +358,7 @@ public:
 
 class su3_abelian {
 public:
-  inline static int data_size = 6;
+  inline static int data_size = 3;
   std::complex<double> matrix[3];
   su3_abelian(std::complex<double> B[3]) {
     for (int i = 0; i < 3; i++) {
@@ -386,15 +385,14 @@ public:
 
   su3_abelian(const std::vector<double> &data) {
     for (int i = 0; i < 3; i++) {
-      matrix[i] = std::complex<double>(data[i * 2], data[i * 2 + 1]);
+      matrix[i] = std::complex<double>(cos(data[i]), sin(data[i]));
     }
   }
 
   std::vector<double> get_data() {
-    std::vector<double> data(6);
+    std::vector<double> data(3);
     for (int i = 0; i < 3; i++) {
-      data[i * 2] = matrix[i].real();
-      data[i * 2 + 1] = matrix[i].imag();
+      data[i] = atan2(matrix[i].imag(), matrix[i].real());
     }
     return data;
   }
@@ -1029,4 +1027,57 @@ inline std::vector<su3> get_generators_su3() {
   generators[7] = su3(matrix);
 
   return generators;
+}
+
+// class to convert MatrixType1 into MatrixType2
+template <class MatrixType1, class MatrixType2> class MatrixConverter {
+public:
+  MatrixType2 convert_matrix(const MatrixType1 &A) {
+    std::cout << "conversion from " << typeid(MatrixType1).name() << " to "
+              << typeid(MatrixType2).name() << " is not implemented"
+              << std::endl;
+    return MatrixType2();
+  }
+};
+
+template <>
+inline abelian MatrixConverter<su2, abelian>::convert_matrix(const su2 &A) {
+  return abelian(1, atan2(A.a3, A.a0));
+}
+
+template <>
+inline su3_abelian
+MatrixConverter<su3, su3_abelian>::convert_matrix(const su3 &A) {
+  std::vector<double> angles(3);
+  su3_abelian B;
+  double sum = 0;
+  for (int c = 0; c < 3; c++) {
+    angles[c] = atan2(A.matrix(c, c).imag(), A.matrix(c, c).real());
+    sum += angles[c];
+  }
+  while (sum >= M_PI) {
+    sum -= 2 * M_PI;
+  }
+  while (sum < -M_PI) {
+    sum += 2 * M_PI;
+  }
+  for (int c = 0; c < 3; c++) {
+    B.matrix[c] = std::complex<double>(cos(angles[c] - sum / 3),
+                                       sin(angles[c] - sum / 3));
+  }
+  return B;
+}
+
+template <> inline su2 MatrixConverter<su2, su2>::convert_matrix(const su2 &A) {
+  double module = sqrt(A.a0 * A.a0 + A.a3 * A.a3);
+  su2 B = su2(A.a0 / module, 0, 0, A.a3 / module);
+  return A ^ B;
+}
+
+template <> inline su3 MatrixConverter<su3, su3>::convert_matrix(const su3 &A) {
+  su3 B;
+  for (int c = 0; c < 3; c++) {
+    B.matrix(c, c) = A.matrix(c, c) / std::sqrt(std::norm(A.matrix(c, c)));
+  }
+  return A ^ B;
 }

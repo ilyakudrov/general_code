@@ -1,12 +1,26 @@
 #pragma once
 
-#include "math.h"
+#include "../include/c-lime/lime_fixed_types.h"
+#include "../include/c-lime/lime_reader.h"
+#include "../include/indexing.h"
 
+#include "math.h"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
+
+inline double reverseValue(const char *data) {
+  double result;
+
+  char *dest = (char *)&result;
+
+  for (int i = 0; i < sizeof(double); i++) {
+    dest[i] = data[sizeof(double) - i - 1];
+  }
+  return result;
+}
 
 // Class which contains array of matrices of type T
 // Order of matrices used in program is (usual ordering)
@@ -63,6 +77,8 @@ public:
 
 template <class DataPattern, class MatrixType> class Data1 {
 public:
+  typedef MatrixType matrix_type;
+  typedef DataPattern data_pattern_type;
   std::vector<MatrixType> array;
   DataPattern data_pattern;
   Data1(const DataPattern &data_pattern) : data_pattern(data_pattern) {
@@ -115,6 +131,50 @@ public:
     stream.close();
   }
 
+  template <int N_dim>
+  void read_data(std::string file_path,
+                 FilePatternILDG<N_dim, MatrixType> file_pattern,
+                 int bytes_skip, std::string file_precision) {
+    int data_size1 = 4 * x_size * y_size * z_size * t_size;
+    array.clear();
+    array.reserve(4 * x_size * y_size * z_size * t_size);
+
+    FILE *fp;
+    fp = fopen(file_path.c_str(), "r");
+
+    LimeReader *reader;
+    reader = limeCreateReader(fp);
+
+    int status;
+    char *lime_type;
+    n_uint64_t nbytes;
+    while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
+
+      if (status != LIME_SUCCESS) {
+        fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
+      }
+
+      lime_type = limeReaderType(reader);
+      nbytes = limeReaderBytes(reader);
+
+      if (strcmp(lime_type, "ildg-binary-data") == 0) {
+
+        std::vector<double> v(nbytes / sizeof(double));
+
+        status = limeReaderReadData((char *)&v[0], &nbytes, reader);
+
+        for (int i = 0; i < nbytes / sizeof(double); i++) {
+          v[i] = reverseValue((char *)&v[i]);
+        }
+
+        if (status != LIME_SUCCESS) {
+          fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
+        }
+        fill_array(v, file_pattern);
+      }
+    }
+  }
+
   template <class FilePattern>
   void fill_data_to_write(std::vector<double> &data, FilePattern file_pattern) {
     std::vector<double> matrix_data(MatrixType::data_size);
@@ -145,6 +205,95 @@ public:
     stream.close();
   }
 };
+
+template <class MatrixType1, class MatrixType2>
+void data_convert(const std::vector<MatrixType1> &data1,
+                  std::vector<MatrixType2> &data2) {
+  MatrixConverter<MatrixType1, MatrixType2> matrix_converter;
+  for (int i = 0; i < data1.size(); i++) {
+    data2[i] = matrix_converter.convert_matrix(data1[i]);
+  }
+}
+
+template <class DataType>
+void read_data(DataType &data, std::string file_path, std::string conf_format,
+               int bytes_skip, std::string file_precision) {
+
+  if (conf_format == std::string_view("lexicographical")) {
+    FilePatternLexicographical<DataType::data_pattern_type::N,
+                               typename DataType::matrix_type>
+        file_pattern;
+    data.read_data(file_path, file_pattern, bytes_skip, file_precision);
+  } else if (conf_format == std::string_view("qcdstag")) {
+    FilePatternQCDSTAG<DataType::data_pattern_type::N,
+                       typename DataType::matrix_type>
+        file_pattern;
+    data.read_data(file_path, file_pattern, bytes_skip, file_precision);
+  } else if (conf_format == std::string_view("ildg")) {
+    FilePatternILDG<DataType::data_pattern_type::N,
+                    typename DataType::matrix_type>
+        file_pattern;
+    data.read_data(file_path, file_pattern, bytes_skip, file_precision);
+  } else
+    std::cout << "read_data wrong conf format" << std::endl;
+}
+
+template <class DataPattern>
+void read_data_convert(Data1<DataPattern, su2> &data, std::string file_path,
+                       std::string conf_format, int bytes_skip,
+                       std::string file_precision, bool convert) {
+  if (convert) {
+    Data1<DataPattern, su2> data_from_file(data.data_pattern);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(Data1<DataPattern, abelian> &data, std::string file_path,
+                       std::string conf_format, int bytes_skip,
+                       std::string file_precision, bool convert) {
+  if (convert) {
+    Data1<DataPattern, su2> data_from_file(data.data_pattern);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(Data1<DataPattern, su3> &data, std::string file_path,
+                       std::string conf_format, int bytes_skip,
+                       std::string file_precision, bool convert) {
+  if (convert) {
+    Data1<DataPattern, su3> data_from_file(data.data_pattern);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(Data1<DataPattern, su3_abelian> &data,
+                       std::string file_path, std::string conf_format,
+                       int bytes_skip, std::string file_precision,
+                       bool convert) {
+  if (convert) {
+    Data1<DataPattern, su3> data_from_file(data.data_pattern);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
 
 } // namespace Data
 

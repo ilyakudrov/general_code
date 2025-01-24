@@ -1,3 +1,7 @@
+#pragma once
+
+#include "../include/matrix.h"
+
 #include <array>
 #include <vector>
 
@@ -62,6 +66,7 @@ template <int dim> struct multi_index_t {
 
 template <int N_dim> class DataPatternLexicographical {
 public:
+  constexpr static int N = N_dim;
   std::array<int, N_dim> lat_dim;
   std::array<int, N_dim> lat_coord;
 
@@ -138,8 +143,9 @@ public:
 //   }
 // };
 
-template <int N_dim> class FilePatternLexicographical {
+template <int N_dim, class MatrixType> class FilePatternLexicographical {
 public:
+  typedef MatrixType matrix_type;
   FilePatternLexicographical() {}
   int get_index_site(std::array<int, N_dim> &lat_dim,
                      std::array<int, N_dim> &lat_coord) const {
@@ -154,7 +160,7 @@ public:
 
   int get_index_link(std::array<int, N_dim> &lat_dim,
                      std::array<int, N_dim> &lat_coord, int mu) const {
-    return get_index_site(lat_dim, lat_coord) * 4 + mu;
+    return get_index_site(lat_dim, lat_coord) * N_dim + mu;
   }
 
   int get_index_matrix_data(std::array<int, N_dim> &lat_dim,
@@ -165,8 +171,40 @@ public:
   }
 };
 
-template <int N_dim> class FilePatternQCDSTAG {
+template <int N_dim> class FilePatternLexicographical<N_dim, su3_abelian> {
 public:
+  typedef su3_abelian matrix_type;
+  FilePatternLexicographical() {}
+  int get_index_site(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord) const {
+    int index = 0;
+    int size = 1;
+    for (int i = 0; i < N_dim; i++) {
+      index += lat_coord[i] * size;
+      size *= lat_dim[i];
+    }
+    return index;
+  }
+
+  int get_index_link(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord, int mu) const {
+    return get_index_site(lat_dim, lat_coord) * N_dim + mu;
+  }
+
+  int get_index_matrix_data(std::array<int, N_dim> &lat_dim,
+                            std::array<int, N_dim> &lat_coord, int mu,
+                            int element_num, int matrix_data_size) const {
+    int size = 1;
+    for (int i = 0; i < N_dim; i++) {
+      size *= lat_dim[i];
+    }
+    return get_index_link(lat_dim, lat_coord, mu) + element_num * size * N_dim;
+  }
+};
+
+template <int N_dim, class MatrixType> class FilePatternQCDSTAG {
+public:
+  typedef MatrixType matrix_type;
   FilePatternQCDSTAG() {}
   int get_index_site(std::array<int, N_dim> &lat_dim,
                      std::array<int, N_dim> &lat_coord) const {
@@ -191,6 +229,73 @@ public:
       size *= lat_dim[i];
     }
     return get_index_site(lat_dim, lat_coord) + mu1 * size;
+  }
+
+  int get_index_matrix_data(std::array<int, N_dim> &lat_dim,
+                            std::array<int, N_dim> &lat_coord, int mu,
+                            int element_num, int matrix_data_size) const {
+    return get_index_link(lat_dim, lat_coord, mu) * matrix_data_size +
+           element_num;
+  }
+};
+
+template <int N_dim> class FilePatternQCDSTAG<N_dim, su2> {
+public:
+  typedef su2 matrix_type;
+  FilePatternQCDSTAG() {}
+  int get_index_site(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord) const {
+    int index = 0;
+    int size = 1;
+    for (int i = 0; i < N_dim; i++) {
+      index += lat_coord[i] * size;
+      size *= lat_dim[i];
+    }
+    return index;
+  }
+
+  int get_index_link(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord, int mu) const {
+    int mu1;
+    if (mu == lat_dim.size() - 1)
+      mu1 = 0;
+    else
+      mu1 = mu + 1;
+    int size = 1;
+    for (int i = 0; i < N_dim; i++) {
+      size *= lat_dim[i];
+    }
+    return get_index_site(lat_dim, lat_coord) + mu1 * size;
+  }
+
+  int get_index_matrix_data(std::array<int, N_dim> &lat_dim,
+                            std::array<int, N_dim> &lat_coord, int mu,
+                            int element_num, int matrix_data_size) const {
+    if (element_num > 0)
+      element_num = N_dim - element_num;
+    return get_index_link(lat_dim, lat_coord, mu) * matrix_data_size +
+           element_num;
+  }
+};
+
+template <int N_dim, class MatrixType> class FilePatternILDG {
+public:
+  typedef MatrixType matrix_type;
+  FilePatternILDG() {}
+  int get_index_site(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord) const {
+    int index = 0;
+    int size = 1;
+    for (int i = 0; i < N_dim; i++) {
+      index += lat_coord[i] * size;
+      size *= lat_dim[i];
+    }
+    return index;
+  }
+
+  int get_index_link(std::array<int, N_dim> &lat_dim,
+                     std::array<int, N_dim> &lat_coord, int mu) const {
+    return get_index_site(lat_dim, lat_coord) * N_dim + mu;
   }
 
   int get_index_matrix_data(std::array<int, N_dim> &lat_dim,

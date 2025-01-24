@@ -474,17 +474,6 @@ void Data::data<abelian>::read_double_vitaly_abelian(std::string &file_name,
             << std::endl;
 }
 
-double reverseValue(const char *data) {
-  double result;
-
-  char *dest = (char *)&result;
-
-  for (int i = 0; i < sizeof(double); i++) {
-    dest[i] = data[sizeof(double) - i - 1];
-  }
-  return result;
-}
-
 template <> void Data::data<su3>::read_ildg(std::string &file_name) {
   int data_size1 = 4 * x_size * y_size * z_size * t_size;
   array.clear();
