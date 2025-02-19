@@ -424,11 +424,13 @@ public:
   }
 
   double multiply_conj_tr_adjoint(const su3_abelian &B) const {
-    std::complex<double> tmp = std::complex<double>(0, 0);
+    std::complex<double> tmp;
+    double trace = 0;
     for (int i = 0; i < 3; i++) {
-      tmp += matrix[i] * std::conj(B.matrix[i]);
+      tmp = matrix[i] * std::conj(B.matrix[i]);
+      trace += cos(2 * atan2(tmp.imag(), tmp.real()));
     }
-    return std::norm(tmp) - 1;
+    return trace;
   }
 
   su3_abelian inverse() const {
