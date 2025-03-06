@@ -283,12 +283,12 @@ int main(int argc, char *argv[]) {
   if (polyakov_correlator_enabled) {
     if (correlator_type == "singlet") {
       polyakov_correlator_vec = polyakov_loop_correlator_singlet(
-          conf_separated, polyakov_correlator_D);
+          conf_wilson.array, polyakov_correlator_D);
       polyakov_correlator = polyakov_average_directions(polyakov_correlator_vec,
                                                         polyakov_correlator_D);
     } else if (correlator_type == "color_average") {
       polyakov_correlator_vec =
-          polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+          polyakov_loop_correlator(conf_wilson.array, polyakov_correlator_D);
       polyakov_correlator = polyakov_average_directions(polyakov_correlator_vec,
                                                         polyakov_correlator_D);
     } else {
@@ -322,12 +322,12 @@ int main(int argc, char *argv[]) {
         if (polyakov_correlator_enabled) {
           if (correlator_type == "singlet") {
             polyakov_correlator_vec = polyakov_loop_correlator_singlet(
-                conf_separated, polyakov_correlator_D);
+                conf_wilson.array, polyakov_correlator_D);
             polyakov_correlator = polyakov_average_directions(
                 polyakov_correlator_vec, polyakov_correlator_D);
           } else if (correlator_type == "color_average") {
-            polyakov_correlator_vec =
-                polyakov_loop_correlator(conf_separated, polyakov_correlator_D);
+            polyakov_correlator_vec = polyakov_loop_correlator(
+                conf_wilson.array, polyakov_correlator_D);
             polyakov_correlator = polyakov_average_directions(
                 polyakov_correlator_vec, polyakov_correlator_D);
           } else {

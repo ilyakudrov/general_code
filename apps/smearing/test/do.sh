@@ -1,47 +1,49 @@
 #!/bin/bash
-conf_format_wilson="ildg"
+# conf_format_wilson="ildg"
 # conf_format_wilson="double"
-# conf_format_wilson="double_qc2dstag"
+conf_format_wilson="double_qc2dstag"
 # conf_path_wilson="../../../tests/confs/MAG/su2/qc2dstag/40^4/mu0.00/conf_abelian_0201"
 # conf_path_wilson="../../../tests/confs/su2/qc2dstag/40^4/mu0.00/CONF0201"
 #conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt4/conf.0501"
 # conf_path_wilson="../../../tests/confs/su3/gluodynamics/16^4/beta6.0/b6p00_L16x16x16x16.01001.lime"
-conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt20/conf.0501"
+# conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt4/conf.0501"
+conf_path_wilson="../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
 # conf_path_wilson="../../../tests/confs/MAG/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_gaugefixed_01001.lime_1"
 # conf_path_wilson="../../../tests/confs/monopoless/su3/gluodynamics/16^4/beta6.0/steps_0/copies=20/conf_monopoless_1001_1"
 # conf_path_wilson="../../../tests/confs/su3/QCD/140MeV/nt20/conf.0501"
 bytes_skip_wilson=0
-wilson_type="su3"
+wilson_type="su2"
 convert_wilson=0
 # conf_format_plaket="double_qc2dstag"
 conf_format_plaket="ildg"
 # conf_path_plaket="../../../tests/confs/su3/gluodynamics/24^4/beta6.0/CONF0001"
 conf_path_plaket="../../../tests/confs/su3/QCD/140MeV/nt20/conf.0501"
 bytes_skip_plaket=0
-plaket_type="su3"
+plaket_type="su2"
 convert_plaket=0
 HYP_alpha1=1
 HYP_alpha2=1
 HYP_alpha3=0.5
 APE_alpha=0.5
-APE_enabled=1
-HYP_enabled=0
+APE_enabled=0
+HYP_enabled=1
 APE_steps=11
 calculation_step_APE=10
 calculation_APE_start=1
 calculation_step_HYP=1
 calculation_HYP_start=1
-HYP_steps=5
-L_spat=64
-L_time=20
+HYP_steps=1
+L_spat=32
+L_time=8
 path_wilson=./result/wilson_loops
 path_flux=./result/flux_tube
 path_polyakov_correlator=./result/polyakov_correlator
 path_polyakov_loop=./result/polyakov_loop
-wilson_enabled=1
+wilson_enabled=0
 flux_enabled=0
-polyakov_correlator_enabled=0
+polyakov_correlator_enabled=1
 polyakov_loop_enabled=0
+correlator_type="color_average"
 T_min=1
 T_max=16
 R_min=1
@@ -57,7 +59,7 @@ parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_p
     -path_wilson ${path_wilson} -path_flux ${path_flux} -wilson_enabled ${wilson_enabled} -flux_enabled ${flux_enabled} -save_conf ${save_conf}\
     -path_polyakov_correlator ${path_polyakov_correlator} -polyakov_correlator_D ${polyakov_correlator_D} -path_polyakov_loop ${path_polyakov_loop}\
     -T_min ${T_min} -T_max ${T_max} -R_min ${R_min} -R_max ${R_max} -calculation_step_APE ${calculation_step_APE}\
-    -polyakov_correlator_enabled ${polyakov_correlator_enabled} -polyakov_loop_enabled ${polyakov_loop_enabled}\
+    -polyakov_correlator_enabled ${polyakov_correlator_enabled} -polyakov_loop_enabled ${polyakov_loop_enabled} -correlator_type ${correlator_type}\
     -calculation_APE_start ${calculation_APE_start} -calculation_step_HYP ${calculation_step_HYP} -calculation_HYP_start ${calculation_HYP_start}"
 
 ../smearing_${wilson_type}_${plaket_type}_test ${parameters}

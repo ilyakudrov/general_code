@@ -144,50 +144,70 @@ double polyakov_loop_parallel(const std::vector<std::vector<T>> &array) {
 
 template <class T>
 std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord = {0, 0, 0, 0};
   std::vector<double> polyakov_loops(x_size * y_size * z_size);
-  link.move_dir(3);
-  int place;
 
-  ITER_START_ZYX
-
-  place = link.place / 4;
-
-  polyakov_loops[place] = link.polyakov_loop(array).tr();
-
-  ITER_END_3
-
+#pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
+  for (int z = 0; z < lat_dim[2]; z++) {
+    for (int y = 0; y < lat_dim[1]; y++) {
+      for (int x = 0; x < lat_dim[0]; x++) {
+        lat_coord[0] = x;
+        lat_coord[1] = y;
+        lat_coord[2] = z;
+        polyakov_loops[get_index_site(lat_coord)] =
+            get_polyakov_loop(array, get_index_matrix(lat_coord, 3), size2 * 4,
+                              lat_dim[3])
+                .tr();
+      }
+    }
+  }
   return polyakov_loops;
 }
 
 std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3> &array) {
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord = {0, 0, 0, 0};
   std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
-  link.move_dir(3);
-  int place;
 
-  ITER_START_ZYX
-
-  place = link.place / 4;
-
-  polyakov_loops[place] = link.polyakov_loop(array).tr_complex();
-
-  ITER_END_3
-
+#pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
+  for (int z = 0; z < lat_dim[2]; z++) {
+    for (int y = 0; y < lat_dim[1]; y++) {
+      for (int x = 0; x < lat_dim[0]; x++) {
+        lat_coord[0] = x;
+        lat_coord[1] = y;
+        lat_coord[2] = z;
+        polyakov_loops[get_index_site(lat_coord)] =
+            get_polyakov_loop(array, get_index_matrix(lat_coord, 3), size2 * 4,
+                              lat_dim[3])
+                .tr_complex();
+      }
+    }
+  }
   return polyakov_loops;
 }
 
 std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3_abelian> &array) {
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord = {0, 0, 0, 0};
   std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
-  link.move_dir(3);
-  int place;
-  ITER_START_ZYX
-  place = link.place / 4;
-  polyakov_loops[place] = link.polyakov_loop(array).tr_complex();
-  ITER_END_3
+
+#pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
+  for (int z = 0; z < lat_dim[2]; z++) {
+    for (int y = 0; y < lat_dim[1]; y++) {
+      for (int x = 0; x < lat_dim[0]; x++) {
+        lat_coord[0] = x;
+        lat_coord[1] = y;
+        lat_coord[2] = z;
+        polyakov_loops[get_index_site(lat_coord)] =
+            get_polyakov_loop(array, get_index_matrix(lat_coord, 3), size2 * 4,
+                              lat_dim[3])
+                .tr_complex();
+      }
+    }
+  }
   return polyakov_loops;
 }
 
@@ -250,7 +270,8 @@ template <class T>
 std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
                                              int D_max) {
   std::vector<double> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;
@@ -260,49 +281,47 @@ std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
   double polyakov_tmp;
   double distance;
   int Dx_min;
+  int place;
+  int correlator_place;
 
-#pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                                 Dx_min)                       \
-    firstprivate(result_size, result_size1)                                    \
-    reduction(vec_double_plus : correlator)
-  ITER_START_ZYX
-
-  polyakov_tmp = polyakov_loops[link.place / 4];
-  link.move(2, -D_max);
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
-    link.move(1, -D_max);
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
-      if (Dy != 0 && Dz != 0)
+      if (Dy != 0 && Dz != 0) {
         Dx_min = 0;
-      else
+      } else {
         Dx_min = -D_max;
-
-      link.move(0, Dx_min);
-
-      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
-
-        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
-
-        if (distance <= D_max) {
-
-          correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
-                     Dx + D_max] +=
-              polyakov_tmp * polyakov_loops[link.place / 4];
-        }
-
-        link.move(0, 1);
       }
-      link.move(1, 1);
-      link.move(0, -D_max - 1);
+      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
+        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
+        if (distance <= D_max) {
+          correlator_place = (Dz + D_max) * result_size1 +
+                             (Dy + D_max) * result_size + Dx + D_max;
+          double correlator_tmp = 0;
+#pragma omp parallel for collapse(2) private(polyakov_tmp, place)              \
+    firstprivate(lat_coord, lat_dim, Dx, Dy, Dz) reduction(+ : correlator_tmp)
+          for (int z = 0; z < lat_dim[2]; z++) {
+            for (int y = 0; y < lat_dim[1]; y++) {
+              for (int x = 0; x < lat_dim[0]; x++) {
+                lat_coord[0] = x;
+                lat_coord[1] = y;
+                lat_coord[2] = z;
+                polyakov_tmp = polyakov_loops[get_index_site(lat_coord)];
+                lat_coord[0] = (lat_coord[0] + lat_dim[0] + Dx) % lat_dim[0];
+                lat_coord[1] = (lat_coord[1] + lat_dim[1] + Dy) % lat_dim[1];
+                lat_coord[2] = (lat_coord[2] + lat_dim[2] + Dz) % lat_dim[2];
+                place = get_index_site(lat_coord);
+                correlator_tmp += polyakov_tmp * polyakov_loops[place];
+              }
+            }
+          }
+          correlator[correlator_place] = correlator_tmp;
+        }
+      }
     }
-    link.move(2, 1);
-    link.move(1, -D_max - 1);
   }
-
-  ITER_END_3
-
   int size = x_size * y_size * z_size;
-
+#pragma omp parallel for collapse(3)                                           \
+    firstprivate(size, D_max, result_size1, result_size)
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
       for (int Dx = -D_max; Dx <= D_max; Dx++) {
@@ -311,7 +330,6 @@ std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
       }
     }
   }
-
   return correlator;
 }
 
@@ -320,7 +338,8 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
                                              int D_max) {
   std::vector<std::complex<double>> polyakov_loops =
       calculate_polyakov_loops_tr(conf);
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;
@@ -330,50 +349,49 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
   std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
+  int place;
+  int correlator_place;
 
-#pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                                 Dx_min)                       \
-    firstprivate(result_size, result_size1)                                    \
-    reduction(vec_double_plus : correlator)
-  ITER_START_ZYX
-
-  polyakov_tmp = polyakov_loops[link.place / 4];
-  link.move(2, -D_max);
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
-    link.move(1, -D_max);
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
-      if (Dy != 0 && Dz != 0)
+      if (Dy != 0 && Dz != 0) {
         Dx_min = 0;
-      else
+      } else {
         Dx_min = -D_max;
-
-      link.move(0, Dx_min);
-
-      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
-
-        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
-
-        if (distance <= D_max) {
-
-          correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
-                     Dx + D_max] +=
-              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
-              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
-        }
-
-        link.move(0, 1);
       }
-      link.move(1, 1);
-      link.move(0, -D_max - 1);
+      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
+        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
+        if (distance <= D_max) {
+          correlator_place = (Dz + D_max) * result_size1 +
+                             (Dy + D_max) * result_size + Dx + D_max;
+          double correlator_tmp = 0;
+#pragma omp parallel for collapse(2) private(polyakov_tmp, place)              \
+    firstprivate(lat_coord, lat_dim, Dx, Dy, Dz) reduction(+ : correlator_tmp)
+          for (int z = 0; z < lat_dim[2]; z++) {
+            for (int y = 0; y < lat_dim[1]; y++) {
+              for (int x = 0; x < lat_dim[0]; x++) {
+                lat_coord[0] = x;
+                lat_coord[1] = y;
+                lat_coord[2] = z;
+                polyakov_tmp = polyakov_loops[get_index_site(lat_coord)];
+                lat_coord[0] = (lat_coord[0] + lat_dim[0] + Dx) % lat_dim[0];
+                lat_coord[1] = (lat_coord[1] + lat_dim[1] + Dy) % lat_dim[1];
+                lat_coord[2] = (lat_coord[2] + lat_dim[2] + Dz) % lat_dim[2];
+                place = get_index_site(lat_coord);
+                correlator_tmp +=
+                    polyakov_tmp.real() * polyakov_loops[place].real() +
+                    polyakov_tmp.imag() * polyakov_loops[place].imag();
+              }
+            }
+          }
+          correlator[correlator_place] = correlator_tmp;
+        }
+      }
     }
-    link.move(2, 1);
-    link.move(1, -D_max - 1);
   }
-
-  ITER_END_3
-
   int size = x_size * y_size * z_size;
-
+#pragma omp parallel for collapse(3)                                           \
+    firstprivate(size, D_max, result_size1, result_size)
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
       for (int Dx = -D_max; Dx <= D_max; Dx++) {
@@ -382,7 +400,6 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
       }
     }
   }
-
   return correlator;
 }
 
@@ -391,7 +408,8 @@ std::vector<double>
 polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
   std::vector<std::complex<double>> polyakov_loops =
       calculate_polyakov_loops_tr(conf);
-  link1 link(x_size, y_size, z_size, t_size);
+  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;
@@ -401,50 +419,49 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
   std::complex<double> polyakov_tmp;
   double distance;
   int Dx_min;
+  int place;
+  int correlator_place;
 
-#pragma omp parallel for collapse(3) private(polyakov_tmp, link, distance,     \
-                                                 Dx_min)                       \
-    firstprivate(result_size, result_size1)                                    \
-    reduction(vec_double_plus : correlator)
-  ITER_START_ZYX
-
-  polyakov_tmp = polyakov_loops[link.place / 4];
-  link.move(2, -D_max);
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
-    link.move(1, -D_max);
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
-      if (Dy != 0 && Dz != 0)
+      if (Dy != 0 && Dz != 0) {
         Dx_min = 0;
-      else
+      } else {
         Dx_min = -D_max;
-
-      link.move(0, Dx_min);
-
-      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
-
-        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
-
-        if (distance <= D_max) {
-
-          correlator[(Dz + D_max) * result_size1 + (Dy + D_max) * result_size +
-                     Dx + D_max] +=
-              polyakov_tmp.real() * polyakov_loops[link.place / 4].real() +
-              polyakov_tmp.imag() * polyakov_loops[link.place / 4].imag();
-        }
-
-        link.move(0, 1);
       }
-      link.move(1, 1);
-      link.move(0, -D_max - 1);
+      for (int Dx = Dx_min; Dx <= D_max; Dx++) {
+        distance = sqrt(Dx * Dx + Dy * Dy + Dz * Dz);
+        if (distance <= D_max) {
+          correlator_place = (Dz + D_max) * result_size1 +
+                             (Dy + D_max) * result_size + Dx + D_max;
+          double correlator_tmp = 0;
+#pragma omp parallel for collapse(2) private(polyakov_tmp, place)              \
+    firstprivate(lat_coord, lat_dim, Dx, Dy, Dz) reduction(+ : correlator_tmp)
+          for (int z = 0; z < lat_dim[2]; z++) {
+            for (int y = 0; y < lat_dim[1]; y++) {
+              for (int x = 0; x < lat_dim[0]; x++) {
+                lat_coord[0] = x;
+                lat_coord[1] = y;
+                lat_coord[2] = z;
+                polyakov_tmp = polyakov_loops[get_index_site(lat_coord)];
+                lat_coord[0] = (lat_coord[0] + lat_dim[0] + Dx) % lat_dim[0];
+                lat_coord[1] = (lat_coord[1] + lat_dim[1] + Dy) % lat_dim[1];
+                lat_coord[2] = (lat_coord[2] + lat_dim[2] + Dz) % lat_dim[2];
+                place = get_index_site(lat_coord);
+                correlator_tmp +=
+                    polyakov_tmp.real() * polyakov_loops[place].real() +
+                    polyakov_tmp.imag() * polyakov_loops[place].imag();
+              }
+            }
+          }
+          correlator[correlator_place] = correlator_tmp;
+        }
+      }
     }
-    link.move(2, 1);
-    link.move(1, -D_max - 1);
   }
-
-  ITER_END_3
-
   int size = x_size * y_size * z_size;
-
+#pragma omp parallel for collapse(3)                                           \
+    firstprivate(size, D_max, result_size1, result_size)
   for (int Dz = -D_max; Dz <= D_max; Dz++) {
     for (int Dy = -D_max; Dy <= D_max; Dy++) {
       for (int Dx = -D_max; Dx <= D_max; Dx++) {
@@ -453,7 +470,6 @@ polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
       }
     }
   }
-
   return correlator;
 }
 

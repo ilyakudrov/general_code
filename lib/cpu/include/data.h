@@ -109,6 +109,7 @@ public:
     std::ifstream stream(file_path);
     std::vector<float> float_v;
     std::vector<double> double_v;
+    stream.ignore(bytes_skip);
     if (file_precision == std::string_view("float")) {
       float_v.resize(data_pattern.get_data_size() * MatrixType::data_size);
       if (!stream.read((char *)&float_v[0],
