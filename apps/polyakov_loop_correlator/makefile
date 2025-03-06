@@ -3,6 +3,7 @@ OBJ_PATH=../../lib/cpu/obj
 GCC=g++
 C_PATH=../../lib/cpu/src/c-lime
 ARCH=test
+FLAGS=-Ofast -fopenmp -march=native -mtune=native -std=c++17
 MATRIX=su2
 C_LIME=$(C_PATH)/lime_fseeko.c  $(C_PATH)/lime_header.c  $(C_PATH)/lime_reader.c  $(C_PATH)/lime_utils.c  $(C_PATH)/lime_writer.c
 OBJFILES=$(OBJ_PATH)/link_$(ARCH).o $(OBJ_PATH)/data_$(ARCH).o $(OBJ_PATH)/basic_observables_$(ARCH).o $(OBJ_PATH)/polyakov_loops_$(ARCH).o \
@@ -11,4 +12,4 @@ HEADERFILES=$(INCLUDE_PATH)/matrix.h $(INCLUDE_PATH)/indexing.h
 EIGH_PATH="/home/ilya/soft/source/eigen-master"
 
 polyakov_loop_correlator: polyakov_loop_correlator.cpp $(OBJFILES) $(HEADERFILES)
-	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) -DMATRIX=$(MATRIX) -I $(EIGH_PATH) -fopenmp -o polyakov_loop_correlator_$(MATRIX)_$(ARCH)
+	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) -DMATRIX=$(MATRIX) $(FLAGS) -I $(EIGH_PATH) -fopenmp -o polyakov_loop_correlator_$(MATRIX)_$(ARCH)
