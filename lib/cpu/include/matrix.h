@@ -5,7 +5,7 @@
 #include <complex>
 #include <iostream>
 
-// su2 matrix in sigma matrices representation (a0 + ai * sigma[i])
+// su2 matrix in sigma matrices representation (a0 + I * ai * sigma[i])
 class su2 {
 public:
   inline static int data_size = 4;
