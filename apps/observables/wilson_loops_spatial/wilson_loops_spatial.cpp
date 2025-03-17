@@ -1,7 +1,6 @@
 #include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/matrix.h"
-#include "../../../lib/cpu/include/smearing.h"
 
 #include <ctime>
 #include <fstream>
@@ -106,6 +105,25 @@ int main(int argc, char *argv[]) {
 
   cout << "plaket " << plaket(conf.array) << endl;
 
+  // vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
+  cout << "plaket space " << plaket_space(conf.array) << endl;
+
+  // conf.array.clear();
+  // conf.array.shrink_to_fit();
+
+  start_time = omp_get_wtime();
+
+  // std::map<std::tuple<int, int, int>, double> wilson_loops =
+  //     wilson_spatial_3d_parallel(conf_separated, R_min, R_max, T_min, T_max,
+  //                                alpha, APE_start, APE_end, APE_step);
+  std::map<std::tuple<int, int, int>, double> wilson_loops =
+      wilson_spatial_3d_indexed(conf.array, R_min, R_max, T_min, T_max, alpha,
+                                APE_start, APE_end, APE_step);
+
+  end_time = omp_get_wtime();
+  observables_time = end_time - start_time;
+  cout << "wilson loops time: " << observables_time << endl;
+
   ofstream stream_wilson;
   stream_wilson.precision(17);
   // open file
@@ -113,26 +131,10 @@ int main(int argc, char *argv[]) {
 
   stream_wilson << "smearing_steps,time_size,space_size,wilson_loop" << endl;
 
-  vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
-  cout << "plaket space " << plaket_space(conf.array) << endl;
-
-  conf.array.clear();
-  conf.array.shrink_to_fit();
-
-  start_time = omp_get_wtime();
-
-  std::map<std::tuple<int, int, int>, double> wilson_loops =
-      wilson_spatial_3d_parallel(conf_separated, R_min, R_max, T_min, T_max,
-                                 alpha, APE_start, APE_end, APE_step);
-
   for (const auto &pair : wilson_loops) {
     stream_wilson << get<0>(pair.first) << "," << get<1>(pair.first) << ","
                   << get<2>(pair.first) << "," << pair.second << endl;
   }
-
-  end_time = omp_get_wtime();
-  observables_time = end_time - start_time;
-  cout << "wilson loops time: " << observables_time << endl;
 
   stream_wilson.close();
 }

@@ -198,8 +198,6 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  // return 0;
-
   Data::data<MATRIX_WILSON> conf_wilson;
   Data::data<MATRIX_PLAKET> conf_plaket;
 
@@ -214,18 +212,7 @@ int main(int argc, char *argv[]) {
 
     cout << "plaket plaket unsmeared " << plaket_unsmeared << endl;
 
-    vector<vector<MATRIX_PLAKET>> conf_separated_plaket =
-        separate_wilson(conf_plaket.array);
-
-    conf_plaket.array.clear();
-    conf_plaket.array.shrink_to_fit();
-
-    plaket_time_tr = plaket_aver_tr_time(conf_separated_plaket);
-
-    for (int i = 0; i < conf_separated_plaket.size(); i++) {
-      conf_separated_plaket[i].clear();
-      conf_separated_plaket[i].shrink_to_fit();
-    }
+    // plaket_time_tr = plaket_aver_tr_time(conf_separated_plaket);
   }
 
   get_data(conf_wilson, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
@@ -272,12 +259,6 @@ int main(int argc, char *argv[]) {
   std::vector<double> polyakov_correlator_vec;
   std ::map<double, double> polyakov_correlator;
 
-  vector<vector<MATRIX_WILSON>> conf_separated;
-  // vector<vector<MATRIX_WILSON>> conf_separated =
-  //     separate_wilson(conf_wilson.array);
-  // conf_wilson.array.clear();
-  // conf_wilson.array.shrink_to_fit();
-
   observables_time = 0;
   start_time = omp_get_wtime();
   if (polyakov_correlator_enabled) {
@@ -301,7 +282,7 @@ int main(int argc, char *argv[]) {
     }
   }
   if (polyakov_loop_enabled) {
-    stream_polyakov_loop << 0 << "," << polyakov_loop_parallel(conf_separated)
+    stream_polyakov_loop << 0 << "," << polyakov_loop(conf_wilson.array)
                          << std::endl;
   }
   end_time = omp_get_wtime();
@@ -311,8 +292,7 @@ int main(int argc, char *argv[]) {
     smearing_time = 0;
     for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
       start_time = omp_get_wtime();
-      smearing_HYP_indexed(conf_wilson.array, HYP_alpha1, HYP_alpha2,
-                           HYP_alpha3);
+      smearing_HYP(conf_wilson.array, HYP_alpha1, HYP_alpha2, HYP_alpha3);
       end_time = omp_get_wtime();
       smearing_time += end_time - start_time;
 
@@ -341,8 +321,7 @@ int main(int argc, char *argv[]) {
         }
         if (polyakov_loop_enabled) {
           stream_polyakov_loop << HYP_step << ","
-                               << polyakov_loop_parallel(conf_separated)
-                               << std::endl;
+                               << polyakov_loop(conf_wilson.array) << std::endl;
         }
       }
       end_time = omp_get_wtime();
@@ -368,7 +347,7 @@ int main(int argc, char *argv[]) {
 
       start_time = omp_get_wtime();
 
-      smearing_APE_indexed(conf_wilson.array, APE_alpha);
+      smearing_APE(conf_wilson.array, APE_alpha);
 
       end_time = omp_get_wtime();
       smearing_time += end_time - start_time;
@@ -390,9 +369,9 @@ int main(int argc, char *argv[]) {
 
         if (flux_enabled) {
 
-          flux_tube = wilson_plaket_correlator(
-              plaket_time_tr, conf_separated, 2, L_time / 2, L_spat / 4,
-              L_spat / 2, 5, 0, "longitudinal");
+          // flux_tube = wilson_plaket_correlator(
+          //     plaket_time_tr, conf_separated, 2, L_time / 2, L_spat / 4,
+          //     L_spat / 2, 5, 0, "longitudinal");
 
           for (auto it = flux_tube.begin(); it != flux_tube.end(); it++) {
             stream_flux << APE_step + 1 << "," << get<0>(it->first) << ","
@@ -425,7 +404,6 @@ int main(int argc, char *argv[]) {
   }
 
   if (save_conf) {
-    conf_wilson.array = merge_wilson(conf_separated);
     conf_wilson.write_double(conf_path_output);
   }
 }

@@ -204,3 +204,10 @@ wilson_spatial_3d_parallel(const std::vector<std::vector<T>> &conf, int r_min,
                            int r_max, int time_min, int time_max, double alpha,
                            int smearing_start, int smearing_end,
                            int smearing_step);
+
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
+                          int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);

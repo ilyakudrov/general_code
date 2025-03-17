@@ -1014,3 +1014,7 @@ template std::vector<su3> swap_directions(const std::vector<su3> &conf,
 // su3_abelian
 template std::vector<su3_abelian>
 swap_directions(const std::vector<su3_abelian> &conf, int dir1, int dir2);
+
+// su3_angles
+template std::vector<su3_angles>
+swap_directions(const std::vector<su3_angles> &conf, int dir1, int dir2);

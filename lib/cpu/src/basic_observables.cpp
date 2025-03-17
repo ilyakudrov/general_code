@@ -1159,9 +1159,9 @@ void wilson_lines_prolong(const std::vector<T> &conf,
 
 template <class T>
 std::vector<T> wilson_lines_get_length_one(const std::vector<T> &conf, int mu) {
-  std::vector<T> wilson_lines(conf.size() / 4);
   std::vector<int> lat_coord(4);
   std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<T> wilson_lines(x_size * y_size * z_size * t_size);
 #pragma omp parallel for collapse(4) private(lat_coord)                        \
     firstprivate(mu, lat_dim)
   for (int t = 0; t < lat_dim[3]; t++) {
@@ -1649,59 +1649,75 @@ std::map<std::tuple<int, int>, int> indices_map_spatial() {
 }
 
 template <class T>
-std::map<std::tuple<int, int>, double>
-wilson_spatial_parallel(const std::vector<std::vector<T>> &conf,
-                        const std::vector<std::vector<T>> &smeared, int r_min,
-                        int r_max, int time_min, int time_max) {
-  std::vector<int> steps = {1, x_size, x_size * y_size,
-                            x_size * y_size * z_size,
-                            x_size * y_size * z_size * t_size};
-  std::map<std::tuple<int, int>, int> indices_map = indices_map_spatial();
-
-  std::map<std::tuple<int, int>, double> wilson_loops;
-  std::vector<std::vector<T>> quark_lines(time_max - time_min + 1);
-  std::vector<T> space_lines;
-  // i is quark line direction, j is smeared direction, k is parallel to them
-  for (int i = 0; i < 3; i++) {
-    for (int t = time_min; t <= time_max; t++) {
-      quark_lines[t - time_min] =
-          wilson_lines(conf[i], t, steps[i], steps[i + 1]);
-    }
-    for (int t = time_min; t <= time_max; t++) {
-      for (int j = 0; j < 3; j++) {
-        if (i != j) {
-          for (int k = 0; k < 3; k++) {
-            if (i != k && j != k) {
-              for (int r = r_min; r <= r_max; r++) {
-                space_lines = wilson_lines(
-                    smeared[indices_map[std::tuple<int, int>(i, j)]], r,
-                    steps[j], steps[j + 1]);
-                if (i < j) {
-                  wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane(
-                      quark_lines[t - time_min], space_lines, steps[i],
-                      steps[i + 1], steps[j], steps[j + 1], t, r);
-                } else {
-                  wilson_loops[std::tuple<int, int>(t, r)] += wilson_plane(
-                      space_lines, quark_lines[t - time_min], steps[j],
-                      steps[j + 1], steps[i], steps[i + 1], r, t);
-                }
-              }
-            }
-          }
+void wilson_lines_single_direction_prolong(const std::vector<T> &conf,
+                                           std::vector<T> &wilson_lines,
+                                           int length, int mu) {
+  std::vector<int> lat_coord(4);
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  int index;
+#pragma omp parallel for collapse(4) private(lat_coord, index)                 \
+    firstprivate(lat_dim, mu)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          index = get_index_site(lat_coord);
+          lat_coord[mu] = (lat_coord[mu] + length) % lat_dim[mu];
+          wilson_lines[index] =
+              wilson_lines[index] * conf[get_index_site(lat_coord)];
         }
       }
     }
   }
-
-  for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    it->second = it->second / 6;
-  }
-
-  return wilson_loops;
 }
 
 template <class T>
-void wilson_spatial_3d_step(
+std::vector<T> wilson_lines_single_direction_indexed(const std::vector<T> &conf,
+                                                     int length, int mu) {
+  std::vector<T> wilson_lines = conf;
+  for (int i = 1; i < length; i++) {
+    wilson_lines_single_direction_prolong(conf, wilson_lines, length, mu);
+  }
+  return wilson_lines;
+}
+
+template <class T>
+double wilson_spatial_plane_indexed(const std::vector<T> &wilson_lines_mu,
+                                    const std::vector<T> &wilson_lines_nu,
+                                    int mu, int nu, int length_mu,
+                                    int length_nu) {
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  T wilson_loop;
+  double result = 0;
+  std::vector<int> lat_coord(4);
+  int index;
+#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index)    \
+    firstprivate(lat_dim, mu, nu, length_mu, length_nu) reduction(+ : result)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          index = get_index_site(lat_coord);
+          lat_coord[mu] = (lat_coord[mu] + length_mu) % lat_dim[mu];
+          wilson_loop = wilson_lines_mu[index] *
+                        wilson_lines_nu[get_index_site(lat_coord)];
+          lat_coord[mu] =
+              (lat_coord[mu] + lat_dim[mu] - length_mu) % lat_dim[mu];
+          lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
+          wilson_loop =
+              wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
+          result += wilson_loop.multiply_conj_tr(wilson_lines_nu[index]);
+        }
+      }
+    }
+  }
+  return result / (x_size * y_size * z_size * t_size);
+}
+
+template <class T>
+void wilson_spatial_3d_step_indexed(
     std::map<std::tuple<int, int, int>, double> &wilson_loops,
     const std::vector<T> &conf_nu, const std::vector<T> &conf_eta, int mu,
     int nu, int eta, std::vector<std::vector<T>> &quark_lines, int r_min,
@@ -1709,43 +1725,49 @@ void wilson_spatial_3d_step(
   std::vector<int> steps = {1, x_size, x_size * y_size,
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
-  std::vector<T> space_lines;
-  for (int t = time_min; t <= time_max; t++) {
-    for (int r = r_min; r <= r_max; r++) {
-      space_lines = wilson_lines(conf_nu, r, steps[nu], steps[nu + 1]);
-      if (mu < nu) {
-        wilson_loops[{smearing, t, r}] +=
-            wilson_plane(quark_lines[t - time_min], space_lines, steps[mu],
-                         steps[mu + 1], steps[nu], steps[nu + 1], t, r);
-      } else {
-        wilson_loops[{smearing, t, r}] +=
-            wilson_plane(space_lines, quark_lines[t - time_min], steps[nu],
-                         steps[nu + 1], steps[mu], steps[mu + 1], r, t);
-      }
-      space_lines = wilson_lines(conf_eta, r, steps[eta], steps[eta + 1]);
-      if (mu < eta) {
-        wilson_loops[{smearing, t, r}] +=
-            wilson_plane(quark_lines[t - time_min], space_lines, steps[mu],
-                         steps[mu + 1], steps[eta], steps[eta + 1], t, r);
-      } else {
-        wilson_loops[{smearing, t, r}] +=
-            wilson_plane(space_lines, quark_lines[t - time_min], steps[eta],
-                         steps[eta + 1], steps[mu], steps[mu + 1], r, t);
-      }
+  std::vector<T> space_lines_nu, space_lines_eta;
+  space_lines_nu = wilson_lines_single_direction_indexed(conf_nu, time_min, nu);
+  space_lines_eta =
+      wilson_lines_single_direction_indexed(conf_eta, time_min, eta);
+  for (int r = r_min; r <= r_max; r++) {
+    for (int t = time_min; t <= time_max; t++) {
+      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed(
+          quark_lines[t - time_min], space_lines_nu, mu, nu, t, r);
+      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed(
+          quark_lines[t - time_min], space_lines_eta, mu, eta, t, r);
     }
+    wilson_lines_single_direction_prolong(conf_nu, space_lines_nu, r, nu);
+    wilson_lines_single_direction_prolong(conf_eta, space_lines_eta, r, eta);
   }
 }
 
 template <class T>
-std::map<std::tuple<int, int, int>, double>
-wilson_spatial_3d_parallel(const std::vector<std::vector<T>> &conf, int r_min,
-                           int r_max, int time_min, int time_max, double alpha,
-                           int smearing_start, int smearing_end,
-                           int smearing_step) {
-  std::vector<int> steps = {1, x_size, x_size * y_size,
-                            x_size * y_size * z_size,
-                            x_size * y_size * z_size * t_size};
+std::vector<T> get_data_single_direction(const std::vector<T> &conf, int mu) {
+  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::vector<int> lat_coord(4);
+  std::vector<T> data(x_size * y_size * z_size * t_size);
+#pragma omp parallel for collapse(4) private(lat_coord)                        \
+    firstprivate(lat_dim, mu)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          data[get_index_site(lat_coord)] =
+              conf[get_index_matrix(lat_coord, mu)];
+        }
+      }
+    }
+  }
+  return data;
+}
 
+template <class T>
+std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
+                          int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step) {
   std::map<std::tuple<int, int, int>, double> wilson_loops;
   std::vector<T> space_lines;
   std::vector<std::vector<T>> quark_lines(time_max - time_min + 1);
@@ -1753,24 +1775,27 @@ wilson_spatial_3d_parallel(const std::vector<std::vector<T>> &conf, int r_min,
 
   for (int nu = 0; nu < 2; nu++) {
     for (int eta = nu + 1; eta < 3; eta++) {
-      smeared1 = conf[nu];
-      smeared2 = conf[eta];
+      smeared1 = get_data_single_direction(conf, nu);
+      smeared2 = get_data_single_direction(conf, eta);
       for (int mu = 0; mu < 3; mu++) {
         if (mu != nu && mu != eta) {
-          for (int t = time_min; t <= time_max; t++) {
-            quark_lines[t - time_min] =
-                wilson_lines(conf[mu], t, steps[mu], steps[mu + 1]);
+          quark_lines[0] = wilson_lines_indexed(conf, time_min, mu);
+          for (int t = time_min + 1; t <= time_max; t++) {
+            quark_lines[t - time_min] = quark_lines[t - time_min - 1];
+            wilson_lines_prolong(conf, quark_lines[t - time_min], t - 1, mu);
           }
-          wilson_spatial_3d_step(wilson_loops, conf[nu], conf[eta], mu, nu, eta,
-                                 quark_lines, r_min, r_max, time_min, time_max,
-                                 0);
+          wilson_spatial_3d_step_indexed(wilson_loops, smeared1, smeared2, mu,
+                                         nu, eta, quark_lines, r_min, r_max,
+                                         time_min, time_max, 0);
           for (int smearing = 1; smearing <= smearing_end; smearing++) {
-            smearing_APE_2d_parallel(smeared1, smeared2, nu, eta, alpha);
+            smearing_APE_2d(smeared1, smeared2, nu, eta, alpha);
+            // std::cout << "smeared1 " << smeared1[0] << std::endl;
+            // std::cout << "smeared2 " << smeared2[0] << std::endl;
             if ((smearing - smearing_start) % smearing_step == 0 &&
                 smearing_step >= smearing_start) {
-              wilson_spatial_3d_step(wilson_loops, smeared1, smeared2, mu, nu,
-                                     eta, quark_lines, r_min, r_max, time_min,
-                                     time_max, smearing);
+              wilson_spatial_3d_step_indexed(
+                  wilson_loops, smeared1, smeared2, mu, nu, eta, quark_lines,
+                  r_min, r_max, time_min, time_max, smearing);
             }
           }
         }
@@ -1879,10 +1904,10 @@ wilson_adjoint_parallel(const std::vector<std::vector<su2>> &conf, int r_min,
                         int r_max, int time_min, int time_max);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_spatial_3d_parallel(const std::vector<std::vector<su2>> &conf, int r_min,
-                           int r_max, int time_min, int time_max, double alpha,
-                           int smearing_start, int smearing_end,
-                           int smearing_step);
+wilson_spatial_3d_indexed(const std::vector<su2> &conf, int r_min, int r_max,
+                          int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);
 
 // abelian
 template double plaket(const std::vector<abelian> &conf);
@@ -1983,10 +2008,10 @@ wilson_adjoint_parallel(const std::vector<std::vector<abelian>> &conf,
                         int r_min, int r_max, int time_min, int time_max);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_spatial_3d_parallel(const std::vector<std::vector<abelian>> &conf,
-                           int r_min, int r_max, int time_min, int time_max,
-                           double alpha, int smearing_start, int smearing_end,
-                           int smearing_step);
+wilson_spatial_3d_indexed(const std::vector<abelian> &conf, int r_min,
+                          int r_max, int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);
 
 // su3
 template double plaket(const std::vector<su3> &conf);
@@ -2084,10 +2109,10 @@ wilson_adjoint_parallel(const std::vector<std::vector<su3>> &conf, int r_min,
                         int r_max, int time_min, int time_max);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_spatial_3d_parallel(const std::vector<std::vector<su3>> &conf, int r_min,
-                           int r_max, int time_min, int time_max, double alpha,
-                           int smearing_start, int smearing_end,
-                           int smearing_step);
+wilson_spatial_3d_indexed(const std::vector<su3> &conf, int r_min, int r_max,
+                          int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);
 
 // su3_abelian
 template double plaket(const std::vector<su3_abelian> &conf);
@@ -2193,10 +2218,10 @@ wilson_adjoint_parallel(const std::vector<std::vector<su3_abelian>> &conf,
                         int r_min, int r_max, int time_min, int time_max);
 
 template std::map<std::tuple<int, int, int>, double>
-wilson_spatial_3d_parallel(const std::vector<std::vector<su3_abelian>> &conf,
-                           int r_min, int r_max, int time_min, int time_max,
-                           double alpha, int smearing_start, int smearing_end,
-                           int smearing_step);
+wilson_spatial_3d_indexed(const std::vector<su3_abelian> &conf, int r_min,
+                          int r_max, int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);
 
 // su3_angles
 template double plaket(const std::vector<su3_angles> &conf);
@@ -2297,3 +2322,9 @@ wilson_adjoint_plane(const std::vector<su3_angles> &wilson_lines_mu,
 template std::map<std::tuple<int, int>, double>
 wilson_adjoint_parallel(const std::vector<std::vector<su3_angles>> &conf,
                         int r_min, int r_max, int time_min, int time_max);
+
+template std::map<std::tuple<int, int, int>, double>
+wilson_spatial_3d_indexed(const std::vector<su3_angles> &conf, int r_min,
+                          int r_max, int time_min, int time_max, double alpha,
+                          int smearing_start, int smearing_end,
+                          int smearing_step);
