@@ -19,7 +19,7 @@ int t_size;
 int size1;
 int size2;
 
-#define MATRIX_TYPE abelian
+#define MATRIX_TYPE su3
 
 using namespace std;
 
@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
   double end_time;
   double search_time;
 
-  x_size = 40;
-  y_size = 40;
-  z_size = 40;
-  t_size = 40;
+  x_size = 24;
+  y_size = 24;
+  z_size = 24;
+  t_size = 24;
   size1 = x_size * y_size;
   size2 = x_size * y_size * z_size;
 
@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
 
   // string conf_path1 = "../../confs/su3/QCD/140MeV/nt4/conf.0501";
   // string conf_format1 = "ildg";
-  // string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0001";
-  // string conf_format1 = "double_qc2dstag";
+  string conf_path1 = "../../confs/su3/gluodynamics/24^4/beta6.0/CONF0001";
+  string conf_format1 = "double_qc2dstag";
   // string conf_path1 =
   // "../../confs/MAG/su3/gluodynamics/40^4/beta6.4/steps_0/"
   //                     "copies=20/s1/conf_gaugefixed_0002_1";
@@ -59,9 +59,9 @@ int main(int argc, char *argv[]) {
   // string conf_path1 = "../../confs/monopoless/su3/gluodynamics/16^4/beta6.0/"
   //                     "steps_0/copies=20/conf_monopoless_1001_1";
   // string conf_format1 = "double";
-  string conf_path1 =
-      "../../confs/monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201";
-  string conf_format1 = "double_qc2dstag";
+  //   string conf_path1 =
+  //       "../../confs/monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201";
+  //   string conf_format1 = "double_qc2dstag";
 
   int bytes_skip = 0;
   bool convert = 1;

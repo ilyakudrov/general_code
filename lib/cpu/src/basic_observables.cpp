@@ -1718,37 +1718,60 @@ double wilson_spatial_plane_indexed(const std::vector<T> &wilson_lines_mu,
 }
 
 template <class T>
-double wilson_spatial_plane_indexed_test(const std::vector<T> &wilson_lines_mu,
-                                         const std::vector<T> &wilson_lines_nu,
-                                         int mu, int nu, int length_mu,
-                                         int length_nu) {
+std::vector<double> wilson_spatial_plane_indexed_test(
+    const std::vector<std::vector<T>> &wilson_lines_mu,
+    const std::vector<T> &wilson_lines_nu,
+    const std::vector<T> &wilson_lines_eta, int mu, int nu, int eta, int r,
+    int time_min, int time_max) {
   std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  T wilson_loop;
-  double result = 0;
+  std::vector<double> result(time_max - time_min + 1);
   std::array<int, 4> lat_coord;
-  int index;
-#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index)    \
-    firstprivate(lat_dim, mu, nu, length_mu, length_nu) reduction(+ : result)
+  int index1, index2, index3;
+#pragma omp parallel for collapse(4) private(lat_coord, index1, index2,        \
+                                                 index3)                       \
+    firstprivate(lat_dim, mu, nu, eta, r, time_min, time_max)                  \
+    reduction(vec_double_plus : result)
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
         for (int x = 0; x < lat_dim[0]; x++) {
           lat_coord = {x, y, z, t};
-          index = get_index_site(lat_coord);
-          lat_coord[mu] = (lat_coord[mu] + length_mu) % lat_dim[mu];
-          wilson_loop = wilson_lines_mu[index] *
-                        wilson_lines_nu[get_index_site(lat_coord)];
-          lat_coord[mu] =
-              (lat_coord[mu] + lat_dim[mu] - length_mu) % lat_dim[mu];
-          lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
-          wilson_loop =
-              wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
-          result += wilson_loop.multiply_conj_tr(wilson_lines_nu[index]);
+          index1 = get_index_site(lat_coord);
+          lat_coord[nu] = (lat_coord[nu] + r) % lat_dim[nu];
+          index2 = get_index_site(lat_coord);
+          lat_coord = {x, y, z, t};
+          lat_coord[mu] = (lat_coord[mu] + time_min) % lat_dim[mu];
+          for (int t = 0; t < time_max - time_min + 1; t++) {
+            index3 = get_index_site(lat_coord);
+            result[t] +=
+                ((wilson_lines_nu[index1] * wilson_lines_mu[t][index2]) ^
+                 wilson_lines_nu[index3])
+                    .multiply_conj_tr(wilson_lines_mu[t][index1]);
+            lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+          }
+          lat_coord = {x, y, z, t};
+          index1 = get_index_site(lat_coord);
+          lat_coord[eta] = (lat_coord[eta] + r) % lat_dim[eta];
+          index2 = get_index_site(lat_coord);
+          lat_coord = {x, y, z, t};
+          lat_coord[mu] = (lat_coord[mu] + time_min) % lat_dim[mu];
+          for (int t = 0; t < time_max - time_min + 1; t++) {
+            index3 = get_index_site(lat_coord);
+            result[t] +=
+                ((wilson_lines_eta[index1] * wilson_lines_mu[t][index2]) ^
+                 wilson_lines_eta[index3])
+                    .multiply_conj_tr(wilson_lines_mu[t][index1]);
+            lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+          }
         }
       }
     }
   }
-  return result / (x_size * y_size * z_size * t_size);
+  int size = x_size * y_size * z_size * t_size * 2;
+  for (int i = 0; i < result.size(); i++) {
+    result[i] /= size;
+  }
+  return result;
 }
 
 template <class T>
@@ -1786,15 +1809,15 @@ void wilson_spatial_3d_step_indexed_test(
                             x_size * y_size * z_size,
                             x_size * y_size * z_size * t_size};
   std::vector<T> space_lines_nu, space_lines_eta;
-  space_lines_nu = wilson_lines_single_direction_indexed(conf_nu, time_min, nu);
-  space_lines_eta =
-      wilson_lines_single_direction_indexed(conf_eta, time_min, eta);
+  space_lines_nu = wilson_lines_single_direction_indexed(conf_nu, r_min, nu);
+  space_lines_eta = wilson_lines_single_direction_indexed(conf_eta, r_min, eta);
+  std::vector<double> wilson_vec;
   for (int r = r_min; r <= r_max; r++) {
-    for (int t = time_min; t <= time_max; t++) {
-      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed_test(
-          quark_lines[t - time_min], space_lines_nu, mu, nu, t, r);
-      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed_test(
-          quark_lines[t - time_min], space_lines_eta, mu, eta, t, r);
+    wilson_vec = wilson_spatial_plane_indexed_test(quark_lines, space_lines_nu,
+                                                   space_lines_eta, mu, nu, eta,
+                                                   r, time_min, time_max);
+    for (int t = 0; t < time_max - time_min + 1; t++) {
+      wilson_loops[{smearing, t + time_min, r}] += wilson_vec[t];
     }
     wilson_lines_single_direction_prolong(conf_nu, space_lines_nu, r, nu);
     wilson_lines_single_direction_prolong(conf_eta, space_lines_eta, r, eta);
@@ -1863,7 +1886,7 @@ wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
     }
   }
   for (auto it = wilson_loops.begin(); it != wilson_loops.end(); it++) {
-    it->second = it->second / 6;
+    it->second = it->second / 3;
   }
   return wilson_loops;
 }

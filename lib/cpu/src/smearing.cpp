@@ -199,8 +199,6 @@ template <class T> void smearing_APE(std::vector<T> &conf, double alpha) {
 template <class T>
 void smearing_APE_2d(std::vector<T> &conf1, std::vector<T> &conf2, int mu,
                      int nu, double alpha) {
-  // std::vector<T> smeared1 = conf1;
-  // std::vector<T> smeared2 = conf2;
   std::vector<T> smeared1(conf1.size());
   std::vector<T> smeared2(conf2.size());
   std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
