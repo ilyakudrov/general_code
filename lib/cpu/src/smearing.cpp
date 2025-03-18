@@ -151,8 +151,8 @@ std::vector<std::vector<T>> separate_smearing(std::vector<T> &conf) {
 
 template <class T> void smearing_APE(std::vector<T> &conf, double alpha) {
   std::vector<T> smeared = conf;
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
   T staple;
   T staple_sum;
   int index;
@@ -199,69 +199,53 @@ template <class T> void smearing_APE(std::vector<T> &conf, double alpha) {
 template <class T>
 void smearing_APE_2d(std::vector<T> &conf1, std::vector<T> &conf2, int mu,
                      int nu, double alpha) {
-  std::vector<T> smeared1 = conf1;
-  std::vector<T> smeared2 = conf2;
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord(4);
+  // std::vector<T> smeared1 = conf1;
+  // std::vector<T> smeared2 = conf2;
+  std::vector<T> smeared1(conf1.size());
+  std::vector<T> smeared2(conf2.size());
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
   T staple;
-  T staple_sum;
-  int index;
-#pragma omp parallel for collapse(4) private(lat_coord, index, staple,         \
-                                                 staple_sum)                   \
+  T A;
+  T B;
+  int index1;
+  int index2;
+  int index3;
+#pragma omp parallel for collapse(4) private(lat_coord, index1, index2,        \
+                                                 index3, staple, A, B)         \
     firstprivate(lat_dim, mu, nu, alpha)
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
         for (int x = 0; x < lat_dim[0]; x++) {
           lat_coord = {x, y, z, t};
-          index = get_index_site(lat_coord);
-          staple_sum = (1 - alpha) * smeared1[index];
+          index1 = get_index_site(lat_coord);
           lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
-          staple = conf2[index] * conf1[get_index_site(lat_coord)];
+          index2 = get_index_site(lat_coord);
           lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
           lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          staple_sum = staple_sum + ((alpha / 2) * staple ^
-                                     conf2[get_index_site(lat_coord)]);
+          index3 = get_index_site(lat_coord);
+          A = conf2[index3] ^ conf1[index2];
+          B = conf2[index1] ^ A;
+          A = conf1[index1] * A;
           lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
           lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
-          staple = conf2[get_index_site(lat_coord)] %
-                   conf1[get_index_site(lat_coord)];
+          index2 = get_index_site(lat_coord);
+          staple = conf2[index2] % conf1[index2];
           lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          staple_sum = staple_sum + ((alpha / 2) * staple *
-                                     conf2[get_index_site(lat_coord)]);
+          smeared1[index1] =
+              ((1 - alpha) * conf1[index1] +
+               (alpha / 2) * (B + (staple * conf2[get_index_site(lat_coord)])))
+                  .proj();
           lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
-          lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
-          smeared1[get_index_site(lat_coord)] = staple_sum.proj();
-        }
-      }
-    }
-  }
-#pragma omp parallel for collapse(4) private(lat_coord, index, staple,         \
-                                                 staple_sum)                   \
-    firstprivate(lat_dim, mu, nu, alpha)
-  for (int t = 0; t < lat_dim[3]; t++) {
-    for (int z = 0; z < lat_dim[2]; z++) {
-      for (int y = 0; y < lat_dim[1]; y++) {
-        for (int x = 0; x < lat_dim[0]; x++) {
-          lat_coord = {x, y, z, t};
-          index = get_index_site(lat_coord);
-          staple_sum = (1 - alpha) * smeared2[index];
-          lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          staple = conf1[index] * conf2[get_index_site(lat_coord)];
-          lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+          lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 2) % lat_dim[mu];
+          index2 = get_index_site(lat_coord);
+          B = conf1[index2] % conf2[index2];
           lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
-          staple_sum = staple_sum + ((alpha / 2) * staple ^
-                                     conf1[get_index_site(lat_coord)]);
-          lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
-          lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
-          staple = conf1[get_index_site(lat_coord)] %
-                   conf2[get_index_site(lat_coord)];
-          lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
-          staple_sum = staple_sum + ((alpha / 2) * staple *
-                                     conf1[get_index_site(lat_coord)]);
-          lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
-          smeared2[get_index_site(lat_coord)] = staple_sum.proj();
+          smeared2[index1] =
+              ((1 - alpha) * conf2[index1] +
+               (alpha / 2) * (A + (B * conf1[get_index_site(lat_coord)])))
+                  .proj();
         }
       }
     }
@@ -343,8 +327,8 @@ void smearing_plane_HYP(std::vector<T> &smeared, std::vector<T> &conf_mu,
                         double divisor) {
   T staple;
   int index;
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
 #pragma omp parallel for collapse(4) private(lat_coord, index, staple)         \
     firstprivate(lat_dim)
   for (int t = 0; t < lat_dim[3]; t++) {
@@ -487,7 +471,7 @@ void smearing_HYP(std::vector<T> &array, double alpha1, double alpha2,
   smeared.clear();
   smeared.shrink_to_fit();
   array = std::vector<T>(4 * conf[3].size());
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
 #pragma omp parallel for collapse(4) private(lat_coord)
   for (int t = 0; t < t_size; t++) {
     for (int z = 0; z < z_size; z++) {

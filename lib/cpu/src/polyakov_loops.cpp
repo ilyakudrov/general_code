@@ -104,8 +104,8 @@ T get_polyakov_loop(const std::vector<T> &array, int index, int size2,
 }
 
 template <class T> double polyakov_loop(const std::vector<T> &array) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
   double polyakov_loop;
   T A;
   int index;
@@ -144,8 +144,8 @@ double polyakov_loop_parallel(const std::vector<std::vector<T>> &array) {
 
 template <class T>
 std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
   std::vector<double> polyakov_loops(x_size * y_size * z_size);
 
 #pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
@@ -167,8 +167,8 @@ std::vector<double> calculate_polyakov_loops_tr(const std::vector<T> &array) {
 
 std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3> &array) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
   std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
 
 #pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
@@ -190,8 +190,8 @@ calculate_polyakov_loops_tr(const std::vector<su3> &array) {
 
 std::vector<std::complex<double>>
 calculate_polyakov_loops_tr(const std::vector<su3_abelian> &array) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
   std::vector<std::complex<double>> polyakov_loops(x_size * y_size * z_size);
 
 #pragma omp parallel for collapse(3) firstprivate(lat_coord, lat_dim, size2)
@@ -270,8 +270,8 @@ template <class T>
 std::vector<double> polyakov_loop_correlator(const std::vector<T> &conf,
                                              int D_max) {
   std::vector<double> polyakov_loops = calculate_polyakov_loops_tr(conf);
-  std::vector<int> lat_coord = {0, 0, 0, 0};
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;
@@ -338,8 +338,8 @@ std::vector<double> polyakov_loop_correlator(const std::vector<su3> &conf,
                                              int D_max) {
   std::vector<std::complex<double>> polyakov_loops =
       calculate_polyakov_loops_tr(conf);
-  std::vector<int> lat_coord = {0, 0, 0, 0};
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;
@@ -408,8 +408,8 @@ std::vector<double>
 polyakov_loop_correlator(const std::vector<su3_abelian> &conf, int D_max) {
   std::vector<std::complex<double>> polyakov_loops =
       calculate_polyakov_loops_tr(conf);
-  std::vector<int> lat_coord = {0, 0, 0, 0};
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord = {0, 0, 0, 0};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 
   int result_size = 2 * D_max + 1;
   int result_size1 = result_size * result_size;

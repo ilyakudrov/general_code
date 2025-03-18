@@ -85,11 +85,11 @@
     initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 
 template <class T>
-double plaket_site(const std::vector<T> &conf, std::vector<int> &lat_dim,
-                   std::vector<int> &lat_coord) {
+double plaket_site(const std::vector<T> &conf, std::array<int, 4> &lat_dim,
+                   std::array<int, 4> &lat_coord) {
   T A;
   double plaket = 0;
-  std::vector<int> lat_coord1 = lat_coord;
+  std::array<int, 4> lat_coord1 = lat_coord;
   for (int mu = 0; mu < 3; mu++) {
     for (int nu = mu + 1; nu < 4; nu++) {
       A = conf[get_index_matrix(lat_coord1, mu)];
@@ -106,11 +106,11 @@ double plaket_site(const std::vector<T> &conf, std::vector<int> &lat_dim,
 }
 
 template <class T>
-double plaket_site_time(const std::vector<T> &conf, std::vector<int> &lat_dim,
-                        std::vector<int> &lat_coord) {
+double plaket_site_time(const std::vector<T> &conf, std::array<int, 4> &lat_dim,
+                        std::array<int, 4> &lat_coord) {
   T A;
   double plaket = 0;
-  std::vector<int> lat_coord1 = lat_coord;
+  std::array<int, 4> lat_coord1 = lat_coord;
   int nu = 3;
   for (int mu = 0; mu < 3; mu++) {
     A = conf[get_index_matrix(lat_coord1, mu)];
@@ -126,11 +126,12 @@ double plaket_site_time(const std::vector<T> &conf, std::vector<int> &lat_dim,
 }
 
 template <class T>
-double plaket_site_space(const std::vector<T> &conf, std::vector<int> &lat_dim,
-                         std::vector<int> &lat_coord) {
+double plaket_site_space(const std::vector<T> &conf,
+                         std::array<int, 4> &lat_dim,
+                         std::array<int, 4> &lat_coord) {
   T A;
   double plaket = 0;
-  std::vector<int> lat_coord1 = lat_coord;
+  std::array<int, 4> lat_coord1 = lat_coord;
   for (int mu = 0; mu < 2; mu++) {
     for (int nu = mu + 1; nu < 3; nu++) {
       A = conf[get_index_matrix(lat_coord1, mu)];
@@ -148,8 +149,8 @@ double plaket_site_space(const std::vector<T> &conf, std::vector<int> &lat_dim,
 
 template <class T> double plaket(const std::vector<T> &conf) {
   double plaket;
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 #pragma omp parallel for collapse(4) private(lat_coord) firstprivate(lat_dim)  \
     reduction(+ : plaket)
   for (int t = 0; t < lat_dim[3]; t++) {
@@ -167,8 +168,8 @@ template <class T> double plaket(const std::vector<T> &conf) {
 
 template <class T> double plaket_time(const std::vector<T> &conf) {
   double plaket;
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 #pragma omp parallel for collapse(4) private(lat_coord) firstprivate(lat_dim)  \
     reduction(+ : plaket)
   for (int t = 0; t < lat_dim[3]; t++) {
@@ -186,8 +187,8 @@ template <class T> double plaket_time(const std::vector<T> &conf) {
 
 template <class T> double plaket_space(const std::vector<T> &conf) {
   double plaket;
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
 #pragma omp parallel for collapse(4) private(lat_coord) firstprivate(lat_dim)  \
     reduction(+ : plaket)
   for (int t = 0; t < lat_dim[3]; t++) {
@@ -1137,8 +1138,8 @@ double wilson_plane_gevp_adjoint(const std::vector<T> &wilson_lines1_mu,
 template <class T>
 void wilson_lines_prolong(const std::vector<T> &conf,
                           std::vector<T> &wilson_lines, int length, int mu) {
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   int index;
 #pragma omp parallel for collapse(4) private(lat_coord, index)                 \
     firstprivate(lat_dim, mu)
@@ -1159,8 +1160,8 @@ void wilson_lines_prolong(const std::vector<T> &conf,
 
 template <class T>
 std::vector<T> wilson_lines_get_length_one(const std::vector<T> &conf, int mu) {
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   std::vector<T> wilson_lines(x_size * y_size * z_size * t_size);
 #pragma omp parallel for collapse(4) private(lat_coord)                        \
     firstprivate(mu, lat_dim)
@@ -1193,10 +1194,10 @@ double wilson_plane_indexed_single_rxt(
     const std::vector<T> &wilson_lines_mu,
     const std::vector<std::vector<T>> &wilson_lines_nu, int mu, int length_mu,
     int length_nu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   T wilson_loop;
   double result = 0;
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
   int index1;
   int index2;
 #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
@@ -1234,10 +1235,10 @@ double wilson_adjoint_plane_indexed_single_rxt(
     const std::vector<T> &wilson_lines_mu,
     const std::vector<std::vector<T>> &wilson_lines_nu, int mu, int length_mu,
     int length_nu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   T wilson_loop;
   double result = 0;
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
   int index1;
   int index2;
 #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index1,   \
@@ -1276,11 +1277,11 @@ double wilson_plane_gevp_indexed_single_rxt(
     const std::vector<std::vector<T>> &wilson_lines_nu1,
     const std::vector<std::vector<T>> &wilson_lines_nu2, int mu, int length_mu,
     int length_nu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   T wilson_loop1;
   T wilson_loop2;
   double result = 0;
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
   int index1;
   int index2;
 #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop1,          \
@@ -1326,11 +1327,11 @@ double wilson_adjoint_plane_gevp_indexed_single_rxt(
     const std::vector<std::vector<T>> &wilson_lines_nu1,
     const std::vector<std::vector<T>> &wilson_lines_nu2, int mu, int length_mu,
     int length_nu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   T wilson_loop1;
   T wilson_loop2;
   double result = 0;
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
   int index1;
   int index2;
 #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop1,          \
@@ -1652,8 +1653,8 @@ template <class T>
 void wilson_lines_single_direction_prolong(const std::vector<T> &conf,
                                            std::vector<T> &wilson_lines,
                                            int length, int mu) {
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   int index;
 #pragma omp parallel for collapse(4) private(lat_coord, index)                 \
     firstprivate(lat_dim, mu)
@@ -1687,10 +1688,44 @@ double wilson_spatial_plane_indexed(const std::vector<T> &wilson_lines_mu,
                                     const std::vector<T> &wilson_lines_nu,
                                     int mu, int nu, int length_mu,
                                     int length_nu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   T wilson_loop;
   double result = 0;
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_coord;
+  int index;
+#pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index)    \
+    firstprivate(lat_dim, mu, nu, length_mu, length_nu) reduction(+ : result)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          index = get_index_site(lat_coord);
+          lat_coord[mu] = (lat_coord[mu] + length_mu) % lat_dim[mu];
+          wilson_loop = wilson_lines_mu[index] *
+                        wilson_lines_nu[get_index_site(lat_coord)];
+          lat_coord[mu] =
+              (lat_coord[mu] + lat_dim[mu] - length_mu) % lat_dim[mu];
+          lat_coord[nu] = (lat_coord[nu] + length_nu) % lat_dim[nu];
+          wilson_loop =
+              wilson_loop ^ wilson_lines_mu[get_index_site(lat_coord)];
+          result += wilson_loop.multiply_conj_tr(wilson_lines_nu[index]);
+        }
+      }
+    }
+  }
+  return result / (x_size * y_size * z_size * t_size);
+}
+
+template <class T>
+double wilson_spatial_plane_indexed_test(const std::vector<T> &wilson_lines_mu,
+                                         const std::vector<T> &wilson_lines_nu,
+                                         int mu, int nu, int length_mu,
+                                         int length_nu) {
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  T wilson_loop;
+  double result = 0;
+  std::array<int, 4> lat_coord;
   int index;
 #pragma omp parallel for collapse(4) private(lat_coord, wilson_loop, index)    \
     firstprivate(lat_dim, mu, nu, length_mu, length_nu) reduction(+ : result)
@@ -1742,9 +1777,34 @@ void wilson_spatial_3d_step_indexed(
 }
 
 template <class T>
+void wilson_spatial_3d_step_indexed_test(
+    std::map<std::tuple<int, int, int>, double> &wilson_loops,
+    const std::vector<T> &conf_nu, const std::vector<T> &conf_eta, int mu,
+    int nu, int eta, std::vector<std::vector<T>> &quark_lines, int r_min,
+    int r_max, int time_min, int time_max, int smearing) {
+  std::vector<int> steps = {1, x_size, x_size * y_size,
+                            x_size * y_size * z_size,
+                            x_size * y_size * z_size * t_size};
+  std::vector<T> space_lines_nu, space_lines_eta;
+  space_lines_nu = wilson_lines_single_direction_indexed(conf_nu, time_min, nu);
+  space_lines_eta =
+      wilson_lines_single_direction_indexed(conf_eta, time_min, eta);
+  for (int r = r_min; r <= r_max; r++) {
+    for (int t = time_min; t <= time_max; t++) {
+      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed_test(
+          quark_lines[t - time_min], space_lines_nu, mu, nu, t, r);
+      wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed_test(
+          quark_lines[t - time_min], space_lines_eta, mu, eta, t, r);
+    }
+    wilson_lines_single_direction_prolong(conf_nu, space_lines_nu, r, nu);
+    wilson_lines_single_direction_prolong(conf_eta, space_lines_eta, r, eta);
+  }
+}
+
+template <class T>
 std::vector<T> get_data_single_direction(const std::vector<T> &conf, int mu) {
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<int> lat_coord(4);
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
   std::vector<T> data(x_size * y_size * z_size * t_size);
 #pragma omp parallel for collapse(4) private(lat_coord)                        \
     firstprivate(lat_dim, mu)
@@ -1768,6 +1828,8 @@ wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
                           int time_min, int time_max, double alpha,
                           int smearing_start, int smearing_end,
                           int smearing_step) {
+  double start_time;
+  double end_time;
   std::map<std::tuple<int, int, int>, double> wilson_loops;
   std::vector<T> space_lines;
   std::vector<std::vector<T>> quark_lines(time_max - time_min + 1);
@@ -1784,16 +1846,14 @@ wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
             quark_lines[t - time_min] = quark_lines[t - time_min - 1];
             wilson_lines_prolong(conf, quark_lines[t - time_min], t - 1, mu);
           }
-          wilson_spatial_3d_step_indexed(wilson_loops, smeared1, smeared2, mu,
-                                         nu, eta, quark_lines, r_min, r_max,
-                                         time_min, time_max, 0);
+          wilson_spatial_3d_step_indexed_test(wilson_loops, smeared1, smeared2,
+                                              mu, nu, eta, quark_lines, r_min,
+                                              r_max, time_min, time_max, 0);
           for (int smearing = 1; smearing <= smearing_end; smearing++) {
             smearing_APE_2d(smeared1, smeared2, nu, eta, alpha);
-            // std::cout << "smeared1 " << smeared1[0] << std::endl;
-            // std::cout << "smeared2 " << smeared2[0] << std::endl;
             if ((smearing - smearing_start) % smearing_step == 0 &&
                 smearing_step >= smearing_start) {
-              wilson_spatial_3d_step_indexed(
+              wilson_spatial_3d_step_indexed_test(
                   wilson_loops, smeared1, smeared2, mu, nu, eta, quark_lines,
                   r_min, r_max, time_min, time_max, smearing);
             }

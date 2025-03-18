@@ -15,5 +15,8 @@ template <class T>
 void smearing_APE_2d(std::vector<T> &conf1, std::vector<T> &conf2, int mu,
                      int nu, double alpha);
 template <class T>
+void smearing_APE_2d_test(std::vector<T> &conf1, std::vector<T> &conf2, int mu,
+                          int nu, double alpha);
+template <class T>
 void smearing_HYP(std::vector<T> &array, double alpha1, double alpha2,
                   double alpha3);

@@ -104,18 +104,10 @@ int main(int argc, char *argv[]) {
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
 
   cout << "plaket " << plaket(conf.array) << endl;
-
-  // vector<vector<MATRIX>> conf_separated = separate_wilson(conf.array);
   cout << "plaket space " << plaket_space(conf.array) << endl;
-
-  // conf.array.clear();
-  // conf.array.shrink_to_fit();
 
   start_time = omp_get_wtime();
 
-  // std::map<std::tuple<int, int, int>, double> wilson_loops =
-  //     wilson_spatial_3d_parallel(conf_separated, R_min, R_max, T_min, T_max,
-  //                                alpha, APE_start, APE_end, APE_step);
   std::map<std::tuple<int, int, int>, double> wilson_loops =
       wilson_spatial_3d_indexed(conf.array, R_min, R_max, T_min, T_max, alpha,
                                 APE_start, APE_end, APE_step);

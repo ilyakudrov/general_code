@@ -48,8 +48,8 @@ get_vector_potential(std::vector<su2> &conf) {
   std::vector<std::array<double, 12>> vector_potential(x_size * y_size *
                                                        z_size * t_size);
   std::array<Eigen::Matrix2cd, 3> pauli_matrices = get_pauli_matrices();
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   std::array<std::array<double, 3>, 4> vector_potential_tmp1;
   std::array<double, 12> vector_potential_tmp2;
   int index;
@@ -83,8 +83,8 @@ std::vector<std::complex<double>>
 get_furier_coefficients(std::array<double, 4> &momenta) {
   std::vector<std::complex<double>> furier_coefficients(x_size * y_size *
                                                         z_size * t_size);
-  std::vector<int> lat_coord(4);
-  std::vector<int> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
   for (int t = 0; t < lat_dim[3]; t++) {
     for (int z = 0; z < lat_dim[2]; z++) {
       for (int y = 0; y < lat_dim[1]; y++) {
