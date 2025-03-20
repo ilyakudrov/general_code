@@ -1,8 +1,8 @@
 #!/bin/bash
-conf_format_wilson="double_qc2dstag"
-conf_path_wilson="../../../tests/confs/su3/gluodynamics/24^4/beta6.0/CONF0001"
+conf_format_wilson="double"
+conf_path_wilson="../../../tests/confs/MAG/su3/gluodynamics/24^4/beta6.0/steps_0/copies=100/conf_gaugefixed_0175_51"
 bytes_skip_wilson=0
-wilson_type="su3"
+wilson_type="su3_angles"
 convert_wilson=0
 HYP_alpha1=1
 HYP_alpha2=1
@@ -12,7 +12,7 @@ HYP_enabled=1
 APE_steps=1
 calculation_step_APE=10
 calculation_APE_start=1
-HYP_steps=1
+HYP_steps=0
 L_spat=24
 L_time=24
 path_wilson=./result/wilson_loops_gevp
@@ -20,8 +20,8 @@ T_min=1
 T_max=12
 R_min=1
 R_max=12
-N_dir=1
-representation="fundamental"
+N_dir=4
+representation="adjoint"
 parameters="-conf_format_wilson ${conf_format_wilson} -conf_path_wilson ${conf_path_wilson} -bytes_skip_wilson ${bytes_skip_wilson} -convert_wilson ${convert_wilson}\
     -HYP_alpha1 ${HYP_alpha1} -HYP_alpha2 ${HYP_alpha2} -HYP_alpha3 ${HYP_alpha3} -representation ${representation}\
     -APE_alpha ${APE_alpha} -HYP_enabled ${HYP_enabled} -APE_steps ${APE_steps} -HYP_steps ${HYP_steps}\

@@ -430,7 +430,7 @@ public:
       tmp = matrix[i] * std::conj(B.matrix[i]);
       trace += cos(2 * atan2(tmp.imag(), tmp.real()));
     }
-    return trace;
+    return trace / 3;
   }
 
   su3_abelian inverse() const {
@@ -626,12 +626,11 @@ public:
   }
 
   double multiply_conj_tr_adjoint(const su3_angles &B) const {
-    std::complex<double> tmp(0, 0);
+    double trace = 0;
     for (int i = 0; i < 3; i++) {
-      tmp += std::complex<double>(cos(matrix[i] - B.matrix[i]),
-                                  sin(matrix[i] - B.matrix[i]));
+      trace += cos(2 * (matrix[i] - B.matrix[i]));
     }
-    return std::norm(tmp) - 1;
+    return trace / 3;
   }
 
   su3_angles inverse() const {

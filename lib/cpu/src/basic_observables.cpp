@@ -1431,6 +1431,10 @@ template <class T>
 std::map<std::tuple<int, int>, double>
 wilson_gevp_indexed(const std::vector<T> &conf1, const std::vector<T> &conf2,
                     int r_min, int r_max, int time_min, int time_max) {
+  double start_time;
+  double end_time;
+  double plane_time = 0;
+  double prolong_time = 0;
   std::map<std::tuple<int, int>, double> wilson_loops;
   std::vector<std::vector<T>> time_lines(time_max - time_min + 1);
   std::vector<std::vector<T>> space_lines1(3), space_lines2(3);
@@ -1445,15 +1449,23 @@ wilson_gevp_indexed(const std::vector<T> &conf1, const std::vector<T> &conf2,
   }
   for (int r = r_min; r <= r_max; r++) {
     for (int t = time_min; t <= time_max; t++) {
+      start_time = omp_get_wtime();
       wilson_loops[std::tuple<int, int>(t, r)] +=
           wilson_plane_gevp_indexed_single_rxt(
               time_lines[t - time_min], space_lines1, space_lines2, 3, t, r);
+      end_time = omp_get_wtime();
+      plane_time += end_time - start_time;
     }
+    start_time = omp_get_wtime();
     for (int mu = 0; mu < 3; mu++) {
       wilson_lines_prolong(conf1, space_lines1[mu], r, mu);
       wilson_lines_prolong(conf2, space_lines2[mu], r, mu);
     }
+    end_time = omp_get_wtime();
+    prolong_time += end_time - start_time;
   }
+  std::cout << "plane_time: " << plane_time << std::endl;
+  std::cout << "prolong_time: " << prolong_time << std::endl;
   return wilson_loops;
 }
 
@@ -1718,63 +1730,6 @@ double wilson_spatial_plane_indexed(const std::vector<T> &wilson_lines_mu,
 }
 
 template <class T>
-std::vector<double> wilson_spatial_plane_indexed_test(
-    const std::vector<std::vector<T>> &wilson_lines_mu,
-    const std::vector<T> &wilson_lines_nu,
-    const std::vector<T> &wilson_lines_eta, int mu, int nu, int eta, int r,
-    int time_min, int time_max) {
-  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  std::vector<double> result(time_max - time_min + 1);
-  std::array<int, 4> lat_coord;
-  int index1, index2, index3;
-#pragma omp parallel for collapse(4) private(lat_coord, index1, index2,        \
-                                                 index3)                       \
-    firstprivate(lat_dim, mu, nu, eta, r, time_min, time_max)                  \
-    reduction(vec_double_plus : result)
-  for (int t = 0; t < lat_dim[3]; t++) {
-    for (int z = 0; z < lat_dim[2]; z++) {
-      for (int y = 0; y < lat_dim[1]; y++) {
-        for (int x = 0; x < lat_dim[0]; x++) {
-          lat_coord = {x, y, z, t};
-          index1 = get_index_site(lat_coord);
-          lat_coord[nu] = (lat_coord[nu] + r) % lat_dim[nu];
-          index2 = get_index_site(lat_coord);
-          lat_coord = {x, y, z, t};
-          lat_coord[mu] = (lat_coord[mu] + time_min) % lat_dim[mu];
-          for (int t = 0; t < time_max - time_min + 1; t++) {
-            index3 = get_index_site(lat_coord);
-            result[t] +=
-                ((wilson_lines_nu[index1] * wilson_lines_mu[t][index2]) ^
-                 wilson_lines_nu[index3])
-                    .multiply_conj_tr(wilson_lines_mu[t][index1]);
-            lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          }
-          lat_coord = {x, y, z, t};
-          index1 = get_index_site(lat_coord);
-          lat_coord[eta] = (lat_coord[eta] + r) % lat_dim[eta];
-          index2 = get_index_site(lat_coord);
-          lat_coord = {x, y, z, t};
-          lat_coord[mu] = (lat_coord[mu] + time_min) % lat_dim[mu];
-          for (int t = 0; t < time_max - time_min + 1; t++) {
-            index3 = get_index_site(lat_coord);
-            result[t] +=
-                ((wilson_lines_eta[index1] * wilson_lines_mu[t][index2]) ^
-                 wilson_lines_eta[index3])
-                    .multiply_conj_tr(wilson_lines_mu[t][index1]);
-            lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
-          }
-        }
-      }
-    }
-  }
-  int size = x_size * y_size * z_size * t_size * 2;
-  for (int i = 0; i < result.size(); i++) {
-    result[i] /= size;
-  }
-  return result;
-}
-
-template <class T>
 void wilson_spatial_3d_step_indexed(
     std::map<std::tuple<int, int, int>, double> &wilson_loops,
     const std::vector<T> &conf_nu, const std::vector<T> &conf_eta, int mu,
@@ -1793,31 +1748,6 @@ void wilson_spatial_3d_step_indexed(
           quark_lines[t - time_min], space_lines_nu, mu, nu, t, r);
       wilson_loops[{smearing, t, r}] += wilson_spatial_plane_indexed(
           quark_lines[t - time_min], space_lines_eta, mu, eta, t, r);
-    }
-    wilson_lines_single_direction_prolong(conf_nu, space_lines_nu, r, nu);
-    wilson_lines_single_direction_prolong(conf_eta, space_lines_eta, r, eta);
-  }
-}
-
-template <class T>
-void wilson_spatial_3d_step_indexed_test(
-    std::map<std::tuple<int, int, int>, double> &wilson_loops,
-    const std::vector<T> &conf_nu, const std::vector<T> &conf_eta, int mu,
-    int nu, int eta, std::vector<std::vector<T>> &quark_lines, int r_min,
-    int r_max, int time_min, int time_max, int smearing) {
-  std::vector<int> steps = {1, x_size, x_size * y_size,
-                            x_size * y_size * z_size,
-                            x_size * y_size * z_size * t_size};
-  std::vector<T> space_lines_nu, space_lines_eta;
-  space_lines_nu = wilson_lines_single_direction_indexed(conf_nu, r_min, nu);
-  space_lines_eta = wilson_lines_single_direction_indexed(conf_eta, r_min, eta);
-  std::vector<double> wilson_vec;
-  for (int r = r_min; r <= r_max; r++) {
-    wilson_vec = wilson_spatial_plane_indexed_test(quark_lines, space_lines_nu,
-                                                   space_lines_eta, mu, nu, eta,
-                                                   r, time_min, time_max);
-    for (int t = 0; t < time_max - time_min + 1; t++) {
-      wilson_loops[{smearing, t + time_min, r}] += wilson_vec[t];
     }
     wilson_lines_single_direction_prolong(conf_nu, space_lines_nu, r, nu);
     wilson_lines_single_direction_prolong(conf_eta, space_lines_eta, r, eta);
@@ -1869,14 +1799,14 @@ wilson_spatial_3d_indexed(const std::vector<T> &conf, int r_min, int r_max,
             quark_lines[t - time_min] = quark_lines[t - time_min - 1];
             wilson_lines_prolong(conf, quark_lines[t - time_min], t - 1, mu);
           }
-          wilson_spatial_3d_step_indexed_test(wilson_loops, smeared1, smeared2,
-                                              mu, nu, eta, quark_lines, r_min,
-                                              r_max, time_min, time_max, 0);
+          wilson_spatial_3d_step_indexed(wilson_loops, smeared1, smeared2, mu,
+                                         nu, eta, quark_lines, r_min, r_max,
+                                         time_min, time_max, 0);
           for (int smearing = 1; smearing <= smearing_end; smearing++) {
             smearing_APE_2d(smeared1, smeared2, nu, eta, alpha);
             if ((smearing - smearing_start) % smearing_step == 0 &&
                 smearing_step >= smearing_start) {
-              wilson_spatial_3d_step_indexed_test(
+              wilson_spatial_3d_step_indexed(
                   wilson_loops, smeared1, smeared2, mu, nu, eta, quark_lines,
                   r_min, r_max, time_min, time_max, smearing);
             }
