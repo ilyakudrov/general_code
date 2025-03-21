@@ -1,9 +1,9 @@
 #!/bin/bash
-conf_format_wilson="double"
+conf_format_wilson="double_qc2dstag"
 conf_path_wilson="../../../tests/confs/MAG/su3/gluodynamics/24^4/beta6.0/steps_0/copies=100/conf_gaugefixed_0175_51"
 bytes_skip_wilson=0
 wilson_type="su3_angles"
-convert_wilson=0
+convert_wilson=1
 HYP_alpha1=1
 HYP_alpha2=1
 HYP_alpha3=0.5

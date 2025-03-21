@@ -170,42 +170,44 @@ int main(int argc, char *argv[]) {
     }
 
     // wilson loops at (0, 0) APE_steps
-    start_time = omp_get_wtime();
-    if (representation == "fundamental") {
-      wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
-    } else if (representation == "adjoint") {
-      wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min, T_max);
-    } else {
-      cout << "wrong representation" << endl;
-    }
-    write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
-    end_time = omp_get_wtime();
-    observables_time += end_time - start_time;
+    // start_time = omp_get_wtime();
+    // if (representation == "fundamental") {
+    //   wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
+    // } else if (representation == "adjoint") {
+    //   wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min,
+    //   T_max);
+    // } else {
+    //   cout << "wrong representation" << endl;
+    // }
+    // write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
+    // end_time = omp_get_wtime();
+    // observables_time += end_time - start_time;
 
     // wilson loops at (0, APE_step2) APE_steps
-    for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
-      start_time = omp_get_wtime();
-      smearing_APE(conf2.array, APE_alpha);
-      end_time = omp_get_wtime();
-      smearing_APE_time += end_time - start_time;
+    // for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
+    //   start_time = omp_get_wtime();
+    //   smearing_APE(conf2.array, APE_alpha);
+    //   end_time = omp_get_wtime();
+    //   smearing_APE_time += end_time - start_time;
 
-      if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
-          APE_step >= calculation_APE_start) {
-        start_time = omp_get_wtime();
-        if (representation == "fundamental") {
-          wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
-                                           R_max, T_min, T_max);
-        } else if (representation == "adjoint") {
-          wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
-                                                   R_min, R_max, T_min, T_max);
-        } else {
-          cout << "wrong representation" << endl;
-        }
-        write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
-        end_time = omp_get_wtime();
-        observables_time += end_time - start_time;
-      }
-    }
+    //   if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
+    //       APE_step >= calculation_APE_start) {
+    //     start_time = omp_get_wtime();
+    //     if (representation == "fundamental") {
+    //       wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
+    //                                        R_max, T_min, T_max);
+    //     } else if (representation == "adjoint") {
+    //       wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
+    //                                                R_min, R_max, T_min,
+    //                                                T_max);
+    //     } else {
+    //       cout << "wrong representation" << endl;
+    //     }
+    //     write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
+    //     end_time = omp_get_wtime();
+    //     observables_time += end_time - start_time;
+    //   }
+    // }
 
     // wilson loops at (APE_step1, APE_step2) APE_steps, APE_step1 < APE_step2
     for (int APE_step1 = 1; APE_step1 <= APE_steps; APE_step1++) {
