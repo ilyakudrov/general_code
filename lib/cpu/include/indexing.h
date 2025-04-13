@@ -32,7 +32,8 @@ template <int dim> struct multi_index_t {
   std::array<int, dim> size_array;
   template <typename... Args>
   multi_index_t(Args &&...args) : size_array(std::forward<Args>(args)...) {}
-  multi_index_t(std::array<int, dim> &array) : size_array(array) {}
+  // multi_index_t(std::array<int, dim> &&array) :
+  // size_array(std::forward<std::array<int, dim>>(array)) {}
 
   struct iterator {
     struct sentinel_t {};

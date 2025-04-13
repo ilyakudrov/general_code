@@ -248,6 +248,7 @@ public:
   }
 
   double tr() const { return matrix.trace().real() / 3.; }
+  double tr_adjoint() const { return std::norm(matrix.trace()) - 1; }
 
   std::complex<double> tr_complex() const { return matrix.trace() / 3.; }
 
@@ -264,6 +265,7 @@ public:
   }
 
   su3 conj() const { return su3(matrix.adjoint()); }
+  su3 adjoint() const { return su3(matrix.adjoint()); }
 
   su3 mult_by_imag(const double x) const {
     return su3(matrix * std::complex<double>(0, x));

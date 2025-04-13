@@ -607,7 +607,6 @@ template void smearing_HYP(std::vector<su3_abelian> &array, double alpha1,
 // su3_angles
 template std::vector<std::vector<su3_angles>>
 separate_smearing(std::vector<su3_angles> &conf);
-template void smearing_APE(std::vector<su3_angles> &conf, double alpha);
 template void smearing_APE_2d(std::vector<su3_angles> &conf1,
                               std::vector<su3_angles> &conf2, int mu, int nu,
                               double alpha);

@@ -1,4 +1,5 @@
 #include "../../../lib/cpu/include/gluon_propagator.h"
+#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/matrix.h"
 
@@ -72,6 +73,8 @@ int main(int argc, char *argv[]) {
   Data::data<MATRIX> conf;
 
   get_data(conf, conf_path, conf_format, bytes_skip, convert);
+
+  std::cout << "plaket: " << plaket(conf.array) << std::endl;
 
   ofstream stream;
   stream.precision(17);
