@@ -12,6 +12,12 @@
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
 
+#pragma omp declare reduction(                                                 \
+        arr_double_plus : std::array<std::complex<double>, 12> : std::         \
+        transform(omp_out.begin(), omp_out.end(), omp_in.begin(),              \
+                      omp_out.begin(), std::plus<std::complex<double>>()))     \
+    initializer(omp_priv = decltype(omp_orig)())
+
 Eigen::Matrix2cd get_vector_potential_matrix(su2 &a) {
   Eigen::Matrix2cd U;
   U(0, 0) = std::complex<double>(a.a0, a.a3);
@@ -127,6 +133,36 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
   }
   int lattice_volume = x_size * y_size * z_size * t_size;
   for (int i = 0; i < 144; i++) {
+    gluon_propagator[i] /= lattice_volume;
+  }
+  return gluon_propagator;
+}
+
+std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
+    std::vector<std::array<double, 12>> &vector_potential,
+    std::vector<std::complex<double>> &furier_coefficients) {
+  std::array<std::complex<double>, 12> gluon_propagator;
+  std::array<std::complex<double>, 12> furier_coefficient_x;
+#pragma omp parallel
+  for (int i = 0; i < vector_potential.size(); i++) {
+    // std::cout << i << std::endl;
+    for (int m = 0; m < 12; m++) {
+      furier_coefficient_x[m] =
+          vector_potential[i][m] * std::conj(furier_coefficients[i]);
+    }
+#pragma omp for firstprivate(furier_coefficient_x)                             \
+    reduction(arr_double_plus : gluon_propagator)
+    for (int j = 0; j < vector_potential.size(); j++) {
+      for (int m = 0; m < 12; m++) {
+        // for (int n = 0; n < 12; n++) {
+        gluon_propagator[m] += furier_coefficient_x[m] *
+                               vector_potential[j][m] * furier_coefficients[j];
+        // }
+      }
+    }
+  }
+  int lattice_volume = x_size * y_size * z_size * t_size;
+  for (int i = 0; i < 12; i++) {
     gluon_propagator[i] /= lattice_volume;
   }
   return gluon_propagator;
