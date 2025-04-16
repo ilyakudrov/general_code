@@ -147,28 +147,6 @@ int main(int argc, char *argv[]) {
   smearing_HYP_time = 0;
   observables_time = 0;
 
-  double test_time1;
-  double test_time2;
-
-  // test_time1 = omp_get_wtime();
-  // MATRIX_WILSON A = conf1.array[0];
-  // double tmp = 0;
-  // for (int i = 0; i < conf1.array.size(); i++) {
-  //   tmp += conf1.array[i].multiply_conj_tr_adjoint(A);
-  // }
-  // test_time2 = omp_get_wtime();
-  // std::cout << "adjoint test time: " << test_time2 - test_time1 << std::endl;
-
-  // test_time1 = omp_get_wtime();
-  // A = conf1.array[0];
-  // tmp = 0;
-  // for (int i = 0; i < conf1.array.size(); i++) {
-  //   tmp += conf1.array[i].multiply_conj_tr(A);
-  // }
-  // test_time2 = omp_get_wtime();
-  // std::cout << "fundamental test time: " << test_time2 - test_time1
-  //           << std::endl;
-
   link1 link(x_size, y_size, z_size, t_size);
 
   for (int dir = 0; dir < N_dir; dir++) {
@@ -192,50 +170,44 @@ int main(int argc, char *argv[]) {
     }
 
     // wilson loops at (0, 0) APE_steps
-    start_time = omp_get_wtime();
-    test_time1 = omp_get_wtime();
-    if (representation == "fundamental") {
-      wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
-    } else if (representation == "adjoint") {
-      wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min, T_max);
-    } else {
-      cout << "wrong representation" << endl;
-    }
-    test_time2 = omp_get_wtime();
-    std::cout << "wilson_loop_adjoint (0,0): " << test_time2 - test_time1
-              << std::endl;
-    write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
-    end_time = omp_get_wtime();
-    observables_time += end_time - start_time;
+    // start_time = omp_get_wtime();
+    // if (representation == "fundamental") {
+    //   wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
+    // } else if (representation == "adjoint") {
+    //   wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min,
+    //   T_max);
+    // } else {
+    //   cout << "wrong representation" << endl;
+    // }
+    // write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
+    // end_time = omp_get_wtime();
+    // observables_time += end_time - start_time;
 
     // wilson loops at (0, APE_step2) APE_steps
-    for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
-      start_time = omp_get_wtime();
-      smearing_APE(conf2.array, APE_alpha);
-      end_time = omp_get_wtime();
-      smearing_APE_time += end_time - start_time;
+    // for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
+    //   start_time = omp_get_wtime();
+    //   smearing_APE(conf2.array, APE_alpha);
+    //   end_time = omp_get_wtime();
+    //   smearing_APE_time += end_time - start_time;
 
-      if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
-          APE_step >= calculation_APE_start) {
-        start_time = omp_get_wtime();
-        test_time1 = omp_get_wtime();
-        if (representation == "fundamental") {
-          wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
-                                           R_max, T_min, T_max);
-        } else if (representation == "adjoint") {
-          wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
-                                                   R_min, R_max, T_min, T_max);
-        } else {
-          cout << "wrong representation" << endl;
-        }
-        test_time2 = omp_get_wtime();
-        std::cout << "wilson_gevp_adjoint_indexed (0, APE_step2): "
-                  << test_time2 - test_time1 << std::endl;
-        write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
-        end_time = omp_get_wtime();
-        observables_time += end_time - start_time;
-      }
-    }
+    //   if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
+    //       APE_step >= calculation_APE_start) {
+    //     start_time = omp_get_wtime();
+    //     if (representation == "fundamental") {
+    //       wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
+    //                                        R_max, T_min, T_max);
+    //     } else if (representation == "adjoint") {
+    //       wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
+    //                                                R_min, R_max, T_min,
+    //                                                T_max);
+    //     } else {
+    //       cout << "wrong representation" << endl;
+    //     }
+    //     write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
+    //     end_time = omp_get_wtime();
+    //     observables_time += end_time - start_time;
+    //   }
+    // }
 
     // wilson loops at (APE_step1, APE_step2) APE_steps, APE_step1 < APE_step2
     for (int APE_step1 = 1; APE_step1 <= APE_steps; APE_step1++) {
@@ -247,7 +219,6 @@ int main(int argc, char *argv[]) {
       if ((APE_step1 - calculation_APE_start) % calculation_step_APE == 0 &&
           APE_step1 >= calculation_APE_start) {
         start_time = omp_get_wtime();
-        test_time1 = omp_get_wtime();
         if (representation == "fundamental") {
           wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
         } else if (representation == "adjoint") {
@@ -256,9 +227,6 @@ int main(int argc, char *argv[]) {
         } else {
           cout << "wrong representation" << endl;
         }
-        test_time2 = omp_get_wtime();
-        std::cout << "wilson_loop_adjoint (APE_step1, APE_step2): "
-                  << test_time2 - test_time1 << std::endl;
         write_wilson_loops(wilson_tmp, wilson_loops, APE_step1, APE_step1);
         end_time = omp_get_wtime();
         observables_time += end_time - start_time;
@@ -273,7 +241,6 @@ int main(int argc, char *argv[]) {
 
           if ((APE_step2 - APE_step1) % calculation_step_APE == 0) {
             start_time = omp_get_wtime();
-            test_time1 = omp_get_wtime();
             if (representation == "fundamental") {
               wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
                                                R_max, T_min, T_max);
@@ -283,9 +250,6 @@ int main(int argc, char *argv[]) {
             } else {
               cout << "wrong representation" << endl;
             }
-            test_time2 = omp_get_wtime();
-            std::cout << "wilson_gevp_adjoint_indexed (APE_step1, APE_step2): "
-                      << test_time2 - test_time1 << std::endl;
             write_wilson_loops(wilson_tmp, wilson_loops, APE_step1, APE_step2);
             end_time = omp_get_wtime();
             observables_time += end_time - start_time;

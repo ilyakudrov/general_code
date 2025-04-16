@@ -196,6 +196,84 @@ template <class T> void smearing_APE(std::vector<T> &conf, double alpha) {
   conf = smeared;
 }
 
+su3_angles multiply_proj_su3_angles(const std::array<su3_angles, 4> &staple,
+                                    const su3_angles &link, const double &a,
+                                    const double &b) {
+  su3_angles A;
+  for (int i = 0; i < 3; i++) {
+    A.matrix[i] =
+        atan2(a * sin(link.matrix[i]) +
+                  b * (sin(staple[0].matrix[i]) + sin(staple[1].matrix[i]) +
+                       sin(staple[2].matrix[i]) + sin(staple[3].matrix[i])),
+              a * cos(link.matrix[i]) +
+                  b * (cos(staple[0].matrix[i]) + cos(staple[1].matrix[i]) +
+                       cos(staple[2].matrix[i]) + cos(staple[3].matrix[i])));
+  }
+  double sum = 0;
+  for (int i = 0; i < 3; i++) {
+    sum += A.matrix[i];
+  }
+  while (sum >= M_PI) {
+    sum -= 2 * M_PI;
+  }
+  while (sum < -M_PI) {
+    sum += 2 * M_PI;
+  }
+  for (int i = 0; i < 3; i++) {
+    A.matrix[i] = A.matrix[i] - sum / 3;
+  }
+  return A;
+}
+
+template <> void smearing_APE(std::vector<su3_angles> &conf, double alpha) {
+  std::vector<su3_angles> smeared = conf;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  std::array<int, 4> lat_coord;
+  int index1;
+  int index2;
+#pragma omp parallel for collapse(4) private(lat_coord, index1, index2)        \
+    firstprivate(lat_dim, alpha)
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          for (int mu = 0; mu < 3; mu++) {
+            int count = 0;
+            std::array<su3_angles, 4> tmp;
+            for (int nu = 0; nu < 3; nu++) {
+              if (mu != nu) {
+                index1 = get_index_matrix(lat_coord, nu);
+                lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
+                index2 = get_index_matrix(lat_coord, mu);
+                lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+                tmp[count] = (conf[index1] * conf[index2]) ^
+                             conf[get_index_matrix(lat_coord, nu)];
+                count++;
+                lat_coord[nu] = (lat_coord[nu] + lat_dim[nu] - 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+                index1 = get_index_matrix(lat_coord, nu);
+                index2 = get_index_matrix(lat_coord, mu);
+                lat_coord[mu] = (lat_coord[mu] + 1) % lat_dim[mu];
+                tmp[count] = (conf[index1] % conf[index2]) *
+                             conf[get_index_matrix(lat_coord, nu)];
+                count++;
+                lat_coord[nu] = (lat_coord[nu] + 1) % lat_dim[nu];
+                lat_coord[mu] = (lat_coord[mu] + lat_dim[mu] - 1) % lat_dim[mu];
+              }
+            }
+            index1 = get_index_matrix(lat_coord, mu);
+            smeared[index1] = multiply_proj_su3_angles(tmp, conf[index1],
+                                                       1 - alpha, alpha / 4);
+          }
+        }
+      }
+    }
+  }
+  conf = smeared;
+}
+
 template <class T>
 void smearing_APE_2d(std::vector<T> &conf1, std::vector<T> &conf2, int mu,
                      int nu, double alpha) {
@@ -529,7 +607,6 @@ template void smearing_HYP(std::vector<su3_abelian> &array, double alpha1,
 // su3_angles
 template std::vector<std::vector<su3_angles>>
 separate_smearing(std::vector<su3_angles> &conf);
-template void smearing_APE(std::vector<su3_angles> &conf, double alpha);
 template void smearing_APE_2d(std::vector<su3_angles> &conf1,
                               std::vector<su3_angles> &conf2, int mu, int nu,
                               double alpha);

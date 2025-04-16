@@ -153,6 +153,8 @@ int main(int argc, char *argv[]) {
   //     "32^3x8/beta2.779/CONF0001_test";
   // write_float_test(write_path, conf.array);
 
+  std::cout << "plaket: " << plaket(conf.array) << std::endl;
+
   ofstream stream;
   stream.precision(17);
   // open file
