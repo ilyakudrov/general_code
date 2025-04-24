@@ -23,76 +23,6 @@ int t_size;
 int size1;
 int size2;
 
-std::vector<su2> read_conf_test(std::string &file_name, int bytes_skip) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
-  std::vector<su2> array;
-  array.reserve(4 * x_size * y_size * z_size * t_size);
-  std::ifstream stream(file_name);
-  std::vector<float> v(data_size * 4);
-  stream.ignore(bytes_skip);
-  if (!stream.read((char *)&v[0], (data_size * 4) * sizeof(float)))
-    std::cout << "read_float<su2> error: " << file_name << std::endl;
-  su2 A;
-  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  std::array<int, 3> multipliers = {
-      lat_dim[0] * lat_dim[1], lat_dim[0] * lat_dim[1] * lat_dim[2],
-      lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3]};
-  int index;
-  for (int t = 0; t < lat_dim[3]; t++) {
-    for (int z = 0; z < lat_dim[2]; z++) {
-      for (int y = 0; y < lat_dim[1]; y++) {
-        for (int x = 0; x < lat_dim[0]; x++) {
-          for (int mu = 0; mu < 4; mu++) {
-            index = multipliers[1] * t + multipliers[0] * z + lat_dim[0] * y +
-                    x + mu * multipliers[2];
-            A.a0 = (double)v[index * 4];
-            A.a1 = (double)v[index * 4 + 1];
-            A.a2 = (double)v[index * 4 + 2];
-            A.a3 = (double)v[index * 4 + 3];
-            array.push_back(A);
-          }
-        }
-      }
-    }
-  }
-  stream.close();
-  return array;
-}
-
-void write_float_test(std::string &file_name, std::vector<su2> &data) {
-  int data_size1 = 4 * x_size * y_size * z_size * t_size;
-  std::ofstream stream(file_name);
-  std::vector<float> v(data_size1 * 4);
-  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  std::array<int, 3> multipliers = {
-      lat_dim[0] * lat_dim[1], lat_dim[0] * lat_dim[1] * lat_dim[2],
-      lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3]};
-  std::array<int, 4> lat_coord;
-  int index_write;
-  int index_data;
-  for (int t = 0; t < lat_dim[3]; t++) {
-    for (int z = 0; z < lat_dim[2]; z++) {
-      for (int y = 0; y < lat_dim[1]; y++) {
-        for (int x = 0; x < lat_dim[0]; x++) {
-          lat_coord = {x, y, z, t};
-          for (int mu = 0; mu < 4; mu++) {
-            index_write = multipliers[1] * t + multipliers[0] * z +
-                          lat_dim[0] * y + x + mu * multipliers[2];
-            index_data = get_index_matrix(lat_coord, mu);
-            v[index_write * 4] = (float)data[index_data].a0;
-            v[index_write * 4 + 1] = (float)data[index_data].a1;
-            v[index_write * 4 + 2] = (float)data[index_data].a2;
-            v[index_write * 4 + 3] = (float)data[index_data].a3;
-          }
-        }
-      }
-    }
-  }
-  if (!stream.write((char *)&v[0], data_size1 * 4 * sizeof(float)))
-    std::cout << "write_float<su2> error: " << file_name << std::endl;
-  stream.close();
-}
-
 int main(int argc, char *argv[]) {
   double start_time;
   double end_time;
@@ -140,77 +70,141 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  // Data::data<MATRIX> conf;
+  Data::data<MATRIX> conf;
 
-  // get_data(conf, conf_path, conf_format, bytes_skip, convert);
-  std::vector<su2> array = read_conf_test(conf_path, 0);
-  std::cout << "plaket " << plaket(array) << std::endl;
-  std::cout << "plaket " << plaket_time(array) << std::endl;
-  std::cout << "plaket " << plaket_space(array) << std::endl;
+  double a_inv = (542.6 * 8 / 1000);
+  double beta = 2.701;
+  double g = 2 / sqrt(beta);
+  double multiplier = 2 / g * a_inv;
 
-  // std::string write_path =
-  //     "/home/ilya/soft/lattice/general_code/tests/confs/su2/gluodynamics/"
-  //     "32^3x8/beta2.779/CONF0001_test";
-  // write_float_test(write_path, conf.array);
-
-  std::cout << "plaket: " << plaket(conf.array) << std::endl;
+  get_data(conf, conf_path, conf_format, bytes_skip, convert);
+  // std::vector<su2> array = read_conf_test(conf_path, 0);
+  std::cout << "plaket " << plaket(conf.array) << std::endl;
+  std::cout << "plaket " << plaket_time(conf.array) << std::endl;
+  std::cout << "plaket " << plaket_space(conf.array) << std::endl;
 
   ofstream stream;
   stream.precision(17);
   // open file
   //   stream.open(path);
-  start_time = omp_get_wtime();
 
   std::vector<std::array<double, 12>> vector_potential =
-      get_vector_potential(array);
-  end_time = omp_get_wtime();
-  observables_time = end_time - start_time;
-  cout << "get_vector_potential time: " << observables_time << endl;
+      get_vector_potential(conf.array);
+
+  std::vector<std::complex<double>> furier_coefficients;
 
   double multiplyer_t = 2 * M_PI / t_size;
   double multiplyer_s = 2 * M_PI / x_size;
-  std::array<double, 4> momenta = {multiplyer_t, 2 * multiplyer_s,
-                                   3 * multiplyer_s, 4 * multiplyer_s};
+  // std::array<double, 4> momenta = {multiplyer_t, 2 * multiplyer_s,
+  //                                  3 * multiplyer_s, 4 * multiplyer_s};
+  std::array<double, 4> momenta = {multiplyer_s, 0, 0, 0};
+  // std::array<double, 4> momenta = {multiplyer_s, multiplyer_s, multiplyer_s,
+  // 0}; std::array<double, 4> momenta = {0, 0, 0, 0};
 
-  start_time = omp_get_wtime();
-  std::vector<std::complex<double>> furier_coefficients =
-      get_furier_coefficients(momenta);
-  end_time = omp_get_wtime();
-  observables_time = end_time - start_time;
-  cout << "get_furier_coefficients time: " << observables_time << endl;
+  double propagator_transversal_aver_momentum = 0;
+  double propagator_longitudinal_aver_momentum = 0;
+  for (int i = 0; i < 3; i++) {
+    momenta = {0, 0, 0, 0};
+    momenta[i] = multiplyer_s;
+    furier_coefficients = get_furier_coefficients(momenta);
 
-  start_time = omp_get_wtime();
+    start_time = omp_get_wtime();
 
-  // std::array<std::complex<double>, 144> gluon_propagator =
-  //     calculate_gluon_propagator(vector_potential, furier_coefficients);
+    std::array<std::complex<double>, 144> gluon_propagator =
+        calculate_gluon_propagator(vector_potential, furier_coefficients,
+                                   beta / a_inv / a_inv);
 
-  // end_time = omp_get_wtime();
-  // observables_time = end_time - start_time;
-  // cout << "gluon propagator time: " << observables_time << endl;
-  // for (int mu = 0; mu < 4; mu++) {
-  //   for (int a = 0; a < 3; a++) {
-  //     for (int nu = 0; nu < 4; nu++) {
-  //       for (int b = 0; b < 3; b++) {
-  //         std::cout << "mu: " << mu << ", nu: " << nu << ", a: " << a
-  //                   << ", b: " << b << ", D:"
-  //                   << gluon_propagator[(mu * 4 + a) * 12 + nu * 4 + b]
-  //                   << std::endl;
-  //       }
-  //     }
-  //   }
-  // }
-  std::array<std::complex<double>, 12> gluon_propagator_diagonal =
-      calculate_gluon_propagator_diagonal(vector_potential,
-                                          furier_coefficients);
+    end_time = omp_get_wtime();
+    observables_time = end_time - start_time;
+    cout << "gluon propagator time: " << observables_time << endl;
+    for (int mu = 0; mu < 4; mu++) {
+      for (int a = 0; a < 3; a++) {
+        for (int nu = 0; nu < 4; nu++) {
+          for (int b = 0; b < 3; b++) {
+            std::cout << "mu: " << mu << ", nu: " << nu << ", a: " << a
+                      << ", b: " << b << ", D:"
+                      << gluon_propagator[(mu * 3 + a) * 12 + nu * 3 + b] << " "
+                      << (mu * 3 + a) * 12 + nu * 3 + b << std::endl;
+          }
+        }
+      }
+    }
 
-  end_time = omp_get_wtime();
-  observables_time = end_time - start_time;
-  cout << "gluon propagator time: " << observables_time << endl;
-  for (int mu = 0; mu < 4; mu++) {
-    std::cout << "mu = " << mu << ": " << gluon_propagator_diagonal[mu * 3]
-              << " " << gluon_propagator_diagonal[mu * 3 + 1] << " "
-              << gluon_propagator_diagonal[mu * 3 + 2] << std::endl;
+    for (int mu = 0; mu < 3; mu++) {
+      for (int a = 0; a < 3; a++) {
+        propagator_transversal_aver_momentum +=
+            gluon_propagator[(mu * 3 + a) * 12 + mu * 3 + a].real();
+      }
+    }
+    for (int mu = 3; mu < 4; mu++) {
+      for (int a = 0; a < 3; a++) {
+        propagator_longitudinal_aver_momentum +=
+            gluon_propagator[(mu * 3 + a) * 12 + mu * 3 + a].real();
+      }
+    }
   }
+
+  std::cout << "propagator_transversal_aver_momentum "
+            << propagator_transversal_aver_momentum / 6 / 3 << std::endl;
+  std::cout << "propagator_longitudinal_aver_momentum "
+            << propagator_longitudinal_aver_momentum / 3 / 3 << std::endl;
+
+  int m = 12;
+  int n = 12;
+
+  std::cout << "propagator single: "
+            << calculate_gluon_propagator_single(
+                   vector_potential, furier_coefficients, multiplier, m, n)
+            << std::endl;
+
+  propagator_transversal_aver_momentum = 0;
+  propagator_longitudinal_aver_momentum = 0;
+  for (int i = 0; i < 3; i++) {
+
+    momenta = {0, 0, 0, 0};
+    momenta[i] = multiplyer_s;
+    furier_coefficients = get_furier_coefficients(momenta);
+
+    start_time = omp_get_wtime();
+
+    std::array<std::complex<double>, 12> gluon_propagator_diagonal =
+        calculate_gluon_propagator_diagonal(
+            vector_potential, furier_coefficients, beta / a_inv / a_inv);
+
+    end_time = omp_get_wtime();
+    observables_time = end_time - start_time;
+    cout << "gluon propagator diagonal time: " << observables_time << endl;
+    for (int mu = 0; mu < 4; mu++) {
+      std::cout << "mu = " << mu << ": " << gluon_propagator_diagonal[mu * 3]
+                << " " << gluon_propagator_diagonal[mu * 3 + 1] << " "
+                << gluon_propagator_diagonal[mu * 3 + 2] << std::endl;
+    }
+
+    double propagator_transversal_aver = 0;
+    for (int i = 0; i < 9; i++) {
+      propagator_transversal_aver += gluon_propagator_diagonal[i].real();
+    }
+    propagator_transversal_aver /= 6;
+    propagator_transversal_aver_momentum += propagator_transversal_aver;
+    std::cout << "propagator_transversal: " << propagator_transversal_aver
+              << std::endl;
+
+    double propagator_longitudinal_aver = 0;
+    for (int i = 9; i < 12; i++) {
+      propagator_longitudinal_aver += gluon_propagator_diagonal[i].real();
+    }
+    propagator_longitudinal_aver /= 3;
+    propagator_longitudinal_aver_momentum += propagator_longitudinal_aver;
+    std::cout << "propagator_longitudinal: " << propagator_longitudinal_aver
+              << std::endl;
+  }
+
+  propagator_transversal_aver_momentum /= 3;
+  propagator_longitudinal_aver_momentum /= 3;
+  std::cout << "propagator_transversal_aver_momentum: "
+            << propagator_transversal_aver_momentum << std::endl;
+  std::cout << "propagator_longitudinal_aver_momentum: "
+            << propagator_longitudinal_aver_momentum << std::endl;
 
   // stream.close();
 }

@@ -7,13 +7,13 @@
 #include <vector>
 
 #pragma omp declare reduction(                                                 \
-        arr_double_plus : std::array<std::complex<double>, 144> : std::        \
+        arr_double_plus_144 : std::array<std::complex<double>, 144> : std::    \
         transform(omp_out.begin(), omp_out.end(), omp_in.begin(),              \
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
 
 #pragma omp declare reduction(                                                 \
-        arr_double_plus : std::array<std::complex<double>, 12> : std::         \
+        arr_double_plus_12 : std::array<std::complex<double>, 12> : std::      \
         transform(omp_out.begin(), omp_out.end(), omp_in.begin(),              \
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
@@ -43,8 +43,8 @@ std::array<double, 3> get_vector_potential_coefficients(
   std::array<double, 3> coefficients;
   for (int i = 0; i < 3; i++) {
     coefficients[i] =
-        -2 *
-        (get_vector_potential_matrix(a) * pauli_matrices[i]).trace().real();
+        (get_vector_potential_matrix(a) * pauli_matrices[i]).trace().real() *
+        0.5;
   }
   return coefficients;
 }
@@ -109,61 +109,96 @@ get_furier_coefficients(std::array<double, 4> &momenta) {
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator(
     std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients) {
+    std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
   std::array<std::complex<double>, 144> gluon_propagator;
-  std::array<std::complex<double>, 12> furier_coefficient_x;
-#pragma omp parallel
+  std::array<std::complex<double>, 12> vector_potential_sum;
+#pragma omp parallel for reduction(arr_double_plus_12 : vector_potential_sum)
   for (int i = 0; i < vector_potential.size(); i++) {
-    // std::cout << i << std::endl;
     for (int m = 0; m < 12; m++) {
-      furier_coefficient_x[m] =
-          vector_potential[i][m] * std::conj(furier_coefficients[i]);
-    }
-#pragma omp for firstprivate(furier_coefficient_x)                             \
-    reduction(arr_double_plus : gluon_propagator)
-    for (int j = 0; j < vector_potential.size(); j++) {
-      for (int m = 0; m < 12; m++) {
-        for (int n = 0; n < 12; n++) {
-          gluon_propagator[m * 12 + n] += furier_coefficient_x[m] *
-                                          vector_potential[j][n] *
-                                          furier_coefficients[j];
-        }
-      }
+      vector_potential_sum[m] +=
+          vector_potential[i][m] * furier_coefficients[i];
     }
   }
   int lattice_volume = x_size * y_size * z_size * t_size;
-  for (int i = 0; i < 144; i++) {
-    gluon_propagator[i] /= lattice_volume;
+  for (int m = 0; m < 12; m++) {
+    for (int n = 0; n < 12; n++) {
+      gluon_propagator[m * 12 + n] = vector_potential_sum[m] *
+                                     std::conj(vector_potential_sum[n]) *
+                                     (multiplier / lattice_volume);
+      std::cout << "gluon_propagator test: " << gluon_propagator[m * 12 + n]
+                << std::endl;
+    }
   }
   return gluon_propagator;
 }
 
 std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
     std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients) {
+    std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
   std::array<std::complex<double>, 12> gluon_propagator;
-  std::array<std::complex<double>, 12> furier_coefficient_x;
-#pragma omp parallel
-  for (int i = 0; i < vector_potential.size(); i++) {
-    // std::cout << i << std::endl;
+#pragma omp parallel for reduction(arr_double_plus_12 : gluon_propagator)
+  for (int j = 0; j < vector_potential.size(); j++) {
     for (int m = 0; m < 12; m++) {
-      furier_coefficient_x[m] =
-          vector_potential[i][m] * std::conj(furier_coefficients[i]);
-    }
-#pragma omp for firstprivate(furier_coefficient_x)                             \
-    reduction(arr_double_plus : gluon_propagator)
-    for (int j = 0; j < vector_potential.size(); j++) {
-      for (int m = 0; m < 12; m++) {
-        // for (int n = 0; n < 12; n++) {
-        gluon_propagator[m] += furier_coefficient_x[m] *
-                               vector_potential[j][m] * furier_coefficients[j];
-        // }
-      }
+      gluon_propagator[m] += vector_potential[j][m] * furier_coefficients[j];
     }
   }
   int lattice_volume = x_size * y_size * z_size * t_size;
-  for (int i = 0; i < 12; i++) {
-    gluon_propagator[i] /= lattice_volume;
+  for (int m = 0; m < 12; m++) {
+    gluon_propagator[m] = gluon_propagator[m] * std::conj(gluon_propagator[m]) *
+                          (multiplier / lattice_volume);
   }
+  return gluon_propagator;
+}
+
+std::vector<std::array<double, 3>>
+get_vector_potential_longitudinal(std::vector<su2> &conf) {
+  std::vector<std::array<double, 3>> vector_potential(x_size * y_size * z_size *
+                                                      t_size);
+  std::array<Eigen::Matrix2cd, 3> pauli_matrices = get_pauli_matrices();
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  int mu = 3;
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          vector_potential[get_index_site(lat_coord)] =
+              get_vector_potential_coefficients(
+                  conf[get_index_matrix(lat_coord, mu)], pauli_matrices);
+        }
+      }
+    }
+  }
+  return vector_potential;
+}
+
+double calculate_gluon_propagator_longitudinal_zero_momentum(
+    std::vector<std::array<double, 3>> &vector_potential, double multiplier) {
+  double result = 0;
+  result = 0;
+  for (int j = 0; j < 3; j++) {
+    double tmp = 0;
+#pragma omp parallel for reduction(+ : tmp) schedule(dynamic)
+    for (int i = 0; i < vector_potential.size(); i++) {
+      tmp += vector_potential[i][j];
+    }
+    result += tmp * tmp / 3;
+  }
+  int lattice_volume = x_size * y_size * z_size * t_size;
+  return result / lattice_volume * multiplier;
+}
+
+std::complex<double> calculate_gluon_propagator_single(
+    std::vector<std::array<double, 12>> &vector_potential,
+    std::vector<std::complex<double>> &furier_coefficients, double multiplier,
+    int m, int n) {
+  std::complex<double> gluon_propagator{0, 0};
+  for (int i = 0; i < vector_potential.size(); i++) {
+    gluon_propagator += vector_potential[i][m] * furier_coefficients[i];
+  }
+  int lattice_volume = x_size * y_size * z_size * t_size;
+  gluon_propagator = gluon_propagator * std::conj(gluon_propagator) *
+                     (multiplier / lattice_volume);
   return gluon_propagator;
 }

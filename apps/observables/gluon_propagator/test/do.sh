@@ -1,8 +1,10 @@
 #!/bin/bash
-conf_format="double_qc2dstag"
-# conf_path="../../../../tests/confs/su2/gluodynamics/66^3x8/beta2.701/CONF_B2701L66T08"
-conf_path="../../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001_test"
-bytes_skip=0
+conf_format="float"
+# conf_format="double_qc2dstag"
+conf_path="../../../../tests/confs/su2/gluodynamics/66^3x8/beta2.701/CONF_B2701L66T08"
+# conf_path="../../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
+bytes_skip=76
+# bytes_skip=0
 matrix_type="su2"
 convert=0
 L_spat=66
