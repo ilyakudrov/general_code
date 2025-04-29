@@ -30,3 +30,6 @@ std::complex<double> calculate_gluon_propagator_single(
     std::vector<std::array<double, 12>> &vector_potential,
     std::vector<std::complex<double>> &furier_coefficients, double multiplier,
     int m, int n);
+
+std::vector<std::vector<std::array<double, 4>>> generate_momenta(int Ns,
+                                                                 int Nt);

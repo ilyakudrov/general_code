@@ -2,6 +2,7 @@
 #include "../include/matrix.h"
 
 #include <Eigen/Dense>
+#include <algorithm>
 #include <array>
 #include <complex>
 #include <vector>
@@ -112,21 +113,17 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
     std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
   std::array<std::complex<double>, 144> gluon_propagator;
   std::array<std::complex<double>, 12> vector_potential_sum;
-#pragma omp parallel for reduction(arr_double_plus_12 : vector_potential_sum)
+  double a = multiplier / (x_size * y_size * z_size * t_size);
   for (int i = 0; i < vector_potential.size(); i++) {
     for (int m = 0; m < 12; m++) {
       vector_potential_sum[m] +=
           vector_potential[i][m] * furier_coefficients[i];
     }
   }
-  int lattice_volume = x_size * y_size * z_size * t_size;
   for (int m = 0; m < 12; m++) {
     for (int n = 0; n < 12; n++) {
-      gluon_propagator[m * 12 + n] = vector_potential_sum[m] *
-                                     std::conj(vector_potential_sum[n]) *
-                                     (multiplier / lattice_volume);
-      std::cout << "gluon_propagator test: " << gluon_propagator[m * 12 + n]
-                << std::endl;
+      gluon_propagator[m * 12 + n] =
+          vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
     }
   }
   return gluon_propagator;
@@ -136,7 +133,8 @@ std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
     std::vector<std::array<double, 12>> &vector_potential,
     std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
   std::array<std::complex<double>, 12> gluon_propagator;
-#pragma omp parallel for reduction(arr_double_plus_12 : gluon_propagator)
+  // #pragma omp parallel for reduction(arr_double_plus_12 : gluon_propagator)      \
+//     schedule(dynamic)
   for (int j = 0; j < vector_potential.size(); j++) {
     for (int m = 0; m < 12; m++) {
       gluon_propagator[m] += vector_potential[j][m] * furier_coefficients[j];
@@ -201,4 +199,95 @@ std::complex<double> calculate_gluon_propagator_single(
   gluon_propagator = gluon_propagator * std::conj(gluon_propagator) *
                      (multiplier / lattice_volume);
   return gluon_propagator;
+}
+
+std::vector<std::vector<std::array<double, 4>>> generate_momenta(int Ns,
+                                                                 int Nt) {
+  double multiplyer_t = 2 * M_PI / Ns;
+  double multiplyer_s = 2 * M_PI / Nt;
+  std::vector<std::vector<std::array<double, 4>>> momenta;
+  std::array<int, 3> momentum1;
+  std::array<int, 3> momentum2;
+  for (int qx = 0; qx <= Ns / 2; qx++) {
+    for (int qy = qx; qy <= Ns / 2; qy++) {
+      for (int qz = qy; qz <= Ns / 2; qz++) {
+        momentum1 = {qx, qy, qz};
+        std::vector<std::array<double, 4>> momenta_tmp;
+        momenta_tmp.push_back({momentum1[0] * multiplyer_s,
+                               momentum1[1] * multiplyer_s,
+                               momentum1[2] * multiplyer_s, 0});
+        momentum2 = momentum1;
+        while (std::next_permutation(momentum2.begin(), momentum2.end())) {
+          momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                 momentum2[1] * multiplyer_s,
+                                 momentum2[2] * multiplyer_s, 0});
+        }
+        momentum2 = momentum1;
+        while (std::prev_permutation(momentum2.begin(), momentum2.end())) {
+          momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                 momentum2[1] * multiplyer_s,
+                                 momentum2[2] * multiplyer_s, 0});
+        }
+        if (qx != qy && qx != Ns / 2 && qx != 0 && qy != 0 && qz != 0) {
+          momentum2 = momentum1;
+          momentum2[0] = -momentum2[0];
+          momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                 momentum2[1] * multiplyer_s,
+                                 momentum2[2] * multiplyer_s, 0});
+          while (std::next_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+          momentum2 = momentum1;
+          momentum2[0] = -momentum2[0];
+          while (std::prev_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+        }
+        if (qy != qz && qy != Ns / 2 && qy != 0 && qz != 0) {
+          momentum2 = momentum1;
+          momentum2[1] = -momentum2[1];
+          momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                 momentum2[1] * multiplyer_s,
+                                 momentum2[2] * multiplyer_s, 0});
+          while (std::next_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+          momentum2 = momentum1;
+          momentum2[1] = -momentum2[1];
+          while (std::prev_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+        }
+        if (qz != Ns / 2 && qy != 0 && qz != 0) {
+          momentum2 = momentum1;
+          momentum2[2] = -momentum2[2];
+          momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                 momentum2[1] * multiplyer_s,
+                                 momentum2[2] * multiplyer_s, 0});
+          while (std::next_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+          momentum2 = momentum1;
+          momentum2[2] = -momentum2[2];
+          while (std::prev_permutation(momentum2.begin(), momentum2.end())) {
+            momenta_tmp.push_back({momentum2[0] * multiplyer_s,
+                                   momentum2[1] * multiplyer_s,
+                                   momentum2[2] * multiplyer_s, 0});
+          }
+        }
+        momenta.push_back(momenta_tmp);
+      }
+    }
+  }
+  return momenta;
 }
