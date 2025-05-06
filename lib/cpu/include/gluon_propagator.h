@@ -7,29 +7,40 @@
 #include <vector>
 
 std::vector<std::array<double, 12>>
-get_vector_potential(std::vector<su2> &conf);
+get_vector_potential(const std::vector<su2> &conf);
 
 std::vector<std::complex<double>>
-get_furier_coefficients(std::array<double, 4> &momenta);
+get_furier_coefficients(const std::array<double, 4> &momenta);
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier);
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier);
+
+std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::array<double, 4>> &momenta, double multiplier);
+
+std::array<std::complex<double>, 144> calculate_gluon_propagator_lattice(
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::array<double, 4> &momenta, double multiplier);
 
 std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier);
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier);
 
 std::vector<std::array<double, 3>>
-get_vector_potential_longitudinal(std::vector<su2> &conf);
+get_vector_potential_longitudinal(const std::vector<su2> &conf);
 
 double calculate_gluon_propagator_longitudinal_zero_momentum(
-    std::vector<std::array<double, 3>> &vector_potential, double multiplier);
+    const std::vector<std::array<double, 3>> &vector_potential,
+    double multiplier);
 
 std::complex<double> calculate_gluon_propagator_single(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier,
-    int m, int n);
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier, int m, int n);
 
 std::vector<std::vector<std::array<double, 4>>> generate_momenta(int Ns,
                                                                  int Nt);

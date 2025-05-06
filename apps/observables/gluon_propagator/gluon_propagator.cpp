@@ -93,40 +93,44 @@ int main(int argc, char *argv[]) {
 
   std::vector<std::complex<double>> furier_coefficients;
 
-  double multiplyer_t = 2 * M_PI / t_size;
-  double multiplyer_s = 2 * M_PI / x_size;
-
   std::map<std::tuple<double, double, double, double, int, int, int, int>,
            std::complex<double>>
       gluon_propagator_map;
 
-  // for (int i = 0; i < momenta.size(); i++) {
-  //   for (int j = 0; j < momenta[i].size(); j++) {
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < momenta.size(); i++) {
+    start_time = omp_get_wtime();
+    std::array<std::complex<double>, 144> gluon_propagator =
+        calculate_gluon_propagator_group(vector_potential, momenta[i],
+                                         beta / a_inv / a_inv);
     for (int j = 0; j < momenta[i].size(); j++) {
-      furier_coefficients = get_furier_coefficients(momenta[i][j]);
-      std::array<std::complex<double>, 144> gluon_propagator =
-          calculate_gluon_propagator(vector_potential, furier_coefficients,
-                                     beta / a_inv / a_inv);
       for (int mu = 0; mu < 4; mu++) {
         for (int a = 0; a < 3; a++) {
           for (int nu = 0; nu < 4; nu++) {
             for (int b = 0; b < 3; b++) {
               gluon_propagator_map[std::make_tuple(
-                  momenta[i][j][0], momenta[i][j][1], momenta[i][j][2],
-                  momenta[i][j][3], mu, nu, a, b)] =
+                  momenta[i][0][0], momenta[i][0][1], momenta[i][0][2],
+                  momenta[i][0][3], mu, nu, a, b)] =
                   gluon_propagator[(mu * 3 + a) * 12 + nu * 3 + b];
             }
           }
         }
       }
     }
+    end_time = omp_get_wtime();
+    std::cout << "time: " << end_time - start_time << std::endl;
   }
 
   ofstream stream;
   stream.precision(17);
   // open file
-  //   stream.open(path);
-
+  stream.open(output_path);
+  stream << "p1,p2,p3,p4,mu,nu,a,b,Dr,Di" << std::endl;
+  for (const auto &pair : gluon_propagator_map) {
+    stream << get<0>(pair.first) << "," << get<1>(pair.first) << ","
+           << get<2>(pair.first) << "," << get<3>(pair.first) << ","
+           << get<4>(pair.first) << "," << get<5>(pair.first) << ","
+           << get<6>(pair.first) << "," << get<7>(pair.first) << ","
+           << pair.second.real() << "," << pair.second.imag() << endl;
+  }
   stream.close();
 }

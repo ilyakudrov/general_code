@@ -19,7 +19,7 @@
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
 
-Eigen::Matrix2cd get_vector_potential_matrix(su2 &a) {
+Eigen::Matrix2cd get_vector_potential_matrix(const su2 &a) {
   Eigen::Matrix2cd U;
   U(0, 0) = std::complex<double>(a.a0, a.a3);
   U(0, 1) = std::complex<double>(a.a2, a.a1);
@@ -40,7 +40,7 @@ std::array<Eigen::Matrix2cd, 3> get_pauli_matrices() {
 }
 
 std::array<double, 3> get_vector_potential_coefficients(
-    su2 &a, std::array<Eigen::Matrix2cd, 3> &pauli_matrices) {
+    const su2 &a, const std::array<Eigen::Matrix2cd, 3> &pauli_matrices) {
   std::array<double, 3> coefficients;
   for (int i = 0; i < 3; i++) {
     coefficients[i] =
@@ -51,7 +51,7 @@ std::array<double, 3> get_vector_potential_coefficients(
 }
 
 std::vector<std::array<double, 12>>
-get_vector_potential(std::vector<su2> &conf) {
+get_vector_potential(const std::vector<su2> &conf) {
   std::vector<std::array<double, 12>> vector_potential(x_size * y_size *
                                                        z_size * t_size);
   std::array<Eigen::Matrix2cd, 3> pauli_matrices = get_pauli_matrices();
@@ -87,7 +87,7 @@ get_vector_potential(std::vector<su2> &conf) {
 }
 
 std::vector<std::complex<double>>
-get_furier_coefficients(std::array<double, 4> &momenta) {
+get_furier_coefficients(const std::array<double, 4> &momenta) {
   std::vector<std::complex<double>> furier_coefficients(x_size * y_size *
                                                         z_size * t_size);
   std::array<int, 4> lat_coord;
@@ -97,10 +97,10 @@ get_furier_coefficients(std::array<double, 4> &momenta) {
       for (int y = 0; y < lat_dim[1]; y++) {
         for (int x = 0; x < lat_dim[0]; x++) {
           lat_coord = {x, y, z, t};
+          double power = momenta[0] * lat_coord[0] + momenta[1] * lat_coord[1] +
+                         momenta[2] * lat_coord[2] + momenta[3] * lat_coord[3];
           furier_coefficients[get_index_site(lat_coord)] =
-              std::exp(std::complex<double>(0, 1) *
-                       (momenta[0] * lat_coord[0] + momenta[1] * lat_coord[1] +
-                        momenta[2] * lat_coord[2] + momenta[3] * lat_coord[3]));
+              std::complex<double>(cos(power), sin(power));
         }
       }
     }
@@ -109,8 +109,9 @@ get_furier_coefficients(std::array<double, 4> &momenta) {
 }
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier) {
   std::array<std::complex<double>, 144> gluon_propagator;
   std::array<std::complex<double>, 12> vector_potential_sum;
   double a = multiplier / (x_size * y_size * z_size * t_size);
@@ -129,9 +130,71 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
   return gluon_propagator;
 }
 
+std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::array<double, 4>> &momenta, double multiplier) {
+  std::array<std::complex<double>, 144> gluon_propagator;
+  double a = multiplier / (x_size * y_size * z_size * t_size) / momenta.size();
+  std::vector<std::complex<double>> furier_coefficients;
+  for (int p = 0; p < momenta.size(); p++) {
+    furier_coefficients = get_furier_coefficients(momenta[p]);
+    std::array<std::complex<double>, 12> vector_potential_sum;
+    for (int i = 0; i < vector_potential.size(); i++) {
+      for (int m = 0; m < 12; m++) {
+        vector_potential_sum[m] +=
+            vector_potential[i][m] * furier_coefficients[i];
+      }
+    }
+    for (int m = 0; m < 12; m++) {
+      for (int n = 0; n < 12; n++) {
+        gluon_propagator[m * 12 + n] +=
+            vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+      }
+    }
+  }
+  return gluon_propagator;
+}
+
+std::array<std::complex<double>, 144> calculate_gluon_propagator_lattice(
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::array<double, 4> &momenta, double multiplier) {
+  std::array<std::complex<double>, 144> gluon_propagator;
+  std::array<std::complex<double>, 12> vector_potential_sum;
+  double a = multiplier / (x_size * y_size * z_size * t_size);
+  std::array<int, 4> lat_coord;
+  std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
+  int index;
+  std::complex<double> furier_coefficient;
+  for (int t = 0; t < lat_dim[3]; t++) {
+    for (int z = 0; z < lat_dim[2]; z++) {
+      for (int y = 0; y < lat_dim[1]; y++) {
+        for (int x = 0; x < lat_dim[0]; x++) {
+          lat_coord = {x, y, z, t};
+          index = get_index_site(lat_coord);
+          double power = momenta[0] * lat_coord[0] + momenta[1] * lat_coord[1] +
+                         momenta[2] * lat_coord[2] + momenta[3] * lat_coord[3];
+          furier_coefficient = std::complex<double>(cos(power), sin(power));
+          for (int m = 0; m < 12; m++) {
+            vector_potential_sum[m] +=
+                vector_potential[index][m] * furier_coefficient;
+          }
+        }
+      }
+    }
+  }
+  for (int m = 0; m < 12; m++) {
+    for (int n = 0; n < 12; n++) {
+      gluon_propagator[m * 12 + n] =
+          vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+    }
+  }
+  return gluon_propagator;
+}
+
 std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier) {
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier) {
   std::array<std::complex<double>, 12> gluon_propagator;
   // #pragma omp parallel for reduction(arr_double_plus_12 : gluon_propagator)      \
 //     schedule(dynamic)
@@ -149,7 +212,7 @@ std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
 }
 
 std::vector<std::array<double, 3>>
-get_vector_potential_longitudinal(std::vector<su2> &conf) {
+get_vector_potential_longitudinal(const std::vector<su2> &conf) {
   std::vector<std::array<double, 3>> vector_potential(x_size * y_size * z_size *
                                                       t_size);
   std::array<Eigen::Matrix2cd, 3> pauli_matrices = get_pauli_matrices();
@@ -172,7 +235,8 @@ get_vector_potential_longitudinal(std::vector<su2> &conf) {
 }
 
 double calculate_gluon_propagator_longitudinal_zero_momentum(
-    std::vector<std::array<double, 3>> &vector_potential, double multiplier) {
+    const std::vector<std::array<double, 3>> &vector_potential,
+    double multiplier) {
   double result = 0;
   result = 0;
   for (int j = 0; j < 3; j++) {
@@ -188,9 +252,9 @@ double calculate_gluon_propagator_longitudinal_zero_momentum(
 }
 
 std::complex<double> calculate_gluon_propagator_single(
-    std::vector<std::array<double, 12>> &vector_potential,
-    std::vector<std::complex<double>> &furier_coefficients, double multiplier,
-    int m, int n) {
+    const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::complex<double>> &furier_coefficients,
+    double multiplier, int m, int n) {
   std::complex<double> gluon_propagator{0, 0};
   for (int i = 0; i < vector_potential.size(); i++) {
     gluon_propagator += vector_potential[i][m] * furier_coefficients[i];
@@ -203,8 +267,8 @@ std::complex<double> calculate_gluon_propagator_single(
 
 std::vector<std::vector<std::array<double, 4>>> generate_momenta(int Ns,
                                                                  int Nt) {
-  double multiplyer_t = 2 * M_PI / Ns;
-  double multiplyer_s = 2 * M_PI / Nt;
+  double multiplyer_t = 2 * M_PI / Nt;
+  double multiplyer_s = 2 * M_PI / Ns;
   std::vector<std::vector<std::array<double, 4>>> momenta;
   std::array<int, 3> momentum1;
   std::array<int, 3> momentum2;
