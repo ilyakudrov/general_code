@@ -125,6 +125,10 @@ public:
     size3 = lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3];
   }
 
+  int get_data_size() const {
+    return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3] * 4;
+  }
+
   inline void move_forward(int length, int mu) {
     lat_coord[mu] = (lat_coord[mu] + length) % lat_dim[mu];
   }

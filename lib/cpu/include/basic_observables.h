@@ -1,13 +1,141 @@
 #pragma once
 
+#include "data.h"
 #include "matrix.h"
 
 #include <algorithm>
+#include <array>
 #include <map>
 
 template <class T> double plaket(const std::vector<T> &conf);
 template <class T> double plaket_time(const std::vector<T> &conf);
 template <class T> double plaket_space(const std::vector<T> &conf);
+template <class DataPattern, class MatrixType>
+double plaket_site_indexed(const Data::Data1<DataPattern, MatrixType> &conf,
+                           DataPattern &data_pattern) {
+  MatrixType A;
+  double plaket = 0;
+  for (int mu = 0; mu < 3; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      A = conf[data_pattern.get_index_link(mu)];
+      data_pattern.move_forward(1, mu);
+      A = A * conf[data_pattern.get_index_link(nu)];
+      data_pattern.move_backward(1, mu);
+      data_pattern.move_forward(1, nu);
+      A = A ^ conf[data_pattern.get_index_link(mu)];
+      data_pattern.move_backward(1, nu);
+      plaket += A.multiply_conj_tr(conf[data_pattern.get_index_link(nu)]);
+    }
+  }
+  return plaket / 6;
+}
+
+template <class DataPattern, class MatrixType>
+double
+plaket_site_time_indexed(const Data::Data1<DataPattern, MatrixType> &conf,
+                         DataPattern &data_pattern) {
+  MatrixType A;
+  double plaket = 0;
+  int nu = 3;
+  for (int mu = 0; mu < 3; mu++) {
+    A = conf[data_pattern.get_index_link(mu)];
+    data_pattern.move_forward(1, mu);
+    A = A * conf[data_pattern.get_index_link(nu)];
+    data_pattern.move_backward(1, mu);
+    data_pattern.move_forward(1, nu);
+    A = A ^ conf[data_pattern.get_index_link(mu)];
+    data_pattern.move_backward(1, nu);
+    plaket += A.multiply_conj_tr(conf[data_pattern.get_index_link(nu)]);
+  }
+  return plaket / 3;
+}
+
+template <class DataPattern, class MatrixType>
+double
+plaket_site_space_indexed(const Data::Data1<DataPattern, MatrixType> &conf,
+                          DataPattern &data_pattern) {
+  MatrixType A;
+  double plaket = 0;
+  for (int mu = 0; mu < 2; mu++) {
+    for (int nu = mu + 1; nu < 3; nu++) {
+      A = conf[data_pattern.get_index_link(mu)];
+      data_pattern.move_forward(1, mu);
+      A = A * conf[data_pattern.get_index_link(nu)];
+      data_pattern.move_backward(1, mu);
+      data_pattern.move_forward(1, nu);
+      A = A ^ conf[data_pattern.get_index_link(mu)];
+      data_pattern.move_backward(1, nu);
+      plaket += A.multiply_conj_tr(conf[data_pattern.get_index_link(nu)]);
+    }
+  }
+  return plaket / 3;
+}
+
+template <class DataPattern, class MatrixType>
+double plaket_indexed(const Data::Data1<DataPattern, MatrixType> &conf) {
+  double plaket;
+  DataPattern data_pattern(conf.lat_dim);
+#pragma omp parallel for collapse(4) firstprivate(data_pattern)                \
+    reduction(+ : plaket)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          plaket += plaket_site_indexed(conf, data_pattern);
+        }
+      }
+    }
+  }
+  return plaket / (data_pattern.lat_dim[0] * data_pattern.lat_dim[1] *
+                   data_pattern.lat_dim[2] * data_pattern.lat_dim[3]);
+}
+
+template <class DataPattern, class MatrixType>
+double plaket_time_indexed(const Data::Data1<DataPattern, MatrixType> &conf) {
+  double plaket;
+  DataPattern data_pattern(conf.lat_dim);
+#pragma omp parallel for collapse(4) firstprivate(data_pattern)                \
+    reduction(+ : plaket)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          plaket += plaket_site_time_indexed(conf, data_pattern);
+        }
+      }
+    }
+  }
+  return plaket / (data_pattern.lat_dim[0] * data_pattern.lat_dim[1] *
+                   data_pattern.lat_dim[2] * data_pattern.lat_dim[3]);
+}
+
+template <class DataPattern, class MatrixType>
+double plaket_space_indexed(const Data::Data1<DataPattern, MatrixType> &conf) {
+  double plaket;
+  DataPattern data_pattern(conf.lat_dim);
+#pragma omp parallel for collapse(4) firstprivate(data_pattern)                \
+    reduction(+ : plaket)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          plaket += plaket_site_space_indexed(conf, data_pattern);
+        }
+      }
+    }
+  }
+  return plaket / (data_pattern.lat_dim[0] * data_pattern.lat_dim[1] *
+                   data_pattern.lat_dim[2] * data_pattern.lat_dim[3]);
+}
+template <class DataPattern, class MatrixType>
+double plaket_indexed(const Data::Data1<DataPattern, MatrixType> &conf);
+template <class DataPattern, class MatrixType>
+double plaket_time_indexed(const Data::Data1<DataPattern, MatrixType> &conf);
+template <class DataPattern, class MatrixType>
+double plaket_space_indexed(const Data::Data1<DataPattern, MatrixType> &conf);
 template <class T>
 std::vector<T> wilson_lines(const std::vector<T> &array, int mu, int length);
 template <class T>

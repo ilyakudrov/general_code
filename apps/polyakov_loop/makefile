@@ -12,4 +12,4 @@ HEADERFILES=$(INCLUDE_PATH)/matrix.h $(INCLUDE_PATH)/indexing.h
 EIGH_PATH="/home/ilya/soft/source/eigen-master"
 
 polyakov_loop: polyakov_loop.cpp $(OBJFILES) $(HEADERFILES)
-	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) $(FLAGS) -DMATRIX=$(MATRIX) -I $(EIGH_PATH) -fopenmp -o polyakov_loop_$(MATRIX)_$(ARCH)
+	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) $(FLAGS) -DMATRIX=$(MATRIX) -I $(EIGH_PATH) -o polyakov_loop_$(MATRIX)_$(ARCH)

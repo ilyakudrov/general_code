@@ -12,4 +12,4 @@ HEADERFILES=$(INCLUDE_PATH)/matrix.h $(INCLUDE_PATH)/indexing.h
 EIGH_PATH="/home/ilya/soft/source/eigen-master"
 
 polyakov_loop_correlator: polyakov_loop_correlator.cpp $(OBJFILES) $(HEADERFILES)
-	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) -DMATRIX=$(MATRIX) $(FLAGS) -I $(EIGH_PATH) -fopenmp -o polyakov_loop_correlator_$(MATRIX)_$(ARCH)
+	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) -DMATRIX=$(MATRIX) $(FLAGS) -I $(EIGH_PATH) -o polyakov_loop_correlator_$(MATRIX)_$(ARCH)

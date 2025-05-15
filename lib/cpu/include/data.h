@@ -80,15 +80,20 @@ public:
   typedef MatrixType matrix_type;
   typedef DataPattern data_pattern_type;
   std::vector<MatrixType> array;
-  DataPattern data_pattern;
-  Data1(const DataPattern &data_pattern) : data_pattern(data_pattern) {
-    array = std::vector<MatrixType>(data_pattern.get_data_size());
+  std::array<int, 4> lat_dim;
+  Data1(const std::array<int, 4> &_lat_dim) : lat_dim(_lat_dim) {
+    array = std::vector<MatrixType>(lat_dim[0] * lat_dim[1] * lat_dim[2] *
+                                    lat_dim[3] * 4);
   }
+
+  const MatrixType &operator[](int index) const { return array[index]; }
+  MatrixType &operator[](int index) { return array[index]; }
 
   template <class FilePattern, class precision>
   void fill_array(std::vector<precision> &data, FilePattern file_pattern) {
     MatrixType A;
     std::vector<double> matrix_data(MatrixType::data_size);
+    data_pattern_type data_pattern(lat_dim);
     for (auto lat_coord : data_pattern.get_multi_index()) {
       for (int mu = 0; mu < data_pattern.lat_dim.size(); mu++) {
         for (int element_num = 0; element_num < MatrixType::data_size;
@@ -110,6 +115,7 @@ public:
     std::vector<float> float_v;
     std::vector<double> double_v;
     stream.ignore(bytes_skip);
+    data_pattern_type data_pattern(lat_dim);
     if (file_precision == std::string_view("float")) {
       float_v.resize(data_pattern.get_data_size() * MatrixType::data_size);
       if (!stream.read((char *)&float_v[0],
@@ -179,6 +185,7 @@ public:
   template <class FilePattern>
   void fill_data_to_write(std::vector<double> &data, FilePattern file_pattern) {
     std::vector<double> matrix_data(MatrixType::data_size);
+    data_pattern_type data_pattern(lat_dim);
     for (auto lat_coord : data_pattern.get_multi_index()) {
       for (int mu = 0; mu < data_pattern.lat_dim.size(); mu++) {
         data_pattern.lat_coord = lat_coord;
@@ -195,6 +202,7 @@ public:
 
   template <class FilePattern>
   void write_data(std::string file_path, FilePattern file_pattern) {
+    data_pattern_type data_pattern(lat_dim);
     std::vector<double> data(data_pattern.get_data_size() *
                              MatrixType::data_size);
     fill_data_to_write(data, file_pattern);
@@ -266,7 +274,7 @@ void read_data_convert(Data1<DataPattern, su3> &data, std::string file_path,
                        std::string conf_format, int bytes_skip,
                        std::string file_precision, bool convert) {
   if (convert) {
-    Data1<DataPattern, su3> data_from_file(data.data_pattern);
+    Data1<DataPattern, su3> data_from_file(data.lat_dim);
     read_data(data_from_file, file_path, conf_format, bytes_skip,
               file_precision);
     data_convert(data_from_file.array, data.array);

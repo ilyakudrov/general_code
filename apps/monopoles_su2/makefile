@@ -13,4 +13,4 @@ EIGH_PATH="/home/ilya/soft/source/eigen-master"
 TARGETS=monopoles_su2
 
 $(TARGETS): %: %.cpp $(OBJFILES) $(HEADERFILES)
-	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -fopenmp -o $@_$(ARCH)
+	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o $@_$(ARCH)
