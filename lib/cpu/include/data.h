@@ -221,19 +221,13 @@ void read_data(DataType &data, std::string file_path, std::string conf_format,
                int bytes_skip, std::string file_precision) {
 
   if (conf_format == std::string_view("lexicographical")) {
-    FilePatternLexicographical<DataType::data_pattern_type::N,
-                               typename DataType::matrix_type>
-        file_pattern;
+    FilePatternLexicographical<4, typename DataType::matrix_type> file_pattern;
     data.read_data(file_path, file_pattern, bytes_skip, file_precision);
   } else if (conf_format == std::string_view("qcdstag")) {
-    FilePatternQCDSTAG<DataType::data_pattern_type::N,
-                       typename DataType::matrix_type>
-        file_pattern;
+    FilePatternQCDSTAG<4, typename DataType::matrix_type> file_pattern;
     data.read_data(file_path, file_pattern, bytes_skip, file_precision);
   } else if (conf_format == std::string_view("ildg")) {
-    FilePatternILDG<DataType::data_pattern_type::N,
-                    typename DataType::matrix_type>
-        file_pattern;
+    FilePatternILDG<4, typename DataType::matrix_type> file_pattern;
     data.read_data(file_path, file_pattern, bytes_skip, file_precision);
   } else
     std::cout << "read_data wrong conf format" << std::endl;

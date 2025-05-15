@@ -93,8 +93,8 @@ int main(int argc, char *argv[]) {
   conf1.array.shrink_to_fit();
 
   std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  Data::Data1<DataPatternLexicographical<4>, MATRIX_TYPE> data_indexed(
-      (DataPatternLexicographical<4>(lat_dim)));
+  Data::Data1<DataPatternLexicographical, MATRIX_TYPE> data_indexed(
+      (DataPatternLexicographical(lat_dim)));
   Data::read_data_convert(data_indexed, conf_path1, "qcdstag", 0, "double", 1);
 
   start_time = omp_get_wtime();
@@ -117,8 +117,8 @@ int main(int argc, char *argv[]) {
   data_indexed.write_data("../../confs/test/conf_test",
                           file_pattern_lexicographical);
 
-  Data::Data1<DataPatternLexicographical<4>, MATRIX_TYPE> data_indexed1(
-      (DataPatternLexicographical<4>(lat_dim)));
+  Data::Data1<DataPatternLexicographical, MATRIX_TYPE> data_indexed1(
+      (DataPatternLexicographical(lat_dim)));
   Data::read_data_convert(data_indexed1, "../../confs/test/conf_test",
                           "lexicographical", 0, "double", 0);
 

@@ -65,84 +65,85 @@ template <int dim> struct multi_index_t {
   auto end() const { return typename iterator::sentinel_t{}; }
 };
 
-template <int N_dim> class DataPatternLexicographical {
+// class for indexing place of matrix in vector of data in four dimensions
+// order of coordinates from the fastest running to the slowest is
+// mu, x, y, z, t
+class DataPatternLexicographical {
 public:
-  constexpr static int N = N_dim;
-  std::array<int, N_dim> lat_dim;
-  std::array<int, N_dim> lat_coord;
+  std::array<int, 4> lat_dim;
+  std::array<int, 4> lat_coord;
+  int size1;
+  int size2;
 
-  DataPatternLexicographical(const std::array<int, N_dim> &lattice_dimension) {
-    lat_dim = lattice_dimension;
+  DataPatternLexicographical(const std::array<int, 4> &_lat_dim)
+      : lat_dim(_lat_dim) {
+    lat_coord = {0, 0, 0, 0};
+    size1 = lat_dim[0] * lat_dim[1];
+    size2 = lat_dim[0] * lat_dim[1] * lat_dim[2];
   }
 
   int get_data_size() const {
-    int size = 1;
-    for (int i = 0; i < N_dim; i++) {
-      size *= lat_dim[i];
-    }
-    return size * N_dim;
+    return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3] * 4;
   }
 
-  void move_forward(int length, int mu) const {
+  void move_forward(int length, int mu) {
     lat_coord[mu] = (lat_coord[mu] + length) % lat_dim[mu];
   }
 
-  void move_backward(int length, int mu) const {
+  void move_backward(int length, int mu) {
     lat_coord[mu] = (lat_coord[mu] - length + lat_dim[mu]) % lat_dim[mu];
   }
 
+  // place of site if link direction is neglected, indices run as x, y, z ,t
   int get_index_site() const {
-    int index = 0;
-    int size = 1;
-    for (int i = 0; i < N_dim; i++) {
-      index += lat_coord[i] * size;
-      size *= lat_dim[i];
-    }
-    return index;
+    return size2 * lat_coord[3] + size1 * lat_coord[2] +
+           lat_dim[0] * lat_coord[1] + lat_coord[0];
   }
 
+  // place of link in vector of data
   int get_index_link(int mu) const { return get_index_site() * 4 + mu; }
 
-  multi_index_t<N_dim> get_multi_index() {
-    return multi_index_t<N_dim>(lat_dim);
-  }
+  multi_index_t<4> get_multi_index() { return multi_index_t<4>(lat_dim); }
 };
 
-// template <int N_dim> class DataPatternSeparateDir {
-// public:
-//   std::array<int, N_dim> lat_dim;
-//   std::array<int, N_dim> lat_coord;
+// class for indexing place of matrix in vector of data in four dimensions
+// order of coordinates from the fastest running to the slowest is
+// x, y, z, t, mu
+class DataPatternSeparateDir {
+public:
+  std::array<int, 4> lat_dim;
+  std::array<int, 4> lat_coord;
+  int size1;
+  int size2;
+  int size3;
 
-//   DataPatternSeparateDir(std::array<int, N_dim> &lattice_dimension) {
-//     lat_dim = lattice_dimension;
-//   }
+  DataPatternSeparateDir(const std::array<int, 4> &_lat_dim)
+      : lat_dim(_lat_dim) {
+    lat_coord = {0, 0, 0, 0};
+    size1 = lat_dim[0] * lat_dim[1];
+    size2 = lat_dim[0] * lat_dim[1] * lat_dim[2];
+    size3 = lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3];
+  }
 
-//   inline void move_forward(int length, int mu) {
-//     lat_coord[mu] = (lat_coord[mu] + length) % lat_dim[mu];
-//   }
+  inline void move_forward(int length, int mu) {
+    lat_coord[mu] = (lat_coord[mu] + length) % lat_dim[mu];
+  }
 
-//   inline void move_backward(int length, int mu) {
-//     lat_coord[mu] = (lat_coord[mu] - length + lat_dim[mu]) % lat_dim[mu];
-//   }
+  inline void move_backward(int length, int mu) {
+    lat_coord[mu] = (lat_coord[mu] - length + lat_dim[mu]) % lat_dim[mu];
+  }
 
-//   inline int get_index_site() {
-//     int index = 0;
-//     int size = 1;
-//     for (int i = 0; i < N_dim; i++) {
-//       index += lat_coord[i] * size;
-//       size *= lat_dim[i];
-//     }
-//     return index;
-//   }
+  // place of site if link direction is neglected, indices run as x, y, z ,t
+  int get_index_site() const {
+    return size2 * lat_coord[3] + size1 * lat_coord[2] +
+           lat_dim[0] * lat_coord[1] + lat_coord[0];
+  }
 
-//   inline int get_index_link(int mu) {
-//     int size = 1;
-//     for (int i = 0; i < N_dim; i++) {
-//       size *= lat_dim[i];
-//     }
-//     return get_index_site(lat_coord) + mu * size;
-//   }
-// };
+  // place of link in vector of data
+  int get_index_link(int mu) const { return get_index_site() + mu * size3; }
+
+  multi_index_t<4> get_multi_index() { return multi_index_t<4>(lat_dim); }
+};
 
 template <int N_dim, class MatrixType> class FilePatternLexicographical {
 public:
