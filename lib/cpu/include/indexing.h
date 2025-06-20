@@ -82,8 +82,16 @@ public:
     size2 = lat_dim[0] * lat_dim[1] * lat_dim[2];
   }
 
+  DataPatternLexicographical(const DataPatternLexicographical &_data_pattern)
+      : lat_dim(_data_pattern.lat_dim), lat_coord(_data_pattern.lat_coord),
+        size1(_data_pattern.size1), size2(_data_pattern.size2) {}
+
   int get_data_size() const {
     return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3] * 4;
+  }
+
+  int get_lattice_size() const {
+    return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3];
   }
 
   void move_forward(int length, int mu) {
@@ -94,10 +102,21 @@ public:
     lat_coord[mu] = (lat_coord[mu] - length + lat_dim[mu]) % lat_dim[mu];
   }
 
+  // move when length can be negative
+  inline void move(int length, int mu) {
+    lat_coord[mu] = (lat_coord[mu] + length + lat_dim[mu]) % lat_dim[mu];
+  }
+
   // place of site if link direction is neglected, indices run as x, y, z ,t
   int get_index_site() const {
     return size2 * lat_coord[3] + size1 * lat_coord[2] +
            lat_dim[0] * lat_coord[1] + lat_coord[0];
+  }
+
+  // place of site if link direction is neglected and there were only x, y, z
+  // coordinates
+  int get_index_site_spacial() const {
+    return size1 * lat_coord[2] + lat_dim[0] * lat_coord[1] + lat_coord[0];
   }
 
   // place of link in vector of data
@@ -125,8 +144,16 @@ public:
     size3 = lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3];
   }
 
+  DataPatternSeparateDir(const DataPatternSeparateDir &_data_pattern)
+      : lat_dim(_data_pattern.lat_dim), lat_coord(_data_pattern.lat_coord),
+        size1(_data_pattern.size1), size2(_data_pattern.size2) {}
+
   int get_data_size() const {
     return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3] * 4;
+  }
+
+  int get_lattice_size() const {
+    return lat_dim[0] * lat_dim[1] * lat_dim[2] * lat_dim[3];
   }
 
   inline void move_forward(int length, int mu) {
@@ -137,10 +164,21 @@ public:
     lat_coord[mu] = (lat_coord[mu] - length + lat_dim[mu]) % lat_dim[mu];
   }
 
-  // place of site if link direction is neglected, indices run as x, y, z ,t
+  // move when length can be negative
+  inline void move(int length, int mu) {
+    lat_coord[mu] = (lat_coord[mu] + length + lat_dim[mu]) % lat_dim[mu];
+  }
+
+  // place of site if link direction is neglected, indices run as x, y, z, t
   int get_index_site() const {
     return size2 * lat_coord[3] + size1 * lat_coord[2] +
            lat_dim[0] * lat_coord[1] + lat_coord[0];
+  }
+
+  // place of site if link direction is neglected and there were only x, y, z
+  // coordinates
+  int get_index_site_spacial() const {
+    return size1 * lat_coord[2] + lat_dim[0] * lat_coord[1] + lat_coord[0];
   }
 
   // place of link in vector of data

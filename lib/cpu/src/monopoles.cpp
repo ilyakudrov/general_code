@@ -1,4 +1,6 @@
 #include "../include/monopoles.h"
+#include "../include/data.h"
+#include "../include/indexing.h"
 
 #include <algorithm>
 #include <cmath>
@@ -38,6 +40,161 @@
   (dir - 1) * x_size *y_size *z_size *t_size * 4 +                             \
       (t) * x_size *y_size *z_size * 4 + (z) * x_size *y_size * 4 +            \
       (y) * x_size * 4 + (x) * 4
+
+void get_current(std::vector<std::vector<double>> &monopole_plaket, double *J,
+                 DataPatternLexicographical &data_pattern) {
+  double j0, j1, j2, j3;
+  DataPatternLexicographical data_pattern_x(data_pattern);
+  data_pattern_x.move_forward(1, 0);
+  DataPatternLexicographical data_pattern_y(data_pattern);
+  data_pattern_y.move_forward(1, 1);
+  DataPatternLexicographical data_pattern_z(data_pattern);
+  data_pattern_z.move_forward(1, 2);
+  DataPatternLexicographical data_pattern_t(data_pattern);
+  data_pattern_t.move_forward(1, 3);
+
+  int index;
+  data_pattern.move_forward(1, 3);
+  data_pattern_x.move_forward(1, 3);
+  data_pattern_y.move_forward(1, 3);
+  data_pattern_z.move_forward(1, 3);
+  index = data_pattern.get_index_site();
+  j3 = monopole_plaket[3][data_pattern_x.get_index_site()] -
+       monopole_plaket[3][index] -
+       (monopole_plaket[1][data_pattern_y.get_index_site()] -
+        monopole_plaket[1][index]) +
+       monopole_plaket[0][data_pattern_z.get_index_site()] -
+       monopole_plaket[0][index];
+  data_pattern.move_backward(1, 3);
+  data_pattern_x.move_backward(1, 3);
+  data_pattern_y.move_backward(1, 3);
+  data_pattern_z.move_backward(1, 3);
+  data_pattern.move_forward(1, 0);
+  data_pattern_t.move_forward(1, 0);
+  data_pattern_y.move_forward(1, 0);
+  data_pattern_z.move_forward(1, 0);
+  index = data_pattern.get_index_site();
+  j0 = -(monopole_plaket[3][data_pattern_t.get_index_site()] -
+         monopole_plaket[3][index]) -
+       (monopole_plaket[5][data_pattern_y.get_index_site()] -
+        monopole_plaket[5][index]) +
+       monopole_plaket[4][data_pattern_z.get_index_site()] -
+       monopole_plaket[4][index];
+  data_pattern.move_backward(1, 0);
+  data_pattern_t.move_backward(1, 0);
+  data_pattern_y.move_backward(1, 0);
+  data_pattern_z.move_backward(1, 0);
+  data_pattern.move_forward(1, 1);
+  data_pattern_t.move_forward(1, 1);
+  data_pattern_x.move_forward(1, 1);
+  data_pattern_z.move_forward(1, 1);
+  index = data_pattern.get_index_site();
+  j1 = monopole_plaket[1][data_pattern_t.get_index_site()] -
+       monopole_plaket[1][index] +
+       monopole_plaket[5][data_pattern_x.get_index_site()] -
+       monopole_plaket[5][index] -
+       (monopole_plaket[2][data_pattern_z.get_index_site()] -
+        monopole_plaket[2][index]);
+  data_pattern.move_backward(1, 1);
+  data_pattern_t.move_backward(1, 1);
+  data_pattern_x.move_backward(1, 1);
+  data_pattern_z.move_backward(1, 1);
+  data_pattern.move_forward(1, 2);
+  data_pattern_t.move_forward(1, 2);
+  data_pattern_x.move_forward(1, 2);
+  data_pattern_y.move_forward(1, 2);
+  index = data_pattern.get_index_site();
+  j2 = -(monopole_plaket[0][data_pattern_t.get_index_site()] -
+         monopole_plaket[0][index]) -
+       (monopole_plaket[4][data_pattern_x.get_index_site()] -
+        monopole_plaket[4][index]) +
+       monopole_plaket[2][data_pattern_y.get_index_site()] -
+       monopole_plaket[2][index];
+  data_pattern.move_backward(1, 2);
+  data_pattern_t.move_backward(1, 2);
+  data_pattern_x.move_backward(1, 2);
+  data_pattern_y.move_backward(1, 2);
+
+  J[0] = j0 / 2 / M_PI;
+  J[1] = j1 / 2 / M_PI;
+  J[2] = j2 / 2 / M_PI;
+  J[3] = j3 / 2 / M_PI;
+}
+
+void get_current_singular(std::vector<std::vector<int>> &monopole_plaket,
+                          double *J, DataPatternLexicographical &data_pattern) {
+  double j0, j1, j2, j3;
+  DataPatternLexicographical data_pattern_x(data_pattern);
+  data_pattern_x.move_forward(1, 0);
+  DataPatternLexicographical data_pattern_y(data_pattern);
+  data_pattern_y.move_forward(1, 1);
+  DataPatternLexicographical data_pattern_z(data_pattern);
+  data_pattern_z.move_forward(1, 2);
+  DataPatternLexicographical data_pattern_t(data_pattern);
+  data_pattern_t.move_forward(1, 3);
+
+  int index;
+  data_pattern.move_forward(1, 3);
+  data_pattern_x.move_forward(1, 3);
+  data_pattern_y.move_forward(1, 3);
+  data_pattern_z.move_forward(1, 3);
+  index = data_pattern.get_index_site();
+  j3 = -(monopole_plaket[3][data_pattern_x.get_index_site()] -
+         monopole_plaket[3][index] -
+         (monopole_plaket[1][data_pattern_y.get_index_site()] -
+          monopole_plaket[1][index]) +
+         monopole_plaket[0][data_pattern_z.get_index_site()] -
+         monopole_plaket[0][index]);
+  data_pattern.move_backward(1, 3);
+  data_pattern_x.move_backward(1, 3);
+  data_pattern_y.move_backward(1, 3);
+  data_pattern_z.move_backward(1, 3);
+  data_pattern.move_forward(1, 0);
+  data_pattern_t.move_forward(1, 0);
+  data_pattern_y.move_forward(1, 0);
+  data_pattern_z.move_forward(1, 0);
+  index = data_pattern.get_index_site();
+  j0 = -(-(monopole_plaket[3][data_pattern_t.get_index_site()] -
+           monopole_plaket[3][index]) -
+         (monopole_plaket[5][data_pattern_y.get_index_site()] -
+          monopole_plaket[5][index]) +
+         monopole_plaket[4][data_pattern_z.get_index_site()] -
+         monopole_plaket[4][index]);
+  data_pattern.move_backward(1, 0);
+  data_pattern_t.move_backward(1, 0);
+  data_pattern_y.move_backward(1, 0);
+  data_pattern_z.move_backward(1, 0);
+  data_pattern.move_forward(1, 1);
+  data_pattern_t.move_forward(1, 1);
+  data_pattern_x.move_forward(1, 1);
+  data_pattern_z.move_forward(1, 1);
+  index = data_pattern.get_index_site();
+  j1 = -(monopole_plaket[1][data_pattern_t.get_index_site()] -
+         monopole_plaket[1][index] +
+         monopole_plaket[5][data_pattern_x.get_index_site()] -
+         monopole_plaket[5][index] -
+         (monopole_plaket[2][data_pattern_z.get_index_site()] -
+          monopole_plaket[2][index]));
+  data_pattern.move_backward(1, 1);
+  data_pattern_t.move_backward(1, 1);
+  data_pattern_x.move_backward(1, 1);
+  data_pattern_z.move_backward(1, 1);
+  data_pattern.move_forward(1, 2);
+  data_pattern_t.move_forward(1, 2);
+  data_pattern_x.move_forward(1, 2);
+  data_pattern_y.move_forward(1, 2);
+  index = data_pattern.get_index_site();
+  j2 = -(-(monopole_plaket[0][data_pattern_t.get_index_site()] -
+           monopole_plaket[0][index]) -
+         (monopole_plaket[4][data_pattern_x.get_index_site()] -
+          monopole_plaket[4][index]) +
+         monopole_plaket[2][data_pattern_y.get_index_site()] -
+         monopole_plaket[2][index]);
+  data_pattern.move_backward(1, 2);
+  data_pattern_t.move_backward(1, 2);
+  data_pattern_x.move_backward(1, 2);
+  data_pattern_y.move_backward(1, 2);
+}
 
 // read configuration of angles
 std::vector<double> read_angles_float_fortran(std::string &file_path) {
@@ -192,7 +349,6 @@ calculate_monopole_plaket(std::vector<double> &angles) {
   int data_size = x_size * y_size * z_size * t_size;
   std::vector<std::vector<double>> plakets(6, std::vector<double>(data_size));
   link1 link(x_size, y_size, z_size, t_size);
-
   int count = 0;
   for (int mu = 0; mu < 4; mu++) {
     link.move_dir(mu);
@@ -203,6 +359,196 @@ calculate_monopole_plaket(std::vector<double> &angles) {
 
       SPACE_ITER_END
 
+      count++;
+    }
+  }
+  return plakets;
+}
+
+std::vector<std::vector<std::vector<double>>> calculate_monopole_plaket(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<std::vector<double>>> plakets(
+      3, std::vector<std::vector<double>>(
+             6, std::vector<double>(data_pattern.get_lattice_size())));
+  int count = 0;
+  int index;
+  double plaket;
+  su3_angles A;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+        for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+          for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+            for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+              data_pattern.lat_coord = {x, y, z, t};
+              index = data_pattern.get_index_site();
+              double plaket = 0;
+              A = conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_forward(1, mu);
+              A = A * conf[data_pattern.get_index_link(nu)];
+              data_pattern.move_backward(1, mu);
+              data_pattern.move_forward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_backward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(nu)];
+              for (int i = 0; i < 3; i++) {
+                plaket = A.matrix[i];
+                while (plaket > M_PI) {
+                  plaket -= 2 * M_PI;
+                }
+                while (plaket < -M_PI) {
+                  plaket += 2 * M_PI;
+                }
+                plakets[i][count][index] = plaket;
+              }
+            }
+          }
+        }
+      }
+      count++;
+    }
+  }
+  return plakets;
+}
+
+std::vector<std::vector<double>> calculate_monopole_plaket(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<double>> plakets(
+      6, std::vector<double>(data_pattern.get_lattice_size()));
+  int count = 0;
+  int index;
+  double plaket;
+  abelian A;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+        for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+          for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+            for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+              data_pattern.lat_coord = {x, y, z, t};
+              index = data_pattern.get_index_site();
+              double plaket = 0;
+              A = conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_forward(1, mu);
+              A = A * conf[data_pattern.get_index_link(nu)];
+              data_pattern.move_backward(1, mu);
+              data_pattern.move_forward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_backward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(nu)];
+              plaket = A.phi;
+              while (plaket > M_PI) {
+                plaket -= 2 * M_PI;
+              }
+              while (plaket < -M_PI) {
+                plaket += 2 * M_PI;
+              }
+              plakets[count][index] = plaket;
+            }
+          }
+        }
+      }
+      count++;
+    }
+  }
+  return plakets;
+}
+
+std::vector<std::vector<std::vector<int>>> calculate_monopole_plaket_singular(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<std::vector<int>>> plakets(
+      3, std::vector<std::vector<int>>(
+             6, std::vector<int>(data_pattern.get_lattice_size())));
+  int count = 0;
+  int index;
+  double plaket;
+  int plaket_singular;
+  su3_angles A;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+        for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+          for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+            for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+              data_pattern.lat_coord = {x, y, z, t};
+              index = data_pattern.get_index_site();
+              double plaket = 0;
+              A = conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_forward(1, mu);
+              A = A * conf[data_pattern.get_index_link(nu)];
+              data_pattern.move_backward(1, mu);
+              data_pattern.move_forward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_backward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(nu)];
+              for (int i = 0; i < 3; i++) {
+                plaket = A.matrix[i];
+                plaket_singular = 0;
+                while (plaket > M_PI) {
+                  plaket -= 2 * M_PI;
+                  plaket_singular++;
+                }
+                while (plaket < -M_PI) {
+                  plaket += 2 * M_PI;
+                  plaket_singular--;
+                }
+                plakets[i][count][index] = plaket_singular;
+              }
+            }
+          }
+        }
+      }
+      count++;
+    }
+  }
+  return plakets;
+}
+
+std::vector<std::vector<int>> calculate_monopole_plaket_singular(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<int>> plakets(
+      6, std::vector<int>(data_pattern.get_lattice_size()));
+  int count = 0;
+  int index;
+  double plaket;
+  int plaket_singular;
+  abelian A;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+        for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+          for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+            for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+              data_pattern.lat_coord = {x, y, z, t};
+              index = data_pattern.get_index_site();
+              double plaket = 0;
+              A = conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_forward(1, mu);
+              A = A * conf[data_pattern.get_index_link(nu)];
+              data_pattern.move_backward(1, mu);
+              data_pattern.move_forward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(mu)];
+              data_pattern.move_backward(1, nu);
+              A = A ^ conf[data_pattern.get_index_link(nu)];
+              plaket = A.phi;
+              plaket_singular = 0;
+              while (plaket > M_PI) {
+                plaket -= 2 * M_PI;
+                plaket_singular++;
+              }
+              while (plaket < -M_PI) {
+                plaket += 2 * M_PI;
+                plaket_singular--;
+              }
+              plakets[count][index] = plaket_singular;
+            }
+          }
+        }
+      }
       count++;
     }
   }
@@ -232,6 +578,53 @@ calculate_monopole_plaket_singular(std::vector<double> &angles) {
   return singular;
 }
 
+std::vector<std::vector<int>>
+calculate_monopole_plaket_singular(std::vector<double> &angles,
+                                   DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<std::vector<int>> singular(6, std::vector<int>(data_size));
+  int count = 0;
+  int index;
+  double plaket;
+  int plaket_singular;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int nu = mu + 1; nu < 4; nu++) {
+      for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+        for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+          for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+            for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+              data_pattern.lat_coord = {x, y, z, t};
+              index = data_pattern.get_index_site();
+              plaket = 0;
+              plaket = angles[data_pattern.get_index_link(mu)];
+              data_pattern.move_forward(1, mu);
+              plaket += angles[data_pattern.get_index_link(nu)];
+              data_pattern.move_backward(1, mu);
+              data_pattern.move_forward(1, nu);
+              plaket -= angles[data_pattern.get_index_link(mu)];
+              data_pattern.move_backward(1, nu);
+              plaket -= angles[data_pattern.get_index_link(nu)];
+              plaket_singular = 0;
+              while (plaket > M_PI) {
+                plaket -= 2 * M_PI;
+                plaket_singular++;
+              }
+              while (plaket < -M_PI) {
+                plaket += 2 * M_PI;
+                plaket_singular--;
+              }
+              singular[count][index] = plaket_singular;
+            }
+          }
+        }
+      }
+
+      count++;
+    }
+  }
+  return singular;
+}
+
 std::vector<double> calculate_current(std::vector<double> &angles) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
   link1 link(x_size, y_size, z_size, t_size);
@@ -247,6 +640,94 @@ std::vector<double> calculate_current(std::vector<double> &angles) {
 
   SPACE_ITER_END
 
+  return J;
+}
+
+std::vector<std::vector<double>> calculate_current(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<std::vector<double>>> monopole_plakets =
+      make_monopole_plakets(conf);
+  std::vector<std::vector<double>> J(
+      3, std::vector<double>(data_pattern.get_data_size()));
+  for (int i = 0; i < 3; i++) {
+    for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+      for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+        for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+          for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+            data_pattern.lat_coord = {x, y, z, t};
+            get_current(monopole_plakets[i],
+                        &J[i][data_pattern.get_index_link(0)], data_pattern);
+          }
+        }
+      }
+    }
+  }
+  return J;
+}
+
+std::vector<double> calculate_current(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<double>> monopole_plakets =
+      calculate_monopole_plaket(conf);
+  std::vector<double> J(data_pattern.get_data_size());
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          get_current(monopole_plakets, &J[data_pattern.get_index_link(0)],
+                      data_pattern);
+        }
+      }
+    }
+  }
+  return J;
+}
+
+std::vector<std::vector<double>> calculate_current_singular(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<std::vector<int>>> monopole_plakets_singular =
+      make_monopole_plakets_singular(conf);
+  std::vector<std::vector<double>> J(
+      3, std::vector<double>(data_pattern.get_data_size()));
+  for (int i = 0; i < 3; i++) {
+    for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+      for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+        for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+          for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+            data_pattern.lat_coord = {x, y, z, t};
+            get_current_singular(monopole_plakets_singular[i],
+                                 &J[i][data_pattern.get_index_link(0)],
+                                 data_pattern);
+          }
+        }
+      }
+    }
+  }
+  return J;
+}
+
+std::vector<double> calculate_current_singular(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::vector<int>> monopole_plaket_singular =
+      calculate_monopole_plaket_singular(conf);
+  std::vector<double> J(data_pattern.get_data_size());
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          get_current_singular(monopole_plaket_singular,
+                               &J[data_pattern.get_index_link(0)],
+                               data_pattern);
+        }
+      }
+    }
+  }
   return J;
 }
 
@@ -281,6 +762,24 @@ std::vector<double> calculate_current_monopole_plakets(
 
   SPACE_ITER_END
 
+  return J;
+}
+
+std::vector<double> calculate_current_monopole_plakets(
+    std::vector<std::vector<double>> monopole_plakets,
+    DataPatternLexicographical data_pattern) {
+  std::vector<double> J(data_pattern.get_data_size());
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          get_current(monopole_plakets, &J[data_pattern.get_index_link(0)],
+                      data_pattern);
+        }
+      }
+    }
+  }
   return J;
 }
 
@@ -342,6 +841,48 @@ make_monopole_plakets(std::vector<std::vector<double>> &angles) {
   return monopole_plakets;
 }
 
+std::vector<std::vector<std::vector<double>>> make_monopole_plakets(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  std::vector<std::vector<std::vector<double>>> monopole_plakets =
+      calculate_monopole_plaket(conf);
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < monopole_plakets[0].size(); j++) {
+    for (int k = 0; k < monopole_plakets[0][0].size(); k++) {
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += monopole_plakets[i][j][k];
+      }
+      if (sum >= M_PI) {
+        place = 0;
+        extremal = monopole_plakets[0][j][k];
+        if (monopole_plakets[1][j][k] >= extremal) {
+          extremal = monopole_plakets[1][j][k];
+          place = 1;
+        }
+        if (monopole_plakets[2][j][k] >= extremal) {
+          place = 2;
+        }
+        monopole_plakets[place][j][k] -= 2 * M_PI;
+      }
+      if (sum <= -M_PI) {
+        place = 0;
+        extremal = monopole_plakets[0][j][k];
+        if (monopole_plakets[1][j][k] <= extremal) {
+          extremal = monopole_plakets[1][j][k];
+          place = 1;
+        }
+        if (monopole_plakets[2][j][k] <= extremal) {
+          place = 2;
+        }
+        monopole_plakets[place][j][k] += 2 * M_PI;
+      }
+    }
+  }
+  return monopole_plakets;
+}
+
 std::vector<std::vector<std::vector<int>>>
 make_monopole_plakets_singular(std::vector<std::vector<double>> &angles) {
   link1 link(x_size, y_size, z_size, t_size);
@@ -397,6 +938,48 @@ make_monopole_plakets_singular(std::vector<std::vector<double>> &angles) {
     }
   }
 
+  return dirac_plakets;
+}
+
+std::vector<std::vector<std::vector<int>>> make_monopole_plakets_singular(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf) {
+  std::vector<std::vector<std::vector<int>>> dirac_plakets =
+      calculate_monopole_plaket_singular(conf);
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < dirac_plakets[0].size(); j++) {
+    for (int k = 0; k < dirac_plakets[0][0].size(); k++) {
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += dirac_plakets[i][j][k];
+      }
+      if (sum >= 1) {
+        place = 0;
+        extremal = dirac_plakets[0][j][k];
+        if (dirac_plakets[1][j][k] >= extremal) {
+          extremal = dirac_plakets[1][j][k];
+          place = 1;
+        }
+        if (dirac_plakets[2][j][k] >= extremal) {
+          place = 2;
+        }
+        dirac_plakets[place][j][k] -= 1;
+      }
+      if (sum <= -1) {
+        place = 0;
+        extremal = dirac_plakets[0][j][k];
+        if (dirac_plakets[1][j][k] <= extremal) {
+          extremal = dirac_plakets[1][j][k];
+          place = 1;
+        }
+        if (dirac_plakets[2][j][k] <= extremal) {
+          place = 2;
+        }
+        dirac_plakets[place][j][k] += 1;
+      }
+    }
+  }
   return dirac_plakets;
 }
 
@@ -469,6 +1052,55 @@ void make_plakets_both(
   dirac_plakets = std::move(dirac_plakets_tmp);
 }
 
+void make_plakets_both(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf,
+    std::vector<std::vector<std::vector<double>>> &monopole_plakets,
+    std::vector<std::vector<std::vector<int>>> &dirac_plakets) {
+  std::vector<std::vector<std::vector<double>>> monopole_plakets_tmp =
+      calculate_monopole_plaket(conf);
+  std::vector<std::vector<std::vector<int>>> dirac_plakets_tmp =
+      calculate_monopole_plaket_singular(conf);
+  double sum;
+  int place;
+  double extremal;
+  for (int j = 0; j < monopole_plakets_tmp[0].size(); j++) {
+    for (int k = 0; k < monopole_plakets_tmp[0][0].size(); k++) {
+      sum = 0;
+      for (int i = 0; i < 3; i++) {
+        sum += monopole_plakets_tmp[i][j][k];
+      }
+      if (sum >= M_PI) {
+        place = 0;
+        extremal = monopole_plakets_tmp[0][j][k];
+        if (monopole_plakets_tmp[1][j][k] >= extremal) {
+          extremal = monopole_plakets_tmp[1][j][k];
+          place = 1;
+        }
+        if (monopole_plakets_tmp[2][j][k] >= extremal) {
+          place = 2;
+        }
+        monopole_plakets_tmp[place][j][k] -= 2 * M_PI;
+        dirac_plakets_tmp[place][j][k] += 1;
+      }
+      if (sum <= -M_PI) {
+        place = 0;
+        extremal = monopole_plakets_tmp[0][j][k];
+        if (monopole_plakets_tmp[1][j][k] <= extremal) {
+          extremal = monopole_plakets_tmp[1][j][k];
+          place = 1;
+        }
+        if (monopole_plakets_tmp[2][j][k] <= extremal) {
+          place = 2;
+        }
+        monopole_plakets_tmp[place][j][k] += 2 * M_PI;
+        dirac_plakets_tmp[place][j][k] -= 1;
+      }
+    }
+  }
+  monopole_plakets = std::move(monopole_plakets_tmp);
+  dirac_plakets = std::move(dirac_plakets_tmp);
+}
+
 // returns 0 if no current has been found, direction +-1..4 if it has
 template <class T> int find_current(link1 &link, std::vector<T> &J) {
   for (int mu = 0; mu < 4; mu++) {
@@ -484,6 +1116,25 @@ template <class T> int find_current(link1 &link, std::vector<T> &J) {
   return 0;
 }
 
+template <class T>
+int find_current(const std::vector<T> &J,
+                 DataPatternLexicographical &data_pattern) {
+  int index;
+  for (int mu = 0; mu < 4; mu++) {
+    index = data_pattern.get_index_link(mu);
+    if ((J[index] > 0.3) || (J[index] < -0.3))
+      return mu + 1;
+  }
+  for (int mu = 0; mu < 4; mu++) {
+    data_pattern.move_backward(1, mu);
+    index = data_pattern.get_index_link(mu);
+    data_pattern.move_forward(1, mu);
+    if ((J[index] > 0.3) || (J[index] < -0.3))
+      return -mu - 1;
+  }
+  return 0;
+}
+
 // find all directions with current and add loops with that neighbours
 template <class T>
 std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
@@ -493,9 +1144,9 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
   loop *loop_tmp;
   link1 link(x_size, y_size, z_size, t_size);
   int J_tmp;
-
   // for all previously found sites of cluster find new sites with current
   for (int i = 0; i < neighbours.size(); i++) {
+    // std::cout << i << std::endl;
     // go to site
     link.go_update(neighbours[i]->coordinate[0], neighbours[i]->coordinate[1],
                    neighbours[i]->coordinate[2], neighbours[i]->coordinate[3]);
@@ -509,7 +1160,7 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
         loop_tmp = new loop(link);
         neighbours[i]->link.push_back(loop_tmp);
         neighbours[i]->charge.push_back(J_tmp);
-        neighbours.push_back(loop_tmp);
+        neighbours_new.push_back(loop_tmp);
         link.move(mu, -1);
       }
     }
@@ -519,33 +1170,87 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
         J_tmp = std::lround(J[link.place + mu]);
         J[link.place + mu] = 0.;
         loop_tmp = new loop(link);
-        // loop_tmp->link.push_back(neighbours[i]);
         neighbours[i]->link.push_back(loop_tmp);
         neighbours[i]->charge.push_back(J_tmp);
-        neighbours.push_back(loop_tmp);
+        neighbours_new.push_back(loop_tmp);
       }
       link.move(mu, 1);
     }
   }
+  return neighbours_new;
+}
 
+// find all directions with current and add loops with that neighbours
+template <class T>
+std::vector<loop_new *> find_paths(std::vector<loop_new *> &neighbours,
+                                   std::vector<T> &J,
+                                   DataPatternLexicographical &data_pattern) {
+  // std::vector for new sites with current
+  std::vector<loop_new *> neighbours_new;
+  loop_new *loop_tmp;
+  int J_tmp;
+  int index;
+  // for all previously found sites of cluster find new sites with current
+  for (int i = 0; i < neighbours.size(); i++) {
+    // go to site
+    data_pattern.lat_coord = neighbours[i]->coordinate;
+    // check all directions for a current
+    // if a current is found, add it to cluster and to std::vector of new sites
+    for (int mu = 0; mu < 4; mu++) {
+      index = data_pattern.get_index_link(mu);
+      if (J[index] > 0.3) {
+        J_tmp = std::lround(J[index]);
+        J[index] = 0.;
+        data_pattern.move_forward(1, mu);
+        loop_tmp = new loop_new(data_pattern.lat_coord);
+        neighbours[i]->nodes.push_back(loop_tmp);
+        neighbours[i]->charge.push_back(J_tmp);
+        neighbours_new.push_back(loop_tmp);
+        data_pattern.move_backward(1, mu);
+      }
+    }
+    for (int mu = 0; mu < 4; mu++) {
+      data_pattern.move_backward(1, mu);
+      index = data_pattern.get_index_link(mu);
+      if (J[index] < -0.3) {
+        J_tmp = std::lround(J[index]);
+        J[index] = 0.;
+        loop_tmp = new loop_new(data_pattern.lat_coord);
+        neighbours[i]->nodes.push_back(loop_tmp);
+        neighbours[i]->charge.push_back(J_tmp);
+        neighbours_new.push_back(loop_tmp);
+      }
+      data_pattern.move_forward(1, mu);
+    }
+  }
   return neighbours_new;
 }
 
 // find cluster which has site ll
 template <class T> void find_cluster(loop *ll, std::vector<T> &J) {
   std::vector<loop *> neighbours = {ll};
-
   // while find_path finds new sites with current
+  int count = 0;
   do {
     // find new sites with current and add them to loops
     neighbours = find_paths(neighbours, J);
   } while (neighbours.size() > 0);
 }
 
+template <class T>
+void find_cluster(loop_new *ll, std::vector<T> &J,
+                  DataPatternLexicographical &data_pattern) {
+  std::vector<loop_new *> neighbours = {ll};
+  // while find_path finds new sites with current
+  do {
+    // find new sites with current and add them to loops
+    neighbours = find_paths(neighbours, J, data_pattern);
+  } while (neighbours.size() > 0);
+}
+
 // find all clusters on a lattice not using recurrence
 template <class T> std::vector<loop *> calculate_clusters(std::vector<T> &J) {
   int dir1;
-
   std::vector<loop *> LL;
 
   link1 link(x_size, y_size, z_size, t_size);
@@ -569,12 +1274,47 @@ template <class T> std::vector<loop *> calculate_clusters(std::vector<T> &J) {
   return LL;
 }
 
+template <class T>
+std::vector<loop_new *>
+calculate_clusters(std::vector<T> &J,
+                   DataPatternLexicographical &data_pattern) {
+  int dir1;
+  std::vector<loop_new *> LL;
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          // find site with at least one non-zero current
+          dir1 = find_current(J, data_pattern);
+          // if there's a current
+          if (dir1 != 0) {
+            // create a new loop and add it to cluster std::vector
+            LL.push_back(new loop_new(data_pattern.lat_coord));
+            // start finding cluster starting at this point
+            find_cluster(LL[LL.size() - 1], J, data_pattern);
+          }
+        }
+      }
+    }
+  }
+  return LL;
+}
+
 // functions for obtaining information about clusters for testing
 void print_currents(loop *ll) {
   std::cout << ll->coordinate[0] << " " << ll->coordinate[1] << " "
             << ll->coordinate[2] << " " << ll->coordinate[3] << std::endl;
   for (int i = 0; i < ll->link.size(); i++) {
     print_currents(ll->link[i]);
+  }
+}
+
+void print_currents(loop_new *ll) {
+  std::cout << ll->coordinate[0] << " " << ll->coordinate[1] << " "
+            << ll->coordinate[2] << " " << ll->coordinate[3] << std::endl;
+  for (int i = 0; i < ll->nodes.size(); i++) {
+    print_currents(ll->nodes[i]);
   }
 }
 
@@ -597,6 +1337,19 @@ int cluster_length(loop *ll) {
 
   cluster_length_recurrent(ll, length);
 
+  return length;
+}
+
+void cluster_length_recurrent(loop_new *ll, int &length) {
+  for (int i = 0; i < ll->nodes.size(); i++) {
+    cluster_length_recurrent(ll->nodes[i], length);
+    length += abs(ll->charge[i]);
+  }
+}
+
+int cluster_length(loop_new *ll) {
+  int length = 0;
+  cluster_length_recurrent(ll, length);
   return length;
 }
 
@@ -624,6 +1377,26 @@ std::vector<int> length_mu(loop *ll) {
   return lengths_mu;
 }
 
+void length_mu_recurrent(loop_new *ll, std::vector<int> &lengths_mu) {
+  for (int i = 0; i < ll->nodes.size(); i++) {
+    length_mu_recurrent(ll->nodes[i], lengths_mu);
+    int mu = 0;
+    int difference;
+    do {
+      difference = ll->nodes[i]->coordinate[mu] - ll->coordinate[mu];
+      mu++;
+    } while (difference == 0);
+    mu--;
+    lengths_mu[mu] += ll->charge[i];
+  }
+}
+
+std::vector<int> length_mu(loop_new *ll) {
+  std::vector<int> lengths_mu = {0, 0, 0, 0};
+  length_mu_recurrent(ll, lengths_mu);
+  return lengths_mu;
+}
+
 void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu) {
   for (int i = 0; i < ll->link.size(); i++) {
     length_mu_recurrent(ll->link[i], lengths_mu);
@@ -644,6 +1417,31 @@ std::vector<int> currents_directions(loop *ll) {
 
   currents_directions_recurrent(ll, directions);
 
+  return directions;
+}
+
+void currents_directions_recurrent(loop_new *ll, std::vector<int> &directions) {
+  for (int i = 0; i < ll->nodes.size(); i++) {
+    currents_directions_recurrent(ll->nodes[i], directions);
+    int mu = 0;
+    int difference;
+    do {
+      difference = ll->nodes[i]->coordinate[mu] - ll->coordinate[mu];
+      mu++;
+    } while (difference == 0);
+    mu--;
+    if (mu == 3) {
+      directions[1] += abs(ll->charge[i]);
+    } else {
+      directions[0] += abs(ll->charge[i]);
+    }
+  }
+}
+
+std::vector<int> currents_directions(loop_new *ll) {
+  // [0] is spatial, [1] is temporal
+  std::vector<int> directions = {0, 0};
+  currents_directions_recurrent(ll, directions);
   return directions;
 }
 
@@ -789,9 +1587,15 @@ template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
                                         std::vector<double> &J);
 template void find_cluster(loop *ll, std::vector<double> &J);
 template std::vector<loop *> calculate_clusters(std::vector<double> &J);
+template std::vector<loop_new *>
+calculate_clusters(std::vector<double> &J,
+                   DataPatternLexicographical &data_pattern);
 
 template int find_current(link1 &link, std::vector<int> &J);
 template std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
                                         std::vector<int> &J);
 template void find_cluster(loop *ll, std::vector<int> &J);
 template std::vector<loop *> calculate_clusters(std::vector<int> &J);
+template std::vector<loop_new *>
+calculate_clusters(std::vector<int> &J,
+                   DataPatternLexicographical &data_pattern);

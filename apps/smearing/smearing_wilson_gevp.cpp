@@ -1,7 +1,7 @@
-#include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/smearing.h"
+#include "../../lib/cpu/include/wilson_loops.h"
 
 #include <ctime>
 #include <fstream>
@@ -9,8 +9,8 @@
 #include <omp.h>
 #include <sstream>
 
-#ifndef MATRIX_WILSON
-#define MATRIX_WILSON su2
+#ifndef MATRIX
+#define MATRIX su2
 #endif
 
 using namespace std;
@@ -39,8 +39,9 @@ int main(int argc, char *argv[]) {
   double smearing_HYP_time;
   double observables_time;
 
-  string conf_format_wilson;
-  string conf_path_wilson;
+  string conf_format;
+  string file_precision;
+  string conf_path;
   string path_wilson;
   string representation;
   double HYP_alpha1, HYP_alpha2, HYP_alpha3;
@@ -50,71 +51,72 @@ int main(int argc, char *argv[]) {
   int L_spat, L_time;
   int calculation_APE_start, calculation_step_APE;
   int T_min, T_max, R_min, R_max;
-  int bytes_skip_wilson = 0;
-  bool convert_wilson = false;
+  int bytes_skip = 0;
+  bool convert = false;
   int N_dir = 1;
   for (int i = 1; i < argc; i++) {
-    if (string(argv[i]) == "-conf_format_wilson") {
-      conf_format_wilson = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip_wilson") {
-      bytes_skip_wilson = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-conf_path_wilson") {
-      conf_path_wilson = argv[++i];
-    } else if (string(argv[i]) == "-representation") {
+    if (string(argv[i]) == "--conf_format") {
+      conf_format = argv[++i];
+    } else if (string(argv[i]) == "--file_precision") {
+      file_precision = argv[++i];
+    } else if (string(argv[i]) == "--bytes_skip") {
+      bytes_skip = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--conf_path") {
+      conf_path = argv[++i];
+    } else if (string(argv[i]) == "--representation") {
       representation = argv[++i];
-    } else if (string(argv[i]) == "-convert_wilson") {
-      istringstream(string(argv[++i])) >> convert_wilson;
-    } else if (string(argv[i]) == "-HYP_alpha1") {
+    } else if (string(argv[i]) == "--convert") {
+      istringstream(string(argv[++i])) >> convert;
+    } else if (string(argv[i]) == "--HYP_alpha1") {
       HYP_alpha1 = atof(argv[++i]);
-    } else if (string(argv[i]) == "-HYP_alpha2") {
+    } else if (string(argv[i]) == "--HYP_alpha2") {
       HYP_alpha2 = atof(argv[++i]);
-    } else if (string(argv[i]) == "-HYP_alpha3") {
+    } else if (string(argv[i]) == "--HYP_alpha3") {
       HYP_alpha3 = atof(argv[++i]);
-    } else if (string(argv[i]) == "-APE_alpha") {
+    } else if (string(argv[i]) == "--APE_alpha") {
       APE_alpha = atof(argv[++i]);
-    } else if (string(argv[i]) == "-HYP") {
+    } else if (string(argv[i]) == "--HYP") {
       HYP_enabled = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-HYP_enabled") {
+    } else if (string(argv[i]) == "--HYP_enabled") {
       istringstream(string(argv[++i])) >> HYP_enabled;
-    } else if (string(argv[i]) == "-APE_steps") {
+    } else if (string(argv[i]) == "--APE_steps") {
       APE_steps = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-HYP_steps") {
+    } else if (string(argv[i]) == "--HYP_steps") {
       HYP_steps = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-L_spat") {
+    } else if (string(argv[i]) == "--L_spat") {
       L_spat = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-L_time") {
+    } else if (string(argv[i]) == "--L_time") {
       L_time = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-path_wilson") {
+    } else if (string(argv[i]) == "--path_wilson") {
       path_wilson = argv[++i];
-    } else if (string(argv[i]) == "-T_min") {
+    } else if (string(argv[i]) == "--T_min") {
       T_min = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-T_max") {
+    } else if (string(argv[i]) == "--T_max") {
       T_max = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-R_min") {
+    } else if (string(argv[i]) == "--R_min") {
       R_min = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-R_max") {
+    } else if (string(argv[i]) == "--R_max") {
       R_max = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-N_dir") {
+    } else if (string(argv[i]) == "--N_dir") {
       N_dir = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-calculation_step_APE") {
+    } else if (string(argv[i]) == "--calculation_step_APE") {
       calculation_step_APE = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-calculation_APE_start") {
+    } else if (string(argv[i]) == "--calculation_APE_start") {
       calculation_APE_start = stoi(string(argv[++i]));
     }
   }
 
-  x_size = L_spat;
-  y_size = L_spat;
-  z_size = L_spat;
-  t_size = L_time;
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
+  int x_size1 = L_spat;
+  int y_size1 = L_spat;
+  int z_size1 = L_spat;
+  int t_size1 = L_time;
 
-  cout << "conf_format_wilson " << conf_format_wilson << endl;
-  cout << "conf_path_wilson " << conf_path_wilson << endl;
+  cout << "conf_format " << conf_format << endl;
+  cout << "file_precision " << file_precision << endl;
+  cout << "conf_path " << conf_path << endl;
   cout << "representation " << representation << endl;
-  cout << "bytes_skip_wilson " << bytes_skip_wilson << endl;
-  cout << "convert_wilson " << convert_wilson << endl;
+  cout << "bytes_skip " << bytes_skip << endl;
+  cout << "convert " << convert << endl;
   cout << "HYP_alpha1 " << HYP_alpha1 << endl;
   cout << "HYP_alpha2 " << HYP_alpha2 << endl;
   cout << "HYP_alpha3 " << HYP_alpha3 << endl;
@@ -136,83 +138,38 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  Data::data<MATRIX_WILSON> conf1;
-  Data::data<MATRIX_WILSON> conf2;
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf1(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf2(
+      {x_size1, y_size1, z_size1, t_size1});
   map<tuple<int, int>, double> wilson_tmp;
   map<tuple<int, int, int, int>, double> wilson_loops;
-  // vector<vector<MATRIX_WILSON>> conf_separated1;
-  // vector<vector<MATRIX_WILSON>> conf_separated2;
 
   smearing_APE_time = 0;
   smearing_HYP_time = 0;
   observables_time = 0;
 
-  link1 link(x_size, y_size, z_size, t_size);
-
   for (int dir = 0; dir < N_dir; dir++) {
-    get_data(conf1, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
-             convert_wilson);
+    Data::read_data_convert(conf1, conf_path, conf_format, bytes_skip,
+                            file_precision, convert);
     if (dir > 0) {
-      conf1.array = swap_directions(conf1.array, dir - 1, 3);
+      conf1.swap_directions(dir - 1, 3);
     }
-    conf2.array = conf1.array;
-    // conf_separated1 = separate_wilson(conf_wilson.array);
-    // conf_wilson.array.clear();
-    // conf_wilson.array.shrink_to_fit();
+    conf2 = conf1;
 
     if (HYP_enabled == 1) {
       start_time = omp_get_wtime();
       for (int HYP_step = 1; HYP_step <= HYP_steps; HYP_step++) {
-        smearing_HYP(conf1.array, HYP_alpha1, HYP_alpha2, HYP_alpha3);
+        smearing_HYP(conf1, HYP_alpha1, HYP_alpha2, HYP_alpha3);
       }
       end_time = omp_get_wtime();
       smearing_HYP_time += end_time - start_time;
     }
 
-    // wilson loops at (0, 0) APE_steps
-    // start_time = omp_get_wtime();
-    // if (representation == "fundamental") {
-    //   wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
-    // } else if (representation == "adjoint") {
-    //   wilson_tmp = wilson_loop_adjoint(conf1.array, R_min, R_max, T_min,
-    //   T_max);
-    // } else {
-    //   cout << "wrong representation" << endl;
-    // }
-    // write_wilson_loops(wilson_tmp, wilson_loops, 0, 0);
-    // end_time = omp_get_wtime();
-    // observables_time += end_time - start_time;
-
-    // wilson loops at (0, APE_step2) APE_steps
-    // for (int APE_step = 1; APE_step <= APE_steps; APE_step++) {
-    //   start_time = omp_get_wtime();
-    //   smearing_APE(conf2.array, APE_alpha);
-    //   end_time = omp_get_wtime();
-    //   smearing_APE_time += end_time - start_time;
-
-    //   if ((APE_step - calculation_APE_start) % calculation_step_APE == 0 &&
-    //       APE_step >= calculation_APE_start) {
-    //     start_time = omp_get_wtime();
-    //     if (representation == "fundamental") {
-    //       wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
-    //                                        R_max, T_min, T_max);
-    //     } else if (representation == "adjoint") {
-    //       wilson_tmp = wilson_gevp_adjoint_indexed(conf1.array, conf2.array,
-    //                                                R_min, R_max, T_min,
-    //                                                T_max);
-    //     } else {
-    //       cout << "wrong representation" << endl;
-    //     }
-    //     write_wilson_loops(wilson_tmp, wilson_loops, 0, APE_step);
-    //     end_time = omp_get_wtime();
-    //     observables_time += end_time - start_time;
-    //   }
-    // }
-
     // wilson loops at (APE_step1, APE_step2) APE_steps, APE_step1 < APE_step2
     for (int APE_step1 = 1; APE_step1 <= APE_steps; APE_step1++) {
       start_time = omp_get_wtime();
-      smearing_APE(conf1.array, APE_alpha);
+      smearing_APE(conf1, APE_alpha);
       end_time = omp_get_wtime();
       smearing_APE_time += end_time - start_time;
 
@@ -220,10 +177,9 @@ int main(int argc, char *argv[]) {
           APE_step1 >= calculation_APE_start) {
         start_time = omp_get_wtime();
         if (representation == "fundamental") {
-          wilson_tmp = wilson_loop(conf1.array, R_min, R_max, T_min, T_max);
+          wilson_tmp = wilson_loop(conf1, R_min, R_max, T_min, T_max);
         } else if (representation == "adjoint") {
-          wilson_tmp =
-              wilson_loop_adjoint(conf1.array, R_min, R_max, T_min, T_max);
+          wilson_tmp = wilson_loop_adjoint(conf1, R_min, R_max, T_min, T_max);
         } else {
           cout << "wrong representation" << endl;
         }
@@ -235,18 +191,18 @@ int main(int argc, char *argv[]) {
         for (int APE_step2 = APE_step1 + 1; APE_step2 <= APE_steps;
              APE_step2++) {
           start_time = omp_get_wtime();
-          smearing_APE(conf2.array, APE_alpha);
+          smearing_APE(conf2, APE_alpha);
           end_time = omp_get_wtime();
           smearing_APE_time += end_time - start_time;
 
           if ((APE_step2 - APE_step1) % calculation_step_APE == 0) {
             start_time = omp_get_wtime();
             if (representation == "fundamental") {
-              wilson_tmp = wilson_gevp_indexed(conf1.array, conf2.array, R_min,
-                                               R_max, T_min, T_max);
+              wilson_tmp =
+                  wilson_gevp_indexed(conf1, conf2, R_min, R_max, T_min, T_max);
             } else if (representation == "adjoint") {
-              wilson_tmp = wilson_gevp_adjoint_indexed(
-                  conf1.array, conf2.array, R_min, R_max, T_min, T_max);
+              wilson_tmp = wilson_gevp_adjoint_indexed(conf1, conf2, R_min,
+                                                       R_max, T_min, T_max);
             } else {
               cout << "wrong representation" << endl;
             }

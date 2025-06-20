@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../include/data.h"
+#include "../include/indexing.h"
 #include "../include/link.h"
 #include "../include/loop.h"
 
@@ -23,6 +25,10 @@ calculate_monopole_plaket(std::vector<double> &angles);
 std::vector<std::vector<int>>
 calculate_monopole_plaket_singular(std::vector<double> &angles);
 
+std::vector<std::vector<int>>
+calculate_monopole_plaket_singular(std::vector<double> &angles,
+                                   DataPatternLexicographical &data_pattern);
+
 template <class T> int find_current(link1 &link, std::vector<T> &J);
 
 template <class T>
@@ -32,44 +38,71 @@ std::vector<loop *> find_paths(std::vector<loop *> &neighbours,
 template <class T> void find_cluster(loop *ll, std::vector<T> &J);
 
 template <class T> std::vector<loop *> calculate_clusters(std::vector<T> &J);
+template <class T>
+std::vector<loop_new *>
+calculate_clusters(std::vector<T> &J, DataPatternLexicographical &data_pattern);
 
 std::vector<double> calculate_current(std::vector<double> &angles);
+
+std::vector<std::vector<double>> calculate_current(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf);
+std::vector<double> calculate_current(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf);
+std::vector<std::vector<double>> calculate_current_singular(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf);
+std::vector<double> calculate_current_singular(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf);
 
 std::vector<int> calculate_current_singular(std::vector<double> &angles);
 
 std::vector<double> calculate_current_monopole_plakets(
     std::vector<std::vector<double>> monopole_plakets);
+std::vector<double> calculate_current_monopole_plakets(
+    std::vector<std::vector<double>> monopole_plakets,
+    DataPatternLexicographical data_pattern);
 
 std::vector<std::vector<std::vector<double>>>
 make_monopole_plakets(std::vector<std::vector<double>> &angles);
+std::vector<std::vector<std::vector<double>>> make_monopole_plakets(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf);
 
 std::vector<std::vector<std::vector<int>>>
 make_monopole_plakets_singular(std::vector<std::vector<double>> &angles);
+std::vector<std::vector<std::vector<int>>> make_monopole_plakets_singular(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf);
 
 void make_plakets_both(
     std::vector<std::vector<double>> &angles,
+    std::vector<std::vector<std::vector<double>>> &monopole_plakets,
+    std::vector<std::vector<std::vector<int>>> &dirac_plakets);
+void make_plakets_both(
+    const Data::LatticeData<DataPatternLexicographical, su3_angles> &conf,
     std::vector<std::vector<std::vector<double>>> &monopole_plakets,
     std::vector<std::vector<std::vector<int>>> &dirac_plakets);
 
 // functions for obtaining information about clusters for testing
 
 void print_currents(loop *ll);
+void print_currents(loop_new *ll);
 
 void check_for_coordinate(loop *loop, int coordinate[4], bool &include);
 
 // monopole observables
 
 int cluster_length(loop *ll);
+int cluster_length(loop_new *ll);
 
 void cluster_length_recurrent(loop *ll, int &length);
 
 void cluster_sites(loop *ll);
 
 std::vector<int> length_mu(loop *ll);
+std::vector<int> length_mu(loop_new *ll);
 
 void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu);
 
 std::vector<int> currents_directions(loop *ll);
+std::vector<int> currents_directions(loop_new *ll);
 
 void currents_directions_recurrent(loop *ll, std::vector<int> &directions);
 

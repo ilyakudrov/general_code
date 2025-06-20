@@ -1,7 +1,7 @@
-#include "../../lib/cpu/include/basic_observables.h"
 #include "../../lib/cpu/include/data.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
+#include "../../lib/cpu/include/plaket.h"
 
 #include <fstream>
 #include <iostream>
@@ -19,13 +19,18 @@ int size1;
 int size2;
 
 int main(int argc, char **argv) {
-
   unsigned int start_time;
   unsigned int end_time;
   unsigned int search_time;
 
+  int x_size1;
+  int y_size1;
+  int z_size1;
+  int t_size1;
+
   string path_conf;
   string conf_format;
+  string file_precision;
   int bytes_skip = 0;
   string path_output_clusters_unwrapped;
   string path_output_clusters_wrapped;
@@ -35,67 +40,60 @@ int main(int argc, char **argv) {
 
   // read parameters
   for (int i = 1; i < argc; i++) {
-    if (string(argv[i]) == "-conf_format") {
+    if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
-    } else if (string(argv[i]) == "-path_conf") {
+    } else if (string(argv[i]) == "--file_precision") {
+      file_precision = argv[++i];
+    } else if (string(argv[i]) == "--path_conf") {
       path_conf = argv[++i];
-    } else if (string(argv[i]) == "-path_output_clusters_unwrapped") {
+    } else if (string(argv[i]) == "--path_output_clusters_unwrapped") {
       path_output_clusters_unwrapped = argv[++i];
-    } else if (string(argv[i]) == "-path_output_clusters_wrapped") {
+    } else if (string(argv[i]) == "--path_output_clusters_wrapped") {
       path_output_clusters_wrapped = argv[++i];
-    } else if (string(argv[i]) == "-path_output_windings") {
+    } else if (string(argv[i]) == "--path_output_windings") {
       path_output_windings = argv[++i];
-    } else if (string(argv[i]) == "-path_output_monopoles") {
+    } else if (string(argv[i]) == "--path_output_monopoles") {
       path_output_monopoles = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip") {
+    } else if (string(argv[i]) == "--bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-convert") {
+    } else if (string(argv[i]) == "--convert") {
       istringstream(string(argv[++i])) >> convert;
-    } else if (string(argv[i]) == "-x_size") {
-      x_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-y_size") {
-      y_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-z_size") {
-      z_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-t_size") {
-      t_size = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--x_size") {
+      x_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--y_size") {
+      y_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--z_size") {
+      z_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--t_size") {
+      t_size1 = stoi(string(argv[++i]));
     } else
       cout << "unknown parameter " << argv[i] << endl;
   }
 
   cout << "path_conf " << path_conf << endl;
   cout << "conf_format " << conf_format << endl;
+  cout << "file_precision " << file_precision << endl;
   cout << "bytes_skip " << bytes_skip << endl;
   cout << "convert " << convert << endl;
-
   cout << "path_output_clusters_unwrapped " << path_output_clusters_unwrapped
        << endl;
   cout << "path_output_clusters_wrapped " << path_output_clusters_wrapped
        << endl;
   cout << "path_output_windings " << path_output_windings << endl;
   cout << "path_output_monopoles " << path_output_monopoles << endl;
+  cout << "x_size " << x_size1 << endl;
+  cout << "y_size " << y_size1 << endl;
+  cout << "z_size " << z_size1 << endl;
+  cout << "t_size " << t_size1 << endl;
 
-  cout << "x_size " << x_size << endl;
-  cout << "y_size " << y_size << endl;
-  cout << "z_size " << z_size << endl;
-  cout << "t_size " << t_size << endl;
-
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
-
-  Data::data<abelian> conf;
-
-  // read configuration
-  get_data(conf, path_conf, conf_format, bytes_skip, convert);
-
-  cout << plaket(conf.array) << endl;
+  Data::LatticeData<DataPatternLexicographical, abelian> conf(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::read_data_convert(conf, path_conf, conf_format, bytes_skip,
+                          file_precision, convert);
+  DataPatternLexicographical data_pattern(conf.lat_dim);
 
   cout.precision(17);
-
-  vector<double> angles = convert_to_angles(conf.array);
-
-  conf.array.erase(conf.array.begin(), conf.array.end());
-
+  cout << plaket(conf) << endl;
   std::ofstream output_stream_clusters_unwrapped(
       path_output_clusters_unwrapped);
   std::ofstream output_stream_clusters_wrapped(path_output_clusters_wrapped);
@@ -107,9 +105,8 @@ int main(int argc, char **argv) {
   output_stream_windings << "winding_number,cluster_number,direction" << endl;
   output_stream_monopoles << "asymmetry" << endl;
 
-  vector<double> J = calculate_current(angles);
-
-  vector<loop *> LL = calculate_clusters(J);
+  vector<double> J = calculate_current(conf);
+  vector<loop_new *> LL = calculate_clusters(J, data_pattern);
 
   int length;
 
@@ -124,8 +121,6 @@ int main(int argc, char **argv) {
 
   int space_currents = 0;
   int time_currents = 0;
-
-  vector<int> lattice_sizes = {x_size, y_size, z_size, t_size};
 
   for (int i = 0; i < LL.size(); i++) {
     length = cluster_length(LL[i]);
@@ -148,12 +143,12 @@ int main(int argc, char **argv) {
 
       for (int mu = 0; mu < 3; mu++) {
         if (lengths_mu[mu] != 0) {
-          wrappings_space_tmp += abs(lengths_mu[mu]) / lattice_sizes[mu];
+          wrappings_space_tmp += abs(lengths_mu[mu]) / conf.lat_dim[mu];
         }
       }
 
       if (lengths_mu[3] != 0) {
-        wrappings_time_tmp += abs(lengths_mu[3]) / lattice_sizes[3];
+        wrappings_time_tmp += abs(lengths_mu[3]) / conf.lat_dim[3];
       }
 
       if (wrappings_space_tmp != 0) {

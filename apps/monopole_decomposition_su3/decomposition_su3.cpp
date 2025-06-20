@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <omp.h>
-#include <sstream>
 
 using namespace std;
 
@@ -19,125 +18,101 @@ int size1;
 int size2;
 
 int main(int argc, char **argv) {
-
   double start_time;
   double end_time;
   double search_time;
 
+  int x_size1;
+  int y_size1;
+  int z_size1;
+  int t_size1;
+
   string path_conf;
   string conf_format;
+  string file_precision;
   int bytes_skip = 0;
   string path_conf_monopole;
   string path_conf_monopoless;
   string path_inverse_laplacian;
 
-  bool compensate_dirac = true;
-  bool parallel = false;
-
-  int ml5_conf_num = 0;
-
   // read parameters
   for (int i = 1; i < argc; i++) {
-    if (string(argv[i]) == "-conf_format") {
+    if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
-    } else if (string(argv[i]) == "-path_conf") {
+    } else if (string(argv[i]) == "--file_precision") {
+      file_precision = argv[++i];
+    } else if (string(argv[i]) == "--path_conf") {
       path_conf = argv[++i];
-    } else if (string(argv[i]) == "-path_conf_monopole") {
+    } else if (string(argv[i]) == "--path_conf_monopole") {
       path_conf_monopole = argv[++i];
-    } else if (string(argv[i]) == "-path_conf_monopoless") {
+    } else if (string(argv[i]) == "--path_conf_monopoless") {
       path_conf_monopoless = argv[++i];
-    } else if (string(argv[i]) == "-path_inverse_laplacian") {
+    } else if (string(argv[i]) == "--path_inverse_laplacian") {
       path_inverse_laplacian = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip") {
+    } else if (string(argv[i]) == "--bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-x_size") {
-      x_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-y_size") {
-      y_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-z_size") {
-      z_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-t_size") {
-      t_size = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-parallel") {
-      istringstream(string(argv[++i])) >> parallel;
-    } else if (string(argv[i]) == "-compensate_dirac") {
-      istringstream(string(argv[++i])) >> compensate_dirac;
+    } else if (string(argv[i]) == "--x_size") {
+      x_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--y_size") {
+      y_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--z_size") {
+      z_size1 = stoi(string(argv[++i]));
+    } else if (string(argv[i]) == "--t_size") {
+      t_size1 = stoi(string(argv[++i]));
     } else
       cout << "unknown parameter " << argv[i] << endl;
   }
 
   cout << "path_conf " << path_conf << endl;
   cout << "conf_format " << conf_format << endl;
+  cout << "file_precision " << file_precision << endl;
   cout << "path_conf_monopole " << path_conf_monopole << endl;
   cout << "path_conf_monopoless " << path_conf_monopoless << endl;
   cout << "path_inverse_laplacian " << path_inverse_laplacian << endl;
   cout << "bytes_skip " << bytes_skip << endl;
-  cout << "parallel " << parallel << endl;
-  cout << "compensate_dirac " << compensate_dirac << endl;
+  cout << "x_size " << x_size1 << endl;
+  cout << "y_size " << y_size1 << endl;
+  cout << "z_size " << z_size1 << endl;
+  cout << "t_size " << t_size1 << endl;
 
-  cout << "x_size " << x_size << endl;
-  cout << "y_size " << y_size << endl;
-  cout << "z_size " << z_size << endl;
-  cout << "t_size " << t_size << endl;
-  cout << "ml5_conf_num " << ml5_conf_num << endl;
-
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
-
-  Data::data<su3> conf_su3;
-
-  // read configuration
-  bool convert = 0;
-  get_data(conf_su3, path_conf, conf_format, bytes_skip, convert);
-
+  Data::LatticeData<DataPatternLexicographical, su3> conf_su3(
+      {x_size1, y_size1, z_size1, t_size1});
+  bool convert_su3 = 0;
+  Data::read_data_convert(conf_su3, path_conf, conf_format, bytes_skip,
+                          file_precision, convert_su3);
+  Data::LatticeData<DataPatternLexicographical, su3_angles> conf(
+      {x_size1, y_size1, z_size1, t_size1});
+  bool convert_angles = 1;
+  Data::read_data_convert(conf, path_conf, conf_format, bytes_skip,
+                          file_precision, convert_angles);
   cout.precision(17);
-
-  std::vector<std::vector<double>> angles_su3 = make_angles_SU3(conf_su3.array);
+  DataPatternLexicographical data_pattern_conf(conf.lat_dim);
+  DataPatternLexicographical data_pattern_laplacian(
+      {conf.lat_dim[0] / 2 + 1, conf.lat_dim[1] / 2 + 1,
+       conf.lat_dim[2] / 2 + 1, conf.lat_dim[3] / 2 + 1});
 
   vector<double> inverse_laplacian =
-      read_inverse_laplacian(path_inverse_laplacian);
-
+      read_inverse_laplacian(path_inverse_laplacian, data_pattern_laplacian);
   vector<vector<vector<double>>> monopole_plakets(3);
   vector<vector<vector<int>>> dirac_plakets(3);
-
-  if (compensate_dirac) {
-    make_plakets_both(angles_su3, monopole_plakets, dirac_plakets);
-    for (int i = 0; i < monopole_plakets.size(); i++) {
-      monopole_plakets[i].erase(monopole_plakets[i].begin(),
-                                monopole_plakets[i].end());
-      angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
-    }
-  } else {
-    for (int i = 0; i < monopole_plakets.size(); i++) {
-      dirac_plakets[i] = calculate_monopole_plaket_singular(angles_su3[i]);
-      angles_su3[i].erase(angles_su3[i].begin(), angles_su3[i].end());
-    }
-  }
-
   vector<vector<double>> angles_monopole(3);
+  make_plakets_both(conf, monopole_plakets, dirac_plakets);
 
   start_time = omp_get_wtime();
-
   for (int i = 0; i < 3; i++) {
-    if (parallel) {
-      angles_monopole[i] =
-          make_monopole_angles_parallel(dirac_plakets[i], inverse_laplacian);
-    } else {
-      angles_monopole[i] =
-          make_monopole_angles(dirac_plakets[i], inverse_laplacian);
-    }
+    angles_monopole[i] =
+        make_monopole_angles(dirac_plakets[i], inverse_laplacian,
+                             data_pattern_conf, data_pattern_laplacian);
     dirac_plakets[i].erase(dirac_plakets[i].begin(), dirac_plakets[i].end());
   }
-
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "decomposition time: " << search_time << std::endl;
 
   make_unitary(angles_monopole);
-
-  write_double_angles_su3(path_conf_monopole, angles_monopole);
-
+  write_double_angles_su3(path_conf_monopole, angles_monopole,
+                          data_pattern_conf);
   get_monopoless_optimized_su3(conf_su3.array, angles_monopole);
-
-  write_double_su3(path_conf_monopoless, conf_su3.array);
+  FilePatternLexicographical<4, su3> file_pattern_lexicographical;
+  conf_su3.write_data(path_conf_monopoless, file_pattern_lexicographical);
 }

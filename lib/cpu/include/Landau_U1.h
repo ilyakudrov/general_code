@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../include/data.h"
+#include "../include/indexing.h"
 #include "../include/matrix.h"
 
 #include <vector>
@@ -11,6 +13,9 @@ std::vector<abelian> convert_to_abelian(const std::vector<su2> &conf_su2);
 std::vector<std::complex<double>>
 convert_to_complex(const std::vector<su2> &conf_su2);
 
+std::vector<std::complex<double>> convert_to_complex(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
+
 std::vector<double> convert_complex_to_angles(
     const std::vector<std::complex<double>> &conf_complex);
 
@@ -21,6 +26,18 @@ std::vector<abelian> generate_gauge_abelian_uniform();
 std::vector<std::complex<double>> generate_gauge_complex_uniform();
 
 std::vector<std::complex<double>> generate_gauge_complex_unity();
+
+std::vector<double>
+generate_gauge_angles_uniform(DataPatternLexicographical &data_pattern);
+
+std::vector<abelian>
+generate_gauge_abelian_uniform(DataPatternLexicographical &data_pattern);
+
+std::vector<std::complex<double>>
+generate_gauge_complex_uniform(DataPatternLexicographical &data_pattern);
+
+std::vector<std::complex<double>>
+generate_gauge_complex_unity(DataPatternLexicographical &data_pattern);
 
 std::vector<double> generate_random_numbers(int vector_size);
 
@@ -145,3 +162,12 @@ void apply_gauge_Landau_complex(
 
 void apply_gauge_Landau(std::vector<std::complex<double>> &gauge_complex,
                         std::vector<su2> &conf_su2);
+
+void apply_gauge_Landau_complex(
+    std::vector<std::complex<double>> &gauge_complex,
+    std::vector<std::complex<double>> &conf_complex,
+    DataPatternLexicographical &data_pattern);
+
+void apply_gauge_Landau(
+    std::vector<std::complex<double>> &gauge_complex,
+    Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);

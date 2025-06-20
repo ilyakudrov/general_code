@@ -1,4 +1,6 @@
 #include "../include/Landau_U1.h"
+#include "../include/data.h"
+#include "../include/indexing.h"
 #include "../include/link.h"
 #include "../include/matrix.h"
 
@@ -66,6 +68,22 @@ convert_to_complex(const std::vector<su2> &conf_su2) {
         std::complex<double>(conf_su2[i].a0 / module, conf_su2[i].a3 / module));
   }
 
+  return conf_complex;
+}
+
+std::vector<std::complex<double>> convert_to_complex(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2) {
+  DataPatternLexicographical data_pattern(conf_su2.lat_dim);
+  int data_size = data_pattern.get_data_size();
+  std::vector<std::complex<double>> conf_complex;
+  conf_complex.reserve(data_size);
+  double module;
+  for (int i = 0; i < data_size; i++) {
+    module =
+        sqrt(conf_su2[i].a0 * conf_su2[i].a0 + conf_su2[i].a3 * conf_su2[i].a3);
+    conf_complex.push_back(
+        std::complex<double>(conf_su2[i].a0 / module, conf_su2[i].a3 / module));
+  }
   return conf_complex;
 }
 
@@ -166,6 +184,64 @@ std::vector<std::complex<double>> generate_gauge_complex_unity() {
     gauge_complex.push_back(std::complex<double>(1, 0));
   }
 
+  return gauge_complex;
+}
+
+std::vector<double>
+generate_gauge_angles_uniform(DataPatternLexicographical &data_pattern) {
+  unsigned seed = time(NULL);
+  std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<double> gauge_abelian;
+  gauge_abelian.reserve(data_size);
+  for (int i = 0; i < data_size; i++) {
+    gauge_abelian.push_back(
+        (2 * (double)random_generator() / random_generator.max() - 1) * M_PI);
+  }
+  return gauge_abelian;
+}
+
+std::vector<abelian>
+generate_gauge_abelian_uniform(DataPatternLexicographical &data_pattern) {
+  unsigned seed = time(NULL);
+  std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<abelian> gauge_abelian;
+  gauge_abelian.reserve(data_size);
+  for (int i = 0; i < data_size; i++) {
+    gauge_abelian.push_back(abelian(
+        1,
+        (2 * (double)random_generator() / random_generator.max() - 1) * M_PI));
+  }
+  return gauge_abelian;
+}
+
+std::vector<std::complex<double>>
+generate_gauge_complex_uniform(DataPatternLexicographical &data_pattern) {
+  unsigned seed = time(NULL);
+  std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<std::complex<double>> gauge_complex;
+  gauge_complex.reserve(data_size);
+  double angle_tmp;
+  for (int i = 0; i < data_size; i++) {
+    angle_tmp =
+        (2 * (double)random_generator() / random_generator.max() - 1) * M_PI;
+
+    gauge_complex.push_back(
+        std::complex<double>(cos(angle_tmp), sin(angle_tmp)));
+  }
+  return gauge_complex;
+}
+
+std::vector<std::complex<double>>
+generate_gauge_complex_unity(DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<std::complex<double>> gauge_complex;
+  gauge_complex.reserve(data_size);
+  for (int i = 0; i < data_size; i++) {
+    gauge_complex.push_back(std::complex<double>(1, 0));
+  }
   return gauge_complex;
 }
 
@@ -1362,4 +1438,61 @@ void apply_gauge_Landau(std::vector<std::complex<double>> &gauge_complex,
   }
 
   SPACE_ITER_END
+}
+
+void apply_gauge_Landau_complex(
+    std::vector<std::complex<double>> &gauge_complex,
+    std::vector<std::complex<double>> &conf_complex,
+    DataPatternLexicographical &data_pattern) {
+  std::complex<double> complex_tmp;
+  double norm;
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          for (int mu = 0; mu < 4; mu++) {
+            complex_tmp = gauge_complex[data_pattern.get_index_site()] *
+                          conf_complex[data_pattern.get_index_link(mu)];
+            data_pattern.move_forward(1, mu);
+            complex_tmp =
+                complex_tmp *
+                std::conj(gauge_complex[data_pattern.get_index_site()]);
+            data_pattern.move_backward(1, mu);
+            conf_complex[data_pattern.get_index_link(mu)] = complex_tmp;
+          }
+        }
+      }
+    }
+  }
+}
+
+void apply_gauge_Landau(
+    std::vector<std::complex<double>> &gauge_complex,
+    Data::LatticeData<DataPatternLexicographical, su2> &conf_su2) {
+  DataPatternLexicographical data_pattern(conf_su2.lat_dim);
+  su2 A;
+  int index;
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          index = data_pattern.get_index_site();
+          A = su2(gauge_complex[index].real(), 0, 0,
+                  gauge_complex[index].imag());
+          for (int mu = 0; mu < 4; mu++) {
+            index = data_pattern.get_index_link(mu);
+            conf_su2[index] = A * conf_su2[index];
+          }
+          for (int mu = 0; mu < 4; mu++) {
+            data_pattern.move_backward(1, mu);
+            index = data_pattern.get_index_link(mu);
+            conf_su2[index] = conf_su2[index] ^ A;
+            data_pattern.move_forward(1, mu);
+          }
+        }
+      }
+    }
+  }
 }

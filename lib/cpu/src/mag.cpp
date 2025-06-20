@@ -1,4 +1,5 @@
 #include "../include/mag.h"
+#include "../include/data.h"
 #include "../include/link.h"
 #include "../include/matrix.h"
 
@@ -70,13 +71,11 @@ std::vector<double> generate_random_numbers_sphere(int vector_size) {
   // using time to set a seed
   unsigned seed = time(NULL);
   //   unsigned seed = 123;
-
   // Since C rand() algorythm seems to have small cycle length it's important to
   // use more sophisticated method. Subtract_with_carry_engine is defined in
   // C++11. It realises subtract with carry lagged Fibonacci method. It seems to
   // meet the requirements
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
-
   std::vector<double> random_numbers;
   random_numbers.reserve(2 * vector_size);
 
@@ -795,17 +794,21 @@ void make_maximization_final(std::vector<su2> &conf_su2,
 double mag_functional_su3(std::vector<su3> &conf_su3) {
   double functional = 0;
   std::vector<su3> generators_su3 = get_generators_su3();
-  std::cout << generators_su3[2] << std::endl;
-  std::cout << generators_su3[7] << std::endl;
   for (int i = 0; i < conf_su3.size(); i++) {
-    // functional +=
-    //     (((conf_su3[i] * generators_su3[7]) ^ conf_su3[i]) *
-    //     generators_su3[7])
-    //         .tr();
-    // (((conf_su3[i] * generators_su3[2]) ^ conf_su3[i]) * generators_su3[2])
-    //     .tr() +
-    // (((conf_su3[i] * generators_su3[7]) ^ conf_su3[i]) * generators_su3[7])
-    //     .tr();
+    for (int j = 0; j < 3; j++) {
+      functional +=
+          conf_su3[i].matrix(j, j).real() * conf_su3[i].matrix(j, j).real() +
+          conf_su3[i].matrix(j, j).imag() * conf_su3[i].matrix(j, j).imag();
+    }
+  }
+  return functional / (x_size * y_size * z_size * t_size * 3 * 4);
+}
+
+double mag_functional_su3(
+    const Data::LatticeData<DataPatternLexicographical, su3> &conf_su3) {
+  double functional = 0;
+  std::vector<su3> generators_su3 = get_generators_su3();
+  for (int i = 0; i < conf_su3.array.size(); i++) {
     for (int j = 0; j < 3; j++) {
       functional +=
           conf_su3[i].matrix(j, j).real() * conf_su3[i].matrix(j, j).real() +

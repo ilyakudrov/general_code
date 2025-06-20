@@ -1,11 +1,12 @@
 #include "../../../lib/cpu/include/gluon_propagator.h"
-#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/plaket.h"
 
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <math.h>
 #include <omp.h>
 #include <sstream>
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]) {
   double observables_time;
 
   string conf_format;
+  string file_precision;
   string conf_path;
   string output_path;
   int L_spat, L_time;
@@ -36,33 +38,34 @@ int main(int argc, char *argv[]) {
   bool convert = 0;
   double beta = 0;
   for (int i = 1; i < argc; i++) {
-    if (string(argv[i]) == "-conf_format") {
+    if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip") {
+    } else if (string(argv[i]) == "--file_precision") {
+      file_precision = argv[++i];
+    } else if (string(argv[i]) == "--bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-conf_path") {
+    } else if (string(argv[i]) == "--conf_path") {
       conf_path = argv[++i];
-    } else if (string(argv[i]) == "-convert") {
+    } else if (string(argv[i]) == "--convert") {
       istringstream(string(argv[++i])) >> convert;
-    } else if (string(argv[i]) == "-L_spat") {
+    } else if (string(argv[i]) == "--L_spat") {
       L_spat = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-L_time") {
+    } else if (string(argv[i]) == "--L_time") {
       L_time = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-output_path") {
+    } else if (string(argv[i]) == "--output_path") {
       output_path = argv[++i];
-    } else if (string(argv[i]) == "-beta") {
+    } else if (string(argv[i]) == "--beta") {
       beta = stod(string(argv[++i]));
     }
   }
 
-  x_size = L_spat;
-  y_size = L_spat;
-  z_size = L_spat;
-  t_size = L_time;
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
+  int x_size1 = L_spat;
+  int y_size1 = L_spat;
+  int z_size1 = L_spat;
+  int t_size1 = L_time;
 
   cout << "conf_format " << conf_format << endl;
+  cout << "file_precision " << file_precision << endl;
   cout << "conf_path " << conf_path << endl;
   cout << "bytes_skip " << bytes_skip << endl;
   cout << "convert " << convert << endl;
@@ -74,16 +77,18 @@ int main(int argc, char *argv[]) {
 
   cout.precision(17);
 
-  Data::data<MATRIX> conf;
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::read_data_convert(conf, conf_path, conf_format, bytes_skip,
+                          file_precision, convert);
 
   double a_inv = (542.6 * 8 / 1000);
   double g = 2 / sqrt(beta);
   double multiplier = 2 / g * a_inv;
 
-  get_data(conf, conf_path, conf_format, bytes_skip, convert);
-  std::cout << "plaket " << plaket(conf.array) << std::endl;
-  std::cout << "plaket " << plaket_time(conf.array) << std::endl;
-  std::cout << "plaket " << plaket_space(conf.array) << std::endl;
+  std::cout << "plaket " << plaket(conf) << std::endl;
+  std::cout << "plaket " << plaket_time(conf) << std::endl;
+  std::cout << "plaket " << plaket_space(conf) << std::endl;
 
   std::vector<std::vector<std::array<double, 4>>> momenta =
       generate_momenta(x_size, t_size);
@@ -122,7 +127,6 @@ int main(int argc, char *argv[]) {
 
   ofstream stream;
   stream.precision(17);
-  // open file
   stream.open(output_path);
   stream << "p1,p2,p3,p4,mu,nu,a,b,Dr,Di" << std::endl;
   for (const auto &pair : gluon_propagator_map) {

@@ -1,9 +1,8 @@
 INCLUDE_PATH=../../lib/cpu/include
 OBJ_PATH=../../lib/cpu/obj
 GCC=g++
-MATRIX_PLAKET=su2
-MATRIX_WILSON=su2
-FLAGS=-Ofast -fopenmp -march=native -mtune=native -std=c++17 -DMATRIX_PLAKET=$(MATRIX_PLAKET) -DMATRIX_WILSON=$(MATRIX_WILSON)
+MATRIX=su2
+FLAGS=-Ofast -fopenmp -march=native -mtune=native -std=c++17 -DMATRIX=$(MATRIX)
 C_PATH=../../lib/cpu/src/c-lime
 ARCH=test
 C_LIME=$(C_PATH)/lime_fseeko.c  $(C_PATH)/lime_header.c  $(C_PATH)/lime_reader.c  $(C_PATH)/lime_utils.c  $(C_PATH)/lime_writer.c
@@ -13,7 +12,7 @@ HEADERFILES=$(INCLUDE_PATH)/matrix.h $(INCLUDE_PATH)/indexing.h
 EIGH_PATH="/home/ilya/soft/source/eigen-master"
 
 smearing: smearing.cpp $(OBJ_FILES) $(HEADERFILES)
-	$(GCC) smearing.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o smearing_$(MATRIX_WILSON)_$(MATRIX_PLAKET)_$(ARCH)
+	$(GCC) smearing.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o smearing_$(MATRIX)_$(ARCH)
 
 smearing_wilson_gevp: smearing_wilson_gevp.cpp $(OBJ_FILES) $(HEADERFILES)
-	$(GCC) smearing_wilson_gevp.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o smearing_wilson_gevp_$(MATRIX_WILSON)_$(ARCH)
+	$(GCC) smearing_wilson_gevp.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o smearing_wilson_gevp_$(MATRIX)_$(ARCH)

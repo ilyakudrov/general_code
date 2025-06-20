@@ -8,6 +8,7 @@
 // su2 matrix in sigma matrices representation (a0 + I * ai * sigma[i])
 class su2 {
 public:
+  typedef double trace_type;
   inline static int data_size = 4;
   double a0, a1, a2, a3;
   su2() {
@@ -48,6 +49,7 @@ public:
   }
 
   double tr() { return a0; }
+  double tr_real() { return a0; }
 
   double multiply_conj_tr(const su2 &B) const {
     return a0 * B.a0 + a1 * B.a1 + a2 * B.a2 + a3 * B.a3;
@@ -115,6 +117,7 @@ public:
 
 class abelian {
 public:
+  typedef double trace_type;
   inline static int data_size = 1;
   double r, phi;
   abelian() {
@@ -144,6 +147,7 @@ public:
   }
 
   double tr() const { return r * cos(phi); }
+  double tr_real() const { return r * cos(phi); }
 
   double multiply_conj_tr(const abelian &B) const {
     return r * B.r * cos(phi - B.phi);
@@ -204,6 +208,7 @@ public:
 
 class su3 {
 public:
+  typedef std::complex<double> trace_type;
   inline static int data_size = 18;
   Eigen::Matrix3cd matrix;
   su3() {
@@ -247,10 +252,9 @@ public:
     return data;
   }
 
-  double tr() const { return matrix.trace().real() / 3.; }
+  std::complex<double> tr() const { return matrix.trace() / 3.; }
+  double tr_real() const { return matrix.trace().real() / 3.; }
   double tr_adjoint() const { return std::norm(matrix.trace()) - 1; }
-
-  std::complex<double> tr_complex() const { return matrix.trace() / 3.; }
 
   double multiply_conj_tr(const su3 &B) const {
     return (matrix * B.matrix.adjoint()).trace().real() / 3;
@@ -360,6 +364,7 @@ public:
 
 class su3_abelian {
 public:
+  typedef std::complex<double> trace_type;
   inline static int data_size = 3;
   std::complex<double> matrix[3];
   su3_abelian(std::complex<double> B[3]) {
@@ -399,7 +404,10 @@ public:
     return data;
   }
 
-  double tr() const {
+  std::complex<double> tr() const {
+    return (matrix[0] + matrix[1] + matrix[2]) * (1 / 3.);
+  }
+  double tr_real() const {
     return (matrix[0].real() + matrix[1].real() + matrix[2].real()) / 3;
   }
 
@@ -569,13 +577,10 @@ public:
 
 class su3_angles {
 public:
+  typedef std::complex<double> trace_type;
   inline static int data_size = 3;
-  double matrix[3];
-  su3_angles(double B[3]) {
-    for (int i = 0; i < 3; i++) {
-      matrix[i] = B[i];
-    }
-  }
+  std::array<double, 3> matrix;
+  su3_angles(const std::array<double, 3> &_matrix) : matrix(_matrix) {}
 
   su3_angles() {
     for (int i = 0; i < 3; i++) {
@@ -601,7 +606,11 @@ public:
     return data;
   }
 
-  double tr() const {
+  std::complex<double> tr() const {
+    return {(cos(matrix[0]) + cos(matrix[1]) + cos(matrix[2])) / 3,
+            (sin(matrix[0]) + sin(matrix[1]) + sin(matrix[2])) / 3};
+  }
+  double tr_real() const {
     return (cos(matrix[0]) + cos(matrix[1]) + cos(matrix[2])) / 3;
   }
 
@@ -1069,6 +1078,27 @@ MatrixConverter<su3, su3_abelian>::convert_matrix(const su3 &A) {
                                        sin(angles[c] - sum / 3));
   }
   return B;
+}
+
+template <>
+inline su3_angles
+MatrixConverter<su3, su3_angles>::convert_matrix(const su3 &A) {
+  std::array<double, 3> angles;
+  double sum = 0;
+  for (int c = 0; c < 3; c++) {
+    angles[c] = atan2(A.matrix(c, c).imag(), A.matrix(c, c).real());
+    sum += angles[c];
+  }
+  while (sum >= M_PI) {
+    sum -= 2 * M_PI;
+  }
+  while (sum < -M_PI) {
+    sum += 2 * M_PI;
+  }
+  for (int c = 0; c < 3; c++) {
+    angles[c] = angles[c] - sum / 3;
+  }
+  return su3_angles(angles);
 }
 
 template <> inline su2 MatrixConverter<su2, su2>::convert_matrix(const su2 &A) {

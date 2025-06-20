@@ -1,5 +1,7 @@
 #include "../../../lib/cpu/include/eigen.h"
 
+#include <complex>
+
 #define SPACE_ITER_START                                                       \
   for (int t = 0; t < t_size; t++) {                                           \
     for (int z = 0; z < z_size; z++) {                                         \
@@ -16,6 +18,14 @@
   }                                                                            \
   }                                                                            \
   }
+
+double eta_sign(int mu, link1 &link) {
+  int n = 0;
+  for (int i = 0; i < mu; i++) {
+    n += (link.coordinate[i]);
+  }
+  return 1 - (n % 2) * 2;
+}
 
 std::vector<su2> make_matrix_staggered(const std::vector<su2> &conf,
                                        double mu_q) {
@@ -71,18 +81,13 @@ std::vector<su2> make_matrix_staggered(const std::vector<su2> &conf,
   return matrix;
 }
 
-std::vector<complex>
-matrix_multiplication_staggered(std::vector<su2> &matrix,
-                                const std::vector<complex> &vec_input) {
+std::vector<std::complex<double>> matrix_multiplication_staggered(
+    std::vector<su2> &matrix,
+    const std::vector<std::complex<double>> &vec_input) {
   link1 link(x_size, y_size, z_size, t_size);
   int vec_size = x_size * y_size * z_size * t_size * 2;
 
-  std::vector<complex> vec_output(vec_size);
-  for (int i = 0; i < vec_size; i++) {
-    vec_output[i].re = 0;
-    vec_output[i].im = 0;
-  }
-
+  std::vector<std::complex<double>> vec_output(vec_size);
   int place_vector_center;
   int place_matrix;
 
@@ -115,22 +120,18 @@ matrix_multiplication_staggered(std::vector<su2> &matrix,
   return vec_output;
 }
 
-void matrix_multiplication_su2(const complex *vec_input, complex *vec_output,
-                               su2 &A) {
-  vec_output[0].re += A.a0 * vec_input[0].re - A.a3 * vec_input[0].im +
-                      A.a2 * vec_input[1].re - A.a1 * vec_input[1].im;
-  vec_output[0].im += A.a0 * vec_input[0].im + A.a3 * vec_input[0].re +
-                      A.a2 * vec_input[1].im + A.a1 * vec_input[1].re;
-  vec_output[1].re += -A.a2 * vec_input[0].re - A.a1 * vec_input[0].im +
-                      A.a0 * vec_input[1].re + A.a3 * vec_input[1].im;
-  vec_output[1].im += -A.a2 * vec_input[0].im + A.a1 * vec_input[0].re +
-                      A.a0 * vec_input[1].im - A.a3 * vec_input[1].re;
-}
-
-double eta_sign(int mu, link1 &link) {
-  int n = 0;
-  for (int i = 0; i < mu; i++) {
-    n += (link.coordinate[i]);
-  }
-  return 1 - (n % 2) * 2;
+void matrix_multiplication_su2(const std::complex<double> *vec_input,
+                               std::complex<double> *vec_output, su2 &A) {
+  vec_output[0].real(vec_output[0].real() + A.a0 * vec_input[0].real() -
+                     A.a3 * vec_input[0].imag() + A.a2 * vec_input[1].real() -
+                     A.a1 * vec_input[1].imag());
+  vec_output[0].imag(vec_output[0].imag() + A.a0 * vec_input[0].imag() +
+                     A.a3 * vec_input[0].real() + A.a2 * vec_input[1].imag() +
+                     A.a1 * vec_input[1].real());
+  vec_output[1].real(vec_output[1].real() - A.a2 * vec_input[0].real() -
+                     A.a1 * vec_input[0].imag() + A.a0 * vec_input[1].real() +
+                     A.a3 * vec_input[1].imag());
+  vec_output[1].imag(vec_output[1].imag() - A.a2 * vec_input[0].imag() +
+                     A.a1 * vec_input[0].real() + A.a0 * vec_input[1].imag() -
+                     A.a3 * vec_input[1].real());
 }

@@ -38,20 +38,19 @@ std::vector<double> read_double_angles(std::string &file_name, int bites_skip) {
 }
 
 void write_double_angles(std::string &file_name,
-                         const std::vector<double> &angles) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
-
+                         const std::vector<double> &angles,
+                         DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_data_size();
   std::ofstream stream(file_name);
   if (!stream.write((char *)&angles[0], (data_size) * sizeof(double)))
     std::cout << "write_double_angles error: " << file_name << std::endl;
 }
 
 std::vector<std::vector<double>>
-read_double_angles_su3(std::string &file_name) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
-
+read_double_angles_su3(std::string &file_name,
+                       DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_data_size();
   std::vector<std::vector<double>> angles(3, std::vector<double>(data_size));
-
   std::ifstream stream(file_name);
   for (int i = 0; i < 3; i++) {
     if (!stream.read((char *)&angles[i][0], (data_size) * sizeof(double)))
@@ -61,9 +60,10 @@ read_double_angles_su3(std::string &file_name) {
 }
 
 void write_double_angles_su3(std::string &file_name,
-                             const std::vector<std::vector<double>> &angles) {
-  int data_size = 4 * x_size * y_size * z_size * t_size;
-
+                             const std::vector<std::vector<double>> &angles,
+                             DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_data_size();
+  std::cout << data_size << std::endl;
   std::ofstream stream(file_name);
   for (int i = 0; i < 3; i++) {
     if (!stream.write((char *)&angles[i][0], (data_size) * sizeof(double)))
@@ -200,18 +200,29 @@ std::vector<su2> get_offdiagonal(std::vector<su2> &conf) {
   return conf_offdiagonal;
 }
 
-std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
-  int data_size = x_size * y_size * z_size * t_size;
-
+std::vector<double>
+merge_angles(std::vector<std::vector<double>> &angles,
+             DataPatternLexicographical &data_pattern_conf) {
+  int data_size = data_pattern_conf.get_lattice_size();
   std::vector<double> angles_merged;
   angles_merged.reserve(4 * data_size);
-
   for (int i = 0; i < data_size; i++) {
     for (int mu = 0; mu < 4; mu++) {
       angles_merged.push_back(angles[mu][i]);
     }
   }
+  return angles_merged;
+}
 
+std::vector<double> merge_angles(std::vector<std::vector<double>> &angles) {
+  int data_size = x_size * y_size * z_size * t_size;
+  std::vector<double> angles_merged;
+  angles_merged.reserve(4 * data_size);
+  for (int i = 0; i < data_size; i++) {
+    for (int mu = 0; mu < 4; mu++) {
+      angles_merged.push_back(angles[mu][i]);
+    }
+  }
   return angles_merged;
 }
 
@@ -235,10 +246,8 @@ std::vector<su2> get_monopoless(const std::vector<su2> &conf_su2,
 void get_monopoless_optimized(std::vector<su2> &conf_su2,
                               const std::vector<double> &angles_monopole) {
   su2 A;
-
   for (int i = 0; i < conf_su2.size(); i++) {
     A = su2(cos(angles_monopole[i]), 0, 0, sin(angles_monopole[i]));
-
     conf_su2[i] = conf_su2[i] * A;
   }
 }
@@ -247,16 +256,13 @@ void get_monopoless_optimized_su3(
     std::vector<su3> &conf_su3,
     const std::vector<std::vector<double>> &angles_monopole) {
   su3 A;
-
   double module;
-
   for (int i = 0; i < conf_su3.size(); i++) {
     A = su3();
     for (int j = 0; j < 3; j++) {
       A.matrix(j, j) = std::complex<double>(cos(angles_monopole[j][i]),
                                             sin(angles_monopole[j][i]));
     }
-
     conf_su3[i] = conf_su3[i] * A;
   }
 }
@@ -319,33 +325,28 @@ void apply_gauge_Landau(std::vector<su2> &conf_su2,
   SPACE_ITER_END
 }
 
-std::vector<double> read_inverse_laplacian(std::string &file_path) {
-  int data_size =
-      (x_size / 2 + 1) * (y_size / 2 + 1) * (z_size / 2 + 1) * (t_size / 2 + 1);
-  std::vector<double> laplace(data_size);
-  std::vector<double> v(data_size);
+std::vector<double>
+read_inverse_laplacian(std::string &file_path,
+                       DataPatternLexicographical &data_pattern) {
+  std::vector<double> laplace(data_pattern.get_lattice_size());
+  std::vector<double> v(data_pattern.get_lattice_size());
   std::ifstream stream(file_path);
   stream.ignore(4);
-  if (!stream.read((char *)&v[0], data_size * sizeof(double)))
+  if (!stream.read((char *)&v[0],
+                   data_pattern.get_lattice_size() * sizeof(double)))
     std::cout << "read_inverse_laplacian error: " << file_path << std::endl;
-
-  link1 link_laplace(x_size / 2 + 1, y_size / 2 + 1, z_size / 2 + 1,
-                     t_size / 2 + 1);
-
   int index = 0;
-
-  for (int t = 0; t < t_size / 2 + 1; t++) {
-    for (int z = 0; z < z_size / 2 + 1; z++) {
-      for (int y = 0; y < y_size / 2 + 1; y++) {
-        for (int x = 0; x < x_size / 2 + 1; x++) {
-          link_laplace.go_update(x, y, z, t);
-          laplace[link_laplace.place / 4] = v[index];
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          laplace[data_pattern.get_index_site()] = v[index];
           index++;
         }
       }
     }
   }
-
   return laplace;
 }
 
@@ -493,6 +494,68 @@ void dirac_plaket_difference_nonzero(
   }
 
   SPACE_ITER_END
+}
+
+void dirac_plaket_difference_nonzero(
+    const std::vector<std::vector<int>> &dirac_plaket,
+    std::vector<std::vector<int>> &dirac_difference,
+    std::vector<std::vector<int>> &dirac_coordinate,
+    DataPatternLexicographical &data_pattern) {
+  int angle_tmp;
+  int diff;
+
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+
+          int factor;
+          int a, b;
+          int index;
+
+          for (int mu = 0; mu < 4; mu++) {
+            diff = 0;
+            for (int nu = 0; nu < 4; nu++) {
+              if (nu != mu) {
+                if (mu < nu) {
+                  a = mu;
+                  b = nu;
+                  factor = 1;
+                } else {
+                  a = nu;
+                  b = mu;
+                  factor = -1;
+                }
+                int index = 0;
+                for (int i = 0; i <= a; i++) {
+                  for (int j = i + 1; j < 4; j++) {
+                    if (i == a && j == b)
+                      break;
+                    index++;
+                  }
+                }
+
+                angle_tmp = dirac_plaket[index][data_pattern.get_index_site()];
+                data_pattern.move_backward(1, nu);
+                diff += factor *
+                        (angle_tmp -
+                         dirac_plaket[index][data_pattern.get_index_site()]);
+                data_pattern.move_forward(1, nu);
+              }
+            }
+
+            if (diff != 0) {
+              dirac_difference[mu].push_back(diff);
+              for (int nu = 0; nu < 4; nu++) {
+                dirac_coordinate[mu].push_back(data_pattern.lat_coord[nu]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void decomposition_step(
@@ -1303,6 +1366,215 @@ make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
     }
   }
   return merge_angles(angles_decomposed);
+}
+
+void decomposition_step_parallel1(
+    int monopole_difference, const std::array<int, 4> &monopole_coordinate,
+    const std::vector<double> &laplace, std::vector<double> &angles_decomposed,
+    DataPatternLexicographical &data_pattern_conf,
+    DataPatternLexicographical &data_pattern_laplacian) {
+  std::vector<int> laplace_size = {
+      data_pattern_laplacian.lat_dim[0], data_pattern_laplacian.lat_dim[1],
+      data_pattern_laplacian.lat_dim[2], data_pattern_laplacian.lat_dim[3]};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {
+      data_pattern_conf.lat_dim[0],
+      data_pattern_conf.lat_dim[1] * data_pattern_conf.lat_dim[0],
+      data_pattern_conf.lat_dim[2] * data_pattern_conf.lat_dim[1] *
+          data_pattern_conf.lat_dim[0]};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2) firstprivate(                             \
+        angles_place, laplace_place, laplace_coordinate, laplace_shift,        \
+            angles_shift, data_pattern_conf, data_pattern_laplacian,           \
+            monopole_difference, monopole_coordinate)
+  for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+
+    for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > data_pattern_conf.lat_dim[3] / 2)
+        laplace_coordinate[2] =
+            data_pattern_conf.lat_dim[3] - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > data_pattern_conf.lat_dim[2] / 2)
+        laplace_coordinate[1] =
+            data_pattern_conf.lat_dim[2] - laplace_coordinate[1];
+
+      for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > data_pattern_conf.lat_dim[1] / 2)
+          laplace_coordinate[0] =
+              data_pattern_conf.lat_dim[1] - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        for (int j = data_pattern_conf.lat_dim[0] - monopole_coordinate[0];
+             j <= data_pattern_conf.lat_dim[0] / 2; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = data_pattern_conf.lat_dim[0] / 2 - 1; j > 0; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = 0;
+             j < data_pattern_conf.lat_dim[0] - monopole_coordinate[0]; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+      }
+    }
+  }
+}
+
+void decomposition_step_parallel2(
+    int monopole_difference, const std::array<int, 4> &monopole_coordinate,
+    const std::vector<double> &laplace, std::vector<double> &angles_decomposed,
+    DataPatternLexicographical &data_pattern_conf,
+    DataPatternLexicographical &data_pattern_laplacian) {
+  std::vector<int> laplace_size = {
+      data_pattern_laplacian.lat_dim[0], data_pattern_laplacian.lat_dim[1],
+      data_pattern_laplacian.lat_dim[2], data_pattern_laplacian.lat_dim[3]};
+  std::vector<int> laplace_shift = {
+      laplace_size[0], laplace_size[0] * laplace_size[1],
+      laplace_size[0] * laplace_size[1] * laplace_size[2]};
+  std::vector<int> angles_shift = {
+      data_pattern_conf.lat_dim[0],
+      data_pattern_conf.lat_dim[1] * data_pattern_conf.lat_dim[0],
+      data_pattern_conf.lat_dim[2] * data_pattern_conf.lat_dim[1] *
+          data_pattern_conf.lat_dim[0]};
+  std::vector<int> laplace_coordinate(3);
+
+  int laplace_place;
+  int angles_place;
+
+  angles_place = 0;
+
+#pragma omp parallel for collapse(2) firstprivate(                             \
+        angles_place, laplace_place, laplace_coordinate, laplace_shift,        \
+            angles_shift, data_pattern_conf, data_pattern_laplacian,           \
+            monopole_difference, monopole_coordinate)
+  for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+
+    for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+
+      laplace_coordinate[2] = abs(t - monopole_coordinate[3]);
+      if (laplace_coordinate[2] > data_pattern_conf.lat_dim[3] / 2)
+        laplace_coordinate[2] =
+            data_pattern_conf.lat_dim[3] - laplace_coordinate[2];
+
+      laplace_coordinate[1] = abs(z - monopole_coordinate[2]);
+      if (laplace_coordinate[1] > data_pattern_conf.lat_dim[2] / 2)
+        laplace_coordinate[1] =
+            data_pattern_conf.lat_dim[2] - laplace_coordinate[1];
+
+      for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+
+        laplace_coordinate[0] = abs(y - monopole_coordinate[1]);
+        if (laplace_coordinate[0] > data_pattern_conf.lat_dim[1] / 2)
+          laplace_coordinate[0] =
+              data_pattern_conf.lat_dim[1] - laplace_coordinate[0];
+
+        laplace_place = laplace_coordinate[2] * laplace_shift[2] +
+                        laplace_coordinate[1] * laplace_shift[1] +
+                        laplace_coordinate[0] * laplace_shift[0];
+
+        angles_place =
+            angles_shift[2] * t + angles_shift[1] * z + angles_shift[0] * y;
+
+        for (int j = monopole_coordinate[0]; j >= 0; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = 1; j < data_pattern_conf.lat_dim[0] / 2; j++) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+
+        for (int j = data_pattern_conf.lat_dim[0] / 2;
+             j > monopole_coordinate[0]; j--) {
+
+          angles_decomposed[angles_place] +=
+              laplace[laplace_place + j] * monopole_difference;
+
+          angles_place++;
+        }
+      }
+    }
+  }
+}
+
+std::vector<double>
+make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
+                     const std::vector<double> &laplace,
+                     DataPatternLexicographical &data_pattern_conf,
+                     DataPatternLexicographical &data_pattern_laplacian) {
+  std::vector<std::vector<int>> dirac_difference(4, std::vector<int>());
+  std::vector<std::vector<int>> dirac_coordinate(4, std::vector<int>());
+  dirac_plaket_difference_nonzero(dirac_plakets, dirac_difference,
+                                  dirac_coordinate, data_pattern_conf);
+  for (int mu = 0; mu < dirac_plakets.size(); mu++) {
+    dirac_plakets[mu].clear();
+    dirac_plakets[mu].shrink_to_fit();
+  }
+  std::vector<std::vector<double>> angles_decomposed(
+      4, std::vector<double>(data_pattern_conf.get_lattice_size()));
+  std::array<int, 4> coordinate;
+  for (int mu = 0; mu < 4; mu++) {
+    for (int i = 0; i < dirac_difference[mu].size(); i++) {
+      coordinate = {
+          dirac_coordinate[mu][4 * i], dirac_coordinate[mu][4 * i + 1],
+          dirac_coordinate[mu][4 * i + 2], dirac_coordinate[mu][4 * i + 3]};
+      if (dirac_coordinate[mu][i * 4] > data_pattern_conf.lat_dim[0] / 2) {
+        decomposition_step_parallel1(dirac_difference[mu][i], coordinate,
+                                     laplace, angles_decomposed[mu],
+                                     data_pattern_conf, data_pattern_laplacian);
+      } else {
+        decomposition_step_parallel2(dirac_difference[mu][i], coordinate,
+                                     laplace, angles_decomposed[mu],
+                                     data_pattern_conf, data_pattern_laplacian);
+      }
+    }
+  }
+  for (int mu = 0; mu < 4; mu++) {
+    for (int i = 0; i < angles_decomposed[mu].size(); i++) {
+      angles_decomposed[mu][i] = -2 * M_PI * angles_decomposed[mu][i];
+    }
+  }
+  return merge_angles(angles_decomposed, data_pattern_conf);
 }
 
 void calculate_inverse_laplacian(std::vector<double> &inverse_laplacian_real,

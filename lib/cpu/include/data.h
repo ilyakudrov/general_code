@@ -75,16 +75,19 @@ public:
   void read_double_qc2dstag_convert_abelian(std::string &file_name);
 };
 
-template <class DataPattern, class MatrixType> class Data1 {
+template <class DataPattern, class MatrixType> class LatticeData {
 public:
   typedef MatrixType matrix_type;
   typedef DataPattern data_pattern_type;
   std::vector<MatrixType> array;
   std::array<int, 4> lat_dim;
-  Data1(const std::array<int, 4> &_lat_dim) : lat_dim(_lat_dim) {
+  LatticeData(const std::array<int, 4> &_lat_dim) : lat_dim(_lat_dim) {
     array = std::vector<MatrixType>(lat_dim[0] * lat_dim[1] * lat_dim[2] *
                                     lat_dim[3] * 4);
   }
+  LatticeData(std::vector<MatrixType> &&_array,
+              const std::array<int, 4> &_lat_dim)
+      : array(std::move(_array)), lat_dim(_lat_dim) {}
 
   const MatrixType &operator[](int index) const { return array[index]; }
   MatrixType &operator[](int index) { return array[index]; }
@@ -142,38 +145,25 @@ public:
   void read_data(std::string file_path,
                  FilePatternILDG<N_dim, MatrixType> file_pattern,
                  int bytes_skip, std::string file_precision) {
-    int data_size1 = 4 * x_size * y_size * z_size * t_size;
-    array.clear();
-    array.reserve(4 * x_size * y_size * z_size * t_size);
-
     FILE *fp;
     fp = fopen(file_path.c_str(), "r");
-
     LimeReader *reader;
     reader = limeCreateReader(fp);
-
     int status;
     char *lime_type;
     n_uint64_t nbytes;
     while ((status = limeReaderNextRecord(reader)) != LIME_EOF) {
-
       if (status != LIME_SUCCESS) {
         fprintf(stderr, "limeReaderNextRecord returned status = %d\n", status);
       }
-
       lime_type = limeReaderType(reader);
       nbytes = limeReaderBytes(reader);
-
       if (strcmp(lime_type, "ildg-binary-data") == 0) {
-
         std::vector<double> v(nbytes / sizeof(double));
-
         status = limeReaderReadData((char *)&v[0], &nbytes, reader);
-
         for (int i = 0; i < nbytes / sizeof(double); i++) {
           v[i] = reverseValue((char *)&v[i]);
         }
-
         if (status != LIME_SUCCESS) {
           fprintf(stderr, "limeReaderReadData returned status = %d\n", status);
         }
@@ -213,6 +203,37 @@ public:
       std::cout << "write_data error: " << file_path << std::endl;
     stream.close();
   }
+
+  void swap_directions(int dir1, int dir2) {
+    DataPattern data_pattern1(lat_dim);
+    DataPattern data_pattern2(lat_dim);
+    std::vector<MatrixType> conf1 = array;
+    int tmp;
+    for (int t = 0; t < data_pattern1.lat_dim[3]; t++) {
+      for (int z = 0; z < data_pattern1.lat_dim[2]; z++) {
+        for (int y = 0; y < data_pattern1.lat_dim[1]; y++) {
+          for (int x = 0; x < data_pattern1.lat_dim[0]; x++) {
+            data_pattern1.lat_coord = {x, y, z, t};
+            data_pattern2 = data_pattern1;
+            tmp = data_pattern2.lat_coord[dir1];
+            data_pattern2.lat_coord[dir1] = data_pattern2.lat_coord[dir2];
+            data_pattern2.lat_coord[dir2] = tmp;
+            conf1[data_pattern2.get_index_link(dir1)] =
+                array[data_pattern1.get_index_link(dir2)];
+            conf1[data_pattern2.get_index_link(dir2)] =
+                array[data_pattern1.get_index_link(dir1)];
+            for (int mu = 0; mu < 4; mu++) {
+              if (mu != dir1 && mu != dir2) {
+                conf1[data_pattern2.get_index_link(mu)] =
+                    array[data_pattern1.get_index_link(mu)];
+              }
+            }
+          }
+        }
+      }
+    }
+    array = conf1;
+  }
 };
 
 template <class MatrixType1, class MatrixType2>
@@ -242,54 +263,72 @@ void read_data(DataType &data, std::string file_path, std::string conf_format,
 }
 
 template <class DataPattern>
-void read_data_convert(Data1<DataPattern, su2> &data, std::string file_path,
-                       std::string conf_format, int bytes_skip,
-                       std::string file_precision, bool convert) {
-  if (convert) {
-    Data1<DataPattern, su2> data_from_file(data.data_pattern);
-    read_data(data_from_file, file_path, conf_format, bytes_skip,
-              file_precision);
-    data_convert(data_from_file.array, data.array);
-  } else {
-    read_data(data, file_path, conf_format, bytes_skip, file_precision);
-  }
-}
-
-template <class DataPattern>
-void read_data_convert(Data1<DataPattern, abelian> &data, std::string file_path,
-                       std::string conf_format, int bytes_skip,
-                       std::string file_precision, bool convert) {
-  if (convert) {
-    Data1<DataPattern, su2> data_from_file(data.data_pattern);
-    read_data(data_from_file, file_path, conf_format, bytes_skip,
-              file_precision);
-    data_convert(data_from_file.array, data.array);
-  } else {
-    read_data(data, file_path, conf_format, bytes_skip, file_precision);
-  }
-}
-
-template <class DataPattern>
-void read_data_convert(Data1<DataPattern, su3> &data, std::string file_path,
-                       std::string conf_format, int bytes_skip,
-                       std::string file_precision, bool convert) {
-  if (convert) {
-    Data1<DataPattern, su3> data_from_file(data.lat_dim);
-    read_data(data_from_file, file_path, conf_format, bytes_skip,
-              file_precision);
-    data_convert(data_from_file.array, data.array);
-  } else {
-    read_data(data, file_path, conf_format, bytes_skip, file_precision);
-  }
-}
-
-template <class DataPattern>
-void read_data_convert(Data1<DataPattern, su3_abelian> &data,
+void read_data_convert(LatticeData<DataPattern, su2> &data,
                        std::string file_path, std::string conf_format,
                        int bytes_skip, std::string file_precision,
                        bool convert) {
   if (convert) {
-    Data1<DataPattern, su3> data_from_file(data.data_pattern);
+    LatticeData<DataPattern, su2> data_from_file(data.lat_dim);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(LatticeData<DataPattern, abelian> &data,
+                       std::string file_path, std::string conf_format,
+                       int bytes_skip, std::string file_precision,
+                       bool convert) {
+  if (convert) {
+    LatticeData<DataPattern, su2> data_from_file(data.lat_dim);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(LatticeData<DataPattern, su3> &data,
+                       std::string file_path, std::string conf_format,
+                       int bytes_skip, std::string file_precision,
+                       bool convert) {
+  if (convert) {
+    LatticeData<DataPattern, su3> data_from_file(data.lat_dim);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(LatticeData<DataPattern, su3_abelian> &data,
+                       std::string file_path, std::string conf_format,
+                       int bytes_skip, std::string file_precision,
+                       bool convert) {
+  if (convert) {
+    LatticeData<DataPattern, su3> data_from_file(data.lat_dim);
+    read_data(data_from_file, file_path, conf_format, bytes_skip,
+              file_precision);
+    data_convert(data_from_file.array, data.array);
+  } else {
+    read_data(data, file_path, conf_format, bytes_skip, file_precision);
+  }
+}
+
+template <class DataPattern>
+void read_data_convert(LatticeData<DataPattern, su3_angles> &data,
+                       std::string file_path, std::string conf_format,
+                       int bytes_skip, std::string file_precision,
+                       bool convert) {
+  if (convert) {
+    LatticeData<DataPattern, su3> data_from_file(data.lat_dim);
     read_data(data_from_file, file_path, conf_format, bytes_skip,
               file_precision);
     data_convert(data_from_file.array, data.array);

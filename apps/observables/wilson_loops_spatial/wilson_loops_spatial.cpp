@@ -1,6 +1,7 @@
-#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/plaket.h"
+#include "../../../lib/cpu/include/wilson_loops.h"
 
 #include <ctime>
 #include <fstream>
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
   double observables_time;
 
   string conf_format;
+  string file_precision;
   string conf_path;
   string path_wilson;
   string representation;
@@ -37,47 +39,47 @@ int main(int argc, char *argv[]) {
   int bytes_skip = 0;
   bool convert = 0;
   for (int i = 1; i < argc; i++) {
-    if (string(argv[i]) == "-conf_format") {
+    if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip") {
+    } else if (string(argv[i]) == "--file_precision") {
+      file_precision = argv[++i];
+    } else if (string(argv[i]) == "--bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-conf_path") {
+    } else if (string(argv[i]) == "--conf_path") {
       conf_path = argv[++i];
-    } else if (string(argv[i]) == "-convert") {
+    } else if (string(argv[i]) == "--convert") {
       istringstream(string(argv[++i])) >> convert;
-    } else if (string(argv[i]) == "-L_spat") {
+    } else if (string(argv[i]) == "--L_spat") {
       L_spat = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-L_time") {
+    } else if (string(argv[i]) == "--L_time") {
       L_time = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-path_wilson") {
+    } else if (string(argv[i]) == "--path_wilson") {
       path_wilson = argv[++i];
-    } else if (string(argv[i]) == "-representation") {
+    } else if (string(argv[i]) == "--representation") {
       representation = argv[++i];
-    } else if (string(argv[i]) == "-APE_start") {
+    } else if (string(argv[i]) == "--APE_start") {
       APE_start = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-APE_end") {
+    } else if (string(argv[i]) == "--APE_end") {
       APE_end = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-APE_step") {
+    } else if (string(argv[i]) == "--APE_step") {
       APE_step = stoi(argv[++i]);
-    } else if (string(argv[i]) == "-alpha") {
+    } else if (string(argv[i]) == "--alpha") {
       alpha = atof(argv[++i]);
-    } else if (string(argv[i]) == "-T_min") {
+    } else if (string(argv[i]) == "--T_min") {
       T_min = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-T_max") {
+    } else if (string(argv[i]) == "--T_max") {
       T_max = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-R_min") {
+    } else if (string(argv[i]) == "--R_min") {
       R_min = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-R_max") {
+    } else if (string(argv[i]) == "--R_max") {
       R_max = stoi(string(argv[++i]));
     }
   }
 
-  x_size = L_spat;
-  y_size = L_spat;
-  z_size = L_spat;
-  t_size = L_time;
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
+  int x_size1 = L_spat;
+  int y_size1 = L_spat;
+  int z_size1 = L_spat;
+  int t_size1 = L_time;
 
   cout << "conf_format " << conf_format << endl;
   cout << "conf_path " << conf_path << endl;
@@ -95,21 +97,25 @@ int main(int argc, char *argv[]) {
   cout << "T_max " << T_max << endl;
   cout << "R_min " << R_min << endl;
   cout << "R_max " << R_max << endl;
+  cout << "x_size1 " << x_size1 << endl;
+  cout << "y_size1 " << y_size1 << endl;
+  cout << "z_size1 " << z_size1 << endl;
+  cout << "t_size1 " << t_size1 << endl;
   cout << endl;
 
   cout.precision(17);
 
-  Data::data<MATRIX> conf;
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::read_data_convert(conf, conf_path, conf_format, bytes_skip,
+                          file_precision, convert);
 
-  get_data(conf, conf_path, conf_format, bytes_skip, convert);
-
-  cout << "plaket " << plaket(conf.array) << endl;
-  cout << "plaket space " << plaket_space(conf.array) << endl;
+  std::cout << plaket(conf) << std::endl;
 
   start_time = omp_get_wtime();
 
   std::map<std::tuple<int, int, int>, double> wilson_loops =
-      wilson_spatial_3d_indexed(conf.array, R_min, R_max, T_min, T_max, alpha,
+      wilson_spatial_3d_indexed(conf, R_min, R_max, T_min, T_max, alpha,
                                 APE_start, APE_end, APE_step);
 
   end_time = omp_get_wtime();

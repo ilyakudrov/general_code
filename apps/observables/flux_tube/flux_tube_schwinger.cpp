@@ -1,7 +1,7 @@
-#include "../../../lib/cpu/include/basic_observables.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/flux_tube.h"
 #include "../../../lib/cpu/include/matrix.h"
+#include "../../../lib/cpu/include/plaket.h"
 
 #include <algorithm>
 #include <cstring>
@@ -12,11 +12,8 @@
 #include <sstream>
 #include <vector>
 
-#ifndef MATRIX_PLAKET
-#define MATRIX_PLAKET su2
-#endif
-#ifndef MATRIX_WILSON
-#define MATRIX_WILSON su2
+#ifndef MATRIX
+#define MATRIX su2
 #endif
 
 using namespace std;
@@ -34,7 +31,9 @@ int main(int argc, char *argv[]) {
   double search_time;
 
   std::string conf_format_plaket;
+  std::string file_precision_plaket;
   std::string conf_format_wilson;
+  std::string file_precision_wilson;
   std::string conf_path_plaket;
   std::string conf_path_wilson;
   std::string output_path_electric_long_l;
@@ -56,63 +55,69 @@ int main(int argc, char *argv[]) {
   bool convert_plaket = 0;
   bool convert_wilson = 0;
   for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-conf_format_plaket") == 0) {
+    if (strcmp(argv[i], "--conf_format_plaket") == 0) {
       conf_format_plaket = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip_plaket") {
+    } else if (string(argv[i]) == "--file_precision_plaket") {
+      file_precision_plaket = argv[++i];
+    } else if (string(argv[i]) == "--bytes_skip_plaket") {
       bytes_skip_plaket = stoi(string(argv[++i]));
-    } else if (std::string(argv[i]) == "-conf_format_wilson") {
+    } else if (std::string(argv[i]) == "--conf_format_wilson") {
       conf_format_wilson = argv[++i];
-    } else if (string(argv[i]) == "-bytes_skip_wilson") {
+    } else if (string(argv[i]) == "--file_precision_wilson") {
+      file_precision_wilson = argv[++i];
+    } else if (string(argv[i]) == "--bytes_skip_wilson") {
       bytes_skip_wilson = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "-convert_wilson") {
+    } else if (string(argv[i]) == "--convert_wilson") {
       istringstream(string(argv[++i])) >> convert_wilson;
-    } else if (string(argv[i]) == "-convert_plaket") {
+    } else if (string(argv[i]) == "--convert_plaket") {
       istringstream(string(argv[++i])) >> convert_plaket;
-    } else if (std::string(argv[i]) == "-conf_path_plaket") {
+    } else if (std::string(argv[i]) == "--conf_path_plaket") {
       conf_path_plaket = argv[++i];
-    } else if (std::string(argv[i]) == "-conf_path_wilson") {
+    } else if (std::string(argv[i]) == "--conf_path_wilson") {
       conf_path_wilson = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_electric_long_l") {
+    } else if (std::string(argv[i]) == "--output_path_electric_long_l") {
       output_path_electric_long_l = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_electric_long_tr") {
+    } else if (std::string(argv[i]) == "--output_path_electric_long_tr") {
       output_path_electric_long_tr = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_magnetic_long_l") {
+    } else if (std::string(argv[i]) == "--output_path_magnetic_long_l") {
       output_path_magnetic_long_l = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_magnetic_long_tr") {
+    } else if (std::string(argv[i]) == "--output_path_magnetic_long_tr") {
       output_path_magnetic_long_tr = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_electric_trans_l") {
+    } else if (std::string(argv[i]) == "--output_path_electric_trans_l") {
       output_path_electric_trans_l = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_electric_trans_tr") {
+    } else if (std::string(argv[i]) == "--output_path_electric_trans_tr") {
       output_path_electric_trans_tr = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_magnetic_trans_l") {
+    } else if (std::string(argv[i]) == "--output_path_magnetic_trans_l") {
       output_path_magnetic_trans_l = argv[++i];
-    } else if (std::string(argv[i]) == "-output_path_magnetic_trans_tr") {
+    } else if (std::string(argv[i]) == "--output_path_magnetic_trans_tr") {
       output_path_magnetic_trans_tr = argv[++i];
-    } else if (std::string(argv[i]) == "-L_spat") {
+    } else if (std::string(argv[i]) == "--L_spat") {
       L_spat = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-L_time") {
+    } else if (std::string(argv[i]) == "--L_time") {
       L_time = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-x_trans") {
+    } else if (std::string(argv[i]) == "--x_trans") {
       x_trans = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-T_min") {
+    } else if (std::string(argv[i]) == "--T_min") {
       T_min = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-T_max") {
+    } else if (std::string(argv[i]) == "--T_max") {
       T_max = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-R_min") {
+    } else if (std::string(argv[i]) == "--R_min") {
       R_min = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-R_max") {
+    } else if (std::string(argv[i]) == "--R_max") {
       R_max = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-d_ouside") {
+    } else if (std::string(argv[i]) == "--d_ouside") {
       d_ouside = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "-d_max") {
+    } else if (std::string(argv[i]) == "--d_max") {
       d_max = stoi(std::string(argv[++i]));
     }
   }
 
   std::cout << "conf_format_plaket " << conf_format_plaket << std::endl;
+  std::cout << "file_precision_plaket " << file_precision_plaket << std::endl;
   cout << "bytes_skip_plaket " << bytes_skip_plaket << endl;
   cout << "convert_plaket " << convert_plaket << endl;
   std::cout << "conf_format_wilson " << conf_format_wilson << std::endl;
+  std::cout << "file_precision_wilson " << file_precision_wilson << std::endl;
   cout << "bytes_skip_wilson " << bytes_skip_wilson << endl;
   cout << "convert_wilson " << convert_wilson << endl;
   std::cout << "conf_path_plaket " << conf_path_plaket << std::endl;
@@ -143,32 +148,29 @@ int main(int argc, char *argv[]) {
   std::cout << "d_max " << d_ouside << std::endl;
   std::cout << "x_trans " << x_trans << std::endl;
 
-  x_size = L_spat;
-  y_size = L_spat;
-  z_size = L_spat;
-  t_size = L_time;
-  size1 = x_size * y_size;
-  size2 = x_size * y_size * z_size;
+  int x_size1 = L_spat;
+  int y_size1 = L_spat;
+  int z_size1 = L_spat;
+  int t_size1 = L_time;
 
-  Data::data<MATRIX_PLAKET> conf_plaket;
-  Data::data<MATRIX_WILSON> conf_wilson;
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf_plaket(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::LatticeData<DataPatternLexicographical, MATRIX> conf_wilson(
+      {x_size1, y_size1, z_size1, t_size1});
+  Data::read_data_convert(conf_plaket, conf_path_plaket, conf_format_plaket,
+                          bytes_skip_plaket, file_precision_plaket,
+                          convert_plaket);
+  Data::read_data_convert(conf_wilson, conf_path_wilson, conf_format_wilson,
+                          bytes_skip_wilson, file_precision_wilson,
+                          convert_wilson);
 
-  get_data(conf_plaket, conf_path_plaket, conf_format_plaket, bytes_skip_plaket,
-           convert_plaket);
-  // vector<float> conf_full = read_full_ml5(conf_path_plaket, 1);
-  // conf_plaket.read_float_ml5(conf_full, 0);
-  get_data(conf_wilson, conf_path_wilson, conf_format_wilson, bytes_skip_wilson,
-           convert_wilson);
-  // conf_full = read_full_ml5(conf_path_wilson, 1);
-  // conf_wilson.read_float_ml5(conf_full, 0);
-
-  double plaket_time_average = plaket_time(conf_plaket.array);
-  double plaket_space_average = plaket_space(conf_plaket.array);
+  double plaket_time_average = plaket_time(conf_plaket);
+  double plaket_space_average = plaket_space(conf_plaket);
 
   std::cout << "plaket_time " << plaket_time_average << " smeared_plaket_time "
-            << plaket_time(conf_wilson.array) << std::endl;
+            << plaket_time(conf_wilson) << std::endl;
   std::cout << "plaket_space " << plaket_space_average
-            << " smeared_plaket_space " << plaket_space(conf_wilson.array)
+            << " smeared_plaket_space " << plaket_space(conf_wilson)
             << std::endl;
 
   std::ofstream stream_electric_long_l;
@@ -218,8 +220,8 @@ int main(int argc, char *argv[]) {
   int schwinger_line_max = max(d_max, d_ouside);
   schwinger_line_max = max(schwinger_line_max, (R_max + 1) / 2);
 
-  std::vector<std::vector<MATRIX_WILSON>> schwinger_lines_short(
-      schwinger_line_max, std::vector<MATRIX_WILSON>());
+  std::vector<std::vector<MATRIX>> schwinger_lines_short(schwinger_line_max,
+                                                         std::vector<MATRIX>());
 
   for (int d = 0; d < schwinger_line_max; d++) {
     schwinger_lines_short[d] =

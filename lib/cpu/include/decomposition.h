@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../include/indexing.h"
 #include "../include/link.h"
 
 #include <vector>
@@ -9,10 +10,17 @@ std::vector<double> read_double_angles(std::string &file_name, int bites_skip);
 void write_double_angles(std::string &file_name,
                          const std::vector<double> &angles);
 
-std::vector<std::vector<double>> read_double_angles_su3(std::string &file_name);
+std::vector<std::vector<double>>
+read_double_angles_su3(std::string &file_name,
+                       DataPatternLexicographical &data_pattern);
+
+void write_double_angles(std::string &file_name,
+                         const std::vector<double> &angles,
+                         DataPatternLexicographical &data_pattern);
 
 void write_double_angles_su3(std::string &file_name,
-                             const std::vector<std::vector<double>> &angles);
+                             const std::vector<std::vector<double>> &angles,
+                             DataPatternLexicographical &data_pattern);
 
 void write_double_su2(std::string &file_name, const std::vector<su2> &conf_su2);
 
@@ -33,6 +41,8 @@ std::vector<su2> get_offdiagonal(std::vector<su2> &conf);
 
 std::vector<double>
 merge_angles(const std::vector<std::vector<double>> &angles);
+std::vector<double> merge_angles(std::vector<std::vector<double>> &angles,
+                                 DataPatternLexicographical &data_pattern_conf);
 
 std::vector<su2> get_monopoless(const std::vector<su2> &conf_su2,
                                 const std::vector<double> &angles_monopole);
@@ -52,7 +62,9 @@ std::vector<double> read_gauge_Landau(std::string &file_name, int bites_skip);
 void apply_gauge_Landau(std::vector<su2> &conf_su2,
                         const std::vector<double> &gauge);
 
-std::vector<double> read_inverse_laplacian(std::string &file_path);
+std::vector<double>
+read_inverse_laplacian(std::string &file_path,
+                       DataPatternLexicographical &data_pattern);
 
 double get_monopole_angle(std::vector<std::vector<int>> &monopole_plaket,
                           link1 &link_tmp, std::vector<double> &laplace,
@@ -94,6 +106,11 @@ void decomposition_step(const std::vector<std::vector<int>> &dirac_difference,
 std::vector<double>
 make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
                      const std::vector<double> &laplace);
+std::vector<double>
+make_monopole_angles(std::vector<std::vector<int>> &dirac_plakets,
+                     const std::vector<double> &laplace,
+                     DataPatternLexicographical &data_pattern_conf,
+                     DataPatternLexicographical &data_pattern_laplacian);
 
 void decomposition_step_parallel(int dirac_difference,
                                  const std::vector<int> &dirac_coordinate,

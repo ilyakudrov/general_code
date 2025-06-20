@@ -76,64 +76,36 @@ int main(int argc, char *argv[]) {
   get_data(conf1, conf_path1, conf_format1, bytes_skip, convert);
 
   start_time = omp_get_wtime();
-  // std::cout << polyakov_loop(conf1.array) << std::endl;
-  std::cout << plaket(conf1.array) << std::endl;
-  std::cout << plaket_space(conf1.array) << std::endl;
-  std::cout << plaket_time(conf1.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "observables time: " << search_time << std::endl;
-
-  // for (int i = 0; i < 4; i++) {
-  //   std::cout << conf1.array[i] << std::endl;
-  //   std::cout << conf1.array[conf1.array.size() - 1 - i] << std::endl;
-  // }
 
   conf1.array.clear();
   conf1.array.shrink_to_fit();
 
   std::array<int, 4> lat_dim = {x_size, y_size, z_size, t_size};
-  // Data::Data1<DataPatternLexicographical, MATRIX_TYPE> data_indexed(
-  //     (DataPatternLexicographical(lat_dim)));
-  Data::Data1<DataPatternSeparateDir, MATRIX_TYPE> data_indexed(lat_dim);
+  Data::LatticeData<DataPatternSeparateDir, MATRIX_TYPE> data_indexed(lat_dim);
   Data::read_data_convert(data_indexed, conf_path1, "qcdstag", 0, "double", 1);
 
   start_time = omp_get_wtime();
-  // std::cout << polyakov_loop(data_indexed.array) << std::endl;
-  std::cout << plaket_indexed(data_indexed) << std::endl;
-  std::cout << plaket_space_indexed(data_indexed) << std::endl;
-  std::cout << plaket_time_indexed(data_indexed) << std::endl;
+  std::cout << polyakov_loop(data_indexed) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "observables data_indexed time: " << search_time << std::endl;
-
-  // for (int i = 0; i < 4; i++) {
-  //   std::cout << data_indexed.array[i] << std::endl;
-  //   std::cout << data_indexed.array[data_indexed.array.size() - 1 - i]
-  //             << std::endl;
-  // }
 
   FilePatternLexicographical<4, MATRIX_TYPE> file_pattern_lexicographical;
   data_indexed.write_data("../../confs/test/conf_test",
                           file_pattern_lexicographical);
 
-  Data::Data1<DataPatternLexicographical, MATRIX_TYPE> data_indexed1(lat_dim);
+  Data::LatticeData<DataPatternLexicographical, MATRIX_TYPE> data_indexed1(
+      lat_dim);
   Data::read_data_convert(data_indexed1, "../../confs/test/conf_test",
                           "lexicographical", 0, "double", 0);
 
   start_time = omp_get_wtime();
-  // std::cout << polyakov_loop(data_indexed1.array) << std::endl;
-  std::cout << plaket_indexed(data_indexed1) << std::endl;
-  std::cout << plaket_space_indexed(data_indexed1) << std::endl;
-  std::cout << plaket_time_indexed(data_indexed1) << std::endl;
+  std::cout << polyakov_loop(data_indexed1) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "observables file pattern lexicographical time: " << search_time
             << std::endl;
-
-  // for (int i = 0; i < 4; i++) {
-  //   std::cout << data_indexed.array[i] << std::endl;
-  //   std::cout << data_indexed.array[data_indexed.array.size() - 1 - i]
-  //             << std::endl;
-  // }
 }

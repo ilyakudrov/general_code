@@ -80,3 +80,124 @@ void make_maximization_final(std::vector<su2> &conf_su2,
                              double tolerance_average);
 
 double mag_functional_su3(std::vector<su3> &conf_su3);
+
+template <class DataPattern>
+std::vector<spin> generate_spins_uniform(DataPattern &data_pattern) {
+  int data_size = data_pattern.get_lattice_size();
+  std::vector<double> random_numbers =
+      generate_random_numbers_sphere(data_size);
+  std::vector<spin> spins;
+  spins.reserve(data_size);
+  spin spin_tmp;
+  double a;
+  for (int i = 0; i < data_size; i++) {
+    a = 1 - random_numbers[2 * i] * random_numbers[2 * i] -
+        random_numbers[2 * i + 1] * random_numbers[2 * i + 1];
+    spin_tmp =
+        spin(2 * random_numbers[2 * i] * sqrt(a),
+             2 * random_numbers[2 * i + 1] * sqrt(a),
+             1 - 2 * (random_numbers[2 * i] * random_numbers[2 * i] +
+                      random_numbers[2 * i + 1] * random_numbers[2 * i + 1]));
+    spins.push_back(spin_tmp);
+  }
+  return spins;
+}
+
+// spin contribution_site(std::vector<spin> &spins, std::vector<su2> &conf_su2,
+//                        int x, int y, int z, int t, int position,
+//                        std::vector<int> &shift) {
+
+//   spin A(0, 0, 0);
+
+//   // mu = 0
+//   if (x < x_size - 1)
+//     A.contribution1(conf_su2[position * 4], spins[position + shift[0]]);
+//   else
+//     A.contribution1(conf_su2[position * 4],
+//                     spins[position + shift[0] - shift[1]]);
+
+//   if (x > 0)
+//     A.contribution1_conj(conf_su2[(position - shift[0]) * 4],
+//                          spins[position - shift[0]]);
+//   else
+//     A.contribution1_conj(conf_su2[(position - shift[0] + shift[1]) * 4],
+//                          spins[position - shift[0] + shift[1]]);
+
+//   // mu = 1
+//   if (y < y_size - 1)
+//     A.contribution1(conf_su2[position * 4 + 1], spins[position + shift[1]]);
+//   else
+//     A.contribution1(conf_su2[position * 4 + 1],
+//                     spins[position + shift[1] - shift[2]]);
+
+//   if (y > 0)
+//     A.contribution1_conj(conf_su2[(position - shift[1]) * 4 + 1],
+//                          spins[position - shift[1]]);
+//   else
+//     A.contribution1_conj(conf_su2[(position - shift[1] + shift[2]) * 4 + 1],
+//                          spins[position - shift[1] + shift[2]]);
+
+//   // mu = 2
+//   if (z < z_size - 1)
+//     A.contribution1(conf_su2[position * 4 + 2], spins[position + shift[2]]);
+//   else
+//     A.contribution1(conf_su2[position * 4 + 2],
+//                     spins[position + shift[2] - shift[3]]);
+
+//   if (z > 0)
+//     A.contribution1_conj(conf_su2[(position - shift[2]) * 4 + 2],
+//                          spins[position - shift[2]]);
+//   else
+//     A.contribution1_conj(conf_su2[(position - shift[2] + shift[3]) * 4 + 2],
+//                          spins[position - shift[2] + shift[3]]);
+
+//   // mu = 3
+//   if (t < t_size - 1)
+//     A.contribution1(conf_su2[position * 4 + 3], spins[position + shift[3]]);
+//   else
+//     A.contribution1(conf_su2[position * 4 + 3],
+//                     spins[position + shift[3] - shift[4]]);
+
+//   if (t > 0)
+//     A.contribution1_conj(conf_su2[(position - shift[3]) * 4 + 3],
+//                          spins[position - shift[3]]);
+//   else
+//     A.contribution1_conj(conf_su2[(position - shift[3] + shift[4]) * 4 + 3],
+//                          spins[position - shift[3] + shift[4]]);
+
+//   return A;
+// }
+
+// template <class DataPattern>
+// void heat_bath_update(std::vector<spin> &spins, std::vector<su2> &conf_su2,
+// DataPattern &data_pattern,
+//                       double temperature) {
+//   std::vector<double> random_numbers;
+//   random_numbers =
+//       generate_random_numbers(data_pattern.get_lattice_size * 3);
+//   spin A(0, 0, 0);
+//   int position = 0;
+//   int count = 0;
+// #pragma omp parallel for collapse(4) firstprivate(data_pattern)
+// private(place)
+//   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+//     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+//       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+//         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+//           data_pattern.lat_coord = {x, y, z, t};
+
+//           A = contribution_site(spins, conf_su2, x, y, z, t, position,
+//           shift);
+
+//           heat_bath(spins[position], A, temperature,
+//                     &random_numbers[count * 3]);
+
+//           position++;
+//           count++;
+//         }
+//       }
+//     }
+//   }
+
+//   normalize_spin(spins);
+// }
