@@ -4,9 +4,12 @@
 #include "../include/indexing.h"
 #include "../include/matrix.h"
 
+#include <map>
 #include <vector>
 
 std::vector<double> convert_to_angles(const std::vector<su2> &conf_su2);
+std::vector<double> convert_to_angles(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
 
 std::vector<abelian> convert_to_abelian(const std::vector<su2> &conf_su2);
 
@@ -24,6 +27,8 @@ std::vector<double> generate_gauge_angles_uniform();
 std::vector<abelian> generate_gauge_abelian_uniform();
 
 std::vector<std::complex<double>> generate_gauge_complex_uniform();
+std::vector<std::complex<double>>
+generate_gauge_complex_uniform(DataPatternLexicographical &data_pattern);
 
 std::vector<std::complex<double>> generate_gauge_complex_unity();
 
@@ -67,9 +72,10 @@ double Landau_functional_gauge_angles(const std::vector<double> &gauge_angles,
 double Landau_functional_gauge(const std::vector<double> &gauge_angles,
                                const std::vector<double> &conf_angles);
 
-double Landau_functional_gauge_complex(
+double Landau_functional_conf_complex(
+    const std::vector<std::complex<double>> &conf_complex,
     const std::vector<std::complex<double>> &gauge_complex,
-    const std::vector<std::complex<double>> &conf_complex);
+    DataPatternLexicographical &data_pattern);
 
 double Landau_functional(const std::vector<su2> &conf);
 
@@ -171,3 +177,22 @@ void apply_gauge_Landau_complex(
 void apply_gauge_Landau(
     std::vector<std::complex<double>> &gauge_complex,
     Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
+
+std::map<double, double> simulated_annealing_thermalization_test(
+    const std::vector<std::complex<double>> &conf_complex,
+    std::vector<std::complex<double>> &gauge_complex,
+    DataPatternLexicographical &data_pattern, double T_init, double T_final,
+    double T_step, int OR_steps, int thermalization_steps,
+    int local_thermalization_steps);
+
+void make_simulated_annealing(
+    const std::vector<std::complex<double>> &conf_complex,
+    std::vector<std::complex<double>> &gauge_complex,
+    DataPatternLexicographical &data_pattern, double T_init, double T_final,
+    double T_step, int OR_steps, int thermalization_steps);
+
+void make_maximization_final(
+    const std::vector<std::complex<double>> &conf_complex,
+    std::vector<std::complex<double>> &gauge_complex,
+    DataPatternLexicographical &data_pattern, int OR_steps,
+    double tolerance_maximal, double tolerance_average);

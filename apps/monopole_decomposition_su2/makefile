@@ -11,7 +11,7 @@ OBJFILES=$(OBJ_PATH)/link_$(ARCH).o $(OBJ_PATH)/data_$(ARCH).o $(OBJ_PATH)/basic
 HEADERFILES=$(INCLUDE_PATH)/matrix.h $(INCLUDE_PATH)/indexing.h
 EIGH_PATH="/home/ilya/soft/source/eigen-master"
 
-TARGETS=decomposition
+TARGETS=decomposition functional_dependence inverse_laplacian
 
 $(TARGETS): %: %.cpp $(OBJFILES) $(HEADERFILES)
 	$(GCC) $@.cpp $(OBJFILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o $@_$(ARCH)

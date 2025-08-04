@@ -75,8 +75,6 @@ int main(int argc, char *argv[]) {
       HYP_alpha3 = atof(argv[++i]);
     } else if (string(argv[i]) == "--APE_alpha") {
       APE_alpha = atof(argv[++i]);
-    } else if (string(argv[i]) == "--HYP") {
-      HYP_enabled = stoi(argv[++i]);
     } else if (string(argv[i]) == "--HYP_enabled") {
       istringstream(string(argv[++i])) >> HYP_enabled;
     } else if (string(argv[i]) == "--APE_steps") {

@@ -24,7 +24,8 @@ calculate_monopole_plaket(std::vector<double> &angles);
 
 std::vector<std::vector<int>>
 calculate_monopole_plaket_singular(std::vector<double> &angles);
-
+std::vector<std::vector<int>> calculate_monopole_plaket_singular(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf);
 std::vector<std::vector<int>>
 calculate_monopole_plaket_singular(std::vector<double> &angles,
                                    DataPatternLexicographical &data_pattern);
@@ -102,7 +103,7 @@ std::vector<int> length_mu(loop_new *ll);
 void length_mu_recurrent(loop *ll, std::vector<int> &lengths_mu);
 
 std::vector<int> currents_directions(loop *ll);
-std::vector<int> currents_directions(loop_new *ll);
+std::tuple<int, int> currents_directions(loop_new *ll);
 
 void currents_directions_recurrent(loop *ll, std::vector<int> &directions);
 

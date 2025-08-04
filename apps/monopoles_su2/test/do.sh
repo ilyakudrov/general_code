@@ -1,12 +1,14 @@
 #!/bin/bash
-path_conf="../../../tests/confs/MAG/su2/qc2dstag/40^4/mu0.00/conf_abelian_0201"
+# path_conf="../../../tests/confs/MAG/su2/qc2dstag/40^4/mu0.00/conf_abelian_0201"
+# path_conf="../../../tests/confs/monopole/su2/qc2dstag/40^4/mu0.00/conf_monopole_0201"
+path_conf="../../../tests/confs/monopoless/su2/qc2dstag/40^4/mu0.00/conf_monopoless_0201"
 conf_format=lexicographical
 file_precision=double
 convert=1
-path_output_clusters_unwrapped="./result/clusters_unwrapped_0001"
-path_output_clusters_wrapped="./result/clusters_wrapped_0001"
-path_output_windings="./result/windings_0001"
-path_output_monopoles="./result/monopoles_0001"
+path_output_clusters_unwrapped="./result/clusters_unwrapped2"
+path_output_clusters_wrapped="./result/clusters_wrapped2"
+path_output_windings="./result/windings2"
+path_output_monopoles="./result/monopoles2"
 bytes_skip=0
 x_size=40
 y_size=40

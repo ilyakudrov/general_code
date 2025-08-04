@@ -1,25 +1,51 @@
 #pragma once
 
+#include "../include/data.h"
 #include "../include/matrix.h"
 
+#include <map>
 #include <vector>
 
+std::vector<Eigen::Matrix3d> make_conf_contribution(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
+
 std::vector<spin> read_spins(std::string spins_path);
+std::vector<spin> read_spins(std::string spins_path,
+                             DataPatternLexicographical &data_pattern);
+
+std::vector<Eigen::Vector3d>
+read_vectors(std::string spins_path, DataPatternLexicographical &data_pattern);
 
 void write_spins(std::string output_path, std::vector<spin> spins);
+
+void write_spins(std::string output_path, std::vector<Eigen::Vector3d> spins,
+                 DataPatternLexicographical &data_pattern);
 
 std::vector<double> generate_random_numbers_sphere(int vector_size);
 
 std::vector<spin> generate_spins_uniform();
+
+std::vector<Eigen::Vector3d>
+generate_vectors_uniform(DataPatternLexicographical &data_pattern);
 
 std::vector<double> generate_random_numbers(int vector_size);
 
 void heat_bath(spin &spins, spin &neighbour, double temperature,
                double *random_numbers);
 
-spin contribution_site(std::vector<spin> &spins, std::vector<su2> &conf_su2,
-                       int x, int y, int z, int t, int position,
-                       std::vector<int> &shift);
+spin contribution_site(std::vector<spin> &spins,
+                       const std::vector<su2> &conf_su2, int x, int y, int z,
+                       int t, int position, std::vector<int> &shift);
+
+spin contribution_site(
+    const std::vector<spin> &spins,
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    DataPatternLexicographical &data_pattern);
+
+Eigen::Vector3d
+contribution_site(const std::vector<Eigen::Vector3d> &spins,
+                  const std::vector<Eigen::Matrix3d> &conf_contribution,
+                  DataPatternLexicographical &data_pattern);
 
 void heat_bath_update(std::vector<spin> &spins, std::vector<su2> &conf_su2,
                       double temperature);
@@ -29,7 +55,19 @@ void normalize_spin(std::vector<spin> &spins);
 double MAG_functional_su2_spin(std::vector<su2> &conf_su2,
                                std::vector<spin> &spins);
 
+double MAG_functional_su2_spin(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins);
+
+double
+MAG_functional_su2_spin(const std::vector<Eigen::Matrix3d> &conf_contribution,
+                        std::vector<Eigen::Vector3d> &spins,
+                        DataPatternLexicographical &data_pattern);
+
 double MAG_functional_su2(const std::vector<su2> &array);
+
+double MAG_functional_su2(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
 
 std::vector<su2> make_gauge(std::vector<spin> &spins);
 
@@ -38,6 +76,14 @@ std::vector<su2> gauge_tranformation(std::vector<su2> &conf_su2,
 
 void gauge_tranformation_spins(std::vector<su2> &conf_su2,
                                std::vector<spin> &spins);
+
+void gauge_tranformation_spins(
+    Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins);
+
+void gauge_tranformation_spins(
+    Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<Eigen::Vector3d> &spins);
 
 std::vector<int> make_indices_qube(int qube_size);
 
@@ -70,14 +116,63 @@ void make_simulated_annealing(std::vector<su2> &conf_su2,
                               double T_final, double T_step, int OR_steps,
                               int thermalization_steps);
 
+void make_simulated_annealing(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins, double T_init, double T_final, double T_step,
+    int OR_steps, int thermalization_steps);
+
+void make_simulated_annealing(
+    const std::vector<Eigen::Matrix3d> &conf_contribution,
+    std::vector<Eigen::Vector3d> &spins,
+    DataPatternLexicographical &data_pattern, double T_init, double T_final,
+    double T_step, int OR_steps, int thermalization_steps);
+
+std::map<double, double> simulated_annealing_thermalization_test(
+    std::vector<su2> &conf_su2, std::vector<spin> &spins, double T_init,
+    double T_final, double T_step, int OR_steps, int thermalization_steps,
+    int local_thermalization_steps);
+
+std::map<double, double> simulated_annealing_thermalization_test(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins, double T_init, double T_final, double T_step,
+    int OR_steps, int thermalization_steps, int local_thermalization_steps);
+
+std::map<double, double> simulated_annealing_thermalization_test(
+    const std::vector<Eigen::Matrix3d> &conf_contribution,
+    std::vector<Eigen::Vector3d> &spins,
+    DataPatternLexicographical &data_pattern, double T_init, double T_final,
+    double T_step, int OR_steps, int thermalization_steps,
+    int local_thermalization_steps);
+
 void make_maximization_approximate(std::vector<su2> &conf_su2,
                                    std::vector<spin> &spins, int OR_steps,
                                    int tolerance_digits);
+
+void make_maximization_approximate(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins, int OR_steps, int tolerance_digits);
+
+void make_maximization_approximate(
+    const std::vector<Eigen::Matrix3d> &conf_contribution,
+    std::vector<Eigen::Vector3d> &spins,
+    DataPatternLexicographical &data_pattern, int OR_steps,
+    int tolerance_digits);
 
 void make_maximization_final(std::vector<su2> &conf_su2,
                              std::vector<spin> &spins, int OR_steps,
                              double tolerance_maximal,
                              double tolerance_average);
+
+void make_maximization_final(
+    const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2,
+    std::vector<spin> &spins, int OR_steps, double tolerance_maximal,
+    double tolerance_average);
+
+void make_maximization_final(
+    const std::vector<Eigen::Matrix3d> &conf_contribution,
+    std::vector<Eigen::Vector3d> &spins,
+    DataPatternLexicographical &data_pattern, int OR_steps,
+    double tolerance_maximal, double tolerance_average);
 
 double mag_functional_su3(std::vector<su3> &conf_su3);
 

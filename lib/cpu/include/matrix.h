@@ -916,7 +916,6 @@ public:
     double q02 = A.a0 * A.a2;
     double q03 = A.a0 * A.a3;
     double A5 = A.a0 * A.a0 - q1 - q2 - q3;
-
     a1 +=
         b.a1 * (A5 + 2 * q1) + 2 * b.a2 * (q12 + q03) + 2 * b.a3 * (q13 - q02);
     a2 +=

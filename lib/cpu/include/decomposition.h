@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../include/data.h"
 #include "../include/indexing.h"
 #include "../include/link.h"
 
@@ -34,6 +35,8 @@ std::vector<su3_abelian> get_abelian(std::vector<su3> &conf);
 std::vector<su3_angles> su3_to_su3_angles(std::vector<su3> &conf);
 
 std::vector<abelian> get_abelian(std::vector<su2> &conf);
+std::vector<abelian>
+get_abelian(const Data::LatticeData<DataPatternLexicographical, su2> &conf);
 
 std::vector<su3> get_offdiagonal(std::vector<su3> &conf);
 
@@ -65,6 +68,9 @@ void apply_gauge_Landau(std::vector<su2> &conf_su2,
 std::vector<double>
 read_inverse_laplacian(std::string &file_path,
                        DataPatternLexicographical &data_pattern);
+void write_inverse_laplacian(const std::vector<double> &inverse_laplacian,
+                             std::string &file_path,
+                             DataPatternLexicographical &data_pattern);
 
 double get_monopole_angle(std::vector<std::vector<int>> &monopole_plaket,
                           link1 &link_tmp, std::vector<double> &laplace,
@@ -143,3 +149,17 @@ make_monopole_angles_parallel(std::vector<std::vector<int>> &dirac_plakets,
 
 void calculate_inverse_laplacian(std::vector<double> &inverse_laplacian_real,
                                  std::vector<double> &inverse_laplacian_imag);
+std::vector<double>
+calculate_inverse_laplacian(DataPatternLexicographical &data_pattern_conf,
+                            DataPatternLexicographical &data_pattern_laplacian);
+std::vector<double>
+calculate_inverse_laplacian(DataPatternLexicographical &data_pattern_conf,
+                            DataPatternLexicographical &data_pattern_laplacian,
+                            const std::vector<double> &inverse_momenta);
+std::vector<double> calculate_inverse_laplacian_spatially_symmetric(
+    DataPatternLexicographical &data_pattern_conf,
+    DataPatternLexicographical &data_pattern_laplacian,
+    const std::vector<double> &inverse_momenta);
+
+std::vector<double>
+make_inverse_momenta(DataPatternLexicographical &data_pattern_conf);

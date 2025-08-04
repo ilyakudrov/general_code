@@ -1420,7 +1420,8 @@ std::vector<int> currents_directions(loop *ll) {
   return directions;
 }
 
-void currents_directions_recurrent(loop_new *ll, std::vector<int> &directions) {
+void currents_directions_recurrent(loop_new *ll,
+                                   std::tuple<int, int> &directions) {
   for (int i = 0; i < ll->nodes.size(); i++) {
     currents_directions_recurrent(ll->nodes[i], directions);
     int mu = 0;
@@ -1431,16 +1432,16 @@ void currents_directions_recurrent(loop_new *ll, std::vector<int> &directions) {
     } while (difference == 0);
     mu--;
     if (mu == 3) {
-      directions[1] += abs(ll->charge[i]);
+      std::get<1>(directions) += abs(ll->charge[i]);
     } else {
-      directions[0] += abs(ll->charge[i]);
+      std::get<0>(directions) += abs(ll->charge[i]);
     }
   }
 }
 
-std::vector<int> currents_directions(loop_new *ll) {
+std::tuple<int, int> currents_directions(loop_new *ll) {
   // [0] is spatial, [1] is temporal
-  std::vector<int> directions = {0, 0};
+  std::tuple<int, int> directions = {0, 0};
   currents_directions_recurrent(ll, directions);
   return directions;
 }

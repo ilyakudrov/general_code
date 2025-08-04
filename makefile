@@ -2,7 +2,7 @@ INCLUDE_PATH=./lib/cpu/include
 SRC_PATH=./lib/cpu/src
 OBJ_PATH=./lib/cpu/obj
 GCC=g++
-FLAGS=-Ofast -fopenmp -march=native -mtune=native -std=c++17
+FLAGS=-O3 -fopenmp -march=native -mtune=native -std=c++17
 C_PATH=./lib/cpu/src/c-lime
 ARCH=test
 C_LIME=$(C_PATH)/lime_fseeko.c  $(C_PATH)/lime_header.c  $(C_PATH)/lime_reader.c  $(C_PATH)/lime_utils.c  $(C_PATH)/lime_writer.c

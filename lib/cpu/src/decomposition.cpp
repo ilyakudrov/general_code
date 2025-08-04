@@ -167,6 +167,17 @@ std::vector<abelian> get_abelian(std::vector<su2> &conf) {
   return conf_abelian;
 }
 
+std::vector<abelian>
+get_abelian(const Data::LatticeData<DataPatternLexicographical, su2> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  int data_size = data_pattern.get_data_size();
+  std::vector<abelian> conf_abelian(data_size);
+  for (int i = 0; i < data_size; i++) {
+    conf_abelian[i] = abelian(1, atan2(conf[i].a3, conf[i].a0));
+  }
+  return conf_abelian;
+}
+
 std::vector<su3> get_offdiagonal(std::vector<su3> &conf) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
 
@@ -329,25 +340,21 @@ std::vector<double>
 read_inverse_laplacian(std::string &file_path,
                        DataPatternLexicographical &data_pattern) {
   std::vector<double> laplace(data_pattern.get_lattice_size());
-  std::vector<double> v(data_pattern.get_lattice_size());
   std::ifstream stream(file_path);
-  stream.ignore(4);
-  if (!stream.read((char *)&v[0],
+  if (!stream.read((char *)&laplace[0],
                    data_pattern.get_lattice_size() * sizeof(double)))
     std::cout << "read_inverse_laplacian error: " << file_path << std::endl;
-  int index = 0;
-  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
-    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
-      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
-        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
-          data_pattern.lat_coord = {x, y, z, t};
-          laplace[data_pattern.get_index_site()] = v[index];
-          index++;
-        }
-      }
-    }
-  }
   return laplace;
+}
+
+void write_inverse_laplacian(const std::vector<double> &inverse_laplacian,
+                             std::string &file_path,
+                             DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_lattice_size();
+  std::ofstream stream(file_path);
+  if (!stream.write((char *)&inverse_laplacian[0], data_size * sizeof(double)))
+    std::cout << "write_inverse_laplacian error: " << file_path << std::endl;
+  stream.close();
 }
 
 double get_monopole_angle(std::vector<std::vector<int>> &monopole_plaket,
@@ -1635,4 +1642,194 @@ void calculate_inverse_laplacian(std::vector<double> &inverse_laplacian_real,
       }
     }
   }
+}
+
+std::vector<double> calculate_inverse_laplacian(
+    DataPatternLexicographical &data_pattern_conf,
+    DataPatternLexicographical &data_pattern_laplacian) {
+  int data_size = data_pattern_conf.get_lattice_size();
+  std::vector<double> momentum(4);
+  std::vector<double> inverse_laplacian(
+      data_pattern_laplacian.get_lattice_size());
+  double inv_moment_sum;
+  double scalar_mult;
+  double sin_p;
+  int index_laplacian;
+  for (int t1 = 0; t1 < data_pattern_laplacian.lat_dim[3]; t1++) {
+    for (int z1 = 0; z1 < data_pattern_laplacian.lat_dim[2]; z1++) {
+      for (int y1 = 0; y1 < data_pattern_laplacian.lat_dim[1]; y1++) {
+        for (int x1 = 0; x1 < data_pattern_laplacian.lat_dim[0]; x1++) {
+          data_pattern_laplacian.lat_coord = {x1, y1, z1, t1};
+          index_laplacian = data_pattern_laplacian.get_index_site();
+          for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+            for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+              for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+                for (int x = 0; x < data_pattern_conf.lat_dim[0]; x++) {
+                  if (!(x == 0 && y == 0 && z == 0 && t == 0)) {
+                    data_pattern_conf.lat_coord = {x, y, z, t};
+                    for (int mu = 0; mu < 4; mu++) {
+                      momentum[mu] = 2 * M_PI *
+                                     data_pattern_conf.lat_coord[mu] /
+                                     data_pattern_conf.lat_dim[mu];
+                    }
+                    inv_moment_sum = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      sin_p = sin(momentum[mu] / 2);
+                      inv_moment_sum += 4 * sin_p * sin_p;
+                    }
+                    inv_moment_sum = 1 / inv_moment_sum;
+                    scalar_mult = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      scalar_mult +=
+                          data_pattern_laplacian.lat_coord[mu] * momentum[mu];
+                    }
+                    inverse_laplacian[index_laplacian] +=
+                        cos(scalar_mult) * inv_moment_sum;
+                  }
+                }
+              }
+            }
+          }
+          inverse_laplacian[index_laplacian] /= data_size;
+        }
+      }
+    }
+  }
+  return inverse_laplacian;
+}
+
+std::vector<double>
+calculate_inverse_laplacian(DataPatternLexicographical &data_pattern_conf,
+                            DataPatternLexicographical &data_pattern_laplacian,
+                            const std::vector<double> &inverse_momenta) {
+  int data_size = data_pattern_conf.get_lattice_size();
+  std::vector<double> inverse_laplacian(
+      data_pattern_laplacian.get_lattice_size());
+  double scalar_mult;
+  double sin_p;
+  int index_laplacian;
+  double inverse_laplacian_tmp;
+  for (int t1 = 0; t1 < data_pattern_laplacian.lat_dim[3]; t1++) {
+    for (int z1 = 0; z1 < data_pattern_laplacian.lat_dim[2]; z1++) {
+      for (int y1 = 0; y1 < data_pattern_laplacian.lat_dim[1]; y1++) {
+        for (int x1 = 0; x1 < data_pattern_laplacian.lat_dim[0]; x1++) {
+          data_pattern_laplacian.lat_coord = {x1, y1, z1, t1};
+          index_laplacian = data_pattern_laplacian.get_index_site();
+          inverse_laplacian_tmp = 0;
+#pragma omp parallel for collapse(4) firstprivate(                             \
+        data_pattern_laplacian, data_pattern_conf) private(scalar_mult, sin_p) \
+    reduction(+ : inverse_laplacian_tmp)
+          for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+            for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+              for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+                for (int x = 0; x < data_pattern_conf.lat_dim[0]; x++) {
+                  if (!(x == 0 && y == 0 && z == 0 && t == 0)) {
+                    data_pattern_conf.lat_coord = {x, y, z, t};
+                    scalar_mult = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      scalar_mult += data_pattern_laplacian.lat_coord[mu] * 2 *
+                                     M_PI * data_pattern_conf.lat_coord[mu] /
+                                     data_pattern_conf.lat_dim[mu];
+                    }
+                    inverse_laplacian_tmp +=
+                        cos(scalar_mult) *
+                        inverse_momenta[data_pattern_conf.get_index_site()];
+                  }
+                }
+              }
+            }
+          }
+          inverse_laplacian[index_laplacian] =
+              inverse_laplacian_tmp / data_size;
+        }
+      }
+    }
+  }
+  return inverse_laplacian;
+}
+
+std::vector<double> calculate_inverse_laplacian_spatially_symmetric(
+    DataPatternLexicographical &data_pattern_conf,
+    DataPatternLexicographical &data_pattern_laplacian,
+    const std::vector<double> &inverse_momenta) {
+  int data_size = data_pattern_conf.get_lattice_size();
+  std::vector<double> inverse_laplacian(
+      data_pattern_laplacian.get_lattice_size());
+  double scalar_mult;
+  double sin_p;
+  double inverse_laplacian_tmp;
+  std::array<int, 3> momentum_spatial;
+  for (int t1 = 0; t1 < data_pattern_laplacian.lat_dim[3]; t1++) {
+    for (int z1 = 0; z1 < data_pattern_laplacian.lat_dim[2]; z1++) {
+      for (int y1 = z1; y1 < data_pattern_laplacian.lat_dim[1]; y1++) {
+        for (int x1 = y1; x1 < data_pattern_laplacian.lat_dim[0]; x1++) {
+          data_pattern_laplacian.lat_coord = {x1, y1, z1, t1};
+          inverse_laplacian_tmp = 0;
+#pragma omp parallel for collapse(4) firstprivate(                             \
+        data_pattern_laplacian, data_pattern_conf) private(scalar_mult, sin_p) \
+    reduction(+ : inverse_laplacian_tmp)
+          for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+            for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+              for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+                for (int x = 0; x < data_pattern_conf.lat_dim[0]; x++) {
+                  if (!(x == 0 && y == 0 && z == 0 && t == 0)) {
+                    data_pattern_conf.lat_coord = {x, y, z, t};
+                    scalar_mult = 0;
+                    for (int mu = 0; mu < 4; mu++) {
+                      scalar_mult += data_pattern_laplacian.lat_coord[mu] * 2 *
+                                     M_PI * data_pattern_conf.lat_coord[mu] /
+                                     data_pattern_conf.lat_dim[mu];
+                    }
+                    inverse_laplacian_tmp +=
+                        cos(scalar_mult) *
+                        inverse_momenta[data_pattern_conf.get_index_site()];
+                  }
+                }
+              }
+            }
+          }
+          inverse_laplacian[data_pattern_laplacian.get_index_site()] =
+              inverse_laplacian_tmp / data_size;
+          momentum_spatial = {z1, y1, x1};
+          while (std::next_permutation(momentum_spatial.begin(),
+                                       momentum_spatial.end())) {
+            for (int i = 0; i < 3; i++) {
+              data_pattern_laplacian.lat_coord[i] = momentum_spatial[2 - i];
+            }
+            inverse_laplacian[data_pattern_laplacian.get_index_site()] =
+                inverse_laplacian_tmp / data_size;
+          }
+        }
+      }
+    }
+  }
+  return inverse_laplacian;
+}
+
+std::vector<double>
+make_inverse_momenta(DataPatternLexicographical &data_pattern_conf) {
+  std::vector<double> inverse_momenta(data_pattern_conf.get_lattice_size());
+  double inv_moment_sum;
+  double sin_p;
+  std::array<double, 4> momentum;
+  for (int t = 0; t < data_pattern_conf.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern_conf.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern_conf.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern_conf.lat_dim[0]; x++) {
+          if (!(x == 0 && y == 0 && z == 0 && t == 0)) {
+            data_pattern_conf.lat_coord = {x, y, z, t};
+            inv_moment_sum = 0;
+            for (int mu = 0; mu < 4; mu++) {
+              sin_p = sin(M_PI * data_pattern_conf.lat_coord[mu] /
+                          data_pattern_conf.lat_dim[mu]);
+              inv_moment_sum += 4 * sin_p * sin_p;
+            }
+            inverse_momenta[data_pattern_conf.get_index_site()] =
+                1 / inv_moment_sum;
+          }
+        }
+      }
+    }
+  }
+  return inverse_momenta;
 }

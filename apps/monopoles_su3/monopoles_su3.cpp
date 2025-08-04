@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
     map<int, int> time_windings;
     vector<int> lengths_mu;
     int length_mu_test;
-    vector<int> currents;
+    std::tuple<int, int> currents;
     int space_currents = 0;
     int time_currents = 0;
     cluster_len_sum = 0;
@@ -137,8 +137,8 @@ int main(int argc, char **argv) {
       cluster_len_sum += length;
       lengths_mu = length_mu(LL[i]);
       currents = currents_directions(LL[i]);
-      space_currents += currents[0];
-      time_currents += currents[1];
+      space_currents += std::get<0>(currents);
+      time_currents += std::get<1>(currents);
       int wrappings_time_tmp = 0;
       int wrappings_space_tmp = 0;
       if (lengths_mu[0] == 0 && lengths_mu[1] == 0 && lengths_mu[2] == 0 &&
@@ -184,7 +184,6 @@ int main(int argc, char **argv) {
                                        << it->second << endl;
     }
 
-    int percolating_group = 1;
     for (int i = 0; i < wrapped_lengths.size(); i++) {
       if (std::find(positions_percolating.begin(), positions_percolating.end(),
                     i) != positions_percolating.end()) {

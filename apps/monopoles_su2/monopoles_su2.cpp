@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <sstream>
 
 using namespace std;
@@ -101,15 +102,16 @@ int main(int argc, char **argv) {
   std::ofstream output_stream_monopoles(path_output_monopoles);
 
   output_stream_clusters_unwrapped << "length,number" << endl;
-  output_stream_clusters_wrapped << "length,number,direction" << endl;
+  output_stream_clusters_wrapped
+      << "length,x0_wrap,x1_wrap,x2_wrap,x3_wrap,percolating_group" << endl;
   output_stream_windings << "winding_number,cluster_number,direction" << endl;
   output_stream_monopoles << "asymmetry" << endl;
 
   vector<double> J = calculate_current(conf);
   vector<loop_new *> LL = calculate_clusters(J, data_pattern);
-
   int length;
-
+  vector<vector<int>> wrappings;
+  vector<int> wrapped_lengths;
   map<int, int> lengths_unwrapped;
   map<int, int> lengths_wrapped_time;
   map<int, int> lengths_wrapped_space;
@@ -117,93 +119,77 @@ int main(int argc, char **argv) {
   map<int, int> space_windings;
   map<int, int> time_windings;
   vector<int> lengths_mu;
-  vector<int> currents;
-
+  std::tuple<int, int> currents;
   int space_currents = 0;
   int time_currents = 0;
-
   for (int i = 0; i < LL.size(); i++) {
     length = cluster_length(LL[i]);
     lengths_mu = length_mu(LL[i]);
-
     currents = currents_directions(LL[i]);
-
-    space_currents += currents[0];
-    time_currents += currents[1];
-
+    space_currents += std::get<0>(currents);
+    time_currents += std::get<1>(currents);
     int wrappings_time_tmp = 0;
     int wrappings_space_tmp = 0;
-
     if (lengths_mu[0] == 0 && lengths_mu[1] == 0 && lengths_mu[2] == 0 &&
         lengths_mu[3] == 0) {
       lengths_unwrapped[length]++;
-    }
-
-    else {
-
-      for (int mu = 0; mu < 3; mu++) {
-        if (lengths_mu[mu] != 0) {
-          wrappings_space_tmp += abs(lengths_mu[mu]) / conf.lat_dim[mu];
-        }
-      }
-
-      if (lengths_mu[3] != 0) {
-        wrappings_time_tmp += abs(lengths_mu[3]) / conf.lat_dim[3];
-      }
-
-      if (wrappings_space_tmp != 0) {
-        space_windings[wrappings_space_tmp]++;
-      }
-
-      if (wrappings_time_tmp != 0) {
-        time_windings[wrappings_time_tmp]++;
-      }
-
-      if (wrappings_space_tmp != 0 && wrappings_time_tmp != 0) {
-        lengths_wrapped_both[length]++;
-      } else if (wrappings_space_tmp != 0) {
-        lengths_wrapped_space[length]++;
-      } else if (wrappings_time_tmp != 0) {
-        lengths_wrapped_time[length]++;
-      }
+    } else {
+      wrappings.push_back(vector<int>(
+          {lengths_mu[0] / conf.lat_dim[0], lengths_mu[1] / conf.lat_dim[1],
+           lengths_mu[2] / conf.lat_dim[2], lengths_mu[3] / conf.lat_dim[3]}));
+      wrapped_lengths.push_back(length);
     }
   }
-
+  // sort wrapped_lengths and wrappings accordingly
+  std::vector<std::size_t> permutations(wrapped_lengths.size());
+  std::iota(permutations.begin(), permutations.end(), 0);
+  std::sort(permutations.begin(), permutations.end(),
+            [&](std::size_t i, std::size_t j) {
+              return wrapped_lengths[i] > wrapped_lengths[j];
+            });
+  std::vector<int> sorted_lengths(permutations.size());
+  std::transform(permutations.begin(), permutations.end(),
+                 sorted_lengths.begin(),
+                 [&](std::size_t i) { return wrapped_lengths[i]; });
+  wrapped_lengths = sorted_lengths;
+  std::vector<std::vector<int>> sorted_wrappings(permutations.size(),
+                                                 std::vector<int>());
+  std::transform(permutations.begin(), permutations.end(),
+                 sorted_wrappings.begin(),
+                 [&](std::size_t i) { return wrappings[i]; });
+  wrappings = sorted_wrappings;
+  vector<int> positions_percolating;
+  if (wrappings.size() > 1) {
+    positions_percolating = group_percolating(wrappings);
+  }
   for (auto it = lengths_unwrapped.cbegin(); it != lengths_unwrapped.cend();
        ++it) {
     output_stream_clusters_unwrapped << it->first << "," << it->second << endl;
   }
-
-  for (auto it = lengths_wrapped_time.cbegin();
-       it != lengths_wrapped_time.cend(); ++it) {
-    output_stream_clusters_wrapped << it->first << "," << it->second << ",time"
-                                   << endl;
+  for (int i = 0; i < wrapped_lengths.size(); i++) {
+    if (std::find(positions_percolating.begin(), positions_percolating.end(),
+                  i) != positions_percolating.end()) {
+      output_stream_clusters_wrapped
+          << wrapped_lengths[i] << "," << wrappings[i][0] << ","
+          << wrappings[i][1] << "," << wrappings[i][2] << "," << wrappings[i][3]
+          << ",percolating" << endl;
+    } else {
+      output_stream_clusters_wrapped
+          << wrapped_lengths[i] << "," << wrappings[i][0] << ","
+          << wrappings[i][1] << "," << wrappings[i][2] << "," << wrappings[i][3]
+          << ",non-percolating" << endl;
+    }
   }
-  for (auto it = lengths_wrapped_space.cbegin();
-       it != lengths_wrapped_space.cend(); ++it) {
-    output_stream_clusters_wrapped << it->first << "," << it->second << ",space"
-                                   << endl;
-  }
-  for (auto it = lengths_wrapped_both.cbegin();
-       it != lengths_wrapped_both.cend(); ++it) {
-    output_stream_clusters_wrapped << it->first << "," << it->second << ",both"
-                                   << endl;
-  }
-
   for (auto it = time_windings.begin(); it != time_windings.end(); ++it) {
     output_stream_windings << it->first << "," << it->second << ",time" << endl;
   }
-
   for (auto it = space_windings.begin(); it != space_windings.end(); ++it) {
     output_stream_windings << it->first << "," << it->second << ",space"
                            << endl;
   }
-
   double asymmetry = (space_currents / 3. - time_currents) /
                      (space_currents / 3. + time_currents);
-
   output_stream_monopoles << asymmetry << endl;
-
   output_stream_clusters_unwrapped.close();
   output_stream_clusters_wrapped.close();
   output_stream_windings.close();
