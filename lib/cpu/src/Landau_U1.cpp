@@ -101,6 +101,17 @@ std::vector<std::complex<double>> convert_to_complex(
   return conf_complex;
 }
 
+std::vector<std::complex<double>> convert_to_complex(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  int data_size = data_pattern.get_data_size();
+  std::vector<std::complex<double>> conf_complex(data_size);
+  for (int i = 0; i < data_size; i++) {
+    conf_complex[i] = std::complex<double>(cos(conf[i].phi), sin(conf[i].phi));
+  }
+  return conf_complex;
+}
+
 std::vector<double> convert_complex_to_angles(
     const std::vector<std::complex<double>> &conf_complex) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
@@ -115,6 +126,19 @@ std::vector<double> convert_complex_to_angles(
         atan2(conf_complex[i].imag(), conf_complex[i].real()));
   }
 
+  return conf_angles;
+}
+
+std::vector<abelian> convert_complex_to_abelian(
+    const std::vector<std::complex<double>> &conf_complex,
+    DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_data_size();
+  std::vector<abelian> conf_angles(data_size);
+  double module;
+  for (int i = 0; i < data_size; i++) {
+    conf_angles[i] =
+        abelian(1, atan2(conf_complex[i].imag(), conf_complex[i].real()));
+  }
   return conf_angles;
 }
 

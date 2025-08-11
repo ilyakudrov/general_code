@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
       {x_size1, y_size1, z_size1, t_size1});
   Data::read_data_convert(conf, conf_path, conf_format, bytes_skip,
                           file_precision, convert);
+  DataPatternLexicographical data_pattern(conf.lat_dim);
 
   double a_inv = (542.6 * 8 / 1000);
   double g = 2 / sqrt(beta);
@@ -91,22 +92,22 @@ int main(int argc, char *argv[]) {
   std::cout << "plaket " << plaket_space(conf) << std::endl;
 
   std::vector<std::vector<std::array<double, 4>>> momenta =
-      generate_momenta(x_size, t_size);
+      generate_momenta(x_size1, t_size1);
 
   std::vector<std::array<double, 12>> vector_potential =
-      get_vector_potential(conf.array);
+      get_vector_potential(conf);
 
-  std::vector<std::complex<double>> furier_coefficients;
+  // std::vector<std::complex<double>> furier_coefficients;
 
   std::map<std::tuple<double, double, double, double, int, int, int, int>,
            std::complex<double>>
       gluon_propagator_map;
 
-  for (int i = 0; i < momenta.size(); i++) {
+  for (int i = 0; i < 100; i++) {
     start_time = omp_get_wtime();
     std::array<std::complex<double>, 144> gluon_propagator =
         calculate_gluon_propagator_group(vector_potential, momenta[i],
-                                         beta / a_inv / a_inv);
+                                         beta / a_inv / a_inv, data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
         for (int a = 0; a < 3; a++) {

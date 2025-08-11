@@ -12,7 +12,7 @@ convert=0
 L_spat=66
 L_time=8
 output_path=./result/gluon_propagator
-parameters="-conf_format ${conf_format} -conf_path ${conf_path} -bytes_skip ${bytes_skip} -convert ${convert}\
-    -L_spat ${L_spat} -L_time ${L_time} -output_path ${output_path} -beta ${beta}"
+parameters="--conf_format ${conf_format} --conf_path ${conf_path} --file_precision ${file_precision} --bytes_skip ${bytes_skip} --convert ${convert}\
+    --L_spat ${L_spat} --L_time ${L_time} --output_path ${output_path} --beta ${beta}"
 
 ../gluon_propagator_${matrix_type}_test ${parameters}

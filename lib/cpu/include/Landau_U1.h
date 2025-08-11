@@ -18,9 +18,14 @@ convert_to_complex(const std::vector<su2> &conf_su2);
 
 std::vector<std::complex<double>> convert_to_complex(
     const Data::LatticeData<DataPatternLexicographical, su2> &conf_su2);
+std::vector<std::complex<double>> convert_to_complex(
+    const Data::LatticeData<DataPatternLexicographical, abelian> &conf);
 
 std::vector<double> convert_complex_to_angles(
     const std::vector<std::complex<double>> &conf_complex);
+std::vector<abelian> convert_complex_to_abelian(
+    const std::vector<std::complex<double>> &conf_complex,
+    DataPatternLexicographical &data_pattern);
 
 std::vector<double> generate_gauge_angles_uniform();
 
