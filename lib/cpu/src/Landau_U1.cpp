@@ -432,17 +432,17 @@ inline void contribution_conj_conj(std::complex<double> &contribution,
 std::complex<double>
 contribution_site(std::vector<std::complex<double>> &gauge_complex,
                   const std::vector<std::complex<double>> &conf_complex,
-                  DataPatternLexicographical &data_pattern, int x, int y, int z,
-                  int t, int position, std::vector<int> &shift) {
+                  DataPatternLexicographical &data_pattern, int position,
+                  std::vector<int> &shift) {
   std::complex<double> contribution = 0;
   // mu = 0
-  if (x < data_pattern.lat_dim[0] - 1) {
+  if (data_pattern.lat_coord[0] < data_pattern.lat_dim[0] - 1) {
     contribution_conj(contribution, conf_complex[position * 4],
                       gauge_complex[position + shift[0]]);
   } else
     contribution_conj(contribution, conf_complex[position * 4],
                       gauge_complex[position + shift[0] - shift[1]]);
-  if (x > 0)
+  if (data_pattern.lat_coord[0] > 0)
     contribution_conj_conj(contribution,
                            conf_complex[(position - shift[0]) * 4],
                            gauge_complex[position - shift[0]]);
@@ -451,13 +451,13 @@ contribution_site(std::vector<std::complex<double>> &gauge_complex,
                            conf_complex[(position - shift[0] + shift[1]) * 4],
                            gauge_complex[position - shift[0] + shift[1]]);
   // mu = 1
-  if (y < data_pattern.lat_dim[1] - 1)
+  if (data_pattern.lat_coord[1] < data_pattern.lat_dim[1] - 1)
     contribution_conj(contribution, conf_complex[position * 4 + 1],
                       gauge_complex[position + shift[1]]);
   else
     contribution_conj(contribution, conf_complex[position * 4 + 1],
                       gauge_complex[position + shift[1] - shift[2]]);
-  if (y > 0)
+  if (data_pattern.lat_coord[1] > 0)
     contribution_conj_conj(contribution,
                            conf_complex[(position - shift[1]) * 4 + 1],
                            gauge_complex[position - shift[1]]);
@@ -466,13 +466,13 @@ contribution_site(std::vector<std::complex<double>> &gauge_complex,
         contribution, conf_complex[(position - shift[1] + shift[2]) * 4 + 1],
         gauge_complex[position - shift[1] + shift[2]]);
   // mu = 2
-  if (z < data_pattern.lat_dim[2] - 1)
+  if (data_pattern.lat_coord[2] < data_pattern.lat_dim[2] - 1)
     contribution_conj(contribution, conf_complex[position * 4 + 2],
                       gauge_complex[position + shift[2]]);
   else
     contribution_conj(contribution, conf_complex[position * 4 + 2],
                       gauge_complex[position + shift[2] - shift[3]]);
-  if (z > 0)
+  if (data_pattern.lat_coord[2] > 0)
     contribution_conj_conj(contribution,
                            conf_complex[(position - shift[2]) * 4 + 2],
                            gauge_complex[position - shift[2]]);
@@ -481,13 +481,13 @@ contribution_site(std::vector<std::complex<double>> &gauge_complex,
         contribution, conf_complex[(position - shift[2] + shift[3]) * 4 + 2],
         gauge_complex[position - shift[2] + shift[3]]);
   // mu = 3
-  if (t < data_pattern.lat_dim[3] - 1)
+  if (data_pattern.lat_coord[3] < data_pattern.lat_dim[3] - 1)
     contribution_conj(contribution, conf_complex[position * 4 + 3],
                       gauge_complex[position + shift[3]]);
   else
     contribution_conj(contribution, conf_complex[position * 4 + 3],
                       gauge_complex[position + shift[3] - shift[4]]);
-  if (t > 0)
+  if (data_pattern.lat_coord[3] > 0)
     contribution_conj_conj(contribution,
                            conf_complex[(position - shift[3]) * 4 + 3],
                            gauge_complex[position - shift[3]]);
@@ -521,9 +521,8 @@ void heat_bath_update(std::vector<std::complex<double>> &gauge_angles,
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           position = data_pattern.get_index_site();
-          contribution =
-              contribution_site(gauge_angles, conf_angles, data_pattern, x, y,
-                                z, t, position, shift);
+          contribution = contribution_site(gauge_angles, conf_angles,
+                                           data_pattern, position, shift);
           heat_bath(gauge_angles[position], contribution, temperature,
                     random_generator);
         }
@@ -555,9 +554,8 @@ void heat_bath_update_fast(std::vector<std::complex<double>> &gauge_angles,
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           position = data_pattern.get_index_site();
-          contribution =
-              contribution_site(gauge_angles, conf_angles, data_pattern, x, y,
-                                z, t, position, shift);
+          contribution = contribution_site(gauge_angles, conf_angles,
+                                           data_pattern, position, shift);
           heat_bath_fast(gauge_angles[position], contribution, temperature,
                          random_generator);
         }
@@ -588,9 +586,8 @@ void overrelaxation_update(
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           position = data_pattern.get_index_site();
-          contribution =
-              contribution_site(gauge_complex, conf_complex, data_pattern, x, y,
-                                z, t, position, shift);
+          contribution = contribution_site(gauge_complex, conf_complex,
+                                           data_pattern, position, shift);
           phi = std::atan2(contribution.imag(), contribution.real());
           alpha = std::atan2(gauge_complex[position].imag(),
                              gauge_complex[position].real());
@@ -621,7 +618,7 @@ relaxation_update(std::vector<std::complex<double>> &gauge_complex,
   double diff_maximal = 0;
   double diff_tmp;
 #pragma omp parallel for collapse(4) private(contribution, position, alpha,    \
-                                                 diff_tmp)                     \
+                                                 phi, diff_tmp)                \
     firstprivate(data_pattern, shift) reduction(+ : diff_average)              \
     reduction(max : diff_maximal)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
@@ -630,9 +627,8 @@ relaxation_update(std::vector<std::complex<double>> &gauge_complex,
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           position = data_pattern.get_index_site();
-          contribution =
-              contribution_site(gauge_complex, conf_complex, data_pattern, x, y,
-                                z, t, position, shift);
+          contribution = contribution_site(gauge_complex, conf_complex,
+                                           data_pattern, position, shift);
           phi = std::atan2(gauge_complex[position].imag(),
                            gauge_complex[position].real());
           alpha = std::atan2(contribution.imag(), contribution.real());
