@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
       gluon_propagator_map_abelian;
   std::array<std::complex<double>, 4> gluon_propagator;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
         vector_potential, momenta[i], 1, data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
   std::map<std::tuple<double, double, double, double, int>,
            std::complex<double>>
       gluon_propagator_map_monopole;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
         vector_potential, momenta[i], 1, data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   std::map<std::tuple<double, double, double, double, int>,
            std::complex<double>>
       gluon_propagator_map_photon;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
         vector_potential, momenta[i], 1, data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
