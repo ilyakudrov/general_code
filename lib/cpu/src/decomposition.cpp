@@ -63,7 +63,6 @@ void write_double_angles_su3(std::string &file_name,
                              const std::vector<std::vector<double>> &angles,
                              DataPatternLexicographical &data_pattern) {
   int data_size = data_pattern.get_data_size();
-  std::cout << data_size << std::endl;
   std::ofstream stream(file_name);
   for (int i = 0; i < 3; i++) {
     if (!stream.write((char *)&angles[i][0], (data_size) * sizeof(double)))

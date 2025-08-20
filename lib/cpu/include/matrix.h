@@ -68,6 +68,7 @@ public:
     double rho = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
     return su2(a0 / rho, -a1 / rho, -a2 / rho, -a3 / rho);
   }
+  double determinant() const { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
   double module() const { return a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3; }
   su2 conj() const { return su2(a0, -a1, -a2, -a3); }
   su2 proj() const {

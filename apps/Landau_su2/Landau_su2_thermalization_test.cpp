@@ -1,10 +1,8 @@
-#include "../../lib/cpu/include/Landau_U1.h"
+#include "../../lib/cpu/include/Landau_su2.h"
 #include "../../lib/cpu/include/data.h"
-#include "../../lib/cpu/include/mag.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/plaket.h"
 
-#include <complex>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -27,6 +25,13 @@ int z_size;
 int t_size;
 int size1;
 int size2;
+
+su2 contribution_conj_conj(const su2 &A, const su2 &B) {
+  return su2(A.a0 * B.a0 - A.a1 * B.a1 - A.a2 * B.a2 - A.a3 * B.a3,
+             A.a3 * B.a2 - B.a3 * A.a2 - A.a1 * B.a0 - A.a0 * B.a1,
+             A.a1 * B.a3 - B.a1 * A.a3 - A.a2 * B.a0 - A.a0 * B.a2,
+             A.a2 * B.a1 - B.a2 * A.a1 - A.a3 * B.a0 - A.a0 * B.a3);
+}
 
 int main(int argc, char **argv) {
   double omp_time;
@@ -112,42 +117,26 @@ int main(int argc, char **argv) {
                           file_precision, 0);
   DataPatternLexicographical data_pattern(conf_su2.lat_dim);
   cout.precision(17);
-
-  std::cout << "plaket: " << plaket(conf_su2) << std::endl;
-  std::cout << "MAG functional: " << MAG_functional_su2(conf_su2) << std::endl;
-  vector<spin> spins = generate_spins_uniform(data_pattern);
-  make_simulated_annealing(conf_su2, spins, 2.5, 0.1, 0.1, 6, 20);
-  make_maximization_final(conf_su2, spins, OR_steps, 1e-8, 1e-12);
-  gauge_tranformation_spins(conf_su2, spins);
-  std::cout << "plaket: " << plaket(conf_su2) << std::endl;
-  std::cout << "MAG functional: " << MAG_functional_su2(conf_su2) << std::endl;
-
-  std::vector<std::complex<double>> conf_complex = convert_to_complex(conf_su2);
-  std::vector<std::complex<double>> gauge_complex =
-      generate_gauge_complex_uniform(data_pattern);
-  std::cout << "Landau functional: "
-            << Landau_functional_conf_complex(conf_complex, gauge_complex,
-                                              data_pattern)
+  std::cout << "plaket before gauge: " << plaket(conf_su2) << std::endl;
+  std::vector<su2> gauge = generate_gauge_su2_uniform(data_pattern);
+  std::cout << "Landau functional: " << Landau_functional_conf(conf_su2, gauge)
             << std::endl;
 
   omp_time = omp_get_wtime();
 
   std::map<double, double> functional = simulated_annealing_thermalization_test(
-      conf_complex, gauge_complex, data_pattern, T_init, T_final, T_step,
-      OR_steps, thermalization_steps, local_thermalization_steps);
+      conf_su2, gauge, T_init, T_final, T_step, OR_steps, thermalization_steps,
+      local_thermalization_steps);
 
   std::cout << "thermalization test time: " << omp_get_wtime() - omp_time
             << std::endl;
 
-  std::cout << "Landau functional: "
-            << Landau_functional_conf_complex(conf_complex, gauge_complex,
-                                              data_pattern)
+  std::cout << "Landau functional: " << Landau_functional_conf(conf_su2, gauge)
             << std::endl;
-  apply_gauge_Landau(gauge_complex, conf_su2);
-  std::cout << "Landau functional: " << Landau_functional(conf_su2.array)
-            << std::endl;
-  std::cout << "plaket: " << plaket(conf_su2) << std::endl;
-  std::cout << "MAG functional: " << MAG_functional_su2(conf_su2) << std::endl;
+  apply_gauge_Landau(gauge, conf_su2);
+  std::cout << "Landau functional after apply: "
+            << Landau_su2_functional(conf_su2) << std::endl;
+  std::cout << "plaket after gauge: " << plaket(conf_su2) << std::endl;
 
   ofstream functional_stream;
   functional_stream.open(path_functional_output);

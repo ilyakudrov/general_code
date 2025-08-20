@@ -1,16 +1,16 @@
 #!/bin/bash
 conf_format="lexicographical"
-file_precision="float"
+file_precision="double"
 # conf_format="double_qc2dstag"
-conf_path="../../../../tests/confs/su2/gluodynamics/66^3x8/beta2.701/CONF_B2701L66T08"
+conf_path="../../../../tests/confs/su2/su2_suzuki/24^4/beta2.4/CON_MC_001.LAT"
 # conf_path="../../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
-bytes_skip=76
+bytes_skip=8
 # bytes_skip=0
 matrix_type="su2"
 beta=2.701
 convert=0
-L_spat=66
-L_time=8
+L_spat=24
+L_time=24
 output_path=./result/gluon_propagator
 parameters="--conf_format ${conf_format} --conf_path ${conf_path} --file_precision ${file_precision} --bytes_skip ${bytes_skip} --convert ${convert}\
     --L_spat ${L_spat} --L_time ${L_time} --output_path ${output_path} --beta ${beta}"

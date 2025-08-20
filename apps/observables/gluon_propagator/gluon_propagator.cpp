@@ -1,4 +1,5 @@
 #include "../../../lib/cpu/include/gluon_propagator.h"
+#include "../../../lib/cpu/include/Landau_su2.h"
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/plaket.h"
@@ -25,9 +26,7 @@ int size1;
 int size2;
 
 int main(int argc, char *argv[]) {
-  double start_time;
-  double end_time;
-  double observables_time;
+  double omp_time;
 
   string conf_format;
   string file_precision;
@@ -87,9 +86,18 @@ int main(int argc, char *argv[]) {
   double g = 2 / sqrt(beta);
   double multiplier = 2 / g * a_inv;
 
-  std::cout << "plaket " << plaket(conf) << std::endl;
-  std::cout << "plaket " << plaket_time(conf) << std::endl;
-  std::cout << "plaket " << plaket_space(conf) << std::endl;
+  std::vector<su2> gauge = generate_gauge_su2_uniform(data_pattern);
+  std::cout << "plaket before gauge fixing: " << plaket(conf) << std::endl;
+  std::cout << "Landau su2 functional before gauge fixing: "
+            << Landau_functional_conf(conf, gauge) << std::endl;
+  omp_time = omp_get_wtime();
+  make_simulated_annealing(conf, gauge, 5, 0.01, 0.01, 4, 20);
+  make_maximization_final(conf, gauge, 4, 1e-14, 1e-16);
+  std::cout << "Landau su2 gauge fixing time: " << omp_get_wtime() - omp_time
+            << std::endl;
+  std::cout << "plaket after gauge fixing: " << plaket(conf) << std::endl;
+  std::cout << "Landau su2 functional after gauge fixing: "
+            << Landau_functional_conf(conf, gauge) << std::endl;
 
   std::vector<std::vector<std::array<double, 4>>> momenta =
       generate_momenta(x_size1, t_size1);
@@ -97,17 +105,15 @@ int main(int argc, char *argv[]) {
   std::vector<std::array<double, 12>> vector_potential =
       get_vector_potential(conf);
 
-  // std::vector<std::complex<double>> furier_coefficients;
-
   std::map<std::tuple<double, double, double, double, int, int, int, int>,
            std::complex<double>>
       gluon_propagator_map;
 
   for (int i = 0; i < 100; i++) {
-    start_time = omp_get_wtime();
+    omp_time = omp_get_wtime();
     std::array<std::complex<double>, 144> gluon_propagator =
-        calculate_gluon_propagator_group(vector_potential, momenta[i],
-                                         beta / a_inv / a_inv, data_pattern);
+        calculate_gluon_propagator_group(vector_potential, momenta[i], 1,
+                                         data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
         for (int a = 0; a < 3; a++) {
@@ -122,8 +128,8 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    end_time = omp_get_wtime();
-    std::cout << "time: " << end_time - start_time << std::endl;
+    std::cout << "gluon propagator time: " << omp_get_wtime() - omp_time
+              << std::endl;
   }
 
   ofstream stream;

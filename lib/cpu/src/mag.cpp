@@ -151,21 +151,15 @@ std::vector<double> generate_random_numbers_sphere(int vector_size) {
   std::subtract_with_carry_engine<unsigned, 24, 10, 24> random_generator(seed);
   std::vector<double> random_numbers;
   random_numbers.reserve(2 * vector_size);
-
   double x1, x2;
-
   for (int i = 0; i < vector_size; i++) {
     do {
       x1 = 2 * (double)random_generator() / random_generator.max() - 1;
       x2 = 2 * (double)random_generator() / random_generator.max() - 1;
-
-      // to aviod errors due to rounding
     } while (x1 * x1 + x2 * x2 >= 1);
-
     random_numbers.push_back(x1);
     random_numbers.push_back(x2);
   }
-
   return random_numbers;
 }
 
