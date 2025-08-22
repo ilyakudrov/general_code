@@ -4,7 +4,7 @@ path_conf="../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
 conf_format="qcdstag"
 file_precision="double"
 bytes_skip=0
-path_inverse_laplacian="./result/ALPHA32x8_d.LAT"
+path_inverse_laplacian="./result/inverse_laplacian_32x8"
 N_dir_gevp=1
 HYP_alpha1=1
 HYP_alpha2=1
@@ -19,6 +19,7 @@ y_size=32
 z_size=32
 t_size=8
 copies_required=11
+mag_steps=100
 path_functional_output="./result/functional"
 path_wilson_loops_abelian_output="./result/wilson_loops_abelian"
 path_wilson_loops_monopole_output="./result/wilson_loops_monopole"
@@ -34,7 +35,7 @@ path_windings_monopoless_output="./result/windings_monopoless"
 
 ../functional_dependence_test --path_conf ${path_conf} --conf_format ${conf_format} --file_precision ${file_precision} --bytes_skip ${bytes_skip}\
  --path_inverse_laplacian ${path_inverse_laplacian} --N_dir_gevp ${N_dir_gevp} --HYP_alpha1 ${HYP_alpha1} --HYP_alpha2 ${HYP_alpha2} --HYP_alpha3 ${HYP_alpha3} \
- --copies_required ${copies_required} --path_functional_output ${path_functional_output} \
+ --copies_required ${copies_required} --path_functional_output ${path_functional_output} --mag_steps ${mag_steps} \
  --path_wilson_loops_abelian_output ${path_wilson_loops_abelian_output} --path_wilson_loops_monopole_output ${path_wilson_loops_monopole_output} \
  --path_clusters_unwrapped_abelian_output ${path_clusters_unwrapped_abelian_output} --path_clusters_unwrapped_monopole_output ${path_clusters_unwrapped_monopole_output} --path_clusters_unwrapped_monopoless_output ${path_clusters_unwrapped_monopoless_output} \
  --path_clusters_wrapped_abelian_output ${path_clusters_wrapped_abelian_output} --path_clusters_wrapped_monopole_output ${path_clusters_wrapped_monopole_output} --path_clusters_wrapped_monopoless_output ${path_clusters_wrapped_monopoless_output} \

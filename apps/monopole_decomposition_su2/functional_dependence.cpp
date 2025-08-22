@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
   int HYP_steps, APE_steps;
   int calculation_APE_start, calculation_step_APE;
   int copies_required;
+  int mag_steps;
   // read parameters
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "--conf_format") {
@@ -119,6 +120,8 @@ int main(int argc, char **argv) {
       path_clusters_wrapped_monopoless_output = argv[++i];
     } else if (string(argv[i]) == "--path_windings_monopoless_output") {
       path_windings_monopoless_output = argv[++i];
+    } else if (string(argv[i]) == "--mag_steps") {
+      mag_steps = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "--x_size") {
       x_size1 = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "--y_size") {
@@ -167,6 +170,7 @@ int main(int argc, char **argv) {
   cout << "APE_steps " << APE_steps << endl;
   cout << "HYP_steps " << HYP_steps << endl;
   cout << "copies_required " << copies_required << endl;
+  cout << "mag_steps " << mag_steps << endl;
   cout << "x_size " << x_size1 << endl;
   cout << "y_size " << y_size1 << endl;
   cout << "z_size " << z_size1 << endl;
@@ -240,7 +244,7 @@ int main(int argc, char **argv) {
                 << std::endl;
       omp_time = omp_get_wtime();
       vector<spin> spins = generate_spins_uniform(data_pattern);
-      make_simulated_annealing(conf_su2, spins, 2.5, 0.1, 0.1, 6, 20);
+      make_simulated_annealing(conf_su2, spins, 2.5, 0, 2.5 / mag_steps, 6, 20);
       make_maximization_final(conf_su2, spins, 6, 1e-14, 1e-15);
       gauge_tranformation_spins(conf_su2, spins);
       std::cout << "MAG time: " << omp_get_wtime() - omp_time << std::endl;
@@ -341,36 +345,38 @@ int main(int argc, char **argv) {
       if (wrappings_abelian.size() > 1) {
         positions_percolating_abelian = group_percolating(wrappings_abelian);
       }
-      for (auto it = lengths_unwrapped_abelian.cbegin();
-           it != lengths_unwrapped_abelian.cend(); ++it) {
-        std::cout << it->first << "," << it->second << endl;
-      }
-      for (int i = 0; i < wrapped_lengths_abelian.size(); i++) {
-        if (std::find(positions_percolating_abelian.begin(),
-                      positions_percolating_abelian.end(),
-                      i) != positions_percolating_abelian.end()) {
-          std::cout << wrapped_lengths_abelian[i] << ","
-                    << wrappings_abelian[i][0] << "," << wrappings_abelian[i][1]
-                    << "," << wrappings_abelian[i][2] << ","
-                    << wrappings_abelian[i][3] << ",percolating" << endl;
-        } else {
-          std::cout << wrapped_lengths_abelian[i] << ","
-                    << wrappings_abelian[i][0] << "," << wrappings_abelian[i][1]
-                    << "," << wrappings_abelian[i][2] << ","
-                    << wrappings_abelian[i][3] << ",non-percolating" << endl;
-        }
-      }
-      for (auto it = time_windings_abelian.begin();
-           it != time_windings_abelian.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",time" << endl;
-      }
-      for (auto it = space_windings_abelian.begin();
-           it != space_windings_abelian.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",space" << endl;
-      }
-      double asymmetry_abelian = (space_currents / 3. - time_currents) /
-                                 (space_currents / 3. + time_currents);
-      std::cout << asymmetry_abelian << endl;
+      // for (auto it = lengths_unwrapped_abelian.cbegin();
+      //      it != lengths_unwrapped_abelian.cend(); ++it) {
+      //   std::cout << it->first << "," << it->second << endl;
+      // }
+      // for (int i = 0; i < wrapped_lengths_abelian.size(); i++) {
+      //   if (std::find(positions_percolating_abelian.begin(),
+      //                 positions_percolating_abelian.end(),
+      //                 i) != positions_percolating_abelian.end()) {
+      //     std::cout << wrapped_lengths_abelian[i] << ","
+      //               << wrappings_abelian[i][0] << "," <<
+      //               wrappings_abelian[i][1]
+      //               << "," << wrappings_abelian[i][2] << ","
+      //               << wrappings_abelian[i][3] << ",percolating" << endl;
+      //   } else {
+      //     std::cout << wrapped_lengths_abelian[i] << ","
+      //               << wrappings_abelian[i][0] << "," <<
+      //               wrappings_abelian[i][1]
+      //               << "," << wrappings_abelian[i][2] << ","
+      //               << wrappings_abelian[i][3] << ",non-percolating" << endl;
+      //   }
+      // }
+      // for (auto it = time_windings_abelian.begin();
+      //      it != time_windings_abelian.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",time" << endl;
+      // }
+      // for (auto it = space_windings_abelian.begin();
+      //      it != space_windings_abelian.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",space" << endl;
+      // }
+      // double asymmetry_abelian = (space_currents / 3. - time_currents) /
+      //                            (space_currents / 3. + time_currents);
+      // std::cout << asymmetry_abelian << endl;
       std::cout << "monopoles time: " << omp_get_wtime() - omp_time
                 << std::endl;
 
@@ -428,13 +434,13 @@ int main(int argc, char **argv) {
       conf_abelian2.array.shrink_to_fit();
       std::cout << "abelian wilson loops time: " << omp_get_wtime() - omp_time
                 << std::endl;
-      std::cout << std::endl << "wilson_loops: " << std::endl;
-      for (auto it = wilson_loops_abelian.begin();
-           it != wilson_loops_abelian.end(); it++) {
-        std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
-                  << get<2>(it->first) << "," << get<3>(it->first) << ","
-                  << it->second << endl;
-      }
+      // std::cout << std::endl << "wilson_loops: " << std::endl;
+      // for (auto it = wilson_loops_abelian.begin();
+      //      it != wilson_loops_abelian.end(); it++) {
+      //   std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
+      //             << get<2>(it->first) << "," << get<3>(it->first) << ","
+      //             << it->second << endl;
+      // }
 
       // decomposition
       omp_time = omp_get_wtime();
@@ -518,38 +524,39 @@ int main(int argc, char **argv) {
       if (wrappings_monopole.size() > 1) {
         positions_percolating_monopole = group_percolating(wrappings_monopole);
       }
-      for (auto it = lengths_unwrapped_monopole.cbegin();
-           it != lengths_unwrapped_monopole.cend(); ++it) {
-        std::cout << it->first << "," << it->second << endl;
-      }
-      for (int i = 0; i < wrapped_lengths_monopole.size(); i++) {
-        if (std::find(positions_percolating_monopole.begin(),
-                      positions_percolating_monopole.end(),
-                      i) != positions_percolating_monopole.end()) {
-          std::cout << wrapped_lengths_monopole[i] << ","
-                    << wrappings_monopole[i][0] << ","
-                    << wrappings_monopole[i][1] << ","
-                    << wrappings_monopole[i][2] << ","
-                    << wrappings_monopole[i][3] << ",percolating" << endl;
-        } else {
-          std::cout << wrapped_lengths_monopole[i] << ","
-                    << wrappings_monopole[i][0] << ","
-                    << wrappings_monopole[i][1] << ","
-                    << wrappings_monopole[i][2] << ","
-                    << wrappings_monopole[i][3] << ",non-percolating" << endl;
-        }
-      }
-      for (auto it = time_windings_monopole.begin();
-           it != time_windings_monopole.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",time" << endl;
-      }
-      for (auto it = space_windings_monopole.begin();
-           it != space_windings_monopole.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",space" << endl;
-      }
-      double asymmetry_monopole = (space_currents / 3. - time_currents) /
-                                  (space_currents / 3. + time_currents);
-      std::cout << asymmetry_monopole << endl;
+      // for (auto it = lengths_unwrapped_monopole.cbegin();
+      //      it != lengths_unwrapped_monopole.cend(); ++it) {
+      //   std::cout << it->first << "," << it->second << endl;
+      // }
+      // for (int i = 0; i < wrapped_lengths_monopole.size(); i++) {
+      //   if (std::find(positions_percolating_monopole.begin(),
+      //                 positions_percolating_monopole.end(),
+      //                 i) != positions_percolating_monopole.end()) {
+      //     std::cout << wrapped_lengths_monopole[i] << ","
+      //               << wrappings_monopole[i][0] << ","
+      //               << wrappings_monopole[i][1] << ","
+      //               << wrappings_monopole[i][2] << ","
+      //               << wrappings_monopole[i][3] << ",percolating" << endl;
+      //   } else {
+      //     std::cout << wrapped_lengths_monopole[i] << ","
+      //               << wrappings_monopole[i][0] << ","
+      //               << wrappings_monopole[i][1] << ","
+      //               << wrappings_monopole[i][2] << ","
+      //               << wrappings_monopole[i][3] << ",non-percolating" <<
+      //               endl;
+      //   }
+      // }
+      // for (auto it = time_windings_monopole.begin();
+      //      it != time_windings_monopole.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",time" << endl;
+      // }
+      // for (auto it = space_windings_monopole.begin();
+      //      it != space_windings_monopole.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",space" << endl;
+      // }
+      // double asymmetry_monopole = (space_currents / 3. - time_currents) /
+      //                             (space_currents / 3. + time_currents);
+      // std::cout << asymmetry_monopole << endl;
       std::cout << "monopoles from monopole angles time: "
                 << omp_get_wtime() - omp_time << std::endl;
 
@@ -613,38 +620,39 @@ int main(int argc, char **argv) {
         positions_percolating_monopoless =
             group_percolating(wrappings_monopoless);
       }
-      for (auto it = lengths_unwrapped_monopoless.cbegin();
-           it != lengths_unwrapped_monopoless.cend(); ++it) {
-        std::cout << it->first << "," << it->second << endl;
-      }
-      for (int i = 0; i < wrapped_lengths_monopoless.size(); i++) {
-        if (std::find(positions_percolating_monopoless.begin(),
-                      positions_percolating_monopoless.end(),
-                      i) != positions_percolating_monopoless.end()) {
-          std::cout << wrapped_lengths_monopoless[i] << ","
-                    << wrappings_monopoless[i][0] << ","
-                    << wrappings_monopoless[i][1] << ","
-                    << wrappings_monopoless[i][2] << ","
-                    << wrappings_monopoless[i][3] << ",percolating" << endl;
-        } else {
-          std::cout << wrapped_lengths_monopoless[i] << ","
-                    << wrappings_monopoless[i][0] << ","
-                    << wrappings_monopoless[i][1] << ","
-                    << wrappings_monopoless[i][2] << ","
-                    << wrappings_monopoless[i][3] << ",non-percolating" << endl;
-        }
-      }
-      for (auto it = time_windings_monopoless.begin();
-           it != time_windings_monopoless.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",time" << endl;
-      }
-      for (auto it = space_windings_monopoless.begin();
-           it != space_windings_monopoless.end(); ++it) {
-        std::cout << it->first << "," << it->second << ",space" << endl;
-      }
-      double asymmetry_monopoless = (space_currents / 3. - time_currents) /
-                                    (space_currents / 3. + time_currents);
-      std::cout << asymmetry_monopoless << endl;
+      // for (auto it = lengths_unwrapped_monopoless.cbegin();
+      //      it != lengths_unwrapped_monopoless.cend(); ++it) {
+      //   std::cout << it->first << "," << it->second << endl;
+      // }
+      // for (int i = 0; i < wrapped_lengths_monopoless.size(); i++) {
+      //   if (std::find(positions_percolating_monopoless.begin(),
+      //                 positions_percolating_monopoless.end(),
+      //                 i) != positions_percolating_monopoless.end()) {
+      //     std::cout << wrapped_lengths_monopoless[i] << ","
+      //               << wrappings_monopoless[i][0] << ","
+      //               << wrappings_monopoless[i][1] << ","
+      //               << wrappings_monopoless[i][2] << ","
+      //               << wrappings_monopoless[i][3] << ",percolating" << endl;
+      //   } else {
+      //     std::cout << wrapped_lengths_monopoless[i] << ","
+      //               << wrappings_monopoless[i][0] << ","
+      //               << wrappings_monopoless[i][1] << ","
+      //               << wrappings_monopoless[i][2] << ","
+      //               << wrappings_monopoless[i][3] << ",non-percolating" <<
+      //               endl;
+      //   }
+      // }
+      // for (auto it = time_windings_monopoless.begin();
+      //      it != time_windings_monopoless.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",time" << endl;
+      // }
+      // for (auto it = space_windings_monopoless.begin();
+      //      it != space_windings_monopoless.end(); ++it) {
+      //   std::cout << it->first << "," << it->second << ",space" << endl;
+      // }
+      // double asymmetry_monopoless = (space_currents / 3. - time_currents) /
+      //                               (space_currents / 3. + time_currents);
+      // std::cout << asymmetry_monopoless << endl;
       std::cout << "monopoles from photon angles time: "
                 << omp_get_wtime() - omp_time << std::endl;
 
@@ -702,13 +710,13 @@ int main(int argc, char **argv) {
       conf_monopole2.array.shrink_to_fit();
       std::cout << "monopole wilson loops time: " << omp_get_wtime() - omp_time
                 << std::endl;
-      std::cout << std::endl << "wilson_loops: " << std::endl;
-      for (auto it = wilson_loops_monopole.begin();
-           it != wilson_loops_monopole.end(); it++) {
-        std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
-                  << get<2>(it->first) << "," << get<3>(it->first) << ","
-                  << it->second << endl;
-      }
+      // std::cout << std::endl << "wilson_loops: " << std::endl;
+      // for (auto it = wilson_loops_monopole.begin();
+      //      it != wilson_loops_monopole.end(); it++) {
+      //   std::cout << get<0>(it->first) << "," << get<1>(it->first) << ","
+      //             << get<2>(it->first) << "," << get<3>(it->first) << ","
+      //             << it->second << endl;
+      // }
 
       std::ofstream output_stream_functional(path_functional);
       output_stream_functional << "functional" << endl;
