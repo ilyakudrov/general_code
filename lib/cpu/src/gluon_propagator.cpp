@@ -28,6 +28,12 @@
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
 
+#pragma omp declare reduction(                                                 \
+        arr_double_plus_32 : std::array<std::complex<double>, 32> : std::      \
+        transform(omp_out.begin(), omp_out.end(), omp_in.begin(),              \
+                      omp_out.begin(), std::plus<std::complex<double>>()))     \
+    initializer(omp_priv = decltype(omp_orig)())
+
 Eigen::Matrix2cd get_vector_potential_matrix(const su2 &a) {
   Eigen::Matrix2cd U;
   U(0, 0) = std::complex<double>(a.a0, a.a3);
@@ -50,6 +56,12 @@ Eigen::Matrix2cd get_vector_potential_matrix(const abelian &a) {
          (A - 0.5 * A.trace() * Eigen::Matrix2cd::Identity(2, 2));
 }
 
+su3 get_vector_potential_matrix(const su3 &a) {
+  su3 identity = su3();
+  su3 A = a - a.adjoint();
+  return std::complex<double>(0, -0.5) * (A - 1 / 3. * A.tr() * identity);
+}
+
 std::array<double, 3> get_vector_potential_coefficients(
     const su2 &a, const std::array<Eigen::Matrix2cd, 3> &pauli_matrices) {
   std::array<double, 3> coefficients;
@@ -65,6 +77,17 @@ double get_vector_potential_coefficients(const abelian &a) {
   Eigen::Matrix2cd A;
   A << 1, 0, 0, -1;
   return (get_vector_potential_matrix(a) * A).trace().real() * 0.5;
+}
+
+std::array<std::complex<double>, 8>
+get_vector_potential_coefficients(const su3 &a,
+                                  const std::array<su3, 8> &lambda_matrices) {
+  std::array<std::complex<double>, 8> coefficients;
+  for (int i = 0; i < 8; i++) {
+    coefficients[i] =
+        (get_vector_potential_matrix(a) * lambda_matrices[i]).tr() * 0.5;
+  }
+  return coefficients;
 }
 
 std::array<Eigen::Matrix2cd, 3> get_pauli_matrices() {
@@ -140,13 +163,49 @@ std::vector<std::array<double, 4>> get_vector_potential(
   return vector_potential;
 }
 
+std::vector<std::array<std::complex<double>, 32>> get_vector_potential(
+    const Data::LatticeData<DataPatternLexicographical, su3> &conf) {
+  DataPatternLexicographical data_pattern(conf.lat_dim);
+  std::vector<std::array<std::complex<double>, 32>> vector_potential(
+      data_pattern.get_lattice_size());
+  std::array<su3, 8> lambda_matrices = get_generators_su3();
+  std::array<std::array<std::complex<double>, 8>, 4> vector_potential_tmp1;
+  std::array<std::complex<double>, 32> vector_potential_tmp2;
+  int index;
+  // #pragma omp parallel for private(vector_potential_tmp, index,                  \
+//                                      vector_potential_tmp2)                    \
+//     firstprivate(lambda_matrices)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          for (int mu = 0; mu < 4; mu++) {
+            data_pattern.lat_coord = {x, y, z, t};
+            vector_potential_tmp1[mu] = get_vector_potential_coefficients(
+                conf[data_pattern.get_index_link(mu)], lambda_matrices);
+          }
+          index = data_pattern.get_index_site();
+          for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 8; j++) {
+              vector_potential_tmp2[i * 8 + j] = vector_potential_tmp1[i][j];
+            }
+          }
+          vector_potential[data_pattern.get_index_site()] =
+              vector_potential_tmp2;
+        }
+      }
+    }
+  }
+  return vector_potential;
+}
+
 std::vector<std::complex<double>>
 get_furier_coefficients(const std::array<double, 4> &momenta,
                         DataPatternLexicographical &data_pattern) {
   std::vector<std::complex<double>> furier_coefficients(
       data_pattern.get_lattice_size());
   double power;
-#pragma omp parallel for collapse(3) private(power)                            \
+#pragma omp parallel for collapse(4) private(power)                            \
     firstprivate(data_pattern, momenta)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
@@ -207,6 +266,33 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
     for (int m = 0; m < 12; m++) {
       for (int n = 0; n < 12; n++) {
         gluon_propagator[m * 12 + n] +=
+            vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+      }
+    }
+  }
+  return gluon_propagator;
+}
+
+std::array<std::complex<double>, 1024> calculate_gluon_propagator_group(
+    const std::vector<std::array<std::complex<double>, 32>> &vector_potential,
+    const std::vector<std::array<double, 4>> &momenta, double multiplier,
+    DataPatternLexicographical &data_pattern) {
+  std::array<std::complex<double>, 1024> gluon_propagator;
+  double a = multiplier / data_pattern.get_lattice_size() / momenta.size();
+  std::vector<std::complex<double>> furier_coefficients;
+  for (int p = 0; p < momenta.size(); p++) {
+    furier_coefficients = get_furier_coefficients(momenta[p], data_pattern);
+    std::array<std::complex<double>, 32> vector_potential_sum;
+#pragma omp parallel for reduction(arr_double_plus_32 : vector_potential_sum)
+    for (int i = 0; i < vector_potential.size(); i++) {
+      for (int m = 0; m < 32; m++) {
+        vector_potential_sum[m] +=
+            vector_potential[i][m] * furier_coefficients[i];
+      }
+    }
+    for (int m = 0; m < 32; m++) {
+      for (int n = 0; n < 32; n++) {
+        gluon_propagator[m * 32 + n] +=
             vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
       }
     }

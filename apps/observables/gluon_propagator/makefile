@@ -17,3 +17,6 @@ gluon_propagator: gluon_propagator.cpp $(OBJ_FILES) $(HEADERFILES)
 
 gluon_propagator_abelian: gluon_propagator_abelian.cpp $(OBJ_FILES) $(HEADERFILES)
 	$(GCC) gluon_propagator_abelian.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o gluon_propagator_abelian_$(ARCH)
+
+gluon_propagator_su3: gluon_propagator_su3.cpp $(OBJ_FILES) $(HEADERFILES)
+	$(GCC) gluon_propagator_su3.cpp $(OBJ_FILES) $(C_LIME) $(FLAGS) -I $(EIGH_PATH) -o gluon_propagator_su3_$(ARCH)

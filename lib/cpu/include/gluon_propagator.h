@@ -12,6 +12,8 @@ std::vector<std::array<double, 12>> get_vector_potential(
     const Data::LatticeData<DataPatternLexicographical, su2> &conf);
 std::vector<std::array<double, 4>> get_vector_potential(
     const Data::LatticeData<DataPatternLexicographical, abelian> &conf);
+std::vector<std::array<std::complex<double>, 32>> get_vector_potential(
+    const Data::LatticeData<DataPatternLexicographical, su3> &conf);
 
 std::vector<std::complex<double>>
 get_furier_coefficients(const std::array<double, 4> &momenta,
@@ -24,6 +26,10 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
     const std::vector<std::array<double, 12>> &vector_potential,
+    const std::vector<std::array<double, 4>> &momenta, double multiplier,
+    DataPatternLexicographical &data_pattern);
+std::array<std::complex<double>, 1024> calculate_gluon_propagator_group(
+    const std::vector<std::array<std::complex<double>, 32>> &vector_potential,
     const std::vector<std::array<double, 4>> &momenta, double multiplier,
     DataPatternLexicographical &data_pattern);
 std::array<std::complex<double>, 4> calculate_gluon_propagator_diagonal_group(

@@ -1590,12 +1590,12 @@ void make_simulated_annealing(
     heat_bath_update_fast(spins, conf_su2, T_init);
   }
   double T = T_init;
-  while (T > T_final) {
+  while (T > T_final / 2) {
     heat_bath_update_fast(spins, conf_su2, T);
     for (int i = 0; i < OR_steps; i++) {
       overrelaxation_update(spins, conf_su2);
     }
-    if (T <= 1.6 && T >= 1.2)
+    if (T <= 1.6 + T_step && T >= 1.2)
       T -= T_step / 4;
     else
       T -= T_step;
@@ -1625,7 +1625,7 @@ void make_simulated_annealing(
     }
     T -= T_step / 4;
   }
-  while (T > T_final) {
+  while (T > T_final / 2) {
     heat_bath_update_fast(spins, conf_contribution, data_pattern, T);
     for (int i = 0; i < OR_steps; i++) {
       overrelaxation_update(spins, conf_contribution, data_pattern);
@@ -1643,7 +1643,7 @@ std::map<double, double> simulated_annealing_thermalization_test(
     heat_bath_update(spins, conf_su2, T_init);
   }
   double T = T_init;
-  while (T > T_final) {
+  while (T > T_final / 2) {
     for (int i = 0; i < local_thermalization_steps; i++) {
       heat_bath_update(spins, conf_su2, T);
       for (int i = 0; i < OR_steps; i++) {
@@ -1665,7 +1665,7 @@ std::map<double, double> simulated_annealing_thermalization_test(
     heat_bath_update_fast(spins, conf_su2, T_init);
   }
   double T = T_init;
-  while (T > T_final) {
+  while (T > T_final / 2) {
     for (int i = 0; i < local_thermalization_steps; i++) {
       heat_bath_update_fast(spins, conf_su2, T);
       for (int i = 0; i < OR_steps; i++) {
@@ -1689,7 +1689,7 @@ std::map<double, double> simulated_annealing_thermalization_test(
     heat_bath_update_fast(spins, conf_contribution, data_pattern, T_init);
   }
   double T = T_init;
-  while (T >= T_final) {
+  while (T > T_final / 2) {
     for (int i = 0; i < local_thermalization_steps; i++) {
       heat_bath_update_fast(spins, conf_contribution, data_pattern, T);
       for (int j = 0; j < OR_steps; j++) {
@@ -1836,7 +1836,7 @@ void make_maximization_final(
 
 double mag_functional_su3(std::vector<su3> &conf_su3) {
   double functional = 0;
-  std::vector<su3> generators_su3 = get_generators_su3();
+  std::array<su3, 8> generators_su3 = get_generators_su3();
   for (int i = 0; i < conf_su3.size(); i++) {
     for (int j = 0; j < 3; j++) {
       functional +=
@@ -1850,7 +1850,7 @@ double mag_functional_su3(std::vector<su3> &conf_su3) {
 double mag_functional_su3(
     const Data::LatticeData<DataPatternLexicographical, su3> &conf_su3) {
   double functional = 0;
-  std::vector<su3> generators_su3 = get_generators_su3();
+  std::array<su3, 8> generators_su3 = get_generators_su3();
   for (int i = 0; i < conf_su3.array.size(); i++) {
     for (int j = 0; j < 3; j++) {
       functional +=

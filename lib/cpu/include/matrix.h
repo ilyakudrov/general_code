@@ -984,8 +984,8 @@ public:
   }
 };
 
-inline std::vector<su3> get_generators_su3() {
-  std::vector<su3> generators(8);
+inline std::array<su3, 8> get_generators_su3() {
+  std::array<su3, 8> generators;
 
   Eigen::Matrix3cd matrix = Eigen::Matrix3cd::Identity(3, 3);
 
