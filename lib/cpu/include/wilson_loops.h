@@ -8,6 +8,7 @@
 #include <numeric>
 
 // preserves data_pattern
+// clockwise direction
 template <class DataPattern, class MatrixType>
 MatrixType
 wilson_loop_schwinger(const Data::LatticeData<DataPattern, MatrixType> &conf,
@@ -37,6 +38,7 @@ wilson_loop_schwinger(const Data::LatticeData<DataPattern, MatrixType> &conf,
 }
 
 // preserves data_pattern
+// counter-clockwise direction
 template <class DataPattern, class MatrixType>
 MatrixType wilson_loop_schwinger_opposite(
     const Data::LatticeData<DataPattern, MatrixType> &conf,
@@ -1044,7 +1046,7 @@ wilson_loop(const Data::LatticeData<DataPattern, MatrixType> &conf, int r_min,
   return wilson_loops;
 }
 
-// wilson loop goes in positive mu, nu directions starting from corner
+// wilson loop goes in positive mu, nu directions starting from the corner
 template <class DataPattern, class MatrixType>
 std::vector<double>
 calculate_wilson_loop_plane_tr(const std::vector<MatrixType> &wilson_lines_mu,
@@ -1072,6 +1074,41 @@ calculate_wilson_loop_plane_tr(const std::vector<MatrixType> &wilson_lines_mu,
           data_pattern.move_backward(length_nu, nu);
           result[index1] = wilson_loop.multiply_conj_tr(
               wilson_lines_nu[data_pattern.get_index_site()]);
+        }
+      }
+    }
+  }
+  return result;
+}
+
+template <class DataPattern, class MatrixType>
+std::vector<double> calculate_wilson_loop_time_tr(
+    const std::vector<MatrixType> &time_lines,
+    const std::array<std::vector<MatrixType>, 3> &space_lines,
+    DataPattern &data_pattern, int t, int r) {
+  MatrixType wilson_loop;
+  std::vector<double> result(data_pattern.get_lattice_size() * 3);
+  int index;
+#pragma omp parallel for collapse(4) private(wilson_loop, index)               \
+    firstprivate(data_pattern, t, r)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          index = data_pattern.get_index_site();
+          for (int mu = 0; mu < 3; mu++) {
+            data_pattern.move_forward(r, mu);
+            wilson_loop = space_lines[mu][index] *
+                          time_lines[data_pattern.get_index_site()];
+            data_pattern.move_backward(r, mu);
+            data_pattern.move_forward(t, 3);
+            wilson_loop =
+                wilson_loop ^ space_lines[mu][data_pattern.get_index_site()];
+            data_pattern.move_backward(t, 3);
+            result[index * 3 + mu] = wilson_loop.multiply_conj_tr(
+                time_lines[data_pattern.get_index_site()]);
+          }
         }
       }
     }

@@ -585,3 +585,73 @@ plaket_aver_space_tr(const Data::LatticeData<DataPattern, MatrixType> &conf) {
   }
   return vec;
 }
+
+// average over all directions for trace of temporal wilson loop
+// is used for flux tube
+template <class DataPattern, class MatrixType>
+std::vector<double> plaket_time_site_average_tr(
+    const Data::LatticeData<DataPattern, MatrixType> &conf) {
+  DataPattern data_pattern(conf.lat_dim);
+  std::vector<double> vec(data_pattern.get_lattice_size());
+  double trace_aver;
+#pragma omp parallel for collapse(4)                                           \
+    firstprivate(data_pattern) private(trace_aver)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          trace_aver = 0;
+          for (int mu = 0; mu < 3; mu++) {
+            trace_aver += plaket_plane(conf, data_pattern, mu, 3);
+            data_pattern.move_backward(1, mu);
+            trace_aver += plaket_plane(conf, data_pattern, mu, 3);
+            data_pattern.move_backward(1, 3);
+            trace_aver += plaket_plane(conf, data_pattern, mu, 3);
+            data_pattern.move_forward(1, mu);
+            trace_aver += plaket_plane(conf, data_pattern, mu, 3);
+            data_pattern.move_forward(1, 3);
+          }
+          vec[data_pattern.get_index_site()] = trace_aver / 12;
+        }
+      }
+    }
+  }
+  return vec;
+}
+
+// average over all directions for trace of spacial wilson loop
+// is used for flux tube
+template <class DataPattern, class MatrixType>
+std::vector<double> plaket_space_site_average_tr(
+    const Data::LatticeData<DataPattern, MatrixType> &conf) {
+  DataPattern data_pattern(conf.lat_dim);
+  std::vector<double> vec(data_pattern.get_lattice_size());
+  double trace_aver;
+#pragma omp parallel for collapse(4)                                           \
+    firstprivate(data_pattern) private(trace_aver)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          trace_aver = 0;
+          for (int mu = 0; mu < 2; mu++) {
+            for (int nu = mu + 1; nu < 3; nu++) {
+              trace_aver += plaket_plane(conf, data_pattern, mu, nu);
+              data_pattern.move_backward(1, mu);
+              trace_aver += plaket_plane(conf, data_pattern, mu, nu);
+              data_pattern.move_backward(1, nu);
+              trace_aver += plaket_plane(conf, data_pattern, mu, nu);
+              data_pattern.move_forward(1, mu);
+              trace_aver += plaket_plane(conf, data_pattern, mu, nu);
+              data_pattern.move_forward(1, nu);
+            }
+          }
+          vec[data_pattern.get_index_site()] = trace_aver / 6;
+        }
+      }
+    }
+  }
+  return vec;
+}

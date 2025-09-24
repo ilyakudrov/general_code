@@ -85,8 +85,6 @@ int main(int argc, char *argv[]) {
       L_spat = stoi(std::string(argv[++i]));
     } else if (std::string(argv[i]) == "--L_time") {
       L_time = stoi(std::string(argv[++i]));
-    } else if (std::string(argv[i]) == "--x_trans") {
-      x_trans = stoi(std::string(argv[++i]));
     } else if (std::string(argv[i]) == "--T_min") {
       T_min = stoi(std::string(argv[++i]));
     } else if (std::string(argv[i]) == "--T_max") {
@@ -147,25 +145,30 @@ int main(int argc, char *argv[]) {
   std::cout << "plaket_space " << plaket_space_average << std::endl;
 
   smearing_HYP(conf_wilson, 1, 1, 0.5);
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 100; i++) {
     smearing_APE(conf_wilson, 0.5);
   }
+  std::cout << "ok1" << std::endl;
 
+  start_time = omp_get_wtime();
   map<tuple<int, int>, double> wilson_loops =
       wilson_loop(conf_wilson, R_min, R_max, T_min, T_max);
+  cout << "wilson_loops time: " << omp_get_wtime() - start_time << endl;
+
+  std::cout << "ok2" << std::endl;
 
   map<tuple<int, int, int>, double> flux_tube_electric_longitudinal;
   map<tuple<int, int, int>, double> flux_tube_magnetic_longitudinal;
   map<tuple<int, int, int>, double> flux_tube_electric_transversal;
   map<tuple<int, int, int>, double> flux_tube_magnetic_transversal;
-  vector<double> plaket_time_tr = plaket_aver_time_tr(conf_plaket);
+  vector<double> plaket_time_tr = plaket_time_site_average_tr(conf_plaket);
   double plaket_time_aver = 0;
   for (int i = 0; i < plaket_time_tr.size(); i++) {
     plaket_time_aver += plaket_time_tr[i];
   }
   plaket_time_aver = plaket_time_aver / plaket_time_tr.size() / 2;
   std::cout << "plaket_time_aver " << plaket_time_aver << std::endl;
-  vector<double> plaket_space_tr = plaket_aver_space_tr(conf_plaket);
+  vector<double> plaket_space_tr = plaket_space_site_average_tr(conf_plaket);
   double plaket_space_aver = 0;
   for (int i = 0; i < plaket_space_tr.size(); i++) {
     plaket_space_aver += plaket_space_tr[i];
@@ -174,44 +177,57 @@ int main(int argc, char *argv[]) {
   std::cout << "plaket_space_aver " << plaket_space_aver << std::endl;
 
   start_time = omp_get_wtime();
+  wilson_plaket_correlator_all(
+      flux_tube_electric_longitudinal, flux_tube_electric_transversal,
+      flux_tube_magnetic_longitudinal, flux_tube_magnetic_transversal,
+      plaket_time_tr, plaket_space_tr, conf_wilson, T_min, T_max, R_min, R_max,
+      L_spat / 2);
+  cout << "wilson_plaket_correlator_all time: " << omp_get_wtime() - start_time
+       << endl;
 
-  flux_tube_electric_longitudinal =
-      wilson_plaket_correlator(plaket_time_tr, conf_wilson, T_min, T_max, R_min,
-                               R_max, 10, 0, "longitudinal");
+  // start_time = omp_get_wtime();
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube longitudinal electric new time: " << search_time << endl;
+  // flux_tube_electric_longitudinal =
+  //     wilson_plaket_correlator(plaket_time_tr, conf_wilson, T_min, T_max,
+  //     R_min,
+  //                              R_max, 10, 0, "longitudinal");
 
-  start_time = omp_get_wtime();
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube longitudinal electric new time: " << search_time <<
+  // endl;
 
-  flux_tube_magnetic_longitudinal =
-      wilson_plaket_correlator(plaket_space_tr, conf_wilson, T_min, T_max,
-                               R_min, R_max, 10, 0, "longitudinal");
+  // start_time = omp_get_wtime();
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube longitudinal magnetic new time: " << search_time << endl;
+  // flux_tube_magnetic_longitudinal =
+  //     wilson_plaket_correlator(plaket_space_tr, conf_wilson, T_min, T_max,
+  //                              R_min, R_max, 10, 0, "longitudinal");
 
-  start_time = omp_get_wtime();
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube longitudinal magnetic new time: " << search_time <<
+  // endl;
 
-  flux_tube_electric_transversal =
-      wilson_plaket_correlator(plaket_time_tr, conf_wilson, T_min, T_max, R_min,
-                               R_max, x_size / 2, 0, "transversal");
+  // start_time = omp_get_wtime();
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube transversal electric new time: " << search_time << endl;
+  // flux_tube_electric_transversal =
+  //     wilson_plaket_correlator(plaket_time_tr, conf_wilson, T_min, T_max,
+  //     R_min,
+  //                              R_max, x_size / 2, 0, "transversal");
 
-  start_time = omp_get_wtime();
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube transversal electric new time: " << search_time << endl;
 
-  flux_tube_magnetic_transversal =
-      wilson_plaket_correlator(plaket_space_tr, conf_wilson, T_min, T_max,
-                               R_min, R_max, x_size / 2, 0, "transversal");
+  // start_time = omp_get_wtime();
 
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube transversal magnetic new time: " << search_time << endl;
+  // flux_tube_magnetic_transversal =
+  //     wilson_plaket_correlator(plaket_space_tr, conf_wilson, T_min, T_max,
+  //                              R_min, R_max, x_size / 2, 0, "transversal");
+
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube transversal magnetic new time: " << search_time << endl;
 
   std::ofstream stream_electric_long;
   std::ofstream stream_magnetic_long;
