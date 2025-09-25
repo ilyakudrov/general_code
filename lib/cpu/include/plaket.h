@@ -648,7 +648,7 @@ std::vector<double> plaket_space_site_average_tr(
               data_pattern.move_forward(1, nu);
             }
           }
-          vec[data_pattern.get_index_site()] = trace_aver / 6;
+          vec[data_pattern.get_index_site()] = trace_aver / 12;
         }
       }
     }

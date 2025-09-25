@@ -45,7 +45,6 @@ int main(int argc, char *argv[]) {
   std::string output_path_electric_trans;
   std::string output_path_magnetic_trans;
   int L_spat, L_time;
-  int x_trans = 0;
   int bytes_skip_plaket = 0;
   int bytes_skip_wilson = 0;
   int T_min, T_max;
@@ -120,7 +119,6 @@ int main(int argc, char *argv[]) {
   std::cout << "R_max " << R_max << std::endl;
   std::cout << "T_min " << T_min << std::endl;
   std::cout << "T_max " << T_max << std::endl;
-  std::cout << "x_trans " << x_trans << std::endl;
 
   int x_size1 = L_spat;
   int y_size1 = L_spat;
@@ -148,33 +146,18 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < 100; i++) {
     smearing_APE(conf_wilson, 0.5);
   }
-  std::cout << "ok1" << std::endl;
 
   start_time = omp_get_wtime();
   map<tuple<int, int>, double> wilson_loops =
       wilson_loop(conf_wilson, R_min, R_max, T_min, T_max);
   cout << "wilson_loops time: " << omp_get_wtime() - start_time << endl;
 
-  std::cout << "ok2" << std::endl;
-
   map<tuple<int, int, int>, double> flux_tube_electric_longitudinal;
   map<tuple<int, int, int>, double> flux_tube_magnetic_longitudinal;
   map<tuple<int, int, int>, double> flux_tube_electric_transversal;
   map<tuple<int, int, int>, double> flux_tube_magnetic_transversal;
   vector<double> plaket_time_tr = plaket_time_site_average_tr(conf_plaket);
-  double plaket_time_aver = 0;
-  for (int i = 0; i < plaket_time_tr.size(); i++) {
-    plaket_time_aver += plaket_time_tr[i];
-  }
-  plaket_time_aver = plaket_time_aver / plaket_time_tr.size() / 2;
-  std::cout << "plaket_time_aver " << plaket_time_aver << std::endl;
   vector<double> plaket_space_tr = plaket_space_site_average_tr(conf_plaket);
-  double plaket_space_aver = 0;
-  for (int i = 0; i < plaket_space_tr.size(); i++) {
-    plaket_space_aver += plaket_space_tr[i];
-  }
-  plaket_space_aver = plaket_space_aver / plaket_space_tr.size() / 2;
-  std::cout << "plaket_space_aver " << plaket_space_aver << std::endl;
 
   start_time = omp_get_wtime();
   wilson_plaket_correlator_all(
