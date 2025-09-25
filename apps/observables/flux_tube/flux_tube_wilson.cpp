@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << "," << plaket_time_aver << endl;
+        << "," << plaket_time_average << endl;
   }
   for (auto it = flux_tube_magnetic_longitudinal.begin();
        it != flux_tube_magnetic_longitudinal.end(); it++) {
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << "," << plaket_space_aver << endl;
+        << "," << plaket_space_average << endl;
   }
   for (auto it = flux_tube_electric_transversal.begin();
        it != flux_tube_electric_transversal.end(); it++) {
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << "," << plaket_time_aver << endl;
+        << "," << plaket_time_average << endl;
   }
   for (auto it = flux_tube_magnetic_transversal.begin();
        it != flux_tube_magnetic_transversal.end(); it++) {
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
         << get<0>(it->first) << "," << get<1>(it->first) << ","
         << get<2>(it->first) << "," << it->second << ","
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << "," << plaket_space_aver << endl;
+        << "," << plaket_space_average << endl;
   }
 
   stream_electric_long.close();
