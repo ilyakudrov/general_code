@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
       flux_tube_electric_longitudinal, flux_tube_electric_transversal,
       flux_tube_magnetic_longitudinal, flux_tube_magnetic_transversal,
       plaket_time_tr, plaket_space_tr, conf_wilson, T_min, T_max, R_min, R_max,
-      L_spat / 2);
+      L_spat / 2 - 1);
   cout << "wilson_plaket_correlator_all time: " << omp_get_wtime() - start_time
        << endl;
 
