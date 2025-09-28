@@ -1085,12 +1085,12 @@ template <class DataPattern, class MatrixType>
 std::vector<double> calculate_wilson_loop_time_tr(
     const std::vector<MatrixType> &time_lines,
     const std::array<std::vector<MatrixType>, 3> &space_lines,
-    DataPattern &data_pattern, int t, int r) {
+    DataPattern &data_pattern, int T, int R) {
   MatrixType wilson_loop;
   std::vector<double> result(data_pattern.get_lattice_size() * 3);
   int index;
 #pragma omp parallel for collapse(4) private(wilson_loop, index)               \
-    firstprivate(data_pattern, t, r)
+    firstprivate(data_pattern, T, R)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
@@ -1098,14 +1098,14 @@ std::vector<double> calculate_wilson_loop_time_tr(
           data_pattern.lat_coord = {x, y, z, t};
           index = data_pattern.get_index_site();
           for (int mu = 0; mu < 3; mu++) {
-            data_pattern.move_forward(r, mu);
+            data_pattern.move_forward(R, mu);
             wilson_loop = space_lines[mu][index] *
                           time_lines[data_pattern.get_index_site()];
-            data_pattern.move_backward(r, mu);
-            data_pattern.move_forward(t, 3);
+            data_pattern.move_backward(R, mu);
+            data_pattern.move_forward(T, 3);
             wilson_loop =
                 wilson_loop ^ space_lines[mu][data_pattern.get_index_site()];
-            data_pattern.move_backward(t, 3);
+            data_pattern.move_backward(T, 3);
             result[index * 3 + mu] = wilson_loop.multiply_conj_tr(
                 time_lines[data_pattern.get_index_site()]);
           }
