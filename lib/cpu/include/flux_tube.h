@@ -1037,64 +1037,6 @@ void flux_schwinger_all(
 // d_outside + R / 2 + 1 values, corresponding to sites along spatial direction
 // of wilson loop, where index 0 corresponds to the values in the middle of a
 // string
-// template <class DataPattern>
-// std::tuple<std::vector<double>, std::vector<double>>
-// wilson_plaket_correlator_longitudinal_even(
-//     const std::vector<double> &wilson_loop_tr,
-//     const std::vector<double> &plaket_time_tr,
-//     const std::vector<double> &plaket_space_tr, DataPattern &data_pattern,
-//     int d_outside, int T, int R) {
-//   int index_wilson;
-//   int correlator_size = d_outside + R / 2 + 1;
-//   std::vector<double> correlator_electric(correlator_size);
-//   std::vector<double> correlator_magnetic(correlator_size);
-// #pragma omp parallel for collapse(4) \
-//     firstprivate(data_pattern, d_outside, R, T) private(index_wilson) \
-//     reduction(vec_double_plus : correlator_electric) \
-//     reduction(vec_double_plus : correlator_magnetic)
-//   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
-//     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
-//       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
-//         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
-//           data_pattern.lat_coord = {x, y, z, t};
-//           index_wilson = data_pattern.get_index_site() * 3;
-//           data_pattern.move_forward(T / 2, 3);
-//           for (int mu = 0; mu < 3; mu++) {
-//             data_pattern.move_backward(d_outside, mu);
-//             for (int d = correlator_size - 1; d >= 0; d--) {
-//               correlator_electric[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_time_tr[data_pattern.get_index_site()];
-//               correlator_magnetic[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_space_tr[data_pattern.get_index_site()];
-//               data_pattern.move_forward(1, mu);
-//             }
-//             for (int d = 1; d < correlator_size; d++) {
-//               correlator_electric[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_time_tr[data_pattern.get_index_site()];
-//               correlator_magnetic[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_space_tr[data_pattern.get_index_site()];
-//               data_pattern.move_forward(1, mu);
-//             }
-//             data_pattern.move_backward(R + d_outside + 1, mu);
-//           }
-//         }
-//       }
-//     }
-//   }
-//   correlator_electric[0] /= data_pattern.get_lattice_size() * 3;
-//   for (int i = 1; i < correlator_electric.size(); i++) {
-//     correlator_electric[i] /= data_pattern.get_lattice_size() * 6;
-//   }
-//   correlator_magnetic[0] /= data_pattern.get_lattice_size() * 3;
-//   for (int i = 1; i < correlator_magnetic.size(); i++) {
-//     correlator_magnetic[i] /= data_pattern.get_lattice_size() * 6;
-//   }
-//   return {correlator_electric, correlator_magnetic};
-// }
 template <class DataPattern>
 std::tuple<std::vector<double>, std::vector<double>>
 wilson_plaket_correlator_longitudinal_even(
@@ -1103,7 +1045,7 @@ wilson_plaket_correlator_longitudinal_even(
     const std::vector<double> &plaket_space_tr, DataPattern &data_pattern,
     int d_outside, int T, int R) {
   int index_wilson;
-  int correlator_size = 2 * d_outside + R;
+  int correlator_size = d_outside + R / 2 + 1;
   std::vector<double> correlator_electric(correlator_size);
   std::vector<double> correlator_magnetic(correlator_size);
 #pragma omp parallel for collapse(4)                                           \
@@ -1116,11 +1058,10 @@ wilson_plaket_correlator_longitudinal_even(
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           index_wilson = data_pattern.get_index_site() * 3;
+          data_pattern.move_forward(T / 2, 3);
           for (int mu = 0; mu < 3; mu++) {
-            data_pattern.lat_coord = {x, y, z, t};
-            data_pattern.move_forward(T / 2, 3);
             data_pattern.move_backward(d_outside, mu);
-            for (int d = 0; d < correlator_size; d++) {
+            for (int d = correlator_size - 1; d >= 0; d--) {
               correlator_electric[d] +=
                   wilson_loop_tr[index_wilson + mu] *
                   plaket_time_tr[data_pattern.get_index_site()];
@@ -1129,16 +1070,28 @@ wilson_plaket_correlator_longitudinal_even(
                   plaket_space_tr[data_pattern.get_index_site()];
               data_pattern.move_forward(1, mu);
             }
+            for (int d = 1; d < correlator_size; d++) {
+              correlator_electric[d] +=
+                  wilson_loop_tr[index_wilson + mu] *
+                  plaket_time_tr[data_pattern.get_index_site()];
+              correlator_magnetic[d] +=
+                  wilson_loop_tr[index_wilson + mu] *
+                  plaket_space_tr[data_pattern.get_index_site()];
+              data_pattern.move_forward(1, mu);
+            }
+            data_pattern.move_backward(R + d_outside + 1, mu);
           }
         }
       }
     }
   }
-  for (int i = 0; i < correlator_electric.size(); i++) {
-    correlator_electric[i] /= data_pattern.get_lattice_size() * 3;
+  correlator_electric[0] /= data_pattern.get_lattice_size() * 3;
+  for (int i = 1; i < correlator_electric.size(); i++) {
+    correlator_electric[i] /= data_pattern.get_lattice_size() * 6;
   }
-  for (int i = 0; i < correlator_magnetic.size(); i++) {
-    correlator_magnetic[i] /= data_pattern.get_lattice_size() * 3;
+  correlator_magnetic[0] /= data_pattern.get_lattice_size() * 3;
+  for (int i = 1; i < correlator_magnetic.size(); i++) {
+    correlator_magnetic[i] /= data_pattern.get_lattice_size() * 6;
   }
   return {correlator_electric, correlator_magnetic};
 }
@@ -1149,62 +1102,6 @@ wilson_plaket_correlator_longitudinal_even(
 // d_outside + (R + 1) / 2 values, corresponding to sites along spatial
 // direction of wilson loop, where index 0 corresponds to the values closest to
 // the middle of a string
-// template <class DataPattern>
-// std::tuple<std::vector<double>, std::vector<double>>
-// wilson_plaket_correlator_longitudinal_odd(
-//     const std::vector<double> &wilson_loop_tr,
-//     const std::vector<double> &plaket_time_tr,
-//     const std::vector<double> &plaket_space_tr, DataPattern &data_pattern,
-//     int d_outside, int T, int R) {
-//   int index_wilson;
-//   int correlator_size = d_outside + (R + 1) / 2;
-//   std::vector<double> correlator_electric(correlator_size);
-//   std::vector<double> correlator_magnetic(correlator_size);
-// #pragma omp parallel for collapse(4) \
-//     firstprivate(data_pattern, d_outside, R, T) private(index_wilson) \
-//     reduction(vec_double_plus : correlator_electric) \
-//     reduction(vec_double_plus : correlator_magnetic)
-//   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
-//     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
-//       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
-//         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
-//           data_pattern.lat_coord = {x, y, z, t};
-//           index_wilson = data_pattern.get_index_site() * 3;
-//           data_pattern.move_forward(T / 2, 3);
-//           for (int mu = 0; mu < 3; mu++) {
-//             data_pattern.move_backward(d_outside, mu);
-//             for (int d = correlator_size - 1; d >= 0; d--) {
-//               correlator_electric[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_time_tr[data_pattern.get_index_site()];
-//               correlator_magnetic[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_space_tr[data_pattern.get_index_site()];
-//               data_pattern.move_forward(1, mu);
-//             }
-//             for (int d = 0; d < correlator_size; d++) {
-//               correlator_electric[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_time_tr[data_pattern.get_index_site()];
-//               correlator_magnetic[d] +=
-//                   wilson_loop_tr[index_wilson + mu] *
-//                   plaket_space_tr[data_pattern.get_index_site()];
-//               data_pattern.move_forward(1, mu);
-//             }
-//             data_pattern.move_backward(R + d_outside + 1, mu);
-//           }
-//         }
-//       }
-//     }
-//   }
-//   for (int i = 0; i < correlator_electric.size(); i++) {
-//     correlator_electric[i] /= data_pattern.get_lattice_size() * 6;
-//   }
-//   for (int i = 0; i < correlator_magnetic.size(); i++) {
-//     correlator_magnetic[i] /= data_pattern.get_lattice_size() * 6;
-//   }
-//   return {correlator_electric, correlator_magnetic};
-// }
 template <class DataPattern>
 std::tuple<std::vector<double>, std::vector<double>>
 wilson_plaket_correlator_longitudinal_odd(
@@ -1213,7 +1110,7 @@ wilson_plaket_correlator_longitudinal_odd(
     const std::vector<double> &plaket_space_tr, DataPattern &data_pattern,
     int d_outside, int T, int R) {
   int index_wilson;
-  int correlator_size = 2 * d_outside + R;
+  int correlator_size = d_outside + (R + 1) / 2;
   std::vector<double> correlator_electric(correlator_size);
   std::vector<double> correlator_magnetic(correlator_size);
 #pragma omp parallel for collapse(4)                                           \
@@ -1226,10 +1123,18 @@ wilson_plaket_correlator_longitudinal_odd(
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           data_pattern.lat_coord = {x, y, z, t};
           index_wilson = data_pattern.get_index_site() * 3;
+          data_pattern.move_forward(T / 2, 3);
           for (int mu = 0; mu < 3; mu++) {
-            data_pattern.lat_coord = {x, y, z, t};
-            data_pattern.move_forward(T / 2, 3);
             data_pattern.move_backward(d_outside, mu);
+            for (int d = correlator_size - 1; d >= 0; d--) {
+              correlator_electric[d] +=
+                  wilson_loop_tr[index_wilson + mu] *
+                  plaket_time_tr[data_pattern.get_index_site()];
+              correlator_magnetic[d] +=
+                  wilson_loop_tr[index_wilson + mu] *
+                  plaket_space_tr[data_pattern.get_index_site()];
+              data_pattern.move_forward(1, mu);
+            }
             for (int d = 0; d < correlator_size; d++) {
               correlator_electric[d] +=
                   wilson_loop_tr[index_wilson + mu] *
@@ -1239,16 +1144,17 @@ wilson_plaket_correlator_longitudinal_odd(
                   plaket_space_tr[data_pattern.get_index_site()];
               data_pattern.move_forward(1, mu);
             }
+            data_pattern.move_backward(R + d_outside + 1, mu);
           }
         }
       }
     }
   }
   for (int i = 0; i < correlator_electric.size(); i++) {
-    correlator_electric[i] /= data_pattern.get_lattice_size() * 3;
+    correlator_electric[i] /= data_pattern.get_lattice_size() * 6;
   }
   for (int i = 0; i < correlator_magnetic.size(); i++) {
-    correlator_magnetic[i] /= data_pattern.get_lattice_size() * 3;
+    correlator_magnetic[i] /= data_pattern.get_lattice_size() * 6;
   }
   return {correlator_electric, correlator_magnetic};
 }

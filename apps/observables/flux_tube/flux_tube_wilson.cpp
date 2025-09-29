@@ -162,15 +162,6 @@ int main(int argc, char *argv[]) {
   conf_plaket.array.clear();
   conf_plaket.array.shrink_to_fit();
 
-  // start_time = omp_get_wtime();
-  // wilson_plaket_correlator_all(
-  //     flux_tube_electric_longitudinal, flux_tube_electric_transversal,
-  //     flux_tube_magnetic_longitudinal, flux_tube_magnetic_transversal,
-  //     plaket_time_tr, plaket_space_tr, conf_wilson, T_min, T_max, R_min,
-  //     R_max, L_spat / 2 - 1);
-  // cout << "wilson_plaket_correlator_all time: " << omp_get_wtime() -
-  // start_time
-  //      << endl;
   start_time = omp_get_wtime();
   wilson_plaket_correlator_all(
       wilson_loops, flux_tube_electric_longitudinal,
