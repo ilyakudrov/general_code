@@ -114,9 +114,9 @@ std::vector<double> polyakov_loop_correlator_color_average(
               for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
                 data_pattern.lat_coord = {x, y, z, 0};
                 place = data_pattern.get_index_site_spacial();
-                data_pattern.move_forward(Dx, 0);
-                data_pattern.move_forward(Dy, 1);
-                data_pattern.move_forward(Dz, 2);
+                data_pattern.move(Dx, 0);
+                data_pattern.move(Dy, 1);
+                data_pattern.move(Dz, 2);
                 correlator_tmp += std::real(
                     polyakov_loops[place] *
                     std::conj(
