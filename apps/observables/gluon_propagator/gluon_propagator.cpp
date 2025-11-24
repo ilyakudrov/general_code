@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
   omp_time = omp_get_wtime();
   make_simulated_annealing(conf, gauge, 5, 0.01, 0.01, 4, 20);
   make_maximization_final(conf, gauge, 4, 1e-14, 1e-16);
+  apply_gauge_Landau(gauge, conf);
   std::cout << "Landau su2 gauge fixing time: " << omp_get_wtime() - omp_time
             << std::endl;
   std::cout << "plaket after gauge fixing: " << plaket(conf) << std::endl;
