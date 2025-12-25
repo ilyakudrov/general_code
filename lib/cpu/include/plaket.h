@@ -362,8 +362,8 @@ std::vector<double> calculate_plaket_schwinger_time_left_tr(
           index = data_pattern.get_index_site() * 3;
           for (int dir = 0; dir < 3; dir++) {
             vec[index + dir] =
-                (plaket_left_down(conf, data_pattern, dir, 3).tr() +
-                 plaket_left_up(conf, data_pattern, dir, 3).tr()) *
+                (plaket_left_down(conf, data_pattern, dir, 3).tr_real() +
+                 plaket_left_up(conf, data_pattern, dir, 3).tr_real()) *
                 0.5;
           }
         }
