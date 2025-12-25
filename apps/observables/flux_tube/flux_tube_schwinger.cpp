@@ -1,5 +1,6 @@
 #include "../../../lib/cpu/include/data.h"
 #include "../../../lib/cpu/include/flux_tube.h"
+#include "../../../lib/cpu/include/mag.h"
 #include "../../../lib/cpu/include/matrix.h"
 #include "../../../lib/cpu/include/plaket.h"
 
@@ -44,6 +45,9 @@ int main(int argc, char *argv[]) {
   std::string output_path_electric_trans_tr;
   std::string output_path_magnetic_trans_l;
   std::string output_path_magnetic_trans_tr;
+  double HYP_alpha1, HYP_alpha2, HYP_alpha3;
+  double APE_alpha;
+  int HYP_steps, APE_steps;
   int L_spat, L_time;
   int x_trans = 0;
   int bytes_skip_plaket = 0;
@@ -91,6 +95,18 @@ int main(int argc, char *argv[]) {
       output_path_magnetic_trans_l = argv[++i];
     } else if (std::string(argv[i]) == "--output_path_magnetic_trans_tr") {
       output_path_magnetic_trans_tr = argv[++i];
+    } else if (string(argv[i]) == "--HYP_alpha1") {
+      HYP_alpha1 = atof(argv[++i]);
+    } else if (string(argv[i]) == "--HYP_alpha2") {
+      HYP_alpha2 = atof(argv[++i]);
+    } else if (string(argv[i]) == "--HYP_alpha3") {
+      HYP_alpha3 = atof(argv[++i]);
+    } else if (string(argv[i]) == "--APE_alpha") {
+      APE_alpha = atof(argv[++i]);
+    } else if (string(argv[i]) == "--APE_steps") {
+      APE_steps = stoi(argv[++i]);
+    } else if (string(argv[i]) == "--HYP_steps") {
+      HYP_steps = stoi(argv[++i]);
     } else if (std::string(argv[i]) == "--L_spat") {
       L_spat = stoi(std::string(argv[++i]));
     } else if (std::string(argv[i]) == "--L_time") {
@@ -138,6 +154,12 @@ int main(int argc, char *argv[]) {
             << std::endl;
   std::cout << "output_path_magnetic_trans_tr " << output_path_magnetic_trans_tr
             << std::endl;
+  std::cout << "HYP_alpha1 " << HYP_alpha1 << std::endl;
+  std::cout << "HYP_alpha2 " << HYP_alpha2 << std::endl;
+  std::cout << "HYP_alpha3 " << HYP_alpha3 << std::endl;
+  std::cout << "APE_alpha " << APE_alpha << std::endl;
+  std::cout << "APE_steps " << APE_steps << std::endl;
+  std::cout << "HYP_steps " << HYP_steps << std::endl;
   std::cout << "L_spat " << L_spat << std::endl;
   std::cout << "L_time " << L_time << std::endl;
   std::cout << "R_min " << R_min << std::endl;
@@ -163,6 +185,16 @@ int main(int argc, char *argv[]) {
   Data::read_data_convert(conf_wilson, conf_path_wilson, conf_format_wilson,
                           bytes_skip_wilson, file_precision_wilson,
                           convert_wilson);
+
+  // DataPatternLexicographical data_pattern(conf_wilson.lat_dim);
+  // vector<spin> spins = generate_spins_uniform(data_pattern);
+  // gauge_tranformation_spins(conf_wilson, spins);
+  for (int i = 0; i < HYP_steps; i++) {
+    smearing_HYP(conf_wilson, HYP_alpha1, HYP_alpha2, HYP_alpha3);
+  }
+  for (int i = 0; i < APE_steps; i++) {
+    smearing_APE(conf_wilson, APE_alpha);
+  }
 
   double plaket_time_average = plaket_time(conf_plaket);
   double plaket_space_average = plaket_space(conf_plaket);
@@ -225,7 +257,7 @@ int main(int argc, char *argv[]) {
 
   for (int d = 0; d < schwinger_line_max; d++) {
     schwinger_lines_short[d] =
-        calculate_schwinger_lines_short(conf_wilson.array, d + 1);
+        calculate_schwinger_lines_short(conf_plaket, d + 1);
   }
 
   std::map<std::tuple<int, int, int>, double>
@@ -347,22 +379,27 @@ int main(int argc, char *argv[]) {
 
   start_time = omp_get_wtime();
 
-  flux_schwinger_all(
-      conf_wilson.array, schwinger_lines_short,
-      flux_tube_schwinger_electric_long_l, flux_tube_schwinger_electric_long_tr,
-      flux_tube_schwinger_electric_trans_l,
-      flux_tube_schwinger_electric_trans_tr,
-      flux_tube_schwinger_magnetic_long_l, flux_tube_schwinger_magnetic_long_tr,
-      flux_tube_schwinger_magnetic_trans_l,
-      flux_tube_schwinger_magnetic_trans_tr, T_min, T_max, R_min, R_max,
-      d_ouside, d_max);
+  // flux_schwinger_all(
+  //     conf_wilson.array, schwinger_lines_short,
+  //     flux_tube_schwinger_electric_long_l,
+  //     flux_tube_schwinger_electric_long_tr,
+  //     flux_tube_schwinger_electric_trans_l,
+  //     flux_tube_schwinger_electric_trans_tr,
+  //     flux_tube_schwinger_magnetic_long_l,
+  //     flux_tube_schwinger_magnetic_long_tr,
+  //     flux_tube_schwinger_magnetic_trans_l,
+  //     flux_tube_schwinger_magnetic_trans_tr, T_min, T_max, R_min, R_max,
+  //     d_ouside, d_max);
 
+  flux_tube_schwinger_electric_long_l = flux_schwinger_electric_l_dir_l_plaket(
+      conf_plaket, conf_wilson, schwinger_lines_short, T_min, T_max, R_min,
+      R_max, d_ouside);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   cout << "flux_schwinger all: " << search_time << endl;
 
   map<tuple<int, int>, double> wilson_loops =
-      wilson_loop(conf_wilson.array, R_min, R_max, T_min, T_max);
+      wilson_loop(conf_wilson, R_min, R_max, T_min, T_max);
 
   map<tuple<int, int, int>, double> flux_tube_wilson_electric_long_l;
   map<tuple<int, int, int>, double> flux_tube_wilson_electric_long_tr;
@@ -373,85 +410,93 @@ int main(int argc, char *argv[]) {
   map<tuple<int, int, int>, double> flux_tube_wilson_magnetic_trans_l;
   map<tuple<int, int, int>, double> flux_tube_wilson_magnetic_trans_tr;
 
-  vector<double> plaket_tr = calculate_plaket_time_trace_l(conf_plaket.array);
+  // vector<double> plaket_tr =
+  // calculate_plaket_time_trace_l(conf_plaket.array);
+  vector<double> plaket_tr =
+      calculate_plaket_schwinger_time_left_tr(conf_plaket);
 
   start_time = omp_get_wtime();
   flux_tube_wilson_electric_long_l =
       calculate_wilson_plaket_correlator_electric_longitudinal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
+          plaket_tr, conf_wilson, T_min, T_max, R_min, R_max, d_ouside);
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   cout << "flux tube wilson longitudinal_l electric time: " << search_time
        << endl;
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_electric_trans_l =
-      calculate_wilson_plaket_correlator_electric_transversal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson transversal_l electric time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_electric_trans_l =
+  //     calculate_wilson_plaket_correlator_electric_transversal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_max);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson transversal_l electric time: " << search_time
+  //      << endl;
 
-  plaket_tr = calculate_plaket_time_trace_tr(conf_plaket.array);
+  // plaket_tr = calculate_plaket_time_trace_tr(conf_plaket.array);
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_electric_long_tr =
-      calculate_wilson_plaket_correlator_electric_longitudinal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson longitudinal_tr electric time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_electric_long_tr =
+  //     calculate_wilson_plaket_correlator_electric_longitudinal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max,
+  //         d_ouside);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson longitudinal_tr electric time: " << search_time
+  //      << endl;
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_electric_trans_tr =
-      calculate_wilson_plaket_correlator_electric_transversal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson transversal_tr electric time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_electric_trans_tr =
+  //     calculate_wilson_plaket_correlator_electric_transversal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max,
+  //         d_ouside);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson transversal_tr electric time: " << search_time
+  //      << endl;
 
-  plaket_tr = calculate_plaket_space_trace_l(conf_plaket.array);
+  // plaket_tr = calculate_plaket_space_trace_l(conf_plaket.array);
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_magnetic_long_l =
-      calculate_wilson_plaket_correlator_electric_longitudinal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson longitudinal_l magnetic time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_magnetic_long_l =
+  //     calculate_wilson_plaket_correlator_electric_longitudinal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max,
+  //         d_ouside);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson longitudinal_l magnetic time: " << search_time
+  //      << endl;
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_magnetic_trans_l =
-      calculate_wilson_plaket_correlator_electric_transversal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_max);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson transversal_l magnetic time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_magnetic_trans_l =
+  //     calculate_wilson_plaket_correlator_electric_transversal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_max);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson transversal_l magnetic time: " << search_time
+  //      << endl;
 
-  plaket_tr = calculate_plaket_space_trace_tr(conf_plaket.array);
+  // plaket_tr = calculate_plaket_space_trace_tr(conf_plaket.array);
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_magnetic_long_tr =
-      calculate_wilson_plaket_correlator_electric_longitudinal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson longitudinal_tr magnetic time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_magnetic_long_tr =
+  //     calculate_wilson_plaket_correlator_electric_longitudinal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max,
+  //         d_ouside);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson longitudinal_tr magnetic time: " << search_time
+  //      << endl;
 
-  start_time = omp_get_wtime();
-  flux_tube_wilson_magnetic_trans_tr =
-      calculate_wilson_plaket_correlator_electric_transversal(
-          plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max, d_ouside);
-  end_time = omp_get_wtime();
-  search_time = end_time - start_time;
-  cout << "flux tube wilson transversal_tr magnetic time: " << search_time
-       << endl;
+  // start_time = omp_get_wtime();
+  // flux_tube_wilson_magnetic_trans_tr =
+  //     calculate_wilson_plaket_correlator_electric_transversal(
+  //         plaket_tr, conf_wilson.array, T_min, T_max, R_min, R_max,
+  //         d_ouside);
+  // end_time = omp_get_wtime();
+  // search_time = end_time - start_time;
+  // cout << "flux tube wilson transversal_tr magnetic time: " << search_time
+  //      << endl;
 
   for (auto it = flux_tube_schwinger_electric_long_l.begin();
        it != flux_tube_schwinger_electric_long_l.end(); it++) {
@@ -464,81 +509,88 @@ int main(int argc, char *argv[]) {
         << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
         << endl;
   }
-  for (auto it = flux_tube_schwinger_electric_long_tr.begin();
-       it != flux_tube_schwinger_electric_long_tr.end(); it++) {
-    stream_electric_long_tr
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_electric_long_tr[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_electric_trans_l.begin();
-       it != flux_tube_schwinger_electric_trans_l.end(); it++) {
-    stream_electric_trans_l
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_electric_trans_l[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_electric_trans_tr.begin();
-       it != flux_tube_schwinger_electric_trans_tr.end(); it++) {
-    stream_electric_trans_tr
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_electric_trans_tr[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_magnetic_long_l.begin();
-       it != flux_tube_schwinger_magnetic_long_l.end(); it++) {
-    stream_magnetic_long_l
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_magnetic_long_l[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_magnetic_long_tr.begin();
-       it != flux_tube_schwinger_magnetic_long_tr.end(); it++) {
-    stream_magnetic_long_tr
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_magnetic_long_tr[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_magnetic_trans_l.begin();
-       it != flux_tube_schwinger_magnetic_trans_l.end(); it++) {
-    stream_magnetic_trans_l
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_magnetic_trans_l[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
-  for (auto it = flux_tube_schwinger_magnetic_trans_tr.begin();
-       it != flux_tube_schwinger_magnetic_trans_tr.end(); it++) {
-    stream_magnetic_trans_tr
-        << get<0>(it->first) << "," << get<1>(it->first) << ","
-        << get<2>(it->first) << "," << it->second << ","
-        << flux_tube_wilson_magnetic_trans_tr[tuple<int, int, int>(
-               get<0>(it->first), get<1>(it->first), get<2>(it->first))]
-        << ","
-        << wilson_loops[tuple<int, int>(get<0>(it->first), get<1>(it->first))]
-        << endl;
-  }
+  // for (auto it = flux_tube_schwinger_electric_long_tr.begin();
+  //      it != flux_tube_schwinger_electric_long_tr.end(); it++) {
+  //   stream_electric_long_tr
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_electric_long_tr[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_electric_trans_l.begin();
+  //      it != flux_tube_schwinger_electric_trans_l.end(); it++) {
+  //   stream_electric_trans_l
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_electric_trans_l[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_electric_trans_tr.begin();
+  //      it != flux_tube_schwinger_electric_trans_tr.end(); it++) {
+  //   stream_electric_trans_tr
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_electric_trans_tr[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_magnetic_long_l.begin();
+  //      it != flux_tube_schwinger_magnetic_long_l.end(); it++) {
+  //   stream_magnetic_long_l
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_magnetic_long_l[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_magnetic_long_tr.begin();
+  //      it != flux_tube_schwinger_magnetic_long_tr.end(); it++) {
+  //   stream_magnetic_long_tr
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_magnetic_long_tr[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_magnetic_trans_l.begin();
+  //      it != flux_tube_schwinger_magnetic_trans_l.end(); it++) {
+  //   stream_magnetic_trans_l
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_magnetic_trans_l[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
+  // for (auto it = flux_tube_schwinger_magnetic_trans_tr.begin();
+  //      it != flux_tube_schwinger_magnetic_trans_tr.end(); it++) {
+  //   stream_magnetic_trans_tr
+  //       << get<0>(it->first) << "," << get<1>(it->first) << ","
+  //       << get<2>(it->first) << "," << it->second << ","
+  //       << flux_tube_wilson_magnetic_trans_tr[tuple<int, int, int>(
+  //              get<0>(it->first), get<1>(it->first), get<2>(it->first))]
+  //       << ","
+  //       << wilson_loops[tuple<int, int>(get<0>(it->first),
+  //       get<1>(it->first))]
+  //       << endl;
+  // }
 }

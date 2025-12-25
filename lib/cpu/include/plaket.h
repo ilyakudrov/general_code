@@ -141,6 +141,7 @@ double plaket_space(const Data::LatticeData<DataPattern, MatrixType> &conf) {
 }
 
 // preserves data_pattern coordinates
+// counterclockwise direction in (mu,nu) plane
 template <class DataPattern, class MatrixType>
 inline MatrixType
 plaket_left_down(const Data::LatticeData<DataPattern, MatrixType> &conf,
@@ -338,6 +339,32 @@ std::vector<MatrixType> calculate_plaket_schwinger_time_right(
             vec[index + dir] = (plaket_right_down(conf, data_pattern, dir, 3) +
                                 plaket_right_up(conf, data_pattern, dir, 3)) *
                                0.5;
+          }
+        }
+      }
+    }
+  }
+  return vec;
+}
+
+template <class DataPattern, class MatrixType>
+std::vector<double> calculate_plaket_schwinger_time_left_tr(
+    const Data::LatticeData<DataPattern, MatrixType> &conf) {
+  DataPattern data_pattern(conf.lat_dim);
+  std::vector<double> vec(data_pattern.get_lattice_size() * 3);
+  int index;
+#pragma omp parallel for collapse(4) firstprivate(data_pattern) private(index)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          index = data_pattern.get_index_site() * 3;
+          for (int dir = 0; dir < 3; dir++) {
+            vec[index + dir] =
+                (plaket_left_down(conf, data_pattern, dir, 3).tr() +
+                 plaket_left_up(conf, data_pattern, dir, 3).tr()) *
+                0.5;
           }
         }
       }

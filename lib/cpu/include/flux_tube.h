@@ -19,7 +19,7 @@ template <class DataPattern, class MatrixType>
 std::vector<MatrixType> calculate_schwinger_lines_short(
     const Data::LatticeData<DataPattern, MatrixType> &conf, int d) {
   DataPattern data_pattern(conf.lat_dim);
-  std::vector<MatrixType> vec(data_pattern.get_lattice_size());
+  std::vector<MatrixType> vec(data_pattern.get_lattice_size() * 3);
 #pragma omp parallel for collapse(4) firstprivate(data_pattern)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
@@ -85,22 +85,14 @@ std::vector<MatrixType> calculate_wilson_loops_schwinger_opposite(
   return vec;
 }
 
-template <class DataPattern, class MatrixType>
-std::map<int, double> wilson_plaket_schwinger_l_dir_l_plaket(
-    const std::vector<MatrixType> &wilson_loops,
-    const std::vector<MatrixType> &wilson_loops_opposite,
-    const std::vector<MatrixType> &plaket_left,
-    const std::vector<MatrixType> &plaket_right,
-    const std::vector<std::vector<MatrixType>> &schwinger_lines,
-    DataPattern &data_pattern, int d_ouside, int time, int r) {
-  std::vector<double> correlator(2 * d_ouside + r);
-  MatrixType W;
-  MatrixType A;
-  MatrixType S;
-  int d;
-  int place;
-#pragma omp parallel for collapse(4) private(W, A, S, d, place)                \
-    firstprivate(d_ouside, data_pattern)                                       \
+template <class DataPattern>
+std::map<int, double> wilson_plaket_correlator_electric_longitudinal(
+    DataPattern &data_pattern, const std::vector<double> &wilson_loop_tr,
+    const std::vector<double> &plaket_tr, int r, int time, int d_outside) {
+  std::vector<double> correlator(2 * d_outside + r);
+  double W;
+#pragma omp parallel for collapse(4) private(W)                                \
+    firstprivate(d_outside, data_pattern)                                      \
     reduction(vec_double_plus : correlator)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
@@ -108,61 +100,13 @@ std::map<int, double> wilson_plaket_schwinger_l_dir_l_plaket(
         for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
           for (int dir = 0; dir < 3; dir++) {
             data_pattern.lat_coord = {x, y, z, t};
-            W = wilson_loops[data_pattern.get_index_site() * 3 + dir];
-            d = -d_ouside;
-            data_pattern.move_backward(d_ouside - 1, dir);
-            while (d < -1) {
-              place = data_pattern.get_index_site() * 3;
-              S = schwinger_lines[abs(d) - 2][place + dir];
-              A = W ^ S;
-              A = A ^ plaket_right[place + dir];
-              correlator[d + d_ouside] += A.multiply_tr(S);
+            W = wilson_loop_tr[data_pattern.get_index_site() * 3 + dir];
+            data_pattern.move_forward(time / 2, 3);
+            data_pattern.move_backward(d_outside, dir);
+            for (int d = 0; d < 2 * d_outside + r; d++) {
+              correlator[d] +=
+                  W * plaket_tr[data_pattern.get_index_site() * 3 + dir];
               data_pattern.move_forward(1, dir);
-              d++;
-            }
-            correlator[d + d_ouside] += W.multiply_conj_tr(
-                plaket_right[data_pattern.get_index_site() * 3 + dir]);
-            d++;
-            correlator[d + d_ouside] += W.multiply_tr(
-                plaket_left[data_pattern.get_index_site() * 3 + dir]);
-            d++;
-            while (d < (r + 1) / 2) {
-              S = schwinger_lines[d - 1]
-                                 [data_pattern.get_index_site() * 3 + dir];
-              A = W * S;
-              data_pattern.move_forward(d, dir);
-              A = A * plaket_left[data_pattern.get_index_site() * 3 + dir];
-              correlator[d + d_ouside] += A.multiply_conj_tr(S);
-              data_pattern.move_backward(d, dir);
-              d++;
-            }
-            data_pattern.move_forward(r, dir);
-            W = wilson_loops_opposite[data_pattern.get_index_site() * 3 + dir];
-            data_pattern.move_backward(r / 2 - 1, dir);
-            while (d < r - 1) {
-              S = schwinger_lines[r - d - 2]
-                                 [data_pattern.get_index_site() * 3 + dir];
-              A = W ^ S;
-              A = A * plaket_right[data_pattern.get_index_site() * 3 + dir];
-              correlator[d + d_ouside] += A.multiply_tr(S);
-              data_pattern.move_forward(1, dir);
-              d++;
-            }
-            correlator[d + d_ouside] += W.multiply_tr(
-                plaket_right[data_pattern.get_index_site() * 3 + dir]);
-            d++;
-            correlator[d + d_ouside] += W.multiply_conj_tr(
-                plaket_left[data_pattern.get_index_site() * 3 + dir]);
-            d++;
-            while (d < r + d_ouside) {
-              S = schwinger_lines[d - r - 1]
-                                 [data_pattern.get_index_site() * 3 + dir];
-              A = W * S;
-              data_pattern.move_forward(d - r, dir);
-              A = A ^ plaket_left[data_pattern.get_index_site() * 3 + dir];
-              correlator[d + d_ouside] += A.multiply_conj_tr(S);
-              data_pattern.move_backward(d - r, dir);
-              d++;
             }
           }
         }
@@ -171,8 +115,132 @@ std::map<int, double> wilson_plaket_schwinger_l_dir_l_plaket(
   }
   std::map<int, double> result;
   for (int i = 0; i < correlator.size(); i++) {
-    result[i - d_ouside - r / 2] =
-        correlator[i] / (data_pattern.get_lattice_size * 3);
+    result[i] = correlator[i] / (data_pattern.get_lattice_size() * 3);
+  }
+  return result;
+}
+
+template <class DataPattern, class MatrixType>
+std::map<std::tuple<int, int, int>, double>
+calculate_wilson_plaket_correlator_electric_longitudinal(
+    const std::vector<double> &plaket_tr,
+    const Data::LatticeData<DataPattern, MatrixType> &conf, int T_min,
+    int T_max, int R_min, int R_max, int d_ouside) {
+  DataPattern data_pattern(conf.lat_dim);
+  std::map<std::tuple<int, int, int>, double> flux_tube;
+  std::vector<double> wilson_loop_tr;
+  std::map<int, double> correlator;
+  for (int time = T_min; time <= T_max; time += 2) {
+    for (int r = R_min; r <= R_max; r += 1) {
+      wilson_loop_tr = calculate_wilson_loop_time_tr(conf, r, time);
+      correlator = wilson_plaket_correlator_electric_longitudinal(
+          data_pattern, wilson_loop_tr, plaket_tr, r, time, d_ouside);
+      for (auto i = correlator.begin(); i != correlator.end(); i++) {
+        flux_tube[std::tuple<int, int, int>(time, r, i->first)] = i->second;
+      }
+    }
+  }
+
+  return flux_tube;
+}
+
+template <class DataPattern, class MatrixType>
+std::map<int, double> wilson_plaket_schwinger_l_dir_l_plaket(
+    const std::vector<MatrixType> &wilson_loops,
+    const std::vector<MatrixType> &wilson_loops_opposite,
+    const std::vector<MatrixType> &plaket_left,
+    const std::vector<MatrixType> &plaket_right,
+    const std::vector<std::vector<MatrixType>> &schwinger_lines,
+    DataPattern &data_pattern, int d_outside, int time, int r) {
+  int correlator_size = 2 * d_outside + r;
+  std::vector<double> correlator(correlator_size);
+  MatrixType W;
+  MatrixType A;
+  MatrixType S;
+  int d; // place of plaket in correlator vector
+  int index_schwinger;
+  int place;
+#pragma omp parallel for collapse(4) private(W, A, S, d, place,                \
+                                                 index_schwinger)              \
+    firstprivate(d_outside, correlator_size, data_pattern)                     \
+    reduction(vec_double_plus : correlator)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          for (int dir = 0; dir < 3; dir++) {
+            data_pattern.lat_coord = {x, y, z, t};
+            W = wilson_loops[data_pattern.get_index_site() * 3 + dir];
+            d = 0;
+            index_schwinger = d_outside - 2;
+            data_pattern.move_backward(d_outside - 1, dir);
+            while (d < d_outside - 1) {
+              place = data_pattern.get_index_site() * 3 + dir;
+              S = schwinger_lines[index_schwinger][place];
+              A = W ^ S;
+              A = A ^ plaket_right[place];
+              correlator[d] += A.multiply_tr(S);
+              data_pattern.move_forward(1, dir);
+              d++;
+              index_schwinger--;
+            }
+            place = data_pattern.get_index_site() * 3;
+            correlator[d] += W.multiply_conj_tr(plaket_right[place + dir]);
+            d++;
+            correlator[d] += W.multiply_tr(plaket_left[place + dir]);
+            d++;
+            index_schwinger = 0;
+            while (d < d_outside + (r + 1) / 2) {
+              S = schwinger_lines[index_schwinger]
+                                 [data_pattern.get_index_site() * 3 + dir];
+              A = W * S;
+              data_pattern.move_forward(index_schwinger + 1, dir);
+              A = A * plaket_left[data_pattern.get_index_site() * 3 + dir];
+              correlator[d] += A.multiply_conj_tr(S);
+              data_pattern.move_backward(index_schwinger + 1, dir);
+              d++;
+              index_schwinger++;
+            }
+            data_pattern.move_forward(r, dir);
+            W = wilson_loops_opposite[data_pattern.get_index_site() * 3 + dir];
+            data_pattern.move_backward(r / 2 - 1, dir);
+            index_schwinger = r / 2 - 2;
+            while (d < d_outside + r - 1) {
+              place = data_pattern.get_index_site() * 3 + dir;
+              S = schwinger_lines[index_schwinger][place];
+              A = W ^ S;
+              A = A * plaket_right[place];
+              correlator[d] += A.multiply_tr(S);
+              data_pattern.move_forward(1, dir);
+              d++;
+              index_schwinger--;
+            }
+            place = data_pattern.get_index_site() * 3 + dir;
+            correlator[d] += W.multiply_tr(plaket_right[place]);
+            d++;
+            correlator[d] += W.multiply_conj_tr(plaket_left[place]);
+            d++;
+            index_schwinger = 0;
+            while (d < r + 2 * d_outside) {
+              place = data_pattern.get_index_site() * 3 + dir;
+              S = schwinger_lines[index_schwinger]
+                                 [data_pattern.get_index_site() * 3 + dir];
+              A = W * S;
+              data_pattern.move_forward(index_schwinger + 1, dir);
+              A = A ^ plaket_left[data_pattern.get_index_site() * 3 + dir];
+              correlator[d] += A.multiply_conj_tr(S);
+              data_pattern.move_backward(index_schwinger + 1, dir);
+              d++;
+              index_schwinger++;
+            }
+          }
+        }
+      }
+    }
+  }
+  std::map<int, double> result;
+  for (int i = 0; i < correlator.size(); i++) {
+    result[i] = correlator[i] / (data_pattern.get_lattice_size() * 3);
   }
   return result;
 }
@@ -180,24 +248,25 @@ std::map<int, double> wilson_plaket_schwinger_l_dir_l_plaket(
 template <class DataPattern, class MatrixType>
 std::map<std::tuple<int, int, int>, double>
 flux_schwinger_electric_l_dir_l_plaket(
-    const Data::LatticeData<DataPattern, MatrixType> &conf,
+    const Data::LatticeData<DataPattern, MatrixType> &conf_plaket,
+    const Data::LatticeData<DataPattern, MatrixType> &conf_wilson,
     const std::vector<std::vector<MatrixType>> &schwinger_lines_short,
     int T_min, int T_max, int R_min, int R_max, int d_ouside) {
-  DataPattern data_pattern(conf.lat_dim);
+  DataPattern data_pattern(conf_wilson.lat_dim);
   std::vector<MatrixType> plaket_time_left =
-      calculate_plaket_schwinger_time_left(conf);
+      calculate_plaket_schwinger_time_left(conf_plaket);
   std::vector<MatrixType> plaket_time_right =
-      calculate_plaket_schwinger_time_right(conf);
+      calculate_plaket_schwinger_time_right(conf_plaket);
   std::vector<MatrixType> wilson_loops;
   std::vector<MatrixType> wilson_loops_opposite;
   std::map<std::tuple<int, int, int>, double> result;
   std::map<int, double> schwinger_electric;
   for (int t = T_min; t <= T_max; t += 2) {
     for (int r = R_min; r <= R_max; r += 1) {
-      wilson_loops = calculate_wilson_loops_schwinger(conf, r, t);
+      wilson_loops = calculate_wilson_loops_schwinger(conf_wilson, r, t);
       wilson_loops_opposite =
-          calculate_wilson_loops_schwinger_opposite(conf, r, t);
-      schwinger_electric = wilson_plaket_schwinger_longitudinal_l(
+          calculate_wilson_loops_schwinger_opposite(conf_wilson, r, t);
+      schwinger_electric = wilson_plaket_schwinger_l_dir_l_plaket(
           wilson_loops, wilson_loops_opposite, plaket_time_left,
           plaket_time_right, schwinger_lines_short, data_pattern, d_ouside, t,
           r);

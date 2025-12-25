@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
                            0.1, 4, 20);
   make_maximization_final(conf_complex, gauge_complex, data_pattern, 4, 1e-14,
                           1e-15);
+  apply_gauge_Landau_complex(gauge_complex, conf_complex);
   std::cout << "Landau gauge time: " << omp_get_wtime() - omp_time << std::endl;
   std::cout << "Landau functional after Landau gauge: "
             << Landau_functional_conf_complex(conf_complex, gauge_complex,

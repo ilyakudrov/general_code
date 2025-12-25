@@ -11,6 +11,33 @@
 // clockwise direction
 template <class DataPattern, class MatrixType>
 MatrixType
+wilson_loop_plane(const Data::LatticeData<DataPattern, MatrixType> &conf,
+                  DataPattern &data_pattern, int r_mu, int r_nu, int mu,
+                  int nu) {
+  MatrixType A;
+  for (int i = 0; i < r_mu; i++) {
+    A = A * conf[data_pattern.get_index_link(mu)];
+    data_pattern.move_forward(1, mu);
+  }
+  for (int i = 0; i < r_nu; i++) {
+    A = A * conf[data_pattern.get_index_link(nu)];
+    data_pattern.move_forward(1, nu);
+  }
+  for (int i = 0; i < r_mu; i++) {
+    data_pattern.move_backward(1, mu);
+    A = A ^ conf[data_pattern.get_index_link(mu)];
+  }
+  for (int i = 0; i < r_nu; i++) {
+    data_pattern.move_backward(1, nu);
+    A = A ^ conf[data_pattern.get_index_link(nu)];
+  }
+  return A;
+}
+
+// preserves data_pattern
+// clockwise direction
+template <class DataPattern, class MatrixType>
+MatrixType
 wilson_loop_schwinger(const Data::LatticeData<DataPattern, MatrixType> &conf,
                       DataPattern &data_pattern, int r, int t, int mu) {
   MatrixType A;
@@ -38,7 +65,7 @@ wilson_loop_schwinger(const Data::LatticeData<DataPattern, MatrixType> &conf,
 }
 
 // preserves data_pattern
-// counter-clockwise direction
+// clockwise direction
 template <class DataPattern, class MatrixType>
 MatrixType wilson_loop_schwinger_opposite(
     const Data::LatticeData<DataPattern, MatrixType> &conf,
@@ -1108,6 +1135,33 @@ std::vector<double> calculate_wilson_loop_time_tr(
             data_pattern.move_backward(T, 3);
             result[index * 3 + mu] = wilson_loop.multiply_conj_tr(
                 time_lines[data_pattern.get_index_site()]);
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+
+template <class DataPattern, class MatrixType>
+std::vector<double> calculate_wilson_loop_time_tr(
+    const Data::LatticeData<DataPattern, MatrixType> &conf, int T, int R) {
+  MatrixType wilson_loop;
+  DataPattern data_pattern(conf.lat_dim);
+  std::vector<double> result(data_pattern.get_lattice_size() * 3);
+  int index;
+#pragma omp parallel for collapse(4) private(wilson_loop, index)               \
+    firstprivate(data_pattern, T, R)
+  for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
+    for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
+      for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
+        for (int x = 0; x < data_pattern.lat_dim[0]; x++) {
+          data_pattern.lat_coord = {x, y, z, t};
+          index = data_pattern.get_index_site();
+          for (int mu = 0; mu < 3; mu++) {
+            data_pattern.move_forward(R, mu);
+            result[data_pattern.get_index_site() * 3 + mu] =
+                wilson_loop_plane(conf, data_pattern, R, T, mu, 3).tr_real();
           }
         }
       }

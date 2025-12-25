@@ -12,7 +12,7 @@ bytes_skip_plaket=0
 convert_plaket=0
 L_spat=40
 L_time=40
-output_path_electric_long_l=./result/flux_tube_schwinger_electric_long_l1
+output_path_electric_long_l=./result/flux_tube_schwinger_electric_long_l
 output_path_electric_long_tr=./result/flux_tube_schwinger_electric_long_tr1
 output_path_magnetic_long_l=./result/flux_tube_schwinger_magnetic_long_l1
 output_path_magnetic_long_tr=./result/flux_tube_schwinger_magnetic_long_tr1
@@ -20,8 +20,14 @@ output_path_electric_trans_l=./result/flux_tube_schwinger_electric_trans_l1
 output_path_electric_trans_tr=./result/flux_tube_schwinger_electric_trans_tr1
 output_path_magnetic_trans_l=./result/flux_tube_schwinger_magnetic_trans_l1
 output_path_magnetic_trans_tr=./result/flux_tube_schwinger_magnetic_trans_tr1
+HYP_alpha1=1
+HYP_alpha2=1
+HYP_alpha3=0.5
+APE_alpha=0.5
+APE_steps=11
+HYP_steps=1
 T_min=4
-T_max=4
+T_max=6
 R_min=4
 R_max=5
 d_ouside=10
@@ -38,6 +44,8 @@ parameters="--conf_format_plaket ${conf_format_plaket} --file_precision_plaket $
     --output_path_magnetic_long_tr ${output_path_magnetic_long_tr}\
     --output_path_magnetic_trans_l ${output_path_magnetic_trans_l}\
     --output_path_magnetic_trans_tr ${output_path_magnetic_trans_tr}\
+    --HYP_alpha1 ${HYP_alpha1} --HYP_alpha2 ${HYP_alpha2} --HYP_alpha3 ${HYP_alpha3}\
+    --APE_alpha ${APE_alpha} --APE_steps ${APE_steps} --HYP_steps ${HYP_steps}\
     --L_spat ${L_spat} --L_time ${L_time} --d_ouside ${d_ouside} --d_max ${d_max}\
     --T_min ${T_min} --T_max ${T_max} --R_min ${R_min} --R_max ${R_max}"
 
