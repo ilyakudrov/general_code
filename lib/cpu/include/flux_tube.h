@@ -254,9 +254,9 @@ flux_schwinger_electric_l_dir_l_plaket(
     int T_min, int T_max, int R_min, int R_max, int d_ouside) {
   DataPattern data_pattern(conf_wilson.lat_dim);
   std::vector<MatrixType> plaket_time_left =
-      calculate_plaket_schwinger_time_left(conf_plaket);
+      calculate_plaket_schwinger_time_left(conf_wilson);
   std::vector<MatrixType> plaket_time_right =
-      calculate_plaket_schwinger_time_right(conf_plaket);
+      calculate_plaket_schwinger_time_right(conf_wilson);
   std::vector<MatrixType> wilson_loops;
   std::vector<MatrixType> wilson_loops_opposite;
   std::map<std::tuple<int, int, int>, double> result;

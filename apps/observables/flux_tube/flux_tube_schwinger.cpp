@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 
   for (int d = 0; d < schwinger_line_max; d++) {
     schwinger_lines_short[d] =
-        calculate_schwinger_lines_short(conf_plaket, d + 1);
+        calculate_schwinger_lines_short(conf_wilson, d + 1);
   }
 
   std::map<std::tuple<int, int, int>, double>
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
   // vector<double> plaket_tr =
   // calculate_plaket_time_trace_l(conf_plaket.array);
   vector<double> plaket_tr =
-      calculate_plaket_schwinger_time_left_tr(conf_plaket);
+      calculate_plaket_schwinger_time_left_tr(conf_wilson);
 
   start_time = omp_get_wtime();
   flux_tube_wilson_electric_long_l =
