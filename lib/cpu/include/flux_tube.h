@@ -132,7 +132,7 @@ calculate_wilson_plaket_correlator_electric_longitudinal(
   std::map<int, double> correlator;
   for (int time = T_min; time <= T_max; time += 2) {
     for (int r = R_min; r <= R_max; r += 1) {
-      wilson_loop_tr = calculate_wilson_loop_time_tr(conf, r, time);
+      wilson_loop_tr = calculate_wilson_loop_time_tr(conf, time, r);
       correlator = wilson_plaket_correlator_electric_longitudinal(
           data_pattern, wilson_loop_tr, plaket_tr, r, time, d_ouside);
       for (auto i = correlator.begin(); i != correlator.end(); i++) {
