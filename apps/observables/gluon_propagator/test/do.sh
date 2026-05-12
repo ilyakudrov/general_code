@@ -13,6 +13,6 @@ L_spat=48
 L_time=48
 output_path=./result/gluon_propagator
 parameters="--conf_format ${conf_format} --conf_path ${conf_path} --file_precision ${file_precision} --bytes_skip ${bytes_skip} --convert ${convert}\
-    --L_spat ${L_spat} --L_time ${L_time} --output_path ${output_path} --beta ${beta}"
+    --L_spat ${L_spat} --L_time ${L_time} --output_path ${output_path}"
 
 ../gluon_propagator_${matrix_type}_test ${parameters}

@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
   int L_spat, L_time;
   int bytes_skip = 0;
   bool convert = 0;
-  double beta = 0;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
@@ -53,8 +52,6 @@ int main(int argc, char *argv[]) {
       L_time = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "--output_path") {
       output_path = argv[++i];
-    } else if (string(argv[i]) == "--beta") {
-      beta = stod(string(argv[++i]));
     }
   }
 
@@ -71,7 +68,6 @@ int main(int argc, char *argv[]) {
   cout << "L_spat " << L_spat << endl;
   cout << "L_time " << L_time << endl;
   cout << "output_path " << output_path << endl;
-  cout << "beta " << beta << endl;
   cout << endl;
 
   cout.precision(17);
@@ -82,23 +78,19 @@ int main(int argc, char *argv[]) {
                           file_precision, convert);
   DataPatternLexicographical data_pattern(conf.lat_dim);
 
-  double a_inv = (542.6 * 8 / 1000);
-  double g = 2 / sqrt(beta);
-  double multiplier = 2 / g * a_inv;
-
   std::vector<su2> gauge = generate_gauge_su2_uniform(data_pattern);
   std::cout << "plaket before gauge fixing: " << plaket(conf) << std::endl;
   std::cout << "Landau su2 functional before gauge fixing: "
-            << Landau_functional_conf(conf, gauge) << std::endl;
+            << Landau_su2_functional(conf) << std::endl;
   omp_time = omp_get_wtime();
-  make_simulated_annealing(conf, gauge, 5, 0.01, 0.01, 4, 20);
-  make_maximization_final(conf, gauge, 4, 1e-14, 1e-16);
-  apply_gauge_Landau(gauge, conf);
+  // make_simulated_annealing(conf, gauge, 5, 0.01, 0.01, 4, 20);
+  // make_maximization_final(conf, gauge, 4, 1e-14, 1e-16);
+  // apply_gauge_Landau(gauge, conf);
   std::cout << "Landau su2 gauge fixing time: " << omp_get_wtime() - omp_time
             << std::endl;
   std::cout << "plaket after gauge fixing: " << plaket(conf) << std::endl;
   std::cout << "Landau su2 functional after gauge fixing: "
-            << Landau_functional_conf(conf, gauge) << std::endl;
+            << Landau_su2_functional(conf) << std::endl;
 
   std::vector<std::vector<std::array<double, 4>>> momenta =
       generate_momenta(x_size1, t_size1);
@@ -113,7 +105,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < 100; i++) {
     omp_time = omp_get_wtime();
     std::array<std::complex<double>, 144> gluon_propagator =
-        calculate_gluon_propagator_group(vector_potential, momenta[i], 1,
+        calculate_gluon_propagator_group(vector_potential, momenta[i],
                                          data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {

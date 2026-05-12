@@ -2,7 +2,7 @@
 conf_format="ildg"
 file_precision="double"
 # conf_format="double_qc2dstag"
-conf_path="../../../../tests/confs/su3/QCD/140MeV/nt4/conf.0501"
+conf_path="../../../../tests/confs/Landau_SU3/QCD/140MeV/nt4/conf_Landau_gaugefixed_0501"
 # conf_path="../../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
 bytes_skip=0
 # bytes_skip=0

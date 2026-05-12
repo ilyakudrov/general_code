@@ -34,6 +34,7 @@
                       omp_out.begin(), std::plus<std::complex<double>>()))     \
     initializer(omp_priv = decltype(omp_orig)())
 
+// calculate z - hermitian traceless matrix
 Eigen::Matrix2cd get_vector_potential_matrix(const su2 &a) {
   Eigen::Matrix2cd U;
   U(0, 0) = std::complex<double>(a.a0, a.a3);
@@ -62,6 +63,8 @@ su3 get_vector_potential_matrix(const su3 &a) {
   return std::complex<double>(0, -0.5) * (A - 1 / 3. * A.tr() * identity);
 }
 
+// calculate u = Tr(\Gamma * z), where for SU(2) group \Gamma are Pauli matrices
+// divided by 2
 std::array<double, 3> get_vector_potential_coefficients(
     const su2 &a, const std::array<Eigen::Matrix2cd, 3> &pauli_matrices) {
   std::array<double, 3> coefficients;
@@ -108,9 +111,9 @@ std::vector<std::array<double, 12>> get_vector_potential(
   std::array<std::array<double, 3>, 4> vector_potential_tmp1;
   std::array<double, 12> vector_potential_tmp2;
   int index;
-  // #pragma omp parallel for private(vector_potential_tmp, index,                  \
-//                                      vector_potential_tmp2)                    \
-//     firstprivate(pauli_matrices)
+#pragma omp parallel for private(vector_potential_tmp1, vector_potential_tmp2, \
+                                     index)                                    \
+    firstprivate(pauli_matrices, data_pattern)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
@@ -172,9 +175,9 @@ std::vector<std::array<std::complex<double>, 32>> get_vector_potential(
   std::array<std::array<std::complex<double>, 8>, 4> vector_potential_tmp1;
   std::array<std::complex<double>, 32> vector_potential_tmp2;
   int index;
-  // #pragma omp parallel for private(vector_potential_tmp, index,                  \
-//                                      vector_potential_tmp2)                    \
-//     firstprivate(lambda_matrices)
+#pragma omp parallel for private(vector_potential_tmp1, index,                 \
+                                     vector_potential_tmp2)                    \
+    firstprivate(lambda_matrices, data_pattern)
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
     for (int z = 0; z < data_pattern.lat_dim[2]; z++) {
       for (int y = 0; y < data_pattern.lat_dim[1]; y++) {
@@ -228,10 +231,9 @@ get_furier_coefficients(const std::array<double, 4> &momenta,
 std::array<std::complex<double>, 144> calculate_gluon_propagator(
     const std::vector<std::array<double, 12>> &vector_potential,
     const std::vector<std::complex<double>> &furier_coefficients,
-    double multiplier, DataPatternLexicographical &data_pattern) {
+    DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 144> gluon_propagator;
   std::array<std::complex<double>, 12> vector_potential_sum;
-  double a = multiplier / data_pattern.get_lattice_size();
   for (int i = 0; i < vector_potential.size(); i++) {
     for (int m = 0; m < 12; m++) {
       vector_potential_sum[m] +=
@@ -241,7 +243,7 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
   for (int m = 0; m < 12; m++) {
     for (int n = 0; n < 12; n++) {
       gluon_propagator[m * 12 + n] =
-          vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+          vector_potential_sum[m] * std::conj(vector_potential_sum[n]);
     }
   }
   return gluon_propagator;
@@ -249,24 +251,26 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator(
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
     const std::vector<std::array<double, 12>> &vector_potential,
-    const std::vector<std::array<double, 4>> &momenta, double multiplier,
+    const std::vector<std::array<double, 4>> &momenta,
     DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 144> gluon_propagator;
-  double a = multiplier / data_pattern.get_lattice_size() / momenta.size();
   std::vector<std::complex<double>> furier_coefficients;
   for (int p = 0; p < momenta.size(); p++) {
     furier_coefficients = get_furier_coefficients(momenta[p], data_pattern);
     std::array<std::complex<double>, 12> vector_potential_sum;
+#pragma omp parallel for reduction(arr_double_plus_12 : vector_potential_sum)
     for (int i = 0; i < vector_potential.size(); i++) {
       for (int m = 0; m < 12; m++) {
         vector_potential_sum[m] +=
             vector_potential[i][m] * furier_coefficients[i];
       }
     }
+    int lattice_volume = data_pattern.get_lattice_size();
     for (int m = 0; m < 12; m++) {
       for (int n = 0; n < 12; n++) {
-        gluon_propagator[m * 12 + n] +=
-            vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+        gluon_propagator[m * 12 + n] += vector_potential_sum[m] *
+                                        std::conj(vector_potential_sum[n]) *
+                                        (1. / lattice_volume / momenta.size());
       }
     }
   }
@@ -275,10 +279,9 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator_group(
 
 std::array<std::complex<double>, 1024> calculate_gluon_propagator_group(
     const std::vector<std::array<std::complex<double>, 32>> &vector_potential,
-    const std::vector<std::array<double, 4>> &momenta, double multiplier,
+    const std::vector<std::array<double, 4>> &momenta,
     DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 1024> gluon_propagator;
-  double a = multiplier / data_pattern.get_lattice_size() / momenta.size();
   std::vector<std::complex<double>> furier_coefficients;
   for (int p = 0; p < momenta.size(); p++) {
     furier_coefficients = get_furier_coefficients(momenta[p], data_pattern);
@@ -290,10 +293,12 @@ std::array<std::complex<double>, 1024> calculate_gluon_propagator_group(
             vector_potential[i][m] * furier_coefficients[i];
       }
     }
+    int lattice_volume = data_pattern.get_lattice_size();
     for (int m = 0; m < 32; m++) {
       for (int n = 0; n < 32; n++) {
-        gluon_propagator[m * 32 + n] +=
-            vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+        gluon_propagator[m * 32 + n] += vector_potential_sum[m] *
+                                        std::conj(vector_potential_sum[n]) *
+                                        (1. / lattice_volume / momenta.size());
       }
     }
   }
@@ -302,10 +307,9 @@ std::array<std::complex<double>, 1024> calculate_gluon_propagator_group(
 
 std::array<std::complex<double>, 4> calculate_gluon_propagator_diagonal_group(
     const std::vector<std::array<double, 4>> &vector_potential,
-    const std::vector<std::array<double, 4>> &momenta, double multiplier,
+    const std::vector<std::array<double, 4>> &momenta,
     DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 4> gluon_propagator;
-  double a = multiplier / data_pattern.get_lattice_size() / momenta.size();
   std::vector<std::complex<double>> furier_coefficients;
   for (int p = 0; p < momenta.size(); p++) {
     furier_coefficients = get_furier_coefficients(momenta[p], data_pattern);
@@ -317,9 +321,11 @@ std::array<std::complex<double>, 4> calculate_gluon_propagator_diagonal_group(
             vector_potential[i][m] * furier_coefficients[i];
       }
     }
+    int lattice_volume = data_pattern.get_lattice_size();
     for (int m = 0; m < 4; m++) {
-      gluon_propagator[m] +=
-          vector_potential_sum[m] * std::conj(vector_potential_sum[m]) * a;
+      gluon_propagator[m] += vector_potential_sum[m] *
+                             std::conj(vector_potential_sum[m]) *
+                             (1. / lattice_volume / momenta.size());
     }
   }
   return gluon_propagator;
@@ -327,11 +333,10 @@ std::array<std::complex<double>, 4> calculate_gluon_propagator_diagonal_group(
 
 std::array<std::complex<double>, 144> calculate_gluon_propagator_lattice(
     const std::vector<std::array<double, 12>> &vector_potential,
-    const std::array<double, 4> &momenta, double multiplier,
+    const std::array<double, 4> &momenta,
     DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 144> gluon_propagator;
   std::array<std::complex<double>, 12> vector_potential_sum;
-  double a = multiplier / data_pattern.get_lattice_size();
   int index;
   std::complex<double> furier_coefficient;
   for (int t = 0; t < data_pattern.lat_dim[3]; t++) {
@@ -356,7 +361,7 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator_lattice(
   for (int m = 0; m < 12; m++) {
     for (int n = 0; n < 12; n++) {
       gluon_propagator[m * 12 + n] =
-          vector_potential_sum[m] * std::conj(vector_potential_sum[n]) * a;
+          vector_potential_sum[m] * std::conj(vector_potential_sum[n]);
     }
   }
   return gluon_propagator;
@@ -365,7 +370,7 @@ std::array<std::complex<double>, 144> calculate_gluon_propagator_lattice(
 std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
     const std::vector<std::array<double, 12>> &vector_potential,
     const std::vector<std::complex<double>> &furier_coefficients,
-    double multiplier, DataPatternLexicographical &data_pattern) {
+    DataPatternLexicographical &data_pattern) {
   std::array<std::complex<double>, 12> gluon_propagator;
   // #pragma omp parallel for reduction(arr_double_plus_12 : gluon_propagator)      \
 //     schedule(dynamic)
@@ -377,7 +382,7 @@ std::array<std::complex<double>, 12> calculate_gluon_propagator_diagonal(
   int lattice_volume = data_pattern.get_lattice_size();
   for (int m = 0; m < 12; m++) {
     gluon_propagator[m] = gluon_propagator[m] * std::conj(gluon_propagator[m]) *
-                          (multiplier / lattice_volume);
+                          (1. / lattice_volume);
   }
   return gluon_propagator;
 }

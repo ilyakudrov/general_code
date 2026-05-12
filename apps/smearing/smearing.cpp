@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
     stream_polyakov_loop.precision(17);
     stream_polyakov_loop << "HYP_step,polyakov_loop" << endl;
     for (auto it : polyakov_loop_result) {
-      stream_polyakov_correlator << it.first << "," << it.second << endl;
+      stream_polyakov_loop << it.first << "," << it.second << endl;
     }
     stream_polyakov_loop.close();
   }

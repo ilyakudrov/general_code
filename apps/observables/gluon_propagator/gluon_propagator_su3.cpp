@@ -31,7 +31,6 @@ int main(int argc, char *argv[]) {
   int L_spat, L_time;
   int bytes_skip = 0;
   bool convert = 0;
-  double beta = 0;
   for (int i = 1; i < argc; i++) {
     if (string(argv[i]) == "--conf_format") {
       conf_format = argv[++i];
@@ -49,8 +48,6 @@ int main(int argc, char *argv[]) {
       L_time = stoi(string(argv[++i]));
     } else if (string(argv[i]) == "--output_path") {
       output_path = argv[++i];
-    } else if (string(argv[i]) == "--beta") {
-      beta = stod(string(argv[++i]));
     }
   }
 
@@ -67,7 +64,6 @@ int main(int argc, char *argv[]) {
   cout << "L_spat " << L_spat << endl;
   cout << "L_time " << L_time << endl;
   cout << "output_path " << output_path << endl;
-  cout << "beta " << beta << endl;
   cout << endl;
 
   cout.precision(17);
@@ -78,10 +74,6 @@ int main(int argc, char *argv[]) {
                           file_precision, convert);
   DataPatternLexicographical data_pattern(conf.lat_dim);
 
-  double a_inv = (542.6 * 8 / 1000);
-  double g = 2 / sqrt(beta);
-  double multiplier = 2 / g * a_inv;
-
   std::cout << "plaket: " << plaket(conf) << std::endl;
   std::vector<std::vector<std::array<double, 4>>> momenta =
       generate_momenta(x_size1, t_size1);
@@ -91,10 +83,11 @@ int main(int argc, char *argv[]) {
            std::complex<double>>
       gluon_propagator_map;
 
-  for (int i = 0; i < momenta.size(); i++) {
+  // for (int i = 0; i < momenta.size(); i++) {
+  for (int i = 0; i < 100; i++) {
     omp_time = omp_get_wtime();
     std::array<std::complex<double>, 1024> gluon_propagator =
-        calculate_gluon_propagator_group(vector_potential, momenta[i], 1,
+        calculate_gluon_propagator_group(vector_potential, momenta[i],
                                          data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
