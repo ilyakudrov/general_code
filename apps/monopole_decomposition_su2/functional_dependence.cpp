@@ -460,8 +460,14 @@ int main(int argc, char **argv) {
         conf_photon.array[i] =
             abelian(1, conf_abelian[i].phi + monopole_angles[i]);
       }
+      conf_abelian.array.clear();
+      conf_abelian.array.shrink_to_fit();
       monopole_angles.clear();
       monopole_angles.shrink_to_fit();
+      for (int k = 0; k < dirac_plakets.size(); k++) {
+        dirac_plakets[k].clear();
+        dirac_plakets[k].shrink_to_fit();
+      }
       std::cout << "decomposition time: " << omp_get_wtime() - omp_time
                 << std::endl;
 
