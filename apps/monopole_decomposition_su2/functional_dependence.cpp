@@ -662,6 +662,11 @@ int main(int argc, char **argv) {
       std::cout << "monopoles from photon angles time: "
                 << omp_get_wtime() - omp_time << std::endl;
 
+      J.clear();
+      J.shrink_to_fit();
+      LL.clear();
+      LL.shrink_to_fit();
+
       // monopole wilson loop
       omp_time = omp_get_wtime();
       Data::LatticeData<DataPatternLexicographical, abelian> conf_monopole1(
