@@ -662,6 +662,8 @@ int main(int argc, char **argv) {
       std::cout << "monopoles from photon angles time: "
                 << omp_get_wtime() - omp_time << std::endl;
 
+      conf_photon.array.clear();
+      conf_photon.array.shrink_to_fit();
       J.clear();
       J.shrink_to_fit();
       LL.clear();
