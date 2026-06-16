@@ -1,9 +1,9 @@
 #!/bin/bash
 conf_format="qcdstag"
 file_precision="double"
-conf_path="../../../tests/confs/su3/gluodynamics/48^3x12/beta6.257/CONF0001"
+conf_path="../../../tests/confs/monopole/su3/gluodynamics/48^3x12/beta6.257/steps_0/conf_monopole_0001"
 bytes_skip=0
-matrix_type="su3"
+matrix_type="su3_abelian"
 convert=0
 HYP_alpha1=1
 HYP_alpha2=1
@@ -23,7 +23,7 @@ path_wilson=./result/wilson_loops
 path_polyakov_correlator=./result/polyakov_correlator
 path_polyakov_loop=./result/polyakov_loop
 wilson_enabled=0
-polyakov_correlator_enabled=1
+polyakov_correlator_enabled=0
 polyakov_loop_enabled=1
 correlator_type="color_average"
 T_min=1

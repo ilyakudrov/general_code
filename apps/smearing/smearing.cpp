@@ -252,9 +252,9 @@ int main(int argc, char *argv[]) {
           }
           polyakov_loop_coorelator_write_result(polyakov_correlator_result,
                                                 polyakov_correlator, HYP_step);
-          if (polyakov_loop_enabled) {
-            polyakov_loop_result[HYP_step] = polyakov_loop(conf);
-          }
+        }
+        if (polyakov_loop_enabled) {
+          polyakov_loop_result[HYP_step] = polyakov_loop(conf);
         }
       }
       end_time = omp_get_wtime();
