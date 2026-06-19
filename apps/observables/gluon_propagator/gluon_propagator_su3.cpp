@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
               gluon_propagator_map[std::make_tuple(
                   momenta[i][0][0], momenta[i][0][1], momenta[i][0][2],
                   momenta[i][0][3], mu, nu, a, b)] =
-                  gluon_propagator[(mu * 3 + a) * 32 + nu * 8 + b];
+                  gluon_propagator[(mu * 8 + a) * 32 + nu * 8 + b];
             }
           }
         }
