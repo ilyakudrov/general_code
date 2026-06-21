@@ -989,6 +989,10 @@ inline std::array<su3, 8> get_generators_su3() {
 
   Eigen::Matrix3cd matrix = Eigen::Matrix3cd::Identity(3, 3);
 
+  matrix(0, 0) = std::complex<double>(0, 0);
+  matrix(1, 1) = std::complex<double>(0, 0);
+  matrix(2, 2) = std::complex<double>(0, 0);
+
   // lambda1
   matrix(0, 1) = std::complex<double>(1, 0);
   matrix(1, 0) = std::complex<double>(1, 0);

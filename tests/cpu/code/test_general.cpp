@@ -39,6 +39,11 @@ int main(int argc, char *argv[]) {
   size1 = x_size * y_size;
   size2 = x_size * y_size * z_size;
 
+  std::array<su3, 8> lambda_matrices = get_generators_su3();
+  for (int i = 0; i < 8; i++) {
+    std::cout << lambda_matrices[i] << std::endl;
+  }
+
   std::cout.precision(17);
 
   Data::data<MATRIX_TYPE> conf1;
@@ -63,10 +68,10 @@ int main(int argc, char *argv[]) {
 
   // plakets and polyakov loop
   start_time = omp_get_wtime();
-  std::cout << "plaket " << plaket(conf1.array) << std::endl;
-  std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
-  std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
-  std::cout << "polyakov " << polyakov_loop(conf1.array) << std::endl;
+  // std::cout << "plaket " << plaket(conf1.array) << std::endl;
+  // std::cout << "plaket_time " << plaket_time(conf1.array) << std::endl;
+  // std::cout << "plaket_space " << plaket_space(conf1.array) << std::endl;
+  // std::cout << "polyakov " << polyakov_loop(conf1.array) << std::endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "plaket and staff time: " << search_time << std::endl;
@@ -84,8 +89,8 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<MATRIX_TYPE>> conf_separated =
       separate_wilson(conf1.array);
   start_time = omp_get_wtime();
-  std::cout << "polyakov_parallel " << polyakov_loop_parallel(conf_separated)
-            << endl;
+  // std::cout << "polyakov_parallel " << polyakov_loop_parallel(conf_separated)
+  //           << endl;
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
   std::cout << "polyakov_parallel time: " << search_time << std::endl;
