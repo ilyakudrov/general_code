@@ -243,6 +243,7 @@ int main(int argc, char **argv) {
           cout << "new functional is higher, saving spin configuration" << endl;
           // write_spins(path_spins_output, spins, data_pattern);
           write_spins(path_spins_output, spins);
+          is_compare_spins = true;
         } else {
           cout << "new functional is lower, spin configuration is not saved"
                << endl;
