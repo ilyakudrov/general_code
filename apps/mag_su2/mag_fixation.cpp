@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   string path_spins_output;
   string path_functional_output;
 
+  int steps;
   double T_step;
   double T_init;
   double T_final;
@@ -74,8 +75,8 @@ int main(int argc, char **argv) {
       path_functional_output = argv[++i];
     } else if (string(argv[i]) == "--bytes_skip") {
       bytes_skip = stoi(string(argv[++i]));
-    } else if (string(argv[i]) == "--T_step") {
-      T_step = stod(string(argv[++i]));
+    } else if (string(argv[i]) == "--steps") {
+      steps = stod(string(argv[++i]));
     } else if (string(argv[i]) == "--T_init") {
       T_init = stod(string(argv[++i]));
     } else if (string(argv[i]) == "--T_final") {
@@ -127,7 +128,7 @@ int main(int argc, char **argv) {
   cout << "OR_steps " << OR_steps << endl;
   cout << "is_new_trial " << is_new_trial << endl;
   if (is_new_trial) {
-    cout << "T_step " << T_step << endl;
+    cout << "steps " << steps << endl;
     cout << "T_init " << T_init << endl;
     cout << "T_final " << T_final << endl;
     cout << "thermalization_steps " << thermalization_steps << endl;
@@ -147,6 +148,8 @@ int main(int argc, char **argv) {
   cout << "is_compare " << is_compare << endl;
   cout << "is_compare_spins " << is_compare_spins << endl;
   cout << "is_functional_save " << is_functional_save << endl;
+
+  T_step = (T_init - T_final) / steps;
 
   Data::LatticeData<DataPatternLexicographical, su2> conf_su2(
       {x_size1, y_size1, z_size1, t_size1});
@@ -176,8 +179,10 @@ int main(int argc, char **argv) {
       // T_init,
       //                          T_final, T_step, OR_steps,
       //                          thermalization_steps);
-      make_simulated_annealing(conf_su2, spins, T_init, T_final, T_step,
-                               OR_steps, thermalization_steps);
+      if (steps != 0) {
+        make_simulated_annealing(conf_su2, spins, T_init, T_final, T_step,
+                                 OR_steps, thermalization_steps);
+      }
       end_time = omp_get_wtime();
       search_time = end_time - start_time;
       cout << "simulated annealing time: " << search_time << endl;
