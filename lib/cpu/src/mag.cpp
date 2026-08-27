@@ -124,6 +124,23 @@ void write_spins(std::string output_path, std::vector<spin> spins) {
   stream.close();
 }
 
+void write_spins(std::string output_path, std::vector<spin> spins,
+                 DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_lattice_size();
+  std::ofstream stream(output_path);
+  std::vector<double> v;
+  v.reserve(3 * data_size);
+  for (int i = 0; i < data_size; i++) {
+    v.push_back(spins[i].a1);
+    v.push_back(spins[i].a2);
+    v.push_back(spins[i].a3);
+  }
+  if (!stream.write((char *)&v[0], 3 * data_size * sizeof(double)))
+    std::cout << "write_spins error: " << output_path << std::endl;
+
+  stream.close();
+}
+
 void write_spins(std::string output_path, std::vector<Eigen::Vector3d> spins,
                  DataPatternLexicographical &data_pattern) {
   int data_size = data_pattern.get_lattice_size();

@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
         double functional_old;
         double functional_new;
         if (is_compare_spins) {
-          vector<spin> spins_old = read_spins(path_previous);
+          vector<spin> spins_old = read_spins(path_previous, data_pattern);
           functional_old = MAG_functional_su2_spin(conf_su2, spins_old);
         } else {
           Data::LatticeData<DataPatternLexicographical, su2> conf_old(
@@ -241,16 +241,16 @@ int main(int argc, char **argv) {
         cout << "old functional is " << functional_old << endl;
         if (functional_old < functional_new) {
           cout << "new functional is higher, saving spin configuration" << endl;
-          // write_spins(path_spins_output, spins, data_pattern);
-          write_spins(path_spins_output, spins);
+          write_spins(path_spins_output, spins, data_pattern);
+          // write_spins(path_spins_output, spins);
           is_compare_spins = true;
         } else {
           cout << "new functional is lower, spin configuration is not saved"
                << endl;
         }
       } else
-        // write_spins(path_spins_output, spins, data_pattern);
-        write_spins(path_spins_output, spins);
+        write_spins(path_spins_output, spins, data_pattern);
+      // write_spins(path_spins_output, spins);
     }
   }
   if (is_functional_save) {

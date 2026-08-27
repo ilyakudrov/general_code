@@ -17,6 +17,8 @@ std::vector<Eigen::Vector3d>
 read_vectors(std::string spins_path, DataPatternLexicographical &data_pattern);
 
 void write_spins(std::string output_path, std::vector<spin> spins);
+void write_spins(std::string output_path, std::vector<spin> spins,
+                 DataPatternLexicographical &data_pattern);
 
 void write_spins(std::string output_path, std::vector<Eigen::Vector3d> spins,
                  DataPatternLexicographical &data_pattern);
