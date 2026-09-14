@@ -1,10 +1,10 @@
 #!/bin/bash
-path_conf="../../../tests/confs/su2/gluodynamics/32^3x8/beta2.779/CONF0001"
+path_conf="../../../tests/confs/MAG/su2/su2_suzuki/24^4/beta2.4/steps=0/conf_0001"
 # path_conf="../../../tests/confs/su2/gluodynamics/64^4/beta2.9/CONF0002"
-conf_format="qcdstag"
+conf_format="lexicographical"
 file_precision="double"
 bytes_skip=0
-path_inverse_laplacian="./result/inverse_laplacian_32x8"
+path_inverse_laplacian="./result/inverse_laplacian_24x24"
 N_dir_gevp=1
 HYP_alpha1=1
 HYP_alpha2=1
@@ -14,11 +14,11 @@ APE_steps=71
 calculation_step_APE=20
 calculation_APE_start=11
 HYP_steps=0
-x_size=32
-y_size=32
-z_size=32
-t_size=8
-copies_required=11
+x_size=24
+y_size=24
+z_size=24
+t_size=24
+copies_required=1
 mag_steps=0
 path_functional_output="./result/functional"
 path_wilson_loops_abelian_output="./result/wilson_loops_abelian"

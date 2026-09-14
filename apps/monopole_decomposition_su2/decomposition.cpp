@@ -1,8 +1,10 @@
 #include "../../lib/cpu/include/decomposition.h"
 #include "../../lib/cpu/include/Landau_U1.h"
 #include "../../lib/cpu/include/data.h"
+#include "../../lib/cpu/include/mag.h"
 #include "../../lib/cpu/include/matrix.h"
 #include "../../lib/cpu/include/monopoles.h"
+#include "../../lib/cpu/include/plaket.h"
 
 #include <iostream>
 #include <omp.h>
@@ -21,11 +23,7 @@ int main(int argc, char **argv) {
   double start_time;
   double end_time;
   double search_time;
-
-  int x_size1;
-  int y_size1;
-  int z_size1;
-  int t_size1;
+  double omp_time;
 
   string path_conf;
   string conf_format;
@@ -34,6 +32,10 @@ int main(int argc, char **argv) {
   string path_conf_monopole;
   string path_conf_monopoless;
   string path_inverse_laplacian;
+  int x_size1;
+  int y_size1;
+  int z_size1;
+  int t_size1;
 
   // read parameters
   for (int i = 1; i < argc; i++) {
@@ -69,7 +71,6 @@ int main(int argc, char **argv) {
   cout << "path_conf_monopoless " << path_conf_monopoless << endl;
   cout << "path_inverse_laplacian " << path_inverse_laplacian << endl;
   cout << "bytes_skip " << bytes_skip << endl;
-
   cout << "x_size " << x_size1 << endl;
   cout << "y_size " << y_size1 << endl;
   cout << "z_size " << z_size1 << endl;
@@ -89,8 +90,8 @@ int main(int argc, char **argv) {
 
   cout.precision(17);
 
-  double tolerance_maximal = 1e-9;
-  double tolerance_average = 1e-13;
+  double tolerance_maximal = 1e-13;
+  double tolerance_average = 1e-15;
   int OR_steps = 4;
 
   vector<std::complex<double>> conf_complex = convert_to_complex(conf_su2);
@@ -101,9 +102,10 @@ int main(int argc, char **argv) {
        << Landau_functional_complex(conf_complex) << endl;
 
   start_time = omp_get_wtime();
-
-  make_maximization_final(gauge_complex, conf_complex, OR_steps,
-                          tolerance_maximal, tolerance_average);
+  make_simulated_annealing(conf_complex, gauge_complex, data_pattern_conf, 10,
+                           0.1, 0.1, 4, 20);
+  make_maximization_final(conf_complex, gauge_complex, data_pattern_conf,
+                          OR_steps, tolerance_maximal, tolerance_average);
 
   end_time = omp_get_wtime();
   search_time = end_time - start_time;
@@ -116,7 +118,8 @@ int main(int argc, char **argv) {
   cout << "functional after applying gauge "
        << Landau_functional_complex(conf_complex) << endl;
 
-  vector<double> conf_angles_U1 = convert_complex_to_angles(conf_complex);
+  vector<double> conf_angles_U1 =
+      convert_complex_to_angles(conf_complex, data_pattern_conf);
 
   gauge_complex.clear();
   gauge_complex.shrink_to_fit();

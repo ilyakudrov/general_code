@@ -23,6 +23,9 @@ std::vector<std::complex<double>> convert_to_complex(
 
 std::vector<double> convert_complex_to_angles(
     const std::vector<std::complex<double>> &conf_complex);
+std::vector<double>
+convert_complex_to_angles(const std::vector<std::complex<double>> &conf_complex,
+                          DataPatternLexicographical &data_pattern);
 std::vector<abelian> convert_complex_to_abelian(
     const std::vector<std::complex<double>> &conf_complex,
     DataPatternLexicographical &data_pattern);

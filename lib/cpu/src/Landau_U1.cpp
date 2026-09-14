@@ -115,17 +115,27 @@ std::vector<std::complex<double>> convert_to_complex(
 std::vector<double> convert_complex_to_angles(
     const std::vector<std::complex<double>> &conf_complex) {
   int data_size = 4 * x_size * y_size * z_size * t_size;
-
   std::vector<double> conf_angles;
   conf_angles.reserve(data_size);
-
   double module;
-
   for (int i = 0; i < data_size; i++) {
     conf_angles.push_back(
         atan2(conf_complex[i].imag(), conf_complex[i].real()));
   }
+  return conf_angles;
+}
 
+std::vector<double>
+convert_complex_to_angles(const std::vector<std::complex<double>> &conf_complex,
+                          DataPatternLexicographical &data_pattern) {
+  int data_size = data_pattern.get_data_size();
+  std::vector<double> conf_angles;
+  conf_angles.reserve(data_size);
+  double module;
+  for (int i = 0; i < data_size; i++) {
+    conf_angles.push_back(
+        atan2(conf_complex[i].imag(), conf_complex[i].real()));
+  }
   return conf_angles;
 }
 
@@ -491,10 +501,11 @@ contribution_site(std::vector<std::complex<double>> &gauge_complex,
     contribution_conj_conj(contribution,
                            conf_complex[(position - shift[3]) * 4 + 3],
                            gauge_complex[position - shift[3]]);
-  else
+  else {
     contribution_conj_conj(
         contribution, conf_complex[(position - shift[3] + shift[4]) * 4 + 3],
         gauge_complex[position - shift[3] + shift[4]]);
+  }
   return contribution;
 }
 
