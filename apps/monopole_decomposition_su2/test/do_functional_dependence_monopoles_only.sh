@@ -1,17 +1,17 @@
 #!/bin/bash
 # path_conf="../../../tests/confs/MAG/su2/su2_suzuki/24^4/beta2.4/steps=0/conf_0001"
-# path_conf="../../../tests/confs/su2/gluodynamics/64^4/beta2.9/CONF0002"
-path_conf="../../../tests/confs/su2/gluodynamics/48^4/beta2.7/CON_MC_001.LAT"
-conf_format="lexicographical"
+path_conf="../../../tests/confs/su2/gluodynamics/64^4/beta2.9/CONF0002"
+# path_conf="../../../tests/confs/su2/gluodynamics/48^4/beta2.7/CON_MC_001.LAT"
+conf_format="qcdstag"
 file_precision="double"
-bytes_skip=8
-path_inverse_laplacian="./result/inverse_laplacian_48x48"
-x_size=48
-y_size=48
-z_size=48
-t_size=48
+bytes_skip=0
+path_inverse_laplacian="./result/inverse_laplacian_64x64"
+x_size=64
+y_size=64
+z_size=64
+t_size=64
 copies_required=2
-mag_steps=0
+mag_steps=500
 path_functional_output="./result/functional"
 path_clusters_unwrapped_abelian_output="./result/clusters_unwrapped_abelian"
 path_clusters_unwrapped_monopole_output="./result/clusters_unwrapped_monopole"

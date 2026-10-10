@@ -208,33 +208,6 @@ int main(int argc, char **argv) {
       std::cout << "plaket after MAG: " << plaket(conf_su2) << std::endl;
       MAG_functional = MAG_functional_su2(conf_su2);
       std::cout << "MAG functional after MAG: " << MAG_functional << std::endl;
-      std::vector<std::complex<double>> conf_complex =
-          convert_to_complex(conf_su2);
-      std::vector<std::complex<double>> gauge_complex =
-          generate_gauge_complex_uniform(data_pattern);
-      std::cout << "Landau functional before Landau gauge: "
-                << Landau_functional_conf_complex(conf_complex, gauge_complex,
-                                                  data_pattern)
-                << std::endl;
-
-      omp_time = omp_get_wtime();
-      make_simulated_annealing(conf_complex, gauge_complex, data_pattern, 10,
-                               0.1, 0.1, 4, 50);
-      make_maximization_final(conf_complex, gauge_complex, data_pattern, 4,
-                              1e-14, 1e-15);
-      std::cout << "Landau gauge time: " << omp_get_wtime() - omp_time
-                << std::endl;
-      std::cout << "Landau functional after Landau gauge: "
-                << Landau_functional_conf_complex(conf_complex, gauge_complex,
-                                                  data_pattern)
-                << std::endl;
-      apply_gauge_Landau(gauge_complex, conf_su2);
-      std::cout << "Landau functional after apply_gauge_Landau: "
-                << Landau_functional(conf_su2.array) << std::endl;
-      std::cout << "plaket after Landau gauge: " << plaket(conf_su2)
-                << std::endl;
-      std::cout << "MAG functional after Landau gauge: "
-                << MAG_functional_su2(conf_su2) << std::endl;
 
       Data::LatticeData<DataPatternLexicographical, abelian> conf_abelian(
           {x_size1, y_size1, z_size1, t_size1});
