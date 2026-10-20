@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
            std::complex<double>>
       gluon_propagator_map;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < momenta.size(); i++) {
     omp_time = omp_get_wtime();
     std::array<std::complex<double>, 144> gluon_propagator =
         calculate_gluon_propagator_group(vector_potential, momenta[i],
