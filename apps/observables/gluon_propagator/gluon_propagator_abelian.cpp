@@ -113,8 +113,8 @@ int main(int argc, char *argv[]) {
   omp_time = omp_get_wtime();
   make_simulated_annealing(conf_complex, gauge_complex, data_pattern, 10, 0.1,
                            0.1, 4, 20);
-  make_maximization_final(conf_complex, gauge_complex, data_pattern, 4, 1e-14,
-                          1e-15);
+  make_maximization_final(conf_complex, gauge_complex, data_pattern, 4, 1e-15,
+                          1e-17);
   apply_gauge_Landau_complex(gauge_complex, conf_complex);
   std::cout << "Landau gauge time: " << omp_get_wtime() - omp_time << std::endl;
   std::cout << "Landau functional after Landau gauge: "
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 
   for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
-        vector_potential, momenta[i], 1, data_pattern);
+        vector_potential, momenta[i], data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
         gluon_propagator_map_abelian[std::make_tuple(
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
       gluon_propagator_map_monopole;
   for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
-        vector_potential, momenta[i], 1, data_pattern);
+        vector_potential, momenta[i], data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
         gluon_propagator_map_monopole[std::make_tuple(
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
       gluon_propagator_map_photon;
   for (int i = 0; i < momenta.size(); i++) {
     gluon_propagator = calculate_gluon_propagator_diagonal_group(
-        vector_potential, momenta[i], 1, data_pattern);
+        vector_potential, momenta[i], data_pattern);
     for (int j = 0; j < momenta[i].size(); j++) {
       for (int mu = 0; mu < 4; mu++) {
         gluon_propagator_map_photon[std::make_tuple(

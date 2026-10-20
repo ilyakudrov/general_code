@@ -2,14 +2,14 @@
 conf_format="lexicographical"
 file_precision="double"
 # conf_path="../../../../tests/confs/su2/gluodynamics/66^3x8/beta2.701/CONF_B2701L66T08"
-conf_path="../../../../tests/confs/MAG/su2/su2_suzuki/24^4/beta2.4/T_step=0.0001/conf_0001"
+conf_path="../../../../tests/confs/MAG/su2/su2_suzuki/24^4/beta2.4/steps=0/conf_0001"
 # bytes_skip=76
 bytes_skip=0
-beta=2.701
+beta=2.4
 convert=1
 L_spat=24
 L_time=24
-path_inverse_laplacian="../../../monopole_decomposition_su2/test/result/ALPHA24x24_d.LAT"
+path_inverse_laplacian="../../../../apps/monopole_decomposition_su2/test/result/inverse_laplacian_24x24"
 output_path_abelian=./result/gluon_propagator_abelian
 output_path_monopole=./result/gluon_propagator_monopole
 output_path_photon=./result/gluon_propagator_photon
